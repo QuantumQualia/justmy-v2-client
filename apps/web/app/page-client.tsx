@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
@@ -11,6 +11,7 @@ import { ApiClientError } from "@/lib/services/auth";
 
 export default function LandingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async (plan: SubscriptionPlan) => {
@@ -32,7 +33,13 @@ export default function LandingPage() {
   };
 
   const handleFreeSignup = (type: "personal" | "business" = "personal") => {
-    router.push(`/register?type=${type}`);
+    // Preserve referral code from URL if present
+    const referralCode = searchParams.get("ref") || searchParams.get("referral");
+    const params = new URLSearchParams({ type });
+    if (referralCode) {
+      params.set("ref", referralCode);
+    }
+    router.push(`/register?${params.toString()}`);
   };
 
   return (

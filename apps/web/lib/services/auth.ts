@@ -21,6 +21,7 @@ export interface RegisterData {
   zipCode: string;
   businessName?: string;
   tier: "PERSONAL" | "BUSINESS";
+  referralCode?: string;
 }
 
 export interface AuthResponse {

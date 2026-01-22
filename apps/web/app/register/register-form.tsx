@@ -16,6 +16,9 @@ export default function RegisterForm() {
   // 1. Detect Intent: Did they click "Personal" or "Business"?
   const typeParam = searchParams.get("type") || "personal"; // default to personal
   const isBusiness = typeParam === "business";
+  
+  // 2. Get referral code from URL (supports both ?ref= and ?referral=)
+  const referralCodeFromUrl = searchParams.get("ref") || searchParams.get("referral") || "";
 
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -25,6 +28,7 @@ export default function RegisterForm() {
     password: "",
     zipCode: "",
     businessName: "", // Only used if isBusiness is true
+    referralCode: referralCodeFromUrl, // Auto-populate from URL
   });
 
   const [error, setError] = useState("");
@@ -38,7 +42,9 @@ export default function RegisterForm() {
       // 2. Send to API
       await authService.register({
         ...formData,
-        tier: isBusiness ? "BUSINESS" : "PERSONAL"
+        tier: isBusiness ? "BUSINESS" : "PERSONAL",
+        // Only include referralCode if it's not empty
+        ...(formData.referralCode && { referralCode: formData.referralCode.trim() }),
       });
 
       // 3. Success -> Send to the Dashboard Lobby
@@ -144,6 +150,20 @@ export default function RegisterForm() {
               />
             </div>
           )}
+
+          {/* REFERRAL CODE (Optional) */}
+          <div className="space-y-2">
+            <Label className="text-xs text-slate-400">Referral Code (Optional)</Label>
+            <Input 
+              placeholder="Enter referral code"
+              value={formData.referralCode}
+              className="bg-black/50 border-slate-700"
+              onChange={(e) => setFormData({...formData, referralCode: e.target.value})}
+            />
+            {referralCodeFromUrl && (
+              <p className="text-[10px] text-emerald-400">Referral code detected from link</p>
+            )}
+          </div>
 
           <Button 
             type="submit" 
