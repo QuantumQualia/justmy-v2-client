@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
-import { tokenStorage } from "@/lib/storage/token-storage"
+import { Toaster } from "@workspace/ui/components/sonner"
 
 /**
  * Sync localStorage tokens to cookies on app load
@@ -30,6 +30,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <AuthSync />
       {children}
+      <Toaster 
+        position="top-right"
+        richColors
+        expand={true}
+        toastOptions={{
+          duration: 3000,
+        }}
+      />
     </NextThemesProvider>
   )
 }

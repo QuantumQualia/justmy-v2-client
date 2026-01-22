@@ -5,4 +5,5 @@
 export * from "./auth";
 export { authService, ApiClientError } from "./auth";
 export * from "./session";
+export * from "./subscription";
 

@@ -8,6 +8,7 @@ const publicRoutes = [
   "/",
   "/login",
   "/register",
+  "/stripe-callback", // Stripe callback doesn't require auth (handles it internally)
 ];
 
 /**
