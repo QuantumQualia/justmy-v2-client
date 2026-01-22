@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:webpack": "NEXT_PRIVATE_SKIP_TURBO=1 next build",
+    "build:turbo": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

@@ -4,14 +4,21 @@ import type { Metadata } from "next"
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
 
+// Configure fonts with fallback to handle network issues during build
 const fontSans = Geist({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+  preload: true,
+  fallback: ["system-ui", "arial"],
 })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
+  display: "swap",
+  preload: true,
+  fallback: ["monospace"],
 })
 
 export const metadata: Metadata = {
