@@ -131,9 +131,12 @@ export async function apiRequest<T>(
 
   // Set default headers as a plain object
   // Convert HeadersInit to Record<string, string> for easier manipulation
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-  };
+  const headers: Record<string, string> = {};
+
+  // Only set Content-Type if there's a body
+  if (fetchOptions.body) {
+    headers["Content-Type"] = "application/json";
+  }
 
   // Handle different HeadersInit types
   if (fetchOptions.headers) {
@@ -164,6 +167,11 @@ export async function apiRequest<T>(
       headers,
     });
 
+    // Handle 204 No Content - no body to parse
+    if (response.status === 204) {
+      return undefined as T;
+    }
+
     const data = await response.json().catch(() => ({}));
 
     // Handle 401 Unauthorized - try to refresh token
@@ -177,6 +185,11 @@ export async function apiRequest<T>(
           ...fetchOptions,
           headers,
         });
+
+        // Handle 204 No Content - no body to parse
+        if (retryResponse.status === 204) {
+          return undefined as T;
+        }
 
         const retryData = await retryResponse.json().catch(() => ({}));
 
