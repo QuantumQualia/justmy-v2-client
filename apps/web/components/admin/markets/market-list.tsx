@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback, useRef, useMemo } from "react"
 import Link from "next/link"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/table"
+import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@workspace/ui/components/button"
 import { Badge } from "@workspace/ui/components/badge"
 import { Input } from "@workspace/ui/components/input"
-import { Edit, Trash2, Plus, Search, ChevronLeft, ChevronRight, Loader2 } from "lucide-react"
+import { Edit, Trash2, Plus, Search } from "lucide-react"
 import { marketsService, MarketResponseDto, ApiClientError } from "@/lib/services/markets"
+import { DataTable } from "@/components/ui/data-table"
 
 const ITEMS_PER_PAGE = 20
 
@@ -55,7 +56,7 @@ export function MarketList() {
         limit: ITEMS_PER_PAGE,
         search: debouncedSearch || undefined,
         includeParent: true,
-        orderBy: "createdAt:desc",
+        orderBy: "id:desc",
       })
       
       // Only update if this is still the latest fetch
@@ -109,6 +110,112 @@ export function MarketList() {
     return "Active" // Default
   }
 
+  const columns = useMemo<ColumnDef<MarketResponseDto>[]>(
+    () => [
+      {
+        accessorKey: "id",
+        header: "ID",
+        cell: ({ row }) => (
+          <span className="font-mono text-xs text-slate-500">#{row.original.id}</span>
+        ),
+      },
+      {
+        accessorKey: "name",
+        header: "Name",
+        cell: ({ row }) => {
+          const market = row.original
+          return (
+            <span className="font-medium text-lg text-white">
+              {market.city || market.name || market.siteTitle}
+            </span>
+          )
+        },
+      },
+      {
+        accessorKey: "state",
+        header: "State",
+        cell: ({ row }) => (
+          <span className="text-slate-400">{row.original.state || "-"}</span>
+        ),
+      },
+      {
+        accessorKey: "parent",
+        header: "Parent Market",
+        cell: ({ row }) => {
+          const parent = row.original.parent
+          return (
+            <span className="text-slate-400">
+              {parent ? (
+                parent.city || parent.name || parent.siteTitle || `Market #${parent.id}`
+              ) : (
+                <span className="opacity-30">-</span>
+              )}
+            </span>
+          )
+        },
+      },
+      {
+        accessorKey: "zipCount",
+        header: () => <div className="text-right">Zip Count</div>,
+        cell: ({ row }) => (
+          <div className="text-right">
+            <Badge variant="secondary" className="bg-slate-800 text-slate-300">
+              {row.original.zipCount || 0}
+            </Badge>
+          </div>
+        ),
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const displayStatus = getDisplayStatus(row.original.status)
+          return (
+            <Badge
+              variant={displayStatus === "Active" ? "default" : "outline"}
+              className={
+                displayStatus === "Active"
+                  ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50"
+                  : "text-slate-400 border-slate-700"
+              }
+            >
+              {displayStatus}
+            </Badge>
+          )
+        },
+      },
+      {
+        id: "actions",
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => {
+          const market = row.original
+          return (
+            <div className="flex items-center justify-end gap-2">
+              <Link href={`/admin/markets/${market.id}`}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 text-blue-400 hover:text-white hover:bg-blue-600"
+                >
+                  <Edit className="h-4 w-4" />
+                </Button>
+              </Link>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => handleDelete(market.id)}
+                className="h-8 w-8 p-0"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          )
+        },
+      },
+    ],
+    []
+  )
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-4 bg-slate-900 p-4 rounded-lg border border-slate-800">
@@ -129,163 +236,18 @@ export function MarketList() {
         </Link>
       </div>
 
-      {error && (
-        <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-red-400">
-          {error}
-        </div>
-      )}
-
-      <div className="rounded-md border border-slate-800 bg-slate-900/50 text-white">
-        <Table>
-          <TableHeader>
-            <TableRow className="border-slate-800 bg-slate-950">
-              <TableHead className="text-slate-400">ID</TableHead>
-              <TableHead className="text-slate-400">Name</TableHead>
-              <TableHead className="text-slate-400">State</TableHead>
-              <TableHead className="text-slate-400">Parent Market</TableHead>
-              <TableHead className="text-right text-slate-400">Zip Count</TableHead>
-              <TableHead className="text-slate-400">Status</TableHead>
-              <TableHead className="text-right text-slate-400">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow className="border-slate-800">
-                <TableCell colSpan={7} className="text-center text-slate-400 py-8">
-                  <div className="flex items-center justify-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    Loading markets...
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : markets.length === 0 ? (
-              <TableRow className="border-slate-800">
-                <TableCell colSpan={7} className="text-center text-slate-400 py-8">
-                  {searchTerm ? "No markets found matching your search" : "No markets found"}
-                </TableCell>
-              </TableRow>
-            ) : (
-              markets.map((market) => {
-                const displayStatus = getDisplayStatus(market.status)
-                return (
-                  <TableRow key={market.id} className="border-slate-800 hover:bg-slate-800/50">
-                    <TableCell className="font-mono text-xs text-slate-500">#{market.id}</TableCell>
-                    <TableCell className="font-medium text-lg text-white">{market.city || market.name || market.siteTitle}</TableCell>
-                    <TableCell className="text-slate-400">{market.state || "-"}</TableCell>
-                    <TableCell className="text-slate-400">
-                      {market.parent ? (
-                        <span>{market.parent.city || market.parent.name || market.parent.siteTitle || `Market #${market.parent.id}`}</span>
-                      ) : (
-                        <span className="opacity-30">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Badge variant="secondary" className="bg-slate-800 text-slate-300">
-                        {market.zipCount || 0}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={displayStatus === "Active" ? "default" : "outline"}
-                        className={
-                          displayStatus === "Active"
-                            ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50"
-                            : "text-slate-400 border-slate-700"
-                        }
-                      >
-                        {displayStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-end gap-2">
-                        <Link href={`/admin/markets/${market.id}`}>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 text-blue-400 hover:text-white hover:bg-blue-600"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDelete(market.id)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-slate-400">
-            Showing {(currentPage - 1) * ITEMS_PER_PAGE + 1} to{" "}
-            {Math.min(currentPage * ITEMS_PER_PAGE, total)} of {total} markets
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-              className="bg-slate-900 border-slate-700 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="h-4 w-4" />
-              Previous
-            </Button>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                let pageNum: number
-                if (totalPages <= 5) {
-                  pageNum = i + 1
-                } else if (currentPage <= 3) {
-                  pageNum = i + 1
-                } else if (currentPage >= totalPages - 2) {
-                  pageNum = totalPages - 4 + i
-                } else {
-                  pageNum = currentPage - 2 + i
-                }
-                return (
-                  <Button
-                    key={pageNum}
-                    variant={currentPage === pageNum ? "default" : "outline"}
-                    size="sm"
-                    onClick={() => setCurrentPage(pageNum)}
-                    className={
-                      currentPage === pageNum
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-slate-900 border-slate-700 text-white hover:bg-slate-800"
-                    }
-                  >
-                    {pageNum}
-                  </Button>
-                )
-              })}
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-              className="bg-slate-900 border-slate-700 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      )}
+      <DataTable
+        columns={columns}
+        data={markets}
+        loading={loading}
+        error={error}
+        total={total}
+        page={currentPage}
+        pageSize={ITEMS_PER_PAGE}
+        totalPages={totalPages}
+        onPageChange={setCurrentPage}
+        emptyMessage={searchTerm ? "No markets found matching your search" : "No markets found"}
+      />
     </div>
   )
 }
-
