@@ -32,6 +32,7 @@ export interface AuthResponse {
     lastName: string;
     tier?: "PERSONAL" | "BUSINESS";
   };
+  profile?: any; // Profile response from formatProfileResponse
   // Support both naming conventions (NestJS typically uses accessToken)
   accessToken?: string;
   token?: string; // Fallback for compatibility
@@ -46,6 +47,7 @@ export interface User {
   tier?: "PERSONAL" | "BUSINESS";
   businessName?: string;
   zipCode?: string;
+  profile?: any; // Profile response from formatProfileResponse
 }
 
 export interface PasswordResetRequest {
@@ -90,6 +92,15 @@ export const authService = {
         tokenStorage.setUser(response.user);
       }
 
+      // Store default profile in global state if available
+      if (response.profile) {
+        // Dynamic import to avoid circular dependencies
+        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+        const { useProfileStore } = await import("../store/profile-store");
+        const profileData = mapApiProfileToProfileData(response.profile);
+        useProfileStore.getState().setData(profileData);
+      }
+
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {
@@ -123,6 +134,15 @@ export const authService = {
         tokenStorage.setUser(response.user);
       }
 
+      // Store default profile in global state if available
+      if (response.profile) {
+        // Dynamic import to avoid circular dependencies
+        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+        const { useProfileStore } = await import("../store/profile-store");
+        const profileData = mapApiProfileToProfileData(response.profile);
+        useProfileStore.getState().setData(profileData);
+      }
+
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {
@@ -147,6 +167,9 @@ export const authService = {
     } finally {
       // Always clear tokens (cookies)
       tokenStorage.clear();
+      // Clear profile store
+      const { useProfileStore } = await import("../store/profile-store");
+      useProfileStore.getState().reset();
     }
   },
 
@@ -155,7 +178,17 @@ export const authService = {
    */
   async getCurrentUser(): Promise<User> {
     try {
-      return await apiRequest<User>("auth/me");
+      const user = await apiRequest<User>("auth/me");
+      
+      // Store default profile in global state if available
+      if (user.profile) {
+        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+        const { useProfileStore } = await import("../store/profile-store");
+        const profileData = mapApiProfileToProfileData(user.profile);
+        useProfileStore.getState().setData(profileData);
+      }
+      
+      return user;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -186,6 +219,15 @@ export const authService = {
       }
       if (response.user) {
         tokenStorage.setUser(response.user);
+      }
+
+      // Store default profile in global state if available
+      if (response.profile) {
+        // Dynamic import to avoid circular dependencies
+        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+        const { useProfileStore } = await import("../store/profile-store");
+        const profileData = mapApiProfileToProfileData(response.profile);
+        useProfileStore.getState().setData(profileData);
       }
 
       return response;

@@ -43,19 +43,16 @@ export default function RegisterForm() {
       await authService.register({
         ...formData,
         tier: isBusiness ? "BUSINESS" : "PERSONAL",
-        // Only include referralCode if it's not empty
         ...(formData.referralCode && { referralCode: formData.referralCode.trim() }),
       });
 
-      // 3. Success -> Send to the Dashboard Lobby
-      router.push("/dashboard?welcome=true");
+      router.push("/mycard/edit?welcome=true");
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setError(err.message || "Registration failed. Please try again.");
       } else {
         setError("An error occurred. Please try again.");
       }
-      console.error(err);
     } finally {
       setLoading(false);
     }

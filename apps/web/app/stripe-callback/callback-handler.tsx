@@ -41,7 +41,6 @@ export default function StripeCallbackHandler() {
           router.push("/login?error=verification_failed");
         }
       } catch (error) {
-        console.error("Stripe callback error:", error);
         if (error instanceof ApiClientError) {
           router.push(`/login?error=${encodeURIComponent(error.message)}`);
         } else {

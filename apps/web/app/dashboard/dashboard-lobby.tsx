@@ -58,7 +58,6 @@ export default function DashboardLobby() {
           setError(err.message || "Failed to load user data.");
         } else {
           setError("An error occurred. Please try again.");
-          console.error("Error fetching user:", err);
         }
         // If we don't have cached user and fetch failed, redirect to login
         if (!getCurrentUser()) {

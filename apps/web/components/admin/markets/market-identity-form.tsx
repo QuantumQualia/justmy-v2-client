@@ -112,7 +112,6 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
       } catch (error) {
         // Only update state if this is still the active fetch
         if (fetchingParentsRef.current === effectFetchKey) {
-          console.error("Failed to fetch parent markets:", error)
           // On error, keep existing markets or use empty array
           const currentSelectedParent = selectedParentRef.current
           if (currentSelectedParent) {
@@ -178,7 +177,6 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
       } catch (error) {
         // Only update state if this is still the active fetch
         if (fetchingSelectedParentRef.current === effectParentMarketId) {
-          console.error("Failed to fetch selected parent market:", error)
           setSelectedParent(null)
         }
       } finally {

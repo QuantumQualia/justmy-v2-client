@@ -12,10 +12,51 @@ const publicRoutes = [
 ];
 
 /**
+ * Protected single-segment routes that should never be treated as handles
+ * These are routes that require authentication and are single segments
+ * (e.g., /admin, /dashboard - not /api which is already excluded by matcher)
+ */
+const protectedSingleSegmentRoutes = [
+  "/admin",
+  "/dashboard",
+  "/mycard"
+];
+
+/**
+ * Check if a pathname is a dynamic handle route (e.g., /john, /jane)
+ * Handle routes are single-segment paths that don't match protected routes
+ */
+function isHandleRoute(pathname: string): boolean {
+  // Remove leading slash and check if it's a single segment
+  const segments = pathname.split("/").filter(Boolean);
+  
+  // Must be exactly one segment (e.g., /john, not /john/something)
+  if (segments.length !== 1) {
+    return false;
+  }
+
+  // Check if it matches any protected single-segment route
+  // (e.g., /admin, /dashboard should not be treated as handles)
+  const isProtected = protectedSingleSegmentRoutes.includes(pathname);
+
+  return !isProtected;
+}
+
+/**
  * Check if a route is public
  */
 function isPublicRoute(pathname: string): boolean {
-  return publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+  // Check explicit public routes
+  if (publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
+    return true;
+  }
+
+  // Check if it's a handle route (dynamic profile page)
+  if (isHandleRoute(pathname)) {
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -32,11 +73,6 @@ function getAuthToken(request: NextRequest): string | null {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Debug logging (remove in production)
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[Middleware] Checking route: ${pathname}`);
-  }
-
   // Allow public routes
   if (isPublicRoute(pathname)) {
     // If user is already authenticated and tries to access login/register, redirect to dashboard
@@ -50,18 +86,11 @@ export function middleware(request: NextRequest) {
   // Check authentication for protected routes (everything that's not public)
   const token = getAuthToken(request);
   
-  if (process.env.NODE_ENV === "development") {
-    console.log(`[Middleware] Protected route ${pathname}, token:`, token ? "exists" : "missing");
-  }
-  
   if (!token) {
     // Redirect to login if not authenticated
     const loginUrl = new URL("/login", request.url);
     // Add redirect parameter to return to the original page after login
     loginUrl.searchParams.set("redirect", pathname);
-    if (process.env.NODE_ENV === "development") {
-      console.log(`[Middleware] Redirecting to login from ${pathname}`);
-    }
     return NextResponse.redirect(loginUrl);
   }
 

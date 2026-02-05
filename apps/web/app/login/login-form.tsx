@@ -14,7 +14,7 @@ import { tokenStorage } from "@/lib/storage/token-storage";
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = searchParams.get("redirect") || "/mycard/edit";
 
   useEffect(() => {
     const accessToken = tokenStorage.getAccessToken();
@@ -48,7 +48,6 @@ export default function LoginForm() {
       } else {
         setError("An error occurred. Please try again.");
       }
-      console.error(err);
     } finally {
       setLoading(false);
     }
