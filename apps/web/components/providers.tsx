@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ThemeProvider as NextThemesProvider } from "next-themes"
 import { Toaster } from "@workspace/ui/components/sonner"
+import { GlobalShareHost } from "@/components/share/share-host"
 
 /**
  * Sync localStorage tokens to cookies on app load
@@ -30,6 +31,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <AuthSync />
       {children}
+      <GlobalShareHost />
       <Toaster 
         position="top-right"
         richColors

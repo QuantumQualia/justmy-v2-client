@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import InlineEdit from "@/components/mycard/inline-edit";
 import MyCardLive from "@/components/mycard/mycard-live";
-import { ArrowLeft, Eye, Share2, UserPlus } from "lucide-react";
+import { ArrowLeft, Eye, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { useProfileStore } from "@/lib/store";
+import { openShare } from "@/components/share/share-store";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -121,16 +122,23 @@ export default function ProfilePage() {
             <Button
               variant="outline"
               className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
+              onClick={() => {
+                const url =
+                  typeof window !== "undefined"
+                    ? window.location.origin + "/me"
+                    : "";
+                openShare({
+                  title: data.name || "myCARD",
+                  description: data.tagline || "Check out my JustMy myCARD",
+                  url,
+                  imageUrl: data.banner || data.photo || undefined,
+                  entityLabel: data.type || undefined,
+                });
+              }}
             >
-              <Share2 className="h-4 w-4 mr-2" />
+              {/* We can keep the Eye icon for consistency or swap to Share later */}
+              <Eye className="h-4 w-4 mr-2" />
               Share myCARD
-            </Button>
-            <Button
-              variant="outline"
-              className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
-            >
-              <UserPlus className="h-4 w-4 mr-2" />
-              Send Referral
             </Button>
           </div>
         </div>

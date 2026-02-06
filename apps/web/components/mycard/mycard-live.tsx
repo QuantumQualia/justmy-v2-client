@@ -55,6 +55,7 @@ import {
 } from "react-icons/si";
 import type { ProfileKind } from "@/components/mycard/inline-edit";
 import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
+import { openShare } from "@/components/share/share-store";
 import type { ProfileData, SocialLink } from "@/lib/store";
 
 const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
@@ -304,7 +305,15 @@ export default function MyCardLive({
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    // TODO: Handle upload action
+                    const url =
+                      typeof window !== "undefined" ? window.location.href : "";
+                    openShare({
+                      title: data.name || "myCARD",
+                      description: data.tagline || "Check out this myCARD",
+                      url,
+                      imageUrl: data.banner || data.photo || undefined,
+                      entityLabel: data.type || undefined,
+                    });
                   }}
                   className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
                   title="Upload/Share"
