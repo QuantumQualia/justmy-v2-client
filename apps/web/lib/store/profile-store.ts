@@ -45,6 +45,7 @@ export interface Address {
 export interface ProfileData {
   id?: number; // Profile ID for API calls
   type?: "personal" | "biz" | "growth" | "founder" | "city" | "network"; // Profile type
+  slug: string;
   photo: string;
   banner: string;
   name: string;
@@ -81,6 +82,7 @@ interface ProfileStore {
 const initialData: ProfileData = {
   id: undefined,
   type: undefined,
+  slug: "",
   photo: "",
   banner: "",
   name: "",

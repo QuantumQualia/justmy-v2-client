@@ -176,6 +176,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
   return {
     id: profileId,
     type: profileType,
+    slug: apiProfile.slug,
     photo: apiProfile.photo || "",
     banner: apiProfile.banner || "",
     name: apiProfile.name || "",

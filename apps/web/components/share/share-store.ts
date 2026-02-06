@@ -23,19 +23,19 @@ export const useShareStore = create<ShareState>((set) => ({
  * - If not available or user cancels, falls back to the desktop/modal experience.
  */
 export async function openShare(payload: SharePayload) {
-  // if (typeof navigator !== "undefined" && (navigator as any).share) {
-  //   try {
-  //     await (navigator as any).share({
-  //       title: payload.title,
-  //       text: payload.description,
-  //       url: payload.url,
-  //     });
-  //     return;
-  //   } catch (err) {
-  //     // If user cancels or native share fails, fall back to modal below
-  //     console.warn("Native share failed or was cancelled", err);
-  //   }
-  // }
+  if (typeof navigator !== "undefined" && (navigator as any).share) {
+    try {
+      await (navigator as any).share({
+        title: payload.title,
+        text: payload.description,
+        url: payload.url,
+      });
+      return;
+    } catch (err) {
+      // If user cancels or native share fails, fall back to modal below
+      console.warn("Native share failed or was cancelled", err);
+    }
+  }
 
   useShareStore.getState().open(payload);
 }

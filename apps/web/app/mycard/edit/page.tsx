@@ -123,10 +123,7 @@ export default function ProfilePage() {
               variant="outline"
               className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
               onClick={() => {
-                const url =
-                  typeof window !== "undefined"
-                    ? window.location.origin + "/me"
-                    : "";
+                const url = `${process.env.NEXT_PUBLIC_APP_URL}/${data.slug}`;
                 openShare({
                   title: data.name || "myCARD",
                   description: data.tagline || "Check out my JustMy myCARD",

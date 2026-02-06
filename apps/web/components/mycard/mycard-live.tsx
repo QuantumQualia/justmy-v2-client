@@ -305,12 +305,11 @@ export default function MyCardLive({
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    const url =
-                      typeof window !== "undefined" ? window.location.href : "";
+
                     openShare({
                       title: data.name || "myCARD",
                       description: data.tagline || "Check out this myCARD",
-                      url,
+                      url: `${process.env.NEXT_PUBLIC_APP_URL}/${data.slug}`,
                       imageUrl: data.banner || data.photo || undefined,
                       entityLabel: data.type || undefined,
                     });
