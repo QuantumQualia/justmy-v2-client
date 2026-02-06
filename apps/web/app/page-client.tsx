@@ -31,7 +31,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleFreeSignup = (type: "personal" | "business" = "personal") => {
+  const handleFreeSignup = (type: "personal" | "biz" | "growth" | "founder" | "city" | "network" = "personal") => {
     // Preserve referral code from URL if present
     const referralCode = searchParams.get("ref") || searchParams.get("referral");
     const params = new URLSearchParams({ type });
@@ -91,7 +91,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* --- 4-TIER PRICING SECTION --- */}
+      {/* --- PROFILE TYPES PRICING SECTION --- */}
       <section className="py-24 bg-slate-950 border-t border-slate-900" id="pricing">
         <div className="container px-4 mx-auto max-w-7xl">
           <div className="text-center mb-16">
@@ -113,15 +113,15 @@ export default function LandingPage() {
               features={["Digital ID Card", "Personal Dashboard", "Read-only Map"]}
             />
 
-            {/* 2. BUSINESS OS (Free) */}
+            {/* 2. BIZ OS (Free) */}
             <PricingCard 
               icon={<Briefcase className="h-6 w-6 text-blue-400" />}
-              title="Business OS"
+              title="Biz OS"
               price="Free"
               period="forever"
               desc="Claim your node and manage basic listing info."
               btnText="Claim Business"
-              btnAction={() => handleFreeSignup("business")}
+              btnAction={() => handleFreeSignup("biz")}
               features={["Verified Business Node", "Basic Listing Info", "Receive Reviews"]}
             />
 
@@ -133,7 +133,7 @@ export default function LandingPage() {
               period="/mo"
               desc="Advanced tools, AI writing, and local promotion."
               btnText="Start Growth"
-              btnAction={() => handleCheckout("GROWTH_MONTHLY")}
+              btnAction={() => handleCheckout("GROWTH")}
               features={["AI Content Writer", "Priority Map Rank", "5 Team Cards"]}
               isPopular={false}
               loading={loading}
@@ -156,7 +156,7 @@ export default function LandingPage() {
                   
                   <Button 
                     className="cursor-pointer w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold mb-6"
-                    onClick={() => handleCheckout("FOUNDER_YEARLY")}
+                    onClick={() => handleCheckout("FOUNDER")}
                     disabled={loading}
                   >
                     {loading ? "Processing..." : "Become a Founder"}

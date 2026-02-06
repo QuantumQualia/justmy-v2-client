@@ -20,7 +20,7 @@ export interface RegisterData {
   password: string;
   zipCode: string;
   businessName?: string;
-  tier: "PERSONAL" | "BUSINESS";
+  profileType: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   referralCode?: string;
 }
 
@@ -30,7 +30,7 @@ export interface AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
-    tier?: "PERSONAL" | "BUSINESS";
+    profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   };
   profile?: any; // Profile response from formatProfileResponse
   // Support both naming conventions (NestJS typically uses accessToken)
@@ -44,7 +44,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  tier?: "PERSONAL" | "BUSINESS";
+  profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   businessName?: string;
   zipCode?: string;
   profile?: any; // Profile response from formatProfileResponse

@@ -16,13 +16,13 @@ export interface VerifyCheckoutResponse {
     email: string;
     firstName: string;
     lastName: string;
-    tier?: "PERSONAL" | "BUSINESS";
+    profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   };
   accessToken: string;
   refreshToken?: string;
 }
 
-export type SubscriptionPlan = "GROWTH_MONTHLY" | "FOUNDER_YEARLY";
+export type SubscriptionPlan = "GROWTH" | "FOUNDER";
 
 /**
  * Subscription Service
@@ -30,7 +30,7 @@ export type SubscriptionPlan = "GROWTH_MONTHLY" | "FOUNDER_YEARLY";
 export const subscriptionService = {
   /**
    * Create a Stripe checkout session for a subscription plan
-   * @param plan - The subscription plan identifier (GROWTH_MONTHLY or FOUNDER_YEARLY)
+   * @param plan - The subscription plan identifier (GROWTH or FOUNDER)
    * @returns Checkout session URL to redirect user to Stripe
    */
   async createCheckoutSession(plan: SubscriptionPlan): Promise<string> {

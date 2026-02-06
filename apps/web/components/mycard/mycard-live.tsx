@@ -53,7 +53,7 @@ import {
   SiWhatsapp,
   SiXing,
 } from "react-icons/si";
-import type { ProfileKind, BusinessTier } from "@/components/mycard/inline-edit";
+import type { ProfileKind } from "@/components/mycard/inline-edit";
 import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import type { ProfileData, SocialLink } from "@/lib/store";
 
@@ -135,7 +135,6 @@ const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
 interface MyCardLiveProps {
   data: ProfileData;
   profileType?: ProfileKind;
-  businessTier?: BusinessTier;
 }
 
 // Selection Modal Component
@@ -208,7 +207,6 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
 export default function MyCardLive({
   data,
   profileType = "personal",
-  businessTier,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
   const [shouldCenter, setShouldCenter] = useState(false);

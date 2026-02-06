@@ -44,7 +44,7 @@ export interface Address {
 
 export interface ProfileData {
   id?: number; // Profile ID for API calls
-  type?: "personal" | "business"; // Profile type
+  type?: "personal" | "biz" | "growth" | "founder" | "city" | "network"; // Profile type
   photo: string;
   banner: string;
   name: string;

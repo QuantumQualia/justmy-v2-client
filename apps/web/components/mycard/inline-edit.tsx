@@ -63,8 +63,7 @@ import {
 // Types - SocialType is imported from store
 
 export type MyCardMode = "edit" | "live";
-export type ProfileKind = "personal" | "business";
-export type BusinessTier = "free" | "growth" | "founder";
+export type ProfileKind = "personal" | "biz" | "growth" | "founder" | "city" | "network";
 
 // Helper: Simple field edit modal props
 interface SimpleFieldEditModalProps {
@@ -225,7 +224,6 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ title, description, icon, onC
 export interface ProfileEditProps {
   mode?: MyCardMode;
   profileType?: ProfileKind;
-  businessTier?: BusinessTier;
   data: ProfileData;
   onDataChange: (updates: Partial<ProfileData>) => void;
   onSocialLinkUpdate: (id: string, updates: Partial<SocialLink>) => void;

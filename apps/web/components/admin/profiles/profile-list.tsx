@@ -113,18 +113,13 @@ export function ProfileList() {
       },
       {
         accessorKey: "type",
-        header: "Type / Tier",
+        header: "Profile Type",
         cell: ({ row }) => {
           const profile = row.original
           return (
-            <div className="flex flex-col gap-1">
-              <Badge variant="outline" className="border-slate-600 text-slate-300 w-fit">
-                {profile.type}
-              </Badge>
-              <Badge variant="outline" className="border-slate-600 text-slate-300 w-fit">
-                {profile.subscription?.tier || "Free"}
-              </Badge>
-            </div>
+            <Badge variant="outline" className="border-slate-600 text-slate-300 w-fit">
+              {profile.type}
+            </Badge>
           )
         },
       },

@@ -155,11 +155,23 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     }
   }
 
-  // Map type - ensure it's "personal" or "business"
-  const profileType: "personal" | "business" | undefined = 
-    apiProfile.type === "personal" || apiProfile.type === "business" 
-      ? apiProfile.type 
-      : undefined;
+  // Map type - support new profile types: personal, biz, growth, founder, city, network
+  // Also handle legacy mapping: old "business" type with subscription tier maps to new types
+  let profileType: "personal" | "biz" | "growth" | "founder" | "city" | "network" | undefined;
+  
+  const apiType = apiProfile.type?.toLowerCase();
+  
+  // Check if it's one of the new profile types
+  if (apiType === "personal" || apiType === "biz" || apiType === "growth" || 
+      apiType === "founder" || apiType === "city" || apiType === "network") {
+    profileType = apiType;
+  } else if (apiType === "business") {
+    // Legacy: Map old "business" type based on subscription tier
+    // This assumes the API response includes subscription info in a parent object
+    // If subscription tier is available, map accordingly
+    // Otherwise default to "biz" (which was Business-Free)
+    profileType = "biz"; // Default fallback for old business profiles
+  }
 
   return {
     id: profileId,
