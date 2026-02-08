@@ -103,7 +103,7 @@ export function QRCode({
           const downloadUrl = URL.createObjectURL(blob);
           const link = document.createElement("a");
           link.href = downloadUrl;
-          link.download = "mycard-qrcode.png";
+          link.download = `mycard-${url}-qrcode.png`;
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
@@ -145,7 +145,7 @@ export function QRCode({
       {renderQRCodeWithHashtag()}
 
       {/* Actions */}
-      <div className="flex flex-col gap-3 flex-1 w-full sm:w-auto">
+      <div className="flex flex-col gap-3 flex-1 w-full sm:w-auto sm:max-w-[350px]">
         {/* Download QRCode button */}
         <Button
           onClick={handleDownload}
