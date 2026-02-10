@@ -90,6 +90,7 @@ export function AIAboutAssistant({
 }: AIAboutAssistantProps) {
   const [state, setState] = useState<ModalState>("prompting");
   const [rawInput, setRawInput] = useState("");
+  const [interimTranscript, setInterimTranscript] = useState(""); // Real-time interim transcript
   const [suggestions, setSuggestions] = useState<AboutSuggestions | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<keyof AboutSuggestions | null>(null);
   const [selectedText, setSelectedText] = useState("");
@@ -116,8 +117,8 @@ export function AIAboutAssistant({
         recognitionInstance.lang = "en-US";
 
         recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-          let interimTranscript = "";
-          let finalTranscript = "";
+          let currentInterim = "";
+          let currentFinal = "";
 
           for (let i = event.resultIndex; i < event.results.length; i++) {
             const result = event.results[i];
@@ -128,16 +129,22 @@ export function AIAboutAssistant({
             
             const transcript = alternative.transcript;
             if (result.isFinal) {
-              finalTranscript += transcript + " ";
+              currentFinal += transcript + " ";
             } else {
-              interimTranscript += transcript;
+              currentInterim += transcript;
             }
           }
 
-          setRawInput((prev) => {
-            const newValue = prev + finalTranscript;
-            return newValue.trim();
-          });
+          // Update final transcript (accumulated)
+          if (currentFinal) {
+            setRawInput((prev) => {
+              const newValue = prev + currentFinal;
+              return newValue.trim();
+            });
+          }
+
+          // Update interim transcript (real-time, word-by-word)
+          setInterimTranscript(currentInterim);
         };
 
         recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
@@ -237,6 +244,7 @@ export function AIAboutAssistant({
     if (!isOpen) {
       setState("prompting");
       setRawInput("");
+      setInterimTranscript("");
       setSuggestions(null);
       setSelectedSuggestion(null);
       setSelectedText("");
@@ -278,6 +286,8 @@ export function AIAboutAssistant({
       recognitionRef.current.stop();
     }
     setIsRecording(false);
+    // Clear interim transcript when stopping
+    setInterimTranscript("");
   };
 
   const handleMagicStart = async () => {
@@ -429,8 +439,12 @@ export function AIAboutAssistant({
 
             <div className="space-y-3">
               <textarea
-                value={rawInput}
-                onChange={(e) => setRawInput(e.target.value)}
+                value={rawInput + (interimTranscript ? " " + interimTranscript : "")}
+                onChange={(e) => {
+                  // When user manually types, clear interim and update rawInput
+                  setInterimTranscript("");
+                  setRawInput(e.target.value);
+                }}
                 placeholder="Start typing or use voice input..."
                 className="w-full min-h-[150px] p-4 text-sm text-slate-100 bg-slate-900/50 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 resize-none placeholder:text-slate-500"
                 autoFocus
