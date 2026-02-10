@@ -5,6 +5,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { ImageCropModal } from "@/components/image-crop/image-crop-modal";
+import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
@@ -23,6 +24,7 @@ import {
   Trash2,
   X,
   Globe,
+  Sparkles,
 } from "lucide-react";
 import {
   SiFacebook,
@@ -375,6 +377,7 @@ export default function ProfileEdit({
   }>({});
   const [imageUploadType, setImageUploadType] = useState<"banner" | "profile" | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   // Validation functions
   const validateEmail = (email: string): string | undefined => {
@@ -1678,16 +1681,24 @@ export default function ProfileEdit({
             {editingAbout ? (
               <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 rounded-2xl border-2 border-blue-500/60 shadow-xl backdrop-blur-sm">
                 <div className="space-y-4">
-                  <div className="space-y-2">
+                  <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">About Text</label>
-                    <textarea
-                      value={data.about}
-                      onChange={(e) => onDataChange({ about: e.target.value })}
-                      className="w-full min-h-[220px] p-5 text-sm text-slate-100 leading-relaxed bg-slate-900/90 border-2 border-slate-600/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/80 resize-none placeholder:text-slate-500/70 transition-all duration-200 custom-scrollbar"
-                      placeholder="Tell people about yourself..."
-                      autoFocus
-                    />
+                    <button
+                      onClick={() => setShowAIAssistant(true)}
+                      className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                      title="Get AI suggestions for your About section"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" />
+                      AI Assistant
+                    </button>
                   </div>
+                  <textarea
+                    value={data.about}
+                    onChange={(e) => onDataChange({ about: e.target.value })}
+                    className="w-full min-h-[220px] p-5 text-sm text-slate-100 leading-relaxed bg-slate-900/90 border-2 border-slate-600/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/80 resize-none placeholder:text-slate-500/70 transition-all duration-200 custom-scrollbar"
+                    placeholder="Tell people about yourself..."
+                    autoFocus
+                  />
                   <div className="flex gap-3 pt-1">
                     <Button
                       onClick={() => {
@@ -1739,6 +1750,18 @@ export default function ProfileEdit({
               }}
             />
           )}
+
+          {/* AI About Assistant Modal */}
+          <AIAboutAssistant
+            isOpen={showAIAssistant}
+            onClose={() => setShowAIAssistant(false)}
+            onAccept={(text) => {
+              onDataChange({ about: text });
+              setShowAIAssistant(false);
+              // Auto-save will handle saving to API
+            }}
+            profileData={data}
+          />
         </div>
       </div>
     </div>
