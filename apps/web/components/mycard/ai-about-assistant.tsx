@@ -5,57 +5,7 @@ import { X, Mic, Sparkles, Loader2, Check, Wand2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { aiService, ApiClientError } from "@/lib/services/ai";
 import type { ProfileData } from "@/lib/store";
-
-// TypeScript definitions for Web Speech API
-interface SpeechRecognition extends EventTarget {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  onresult: ((event: SpeechRecognitionEvent) => void) | null;
-  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
-  onend: (() => void) | null;
-}
-
-interface SpeechRecognitionEvent {
-  resultIndex: number;
-  results: SpeechRecognitionResultList;
-}
-
-interface SpeechRecognitionResultList {
-  length: number;
-  item(index: number): SpeechRecognitionResult;
-  [index: number]: SpeechRecognitionResult;
-}
-
-interface SpeechRecognitionResult {
-  length: number;
-  item(index: number): SpeechRecognitionAlternative;
-  [index: number]: SpeechRecognitionAlternative;
-  isFinal: boolean;
-}
-
-interface SpeechRecognitionAlternative {
-  transcript: string;
-  confidence: number;
-}
-
-interface SpeechRecognitionErrorEvent {
-  error: string;
-  message?: string;
-}
-
-declare global {
-  interface Window {
-    webkitSpeechRecognition: {
-      new (): SpeechRecognition;
-    };
-    SpeechRecognition: {
-      new (): SpeechRecognition;
-    };
-  }
-}
+import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 
 interface AIAboutAssistantProps {
   isOpen: boolean;
@@ -90,7 +40,6 @@ export function AIAboutAssistant({
 }: AIAboutAssistantProps) {
   const [state, setState] = useState<ModalState>("prompting");
   const [rawInput, setRawInput] = useState("");
-  const [interimTranscript, setInterimTranscript] = useState(""); // Real-time interim transcript
   const [suggestions, setSuggestions] = useState<AboutSuggestions | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<keyof AboutSuggestions | null>(null);
   const [selectedText, setSelectedText] = useState("");
@@ -100,84 +49,37 @@ export function AIAboutAssistant({
   const [currentPromptIndex, setCurrentPromptIndex] = useState(0);
 
   // Voice recording state
-  const [isRecording, setIsRecording] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
   const [prepCountdown, setPrepCountdown] = useState<number | null>(null);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
-  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const baseInputRef = useRef<string>("");
 
-  // Initialize Web Speech API
+  // Shared speech recognition hook
+  const {
+    isSupported: micSupported,
+    isRecording,
+    transcript,
+    error: micError,
+    start: startMic,
+    stop: stopMic,
+    reset: resetMic,
+  } = useSpeechRecognition({ lang: "en-US", append: false });
+
+  // When recording, stream transcript into rawInput, appending to the text
+  // that was present when recording started.
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const SpeechRecognitionClass = window.webkitSpeechRecognition || window.SpeechRecognition;
-      if (SpeechRecognitionClass) {
-        const recognitionInstance = new SpeechRecognitionClass();
-        recognitionInstance.continuous = true;
-        recognitionInstance.interimResults = true;
-        recognitionInstance.lang = "en-US";
+    if (!isRecording) return;
+    setRawInput(
+      (prev) =>
+        (baseInputRef.current + (transcript ? " " + transcript : "")).trim()
+    );
+  }, [transcript, isRecording]);
 
-        recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-          let currentInterim = "";
-          let currentFinal = "";
-
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const result = event.results[i];
-            if (!result) continue;
-            
-            const alternative = result[0];
-            if (!alternative) continue;
-            
-            const transcript = alternative.transcript;
-            if (result.isFinal) {
-              currentFinal += transcript + " ";
-            } else {
-              currentInterim += transcript;
-            }
-          }
-
-          // Update final transcript (accumulated)
-          if (currentFinal) {
-            setRawInput((prev) => {
-              const newValue = prev + currentFinal;
-              return newValue.trim();
-            });
-          }
-
-          // Update interim transcript (real-time, word-by-word)
-          setInterimTranscript(currentInterim);
-        };
-
-        recognitionInstance.onerror = (event: SpeechRecognitionErrorEvent) => {
-          console.error("Speech recognition error:", event.error);
-          setIsRecording(false);
-
-          // Friendlier, contextual error messages
-          switch (event.error) {
-            case "not-allowed":
-              setError("Microphone permission was blocked. Please allow access in your browser settings to use voice.");
-              break;
-            case "no-speech":
-              // User stayed silent – treat this gently
-              setError("We didn't catch anything that time. You can try speaking again or just type your story instead.");
-              break;
-            case "aborted":
-              // User or browser cancelled; no scary error needed
-              break;
-            default:
-              setError("We hit a hiccup with the mic. You can try again or simply type your story.");
-              break;
-          }
-        };
-
-        recognitionInstance.onend = () => {
-          setIsRecording(false);
-        };
-
-        setRecognition(recognitionInstance);
-        recognitionRef.current = recognitionInstance;
-      }
+  // Surface mic-specific errors through the existing error banner
+  useEffect(() => {
+    if (micError) {
+      setError(micError);
     }
-  }, []);
+  }, [micError]);
 
   // Rotate prompt suggestions
   useEffect(() => {
@@ -215,20 +117,7 @@ export function AIAboutAssistant({
       setIsPreparing(false);
       setPrepCountdown(null);
 
-      if (!recognitionRef.current) {
-        setError("Speech recognition not available. Please use a modern browser.");
-        return;
-      }
-
-      try {
-        recognitionRef.current.start();
-        setIsRecording(true);
-        setError(null);
-      } catch (err) {
-        console.error("Failed to start recording:", err);
-        setError("Failed to start recording. Please try again.");
-      }
-
+      startMic();
       return;
     }
 
@@ -237,31 +126,28 @@ export function AIAboutAssistant({
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [isPreparing, prepCountdown]);
+  }, [isPreparing, prepCountdown, startMic]);
 
   // Reset state when modal closes
   useEffect(() => {
     if (!isOpen) {
       setState("prompting");
       setRawInput("");
-      setInterimTranscript("");
       setSuggestions(null);
       setSelectedSuggestion(null);
       setSelectedText("");
       setIsLoading(false);
       setError(null);
       setProgress(0);
-      setIsRecording(false);
       setIsPreparing(false);
       setPrepCountdown(null);
-      if (recognitionRef.current) {
-        recognitionRef.current.stop();
-      }
+      stopMic();
+      resetMic();
     }
-  }, [isOpen]);
+  }, [isOpen, resetMic, stopMic]);
 
   const startRecording = () => {
-    if (!recognitionRef.current) {
+    if (!micSupported) {
       setError("Speech recognition not available. Please use a modern browser.");
       return;
     }
@@ -270,6 +156,10 @@ export function AIAboutAssistant({
     if (isRecording || isPreparing) {
       return;
     }
+
+    // Capture the current text as the base for this recording session
+    baseInputRef.current = rawInput;
+    resetMic();
 
     // Start a short countdown before beginning actual recording
     setError(null);
@@ -282,12 +172,7 @@ export function AIAboutAssistant({
     setIsPreparing(false);
     setPrepCountdown(null);
 
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-    setIsRecording(false);
-    // Clear interim transcript when stopping
-    setInterimTranscript("");
+    stopMic();
   };
 
   const handleMagicStart = async () => {
@@ -439,10 +324,8 @@ export function AIAboutAssistant({
 
             <div className="space-y-3">
               <textarea
-                value={rawInput + (interimTranscript ? " " + interimTranscript : "")}
+                value={rawInput}
                 onChange={(e) => {
-                  // When user manually types, clear interim and update rawInput
-                  setInterimTranscript("");
                   setRawInput(e.target.value);
                 }}
                 placeholder="Start typing or use voice input..."
@@ -450,7 +333,7 @@ export function AIAboutAssistant({
                 autoFocus
               />
               <div className="flex gap-2">
-                {recognitionRef.current ? (
+                {micSupported && (
                   <button
                     onClick={isRecording ? stopRecording : startRecording}
                     disabled={isPreparing}
@@ -467,7 +350,7 @@ export function AIAboutAssistant({
                         ? "Preparing..."
                         : "Start Recording"}
                   </button>
-                ) : null}
+                )}
                 <button
                   onClick={handleMagicStart}
                   disabled={!rawInput.trim() || isLoading}
