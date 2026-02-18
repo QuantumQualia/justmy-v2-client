@@ -4,7 +4,7 @@
  * Also provides reverse mapping from ProfileData to API DTOs
  */
 
-import type { ProfileData, SocialLink, Hotlink, Phone, Address } from "./profile-store";
+import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market } from "./profile-store";
 import type { UpdateProfileDto, SocialLinkDto, HotlinkDto, PhoneDto, LocationDto } from "../services/profiles";
 
 // API Response types (matching formatProfileResponse and formatPublicProfileResponse)
@@ -54,7 +54,7 @@ export interface ApiProfileResponse {
     label: string;
     link: string;
   }>;
-  // ... other fields not needed for myCard view
+  markets?: Market[];
 }
 
 // Map social name to type
@@ -144,6 +144,9 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     url: cta.link,
   }));
 
+  // Map markets
+  const markets: Market[] = apiProfile.markets || [];
+
   // Convert id from string to number if needed
   let profileId: number | undefined;
   if (apiProfile.id) {
@@ -188,6 +191,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     addresses: addresses.length > 0 ? addresses : undefined,
     socialLinks,
     hotlinks,
+    markets,
     about: apiProfile.about || "",
   };
 }

@@ -59,6 +59,13 @@ export interface TranscriptionResponse {
 }
 
 /**
+ * Response for welcome message generation
+ */
+export interface GenerateWelcomeResponse {
+  message: string; // Two-sentence hero greeting without the weather link line
+}
+
+/**
  * AI Service
  */
 export const aiService = {
@@ -113,6 +120,22 @@ export const aiService = {
         throw error;
       }
       throw new ApiClientError("Failed to transcribe audio.");
+    }
+  },
+
+  /**
+   * Generate personalized welcome message
+   */
+  async generateWelcome(): Promise<GenerateWelcomeResponse> {
+    try {
+      return await apiRequest<GenerateWelcomeResponse>("ai/generate-welcome", {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to generate welcome message.");
     }
   },
 };
