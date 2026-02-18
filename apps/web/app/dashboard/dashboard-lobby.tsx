@@ -18,7 +18,8 @@ import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { getCurrentUser } from "@/lib/services/session";
 import { SuperSearchBar } from "@/components/search/super-search-bar";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
-import { WelcomeMessage } from "@/components/welcome/welcome-message";
+import { GreetingCard } from "@/components/welcome/greeting-card";
+import { DayInHistory } from "@/components/welcome/day-in-history";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -49,7 +50,7 @@ export default function DashboardLobby() {
     <div className="min-h-screen bg-black text-white p-4 md:p-8 font-sans relative">
       <SuperSearchBar />
       <div className="pt-20">
-        <WelcomeMessage />
+        <GreetingCard />
         <SearchResultsPanel />
       </div>
     </div>
