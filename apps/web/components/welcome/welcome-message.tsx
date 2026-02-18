@@ -17,23 +17,15 @@ interface WelcomeMessageProps {
  * Fetches welcome message from API on mount.
  */
 export function WelcomeMessage({ weatherPageLink = "/weather" }: WelcomeMessageProps) {
-  const { data: profileData } = useProfileStore();
   const [message, setMessage] = React.useState<string | null>(null);
-  
-  // Generate link label from market name
-  const linkLabel = React.useMemo(() => {
-    const marketName = profileData.markets?.[0]?.name;
-    if (marketName) {
-      return `Check Full ${marketName} Radar & Forecast`;
-    }
-    return "Check Full Radar & Forecast";
-  }, [profileData.markets]);
+  const [linkLabel, setLinkLabel] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     async function fetchWelcome() {
       try {
         const data = await aiService.generateWelcome();
         setMessage(data.message);
+        setLinkLabel(data.linkLabel);
       } catch (err) {
         console.error("Failed to fetch welcome message:", err);
       }

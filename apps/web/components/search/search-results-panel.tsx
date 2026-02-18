@@ -38,7 +38,7 @@ export function SearchResultsPanel() {
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 mt-4">
-      <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3">
+      <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           {/* Header / toggle */}
           <div className="flex items-center justify-between gap-3">
@@ -145,14 +145,14 @@ export function SearchResultsPanel() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg border border-slate-800 bg-slate-900/60 p-3 hover:border-emerald-500/60 hover:bg-slate-900/90 transition-colors block"
+                          className="rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 p-3 hover:border-emerald-500/60 hover:bg-slate-900/90 transition-colors block"
                         >
                           {content}
                         </a>
                       ) : (
                         <div
                           key={item.id ?? index}
-                          className="rounded-lg border border-slate-800 bg-slate-900/60 p-3"
+                          className="rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 p-3"
                         >
                           {content}
                         </div>

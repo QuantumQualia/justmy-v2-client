@@ -63,6 +63,7 @@ export interface TranscriptionResponse {
  */
 export interface GenerateWelcomeResponse {
   message: string; // Two-sentence hero greeting without the weather link line
+  linkLabel: string; // Link label for the weather page
 }
 
 /**
