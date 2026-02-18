@@ -12,13 +12,27 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
-import { Briefcase, User as UserIcon, MapPin, Plus, ArrowRight } from "lucide-react";
+import {
+  Briefcase,
+  User as UserIcon,
+  MapPin,
+  Plus,
+  ArrowRight,
+  Droplets,
+  Calendar,
+  UserPlus,
+  FolderSearch,
+  HelpCircle,
+  AppWindow,
+} from "lucide-react";
 import Link from "next/link";
 import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { getCurrentUser } from "@/lib/services/session";
 import { SuperSearchBar } from "@/components/search/super-search-bar";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { GreetingCard } from "@/components/welcome/greeting-card";
+import { QuickActionItem, type QuickActionItemConfig } from "@/components/quick-actions/quick-action-item";
+import { WelcomeMessage } from "@/components/welcome/welcome-message";
 import { DayInHistory } from "@/components/welcome/day-in-history";
 
 // --- MOCK DATA (Replace with API calls) ---
@@ -30,6 +44,15 @@ const MY_PROFILES = [
 const LOCAL_CONTENT = [
   { id: 1, title: "City OS Announces New Features", type: "News", date: "2026-01-20" },
   { id: 2, title: "City OS Partners with Local Businesses", type: "News", date: "2026-01-19" },
+];
+
+const QUICK_ACTIONS: QuickActionItemConfig[] = [
+  { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/daily-drop" },
+  { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
+  { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/app-hub" },
+  { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "action", onClick: () => {} },
+  { label: "Directory", icon: FolderSearch, variant: "block", type: "link", href: "/directory" },
+  { label: "Need Help? Ask!", icon: HelpCircle, variant: "block", type: "action", onClick: () => {} },
 ];
 
 export default function DashboardLobby() {
@@ -49,9 +72,23 @@ export default function DashboardLobby() {
   return (
     <div className="min-h-screen bg-black text-white p-4 md:p-8 font-sans relative">
       <SuperSearchBar />
+      <SearchResultsPanel />
+
       <div className="pt-20">
-        <GreetingCard />
-        <SearchResultsPanel />
+        <WelcomeMessage />
+        <DayInHistory />
+        <div className="w-full max-w-3xl mx-auto px-4 mb-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            {QUICK_ACTIONS.filter((a) => a.variant === "panel").map((item, i) => (
+              <QuickActionItem key={`${item.label}-${i}`} item={item} />
+            ))}
+          </div>
+          <div className="flex flex-col gap-2">
+            {QUICK_ACTIONS.filter((a) => a.variant === "block").map((item, i) => (
+              <QuickActionItem key={`${item.label}-${i}`} item={item} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
