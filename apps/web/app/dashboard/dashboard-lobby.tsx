@@ -52,7 +52,7 @@ const QUICK_ACTIONS: QuickActionItemConfig[] = [
   { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/daily-drop" },
   { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
   { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
-  { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/app-hub" },
+  { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
   { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/weather" },
   { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "action", onClick: () => { } },
   { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
