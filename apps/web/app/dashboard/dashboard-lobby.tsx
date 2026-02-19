@@ -24,6 +24,7 @@ import {
   FolderSearch,
   HelpCircle,
   AppWindow,
+  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { authService, ApiClientError, User } from "@/lib/services/auth";
@@ -31,9 +32,10 @@ import { getCurrentUser } from "@/lib/services/session";
 import { SuperSearchBar } from "@/components/search/super-search-bar";
 import { SearchResultsPanel } from "@/components/search/search-results-panel";
 import { GreetingCard } from "@/components/welcome/greeting-card";
-import { QuickActionItem, type QuickActionItemConfig } from "@/components/quick-actions/quick-action-item";
+import { QuickActionItem, type QuickActionItemConfig } from "@/components/common/quick-action-item";
 import { WelcomeMessage } from "@/components/welcome/welcome-message";
 import { DayInHistory } from "@/components/welcome/day-in-history";
+import { AdBanner } from "@/components/common/ad-banner";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -48,11 +50,13 @@ const LOCAL_CONTENT = [
 
 const QUICK_ACTIONS: QuickActionItemConfig[] = [
   { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/daily-drop" },
-  { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
+  { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
+  { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
   { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/app-hub" },
-  { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "action", onClick: () => {} },
-  { label: "Directory", icon: FolderSearch, variant: "block", type: "link", href: "/directory" },
-  { label: "Need Help? Ask!", icon: HelpCircle, variant: "block", type: "action", onClick: () => {} },
+  { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/weather" },
+  { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "action", onClick: () => { } },
+  { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
+  { label: "Need Help? Ask!", icon: HelpCircle, variant: "button", type: "action", onClick: () => { } },
 ];
 
 export default function DashboardLobby() {
@@ -75,8 +79,8 @@ export default function DashboardLobby() {
       <SearchResultsPanel />
 
       <div className="pt-20">
-        <WelcomeMessage />
-        <DayInHistory />
+        {/* <WelcomeMessage />
+        <DayInHistory /> */}
         <div className="w-full max-w-3xl mx-auto px-4 mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {QUICK_ACTIONS.filter((a) => a.variant === "panel").map((item, i) => (
@@ -84,10 +88,19 @@ export default function DashboardLobby() {
             ))}
           </div>
           <div className="flex flex-col gap-2">
-            {QUICK_ACTIONS.filter((a) => a.variant === "block").map((item, i) => (
+            {QUICK_ACTIONS.filter((a) => a.variant === "button").map((item, i) => (
               <QuickActionItem key={`${item.label}-${i}`} item={item} />
             ))}
           </div>
+        </div>
+
+        <div className="w-full max-w-3xl mx-auto px-4 mb-6">
+          <AdBanner
+            imageSrc="/images/placeholders/banner_placement.jpg"
+            imageAlt="Ad Banner"
+            profileSlug="justmymemphis"
+            hotlinks={[{ label: "Learn More", href: "/learn-more" }, { label: "Contact Us", href: "/contact-us" }, { label: "Follow Us", href: "/follow-us" }]}
+          />
         </div>
       </div>
     </div>

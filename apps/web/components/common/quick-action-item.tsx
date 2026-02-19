@@ -5,7 +5,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
-export type QuickActionVariant = "panel" | "block";
+export type QuickActionVariant = "panel" | "button";
 export type QuickActionType = "link" | "action";
 
 /** Config for one quick action: style (variant) and function (type + href or onClick). */
@@ -19,10 +19,10 @@ export interface QuickActionItemConfig {
 }
 
 const panelStyles =
-  "rounded-2xl rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md p-4 flex flex-col items-center justify-center gap-2 min-h-[100px] text-white hover:bg-white/10 hover:border-white/25 transition-colors";
+  "rounded-lg rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md p-4 flex flex-col items-center justify-center gap-2 min-h-[100px] text-white hover:bg-white/10 hover:border-white/25 transition-colors";
 
 const blockStyles =
-  "rounded-xl rounded-br-none border border-white/20 bg-white/10 backdrop-blur-sm px-5 py-3 flex flex-row items-center justify-center gap-3 w-full text-white font-medium hover:bg-white/15 transition-colors";
+  "rounded-lg rounded-br-none border border-white/20 bg-white/10 backdrop-blur-sm px-5 py-3 flex flex-row items-center justify-center gap-3 w-full text-white font-medium hover:bg-white/15 transition-colors";
 
 export interface QuickActionItemProps {
   item: QuickActionItemConfig;
