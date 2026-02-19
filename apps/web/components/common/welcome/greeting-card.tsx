@@ -1,8 +1,8 @@
 "use client";
 
 import * as React from "react";
-import { WelcomeMessage } from "@/components/welcome/welcome-message";
-import { DayInHistory } from "@/components/welcome/day-in-history";
+import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
+import { DayInHistory } from "@/components/common/welcome/day-in-history";
 
 interface GreetingCardProps {
   weatherPageLink?: string;

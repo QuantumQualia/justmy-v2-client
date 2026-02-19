@@ -29,12 +29,12 @@ import {
 import Link from "next/link";
 import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { getCurrentUser } from "@/lib/services/session";
-import { SuperSearchBar } from "@/components/search/super-search-bar";
-import { SearchResultsPanel } from "@/components/search/search-results-panel";
-import { GreetingCard } from "@/components/welcome/greeting-card";
+import { SuperSearchBar } from "@/components/common/search/super-search-bar";
+import { SearchResultsPanel } from "@/components/common/search/search-results-panel";
+import { GreetingCard } from "@/components/common/welcome/greeting-card";
 import { QuickActionItem, type QuickActionItemConfig } from "@/components/common/quick-action-item";
-import { WelcomeMessage } from "@/components/welcome/welcome-message";
-import { DayInHistory } from "@/components/welcome/day-in-history";
+import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
+import { DayInHistory } from "@/components/common/welcome/day-in-history";
 import { AdBanner } from "@/components/common/ad-banner";
 
 // --- MOCK DATA (Replace with API calls) ---
@@ -79,8 +79,8 @@ export default function DashboardLobby() {
       <SearchResultsPanel />
 
       <div className="pt-20">
-        {/* <WelcomeMessage />
-        <DayInHistory /> */}
+        <WelcomeMessage />
+        <DayInHistory />
         <div className="w-full max-w-3xl mx-auto px-4 mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {QUICK_ACTIONS.filter((a) => a.variant === "panel").map((item, i) => (

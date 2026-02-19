@@ -47,9 +47,9 @@ export function AdBanner({
         )}
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2 px-4 py-2 text-sm md:px-6">
-        <span className="text-white/90">@{profileSlug}</span>
-        <nav className="flex items-center gap-2" aria-label="Banner links">
+      <div className="flex flex-wrap items-center justify-end gap-2 px-4 py-1.5 text-[11px] sm:text-xs md:text-[13px] md:px-6">
+        <span className="text-white/80">@{profileSlug}</span>
+        <nav className="flex items-center sm:gap-2 gap-1" aria-label="Banner links">
           {hotlinks.map((link, i) => (
             <React.Fragment key={link.href}>
               {i > 0 && <span className="text-white/50" aria-hidden>|</span>}
