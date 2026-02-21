@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { ImageCropModal } from "@/components/image-crop/image-crop-modal";
+import { ImageCropModal } from "@/components/common/image-crop/image-crop-modal";
 import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
