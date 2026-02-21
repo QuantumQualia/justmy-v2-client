@@ -49,7 +49,7 @@ const LOCAL_CONTENT = [
 ];
 
 const QUICK_ACTIONS: QuickActionItemConfig[] = [
-  { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/daily-drop" },
+  { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/lab/daily-drop" },
   { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
   { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
   { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
