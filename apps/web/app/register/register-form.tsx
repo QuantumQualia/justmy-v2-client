@@ -47,7 +47,7 @@ export default function RegisterForm() {
         ...(formData.referralCode && { referralCode: formData.referralCode.trim() }),
       });
 
-      router.push("/mycard/edit?welcome=true");
+      router.push("/dashboard?welcome=true");
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setError(err.message || "Registration failed. Please try again.");

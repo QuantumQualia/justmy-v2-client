@@ -50,7 +50,7 @@ const LOCAL_CONTENT = [
 
 const QUICK_ACTIONS: QuickActionItemConfig[] = [
   { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/lab/daily-drop" },
-  { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/profile" },
+  { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/mycard/edit" },
   { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
   { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
   { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/weather" },
