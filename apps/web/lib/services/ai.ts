@@ -59,6 +59,24 @@ export interface TranscriptionResponse {
 }
 
 /**
+ * Response for welcome message generation
+ */
+export interface GenerateWelcomeResponse {
+  message: string; // Two-sentence hero greeting without the weather link line
+  linkLabel: string; // Link label for the weather page
+}
+
+/**
+ * Response for "This Day in History" (Legacy & Leadership briefing)
+ */
+export interface DayInHistoryResponse {
+  headline: string;
+  history: string;
+  takeaway: string;
+  readMoreUrl?: string;
+}
+
+/**
  * AI Service
  */
 export const aiService = {
@@ -113,6 +131,38 @@ export const aiService = {
         throw error;
       }
       throw new ApiClientError("Failed to transcribe audio.");
+    }
+  },
+
+  /**
+   * Generate personalized welcome message
+   */
+  async generateWelcome(): Promise<GenerateWelcomeResponse> {
+    try {
+      return await apiRequest<GenerateWelcomeResponse>("ai/generate-welcome", {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to generate welcome message.");
+    }
+  },
+
+  /**
+   * Get "This Day in History" briefing (curated for legacy/leadership)
+   */
+  async getDayInHistory(): Promise<DayInHistoryResponse> {
+    try {
+      return await apiRequest<DayInHistoryResponse>("ai/day-in-history", {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to fetch day in history.");
     }
   },
 };

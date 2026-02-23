@@ -14,7 +14,7 @@ import { tokenStorage } from "@/lib/storage/token-storage";
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const redirect = searchParams.get("redirect") || "/mycard/edit";
+  const redirect = searchParams.get("redirect") || "/dashboard";
 
   useEffect(() => {
     async function checkAuth() {

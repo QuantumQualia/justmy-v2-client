@@ -161,3 +161,16 @@
     display: none;
   }
 }
+
+/* Daily Drop – Events swiper pagination: visible on dark background */
+.events-pagination .swiper-pagination-bullet {
+  background: rgba(255, 255, 255, 0.4) !important;
+  width: 0.5rem;
+  height: 0.5rem;
+  opacity: 1;
+  transition: background 0.2s, transform 0.2s;
+}
+.events-pagination .swiper-pagination-bullet-active {
+  background: #fff !important;
+  transform: scale(1.25);
+}

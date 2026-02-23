@@ -28,6 +28,12 @@ export interface Hotlink {
   url: string;
 }
 
+export interface Market {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface Phone {
   id: string;
   number: string;
@@ -57,6 +63,7 @@ export interface ProfileData {
   addresses?: Address[];
   socialLinks: SocialLink[]; // Only actual social media platforms
   hotlinks: Hotlink[];
+  markets: Market[];
   about: string;
 }
 
@@ -92,8 +99,8 @@ const initialData: ProfileData = {
   phones: [],
   addresses: [],
   socialLinks: [],
-  hotlinks: [
-  ],
+  hotlinks: [],
+  markets: [],
   about: "",
 };
 
