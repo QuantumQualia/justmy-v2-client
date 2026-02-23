@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import InlineEdit from "@/components/mycard/inline-edit";
-import MyCardLive from "@/components/mycard/mycard-live";
+import InlineEdit from "@/components/mycard/inline-edit-view";
+import MyCardLive from "@/components/mycard/live-view";
 import { ArrowLeft, Eye, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";

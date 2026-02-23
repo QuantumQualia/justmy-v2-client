@@ -51,7 +51,7 @@ function isPublicRoute(pathname: string): boolean {
     return true;
   }
 
-  // Check if it's a handle route (dynamic profile page)
+  // Check if it's a handle route (dynamic profile page or CMS page)
   if (isHandleRoute(pathname)) {
     return true;
   }

@@ -38,7 +38,7 @@ export default function DashboardLobby() {
     async function fetchUser() {
       try {
         // First check if we have a user in storage (optimistic)
-        const cachedUser = getCurrentUser();
+        const cachedUser = await getCurrentUser();
         if (cachedUser) {
           setUser(cachedUser);
           setLoading(false);
@@ -60,7 +60,7 @@ export default function DashboardLobby() {
           setError("An error occurred. Please try again.");
         }
         // If we don't have cached user and fetch failed, redirect to login
-        if (!getCurrentUser()) {
+        if (!(await getCurrentUser())) {
           router.push("/login");
         }
       } finally {

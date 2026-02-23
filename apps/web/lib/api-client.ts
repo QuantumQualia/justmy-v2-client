@@ -43,7 +43,7 @@ async function attemptTokenRefresh(): Promise<string | null> {
     return refreshPromise;
   }
 
-  const refreshToken = tokenStorage.getRefreshToken();
+  const refreshToken = await tokenStorage.getRefreshToken();
   if (!refreshToken) {
     return null;
   }
@@ -97,13 +97,13 @@ async function attemptTokenRefresh(): Promise<string | null> {
  * Get the current access token, refreshing if necessary
  */
 async function getValidAccessToken(): Promise<string | null> {
-  const token = tokenStorage.getAccessToken();
+  const token = await tokenStorage.getAccessToken();
   if (token) {
     return token;
   }
 
   // Try to refresh if we have a refresh token
-  if (tokenStorage.hasRefreshToken()) {
+  if (await tokenStorage.hasRefreshToken()) {
     return await attemptTokenRefresh();
   }
 
@@ -158,6 +158,9 @@ export async function apiRequest<T>(
     const token = await getValidAccessToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    } else {
+      // Debug: log when token is not available
+      console.log("[API Client] No token available for request to:", endpoint);
     }
   }
 
