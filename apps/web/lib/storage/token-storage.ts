@@ -17,14 +17,36 @@ function isBrowser(): boolean {
 }
 
 /**
- * Get a cookie value (client-side only)
+ * Get a cookie value (works on both client and server)
+ * Note: On server-side, this dynamically imports Next.js cookies() which only works in Server Components, Server Actions, and Route Handlers
  */
-function getCookie(name: string): string | null {
-  if (!isBrowser()) return null;
+async function getCookie(name: string): Promise<string | null> {
+  // Server-side: use Next.js cookies() with dynamic import to avoid client bundle issues
+  if (!isBrowser()) {
+    try {
+      // Dynamic import to avoid bundling next/headers in client components
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      const value = cookieStore.get(name)?.value;
+      if (value) {
+        console.log(`[TokenStorage] Retrieved ${name} from server cookies`);
+      } else {
+        console.log(`[TokenStorage] ${name} not found in server cookies`);
+      }
+      return value || null;
+    } catch (error) {
+      // cookies() might throw if called outside of Server Components/Actions/Route Handlers
+      // This is expected in client components - the API client will work without the token
+      console.log(`[TokenStorage] Could not read ${name} from server cookies:`, error instanceof Error ? error.message : String(error));
+      return null;
+    }
+  }
+  
+  // Client-side: use document.cookie
   const nameEQ = name + "=";
-  const cookies = document.cookie.split(";");
-  for (let i = 0; i < cookies.length; i++) {
-    let cookie = cookies[i];
+  const cookiesStr = document.cookie.split(";");
+  for (let i = 0; i < cookiesStr.length; i++) {
+    let cookie = cookiesStr[i];
     if (!cookie) continue;
     while (cookie.charAt(0) === " ") {
       cookie = cookie.substring(1, cookie.length);
@@ -69,8 +91,8 @@ export const tokenStorage = {
   /**
    * Get access token (reads from cookies)
    */
-  getAccessToken(): string | null {
-    return getCookie(ACCESS_TOKEN_KEY);
+  async getAccessToken(): Promise<string | null> {
+    return await getCookie(ACCESS_TOKEN_KEY);
   },
 
   /**
@@ -83,8 +105,8 @@ export const tokenStorage = {
   /**
    * Get refresh token (reads from cookies)
    */
-  getRefreshToken(): string | null {
-    return getCookie(REFRESH_TOKEN_KEY);
+  async getRefreshToken(): Promise<string | null> {
+    return await getCookie(REFRESH_TOKEN_KEY);
   },
 
   /**
@@ -101,9 +123,9 @@ export const tokenStorage = {
   /**
    * Get user data (reads from cookies)
    */
-  getUser<T = unknown>(): T | null {
+  async getUser<T = unknown>(): Promise<T | null> {
     try {
-      const user = getCookie(USER_KEY);
+      const user = await getCookie(USER_KEY);
       return user ? (JSON.parse(user) as T) : null;
     } catch (error) {
       console.error("Failed to get user data:", error);
@@ -123,15 +145,15 @@ export const tokenStorage = {
   /**
    * Check if user has a valid access token
    */
-  hasAccessToken(): boolean {
-    return !!this.getAccessToken();
+  async hasAccessToken(): Promise<boolean> {
+    return !!(await this.getAccessToken());
   },
 
   /**
    * Check if user has a valid refresh token
    */
-  hasRefreshToken(): boolean {
-    return !!this.getRefreshToken();
+  async hasRefreshToken(): Promise<boolean> {
+    return !!(await this.getRefreshToken());
   },
 };
 

@@ -17,14 +17,17 @@ export default function LoginForm() {
   const redirect = searchParams.get("redirect") || "/dashboard";
 
   useEffect(() => {
-    const accessToken = tokenStorage.getAccessToken();
-    const refreshToken = tokenStorage.getRefreshToken();
-    const user = tokenStorage.getUser();
-    
-    if (accessToken || refreshToken || user) {
-      router.push(redirect);
+    async function checkAuth() {
+      const accessToken = await tokenStorage.getAccessToken();
+      const refreshToken = await tokenStorage.getRefreshToken();
+      const user = await tokenStorage.getUser();
+      
+      if (accessToken || refreshToken || user) {
+        router.push(redirect);
+      }
     }
-  }, [redirect]);
+    checkAuth();
+  }, [redirect, router]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

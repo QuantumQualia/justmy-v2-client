@@ -9,22 +9,22 @@ import { User } from "./auth";
 /**
  * Check if user is currently authenticated
  */
-export function isAuthenticated(): boolean {
-  return tokenStorage.hasAccessToken();
+export async function isAuthenticated(): Promise<boolean> {
+  return await tokenStorage.hasAccessToken();
 }
 
 /**
  * Get the current user from storage
  */
-export function getCurrentUser(): User | null {
-  return tokenStorage.getUser<User>();
+export async function getCurrentUser(): Promise<User | null> {
+  return await tokenStorage.getUser<User>();
 }
 
 /**
  * Get the current access token
  */
-export function getAccessToken(): string | null {
-  return tokenStorage.getAccessToken();
+export async function getAccessToken(): Promise<string | null> {
+  return await tokenStorage.getAccessToken();
 }
 
 /**
@@ -38,7 +38,7 @@ export function clearSession(): void {
  * Check if session has expired (basic check - token exists)
  * For more advanced expiration checking, decode JWT and check exp claim
  */
-export function isSessionValid(): boolean {
-  return tokenStorage.hasAccessToken();
+export async function isSessionValid(): Promise<boolean> {
+  return await tokenStorage.hasAccessToken();
 }
 

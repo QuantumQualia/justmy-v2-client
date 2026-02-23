@@ -223,7 +223,7 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ title, description, icon, onC
   );
 };
 
-export interface ProfileEditProps {
+export interface InlineEditProps {
   mode?: MyCardMode;
   profileType?: ProfileKind;
   data: ProfileData;
@@ -236,7 +236,7 @@ export interface ProfileEditProps {
   onHotlinkRemove: (id: string) => void;
 }
 
-export default function ProfileEdit({
+export default function InlineEdit({
   mode = "edit",
   data,
   onDataChange,
@@ -246,7 +246,7 @@ export default function ProfileEdit({
   onHotlinkUpdate,
   onHotlinkAdd,
   onHotlinkRemove,
-}: ProfileEditProps) {
+}: InlineEditProps) {
 
   const isEditMode = mode === "edit";
   

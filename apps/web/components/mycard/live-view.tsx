@@ -53,7 +53,7 @@ import {
   SiWhatsapp,
   SiXing,
 } from "react-icons/si";
-import type { ProfileKind } from "@/components/mycard/inline-edit";
+import type { ProfileKind } from "@/components/mycard/inline-edit-view";
 import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import { openShare } from "@/components/common/share/share-store";
 import type { ProfileData, SocialLink } from "@/lib/store";
