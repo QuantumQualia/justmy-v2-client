@@ -103,8 +103,6 @@ export const useSearchStore = create<SearchStore>()(
             {
               method: "POST",
               body: JSON.stringify({ query: trimmed }),
-              // Super search may be public; flip this if it should require auth
-              skipAuth: true,
             }
           );
 
