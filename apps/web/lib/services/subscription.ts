@@ -37,7 +37,7 @@ export const subscriptionService = {
     try {
       const response = await apiRequest<CheckoutResponse>("subscriptions/checkout", {
         method: "POST",
-        body: JSON.stringify({ tier:plan }),
+        body: JSON.stringify({ plan }),
       });
 
       if (!response.url) {

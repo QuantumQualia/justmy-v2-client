@@ -178,6 +178,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
 
   return {
     id: profileId,
+    osId: (apiProfile as any).osId || undefined, // Add OS ID if available
     type: profileType,
     slug: apiProfile.slug,
     photo: apiProfile.photo || "",

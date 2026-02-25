@@ -12,7 +12,9 @@ import {
   Settings,
   ChevronDown,
   ChevronRight,
-  Newspaper
+  Newspaper,
+  Monitor,
+  Grid3x3
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -31,6 +33,16 @@ const navItems = [
     title: "Markets",
     href: "/admin/markets",
     icon: MapPin,
+  },
+  {
+    title: "OS",
+    href: "/admin/os",
+    icon: Monitor,
+  },
+  {
+    title: "Apps",
+    href: "/admin/apps",
+    icon: Grid3x3,
   },
 ];
 

@@ -42,9 +42,13 @@ export default function LoginForm() {
     setError("");
 
     try {
-      await authService.login(formData);
-      // Success -> Redirect to dashboard or the redirect URL
-      router.push(redirect);
+      const response = await authService.login(formData);
+      // Success -> Redirect to default app homepage if available, otherwise use redirect URL
+      if (response.welcomeApp?.homePath) {
+        router.push(response.welcomeApp.homePath);
+      } else {
+        router.push(redirect);
+      }
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setError(err.message || "Login failed. Please try again.");

@@ -18,7 +18,6 @@ export interface ProfileMemberResponseDto {
 
 export interface ProfileSubscriptionResponseDto {
   id: string;
-  tier: string;
   status: string;
 }
 
