@@ -137,17 +137,18 @@ export const profilesService = {
   /**
    * Get profile by slug (public endpoint)
    */
-  async getProfileBySlug(slug: string): Promise<{ profile: any }> {
+  async getProfileBySlug(slug: string): Promise<{ profile: any } | null> {
     try {
       return await apiRequest<{ profile: any }>(`profiles/slug/${slug}`, {
         method: "GET",
         skipAuth: true, // Public endpoint, no auth required
       });
     } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new ApiClientError("Failed to fetch profile.");
+      // if (error instanceof ApiClientError) {
+      //   throw error;
+      // }
+      // throw new ApiClientError("Failed to fetch profile.");
+      return null;
     }
   },
 

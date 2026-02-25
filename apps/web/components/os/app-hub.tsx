@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -9,49 +9,19 @@ import {
 } from "@workspace/ui/components/accordion";
 import { Button } from "@workspace/ui/components/button";
 import { Play, Plus, Minus } from "lucide-react";
+import { appsService, type AppResponseDto, type ProfileAppResponseDto } from "@/lib/services/apps";
+import { useProfileStore } from "@/lib/store/profile-store";
+import { toast } from "sonner";
 
 type AppRecord = {
-  id: string;
+  id: number;
   name: string;
-  icon: string;
+  icon?: string | null;
   description: string;
   video_preview_url: string;
   is_installed: boolean;
   url: string;
 };
-
-const MOCK_APPS: AppRecord[] = [
-  {
-    id: "app_001",
-    name: "myCITY",
-    icon: "icon_city_os.svg",
-    description:
-      "Your connection to the local pulse. Get the Daily Drop, local news, and community alerts specific to your zip code.",
-    video_preview_url: "https://player.vimeo.com/video/347119375",
-    is_installed: false,
-    url: "/apps/my-city",
-  },
-  {
-    id: "app_002",
-    name: "myACCOUNT",
-    icon: "icon_user_settings.svg",
-    description:
-      "The command center for your data. Manage your J-Credits, profile settings, and privacy preferences.",
-    video_preview_url: "https://player.vimeo.com/video/347119375",
-    is_installed: true,
-    url: "/apps/my-account",
-  },
-  {
-    id: "app_003",
-    name: "myLIFE",
-    icon: "icon_life_pulse.svg",
-    description:
-      "Your AI-powered life coach. Plan your weekend, set goals, and track your 'Winning' streak.",
-    video_preview_url: "https://player.vimeo.com/video/347119375",
-    is_installed: false,
-    url: "/apps/my-life",
-  },
-];
 
 interface VideoPreviewModalProps {
   isOpen: boolean;
@@ -129,10 +99,58 @@ interface AppHubProps {
 }
 
 export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
-  const [apps, setApps] = useState<AppRecord[]>(initialApps ?? MOCK_APPS);
+  const [apps, setApps] = useState<AppRecord[]>(initialApps ?? []);
   const [expandedId, setExpandedId] = useState<string | undefined>();
   const [previewApp, setPreviewApp] = useState<AppRecord | null>(null);
-  const [justInstalledId, setJustInstalledId] = useState<string | null>(null);
+  const [justInstalledId, setJustInstalledId] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const profile = useProfileStore((state) => state.data);
+
+  const profileId = profile.id;
+  const osId = profile.osId ? Number(profile.osId) : undefined;
+
+  useEffect(() => {
+    const loadAppsForProfile = async () => {
+      if (!profileId || !osId) {
+        setApps([]);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+
+        const [osApps, profileApps] = await Promise.all([
+          appsService.getAppsByOS(osId),
+          appsService.getProfileApps(profileId),
+        ]);
+
+        const installedAppIds = new Set(
+          (profileApps as ProfileAppResponseDto[]).map((pa) => pa.appId)
+        );
+
+        const mappedApps: AppRecord[] = (osApps as AppResponseDto[]).map((app) => ({
+          id: app.id,
+          name: app.name,
+          icon: app.icon ?? null,
+          description: app.description ?? "",
+          // Temporary shared promo video until per-app previews exist
+          video_preview_url: "https://player.vimeo.com/video/347119375",
+          is_installed: installedAppIds.has(app.id),
+          // Basic app URL; can be refined once app routing is finalized
+          url: `/apps/${app.id}`,
+        }));
+
+        setApps(mappedApps);
+      } catch (error) {
+        console.error("Failed to load apps for OS/profile:", error);
+        toast.error("Failed to load your apps");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadAppsForProfile();
+  }, [profileId, osId]);
 
   const activeApps = useMemo(
     () => apps.filter((a) => a.is_installed),
@@ -143,53 +161,87 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
     [apps]
   );
 
-  const handleToggle = (id: string) => {
-    setExpandedId((current) => (current === id ? undefined : id));
+  const handleToggle = (id: number) => {
+    const idStr = String(id);
+    setExpandedId((current) => (current === idStr ? undefined : idStr));
   };
 
   const handlePreview = (app: AppRecord) => {
     setPreviewApp(app);
   };
 
-  const handleInstall = (id: string) => {
+  const handleInstall = async (id: number) => {
+    if (!profileId) {
+      toast.error("Profile not loaded");
+      return;
+    }
+
+    // Optimistic UI update
     setApps((prev) =>
       prev.map((app) =>
         app.id === id ? { ...app, is_installed: true } : app
       )
     );
     setJustInstalledId(id);
-    setTimeout(() => {
-      setJustInstalledId((current) => (current === id ? null : current));
-    }, 900);
 
-    // NOTE: API integration goes here later:
-    // await apiClient.post("/api/user/apps/install", { appId: id });
+    try {
+      await appsService.enableProfileApp(profileId, id);
+      setTimeout(() => {
+        setJustInstalledId((current) => (current === id ? null : current));
+      }, 900);
+    } catch (error) {
+      console.error("Failed to enable app for profile:", error);
+      toast.error("Failed to install app");
+      // Revert on failure
+      setApps((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, is_installed: false } : app
+        )
+      );
+      setJustInstalledId(null);
+    }
   };
 
-  const handleUninstall = (id: string) => {
+  const handleUninstall = async (id: number) => {
+    if (!profileId) {
+      toast.error("Profile not loaded");
+      return;
+    }
+
+    // Optimistic UI update
     setApps((prev) =>
       prev.map((app) =>
         app.id === id ? { ...app, is_installed: false } : app
       )
     );
-    if (expandedId === id) setExpandedId(undefined);
+    if (expandedId === String(id)) setExpandedId(undefined);
 
-    // NOTE: API integration goes here later:
-    // await apiClient.post("/api/user/apps/uninstall", { appId: id });
+    try {
+      await appsService.disableProfileApp(profileId, id);
+    } catch (error) {
+      console.error("Failed to disable app for profile:", error);
+      toast.error("Failed to uninstall app");
+      // Revert on failure
+      setApps((prev) =>
+        prev.map((app) =>
+          app.id === id ? { ...app, is_installed: true } : app
+        )
+      );
+    }
   };
 
-  const handleOpen = (url: string) => {
-    console.log("Open app url:", url);
+  const handleOpen = (app: AppRecord) => {
+    console.log("Open app:", app);
   };
 
   const renderAppBar = (app: AppRecord, area: "active" | "available") => {
-    const isExpanded = expandedId === app.id;
+    const isExpanded = expandedId === String(app.id);
     const isNewlyInstalled = justInstalledId === app.id;
 
     return (
       <AccordionItem
         key={app.id}
-        value={app.id}
+        value={String(app.id)}
         className={[
           "border border-slate-800 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 mb-2 last:border-b",
           "bg-gradient-to-r from-slate-900/60 to-slate-900/30",
@@ -266,7 +318,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                       size="sm"
                       type="button"
                       className="cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-black inline-flex items-center gap-2 rounded-full px-4"
-                      onClick={() => handleOpen(app.url)}
+                      onClick={() => handleOpen(app)}
                     >
                       <span className="text-xs font-semibold uppercase tracking-[0.16em]">
                         Open App
@@ -325,7 +377,11 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
               "px-3 sm:px-4 py-3 sm:py-4 shadow-[0_0_40px_rgba(0,0,0,0.75)]",
             ].join(" ")}
           >
-            {activeApps.length === 0 ? (
+            {isLoading ? (
+              <div className="py-8 text-center text-slate-400 text-sm">
+                Loading your apps...
+              </div>
+            ) : activeApps.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 py-10 px-4 text-center">
                 <div className="text-slate-500 text-sm font-medium mb-1">
                   No active apps
@@ -362,7 +418,11 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
               "px-3 sm:px-4 py-3 sm:py-4 shadow-[0_0_50px_rgba(0,0,0,0.9)]",
             ].join(" ")}
           >
-            {availableApps.length === 0 ? (
+            {isLoading ? (
+              <div className="py-8 text-center text-slate-400 text-sm">
+                Loading your apps...
+              </div>
+            ) : availableApps.length === 0 ? (
               <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 py-10 px-4 text-center">
                 <div className="text-slate-500 text-sm font-medium mb-1">
                   No available apps
