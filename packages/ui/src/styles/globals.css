@@ -155,6 +155,33 @@
     scrollbar-width: thin;
     scrollbar-color: rgba(59, 130, 246, 0.5) rgba(30, 41, 59, 0.5);
   }
+
+  /* Horizontal scrollbar for dark sections (e.g. hourly tactical scroll) */
+  .scrollbar-horizontal-dark {
+    scrollbar-width: thin;
+    /* thumb, track */
+    scrollbar-color: rgba(148, 163, 184, 0.9) rgba(15, 23, 42, 0.85);
+  }
+  .scrollbar-horizontal-dark::-webkit-scrollbar {
+    height: 6px;
+  }
+  .scrollbar-horizontal-dark::-webkit-scrollbar-track {
+    background: linear-gradient(
+      to right,
+      rgba(15, 23, 42, 0),
+      rgba(148, 163, 184, 0.18),
+      rgba(15, 23, 42, 0)
+    );
+    border-radius: 9999px;
+  }
+  .scrollbar-horizontal-dark::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.9);
+    border-radius: 9999px;
+    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.8);
+  }
+  .scrollbar-horizontal-dark::-webkit-scrollbar-thumb:hover {
+    background: #e5e7eb;
+  }
   .swiper-button-prev-social::after,
   .swiper-button-next-social::after {
     content: '';

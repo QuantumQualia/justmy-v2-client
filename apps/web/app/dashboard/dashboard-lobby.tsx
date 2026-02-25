@@ -53,7 +53,7 @@ const QUICK_ACTIONS: QuickActionItemConfig[] = [
   { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/mycard/edit" },
   { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
   { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
-  { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/weather" },
+  { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/lab/weather" },
   { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "action", onClick: () => { } },
   { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
   { label: "Need Help? Ask!", icon: HelpCircle, variant: "button", type: "action", onClick: () => { } },
