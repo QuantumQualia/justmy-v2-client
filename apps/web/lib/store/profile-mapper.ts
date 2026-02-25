@@ -55,6 +55,7 @@ export interface ApiProfileResponse {
     link: string;
   }>;
   markets?: Market[];
+  referralCode?: string | null;
 }
 
 // Map social name to type
@@ -193,6 +194,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     hotlinks,
     markets,
     about: apiProfile.about || "",
+    referralCode: apiProfile.referralCode ?? undefined,
   };
 }
 

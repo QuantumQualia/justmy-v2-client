@@ -65,6 +65,8 @@ export interface ProfileData {
   hotlinks: Hotlink[];
   markets: Market[];
   about: string;
+  /** Unique code for refer-a-friend; set from API on login/me/refresh */
+  referralCode?: string;
 }
 
 interface ProfileStore {
@@ -102,6 +104,7 @@ const initialData: ProfileData = {
   hotlinks: [],
   markets: [],
   about: "",
+  referralCode: undefined,
 };
 
 export const useProfileStore = create<ProfileStore>()(
