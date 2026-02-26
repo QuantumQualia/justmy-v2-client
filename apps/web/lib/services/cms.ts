@@ -162,7 +162,6 @@ export const cmsService = {
       // Call NestJS backend endpoint
       // Backend should return single page or null (200 with null body)
       // Backend should return 401 if requiresAuth and not authenticated
-      console.log("page1", handle)
       const page = await apiRequest<PayloadPage | null>(
         `cms/pages/by-handle/${handle}`,
         {
@@ -172,11 +171,8 @@ export const cmsService = {
         }
       );
 
-      console.log("page", page)
       return page;
     } catch (error) {
-      console.log("error", error)
-
       // If 401, let it propagate (needs authentication)
       if (error instanceof ApiClientError && error.statusCode === 401) {
         throw error;

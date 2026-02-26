@@ -50,7 +50,9 @@ export interface Address {
 
 export interface ProfileData {
   id?: number; // Profile ID for API calls
-  type?: "personal" | "biz" | "growth" | "founder" | "city" | "network"; // Profile type
+  osId?: string; // Operating System ID
+  osName?: string;
+  type?: "personal" | "biz" | "growth" | "founder" | "city" | "network"; // Profile type (legacy, will be replaced by OS)
   slug: string;
   photo: string;
   banner: string;
@@ -90,6 +92,8 @@ interface ProfileStore {
 // Initial data
 const initialData: ProfileData = {
   id: undefined,
+  osId: undefined,
+  osName: undefined,
   type: undefined,
   slug: "",
   photo: "",

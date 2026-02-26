@@ -118,7 +118,7 @@ function normalizeWindDir(dir: string): WindDirection {
 function formatTimeLabel(time: string): string {
   if (!time) return "";
   const match = time.match(/(\d{1,2}):(\d{2})/);
-  if (!match) return time;
+  if (!match || !match[1]) return time;
   const h = parseInt(match[1], 10);
   const ampm = h >= 12 ? "PM" : "AM";
   const hour12 = h % 12 || 12;

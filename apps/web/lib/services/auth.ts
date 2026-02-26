@@ -33,6 +33,12 @@ export interface AuthResponse {
     profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   };
   profile?: any; // Profile response from formatProfileResponse
+  welcomeApp?: {
+    id: string;
+    name: string;
+    icon?: string;
+    homePath: string;
+  }; // Default app based on user's OS
   // Support both naming conventions (NestJS typically uses accessToken)
   accessToken?: string;
   token?: string; // Fallback for compatibility
@@ -99,6 +105,14 @@ export const authService = {
         const { useProfileStore } = await import("../store/profile-store");
         const profileData = mapApiProfileToProfileData(response.profile);
         useProfileStore.getState().setData(profileData);
+      }
+
+      // Store default app info if available
+      if (response.welcomeApp) {
+        // Could store in localStorage or state if needed for later use
+        if (typeof window !== "undefined") {
+          localStorage.setItem("welcomeApp", JSON.stringify(response.welcomeApp));
+        }
       }
 
       return response;
