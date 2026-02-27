@@ -36,6 +36,7 @@ import { QuickActionItem, type QuickActionItemConfig } from "@/components/common
 import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
 import { DayInHistory } from "@/components/common/welcome/day-in-history";
 import { AdBanner } from "@/components/common/ad-banner";
+import { useChatbotStore } from "@/lib/store/chatbot-store";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -48,22 +49,23 @@ const LOCAL_CONTENT = [
   { id: 2, title: "City OS Partners with Local Businesses", type: "News", date: "2026-01-19" },
 ];
 
-const QUICK_ACTIONS: QuickActionItemConfig[] = [
-  { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/lab/daily-drop" },
-  { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/mycard/edit" },
-  { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
-  { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
-  { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/lab/weather" },
-  { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "link", href: "/lab/refer" },
-  { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
-  { label: "Need Help? Ask!", icon: HelpCircle, variant: "button", type: "action", onClick: () => { } },
-];
-
 export default function DashboardLobby() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [error, setError] = useState<string>("");
+  const { open: openChatbot } = useChatbotStore();
+
+  const QUICK_ACTIONS: QuickActionItemConfig[] = [
+    { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/lab/daily-drop" },
+    { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/mycard/edit" },
+    { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
+    { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
+    { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/lab/weather" },
+    { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "link", href: "/lab/refer" },
+    { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
+    { label: "Need Help? Ask!", icon: HelpCircle, variant: "button", type: "action", onClick: openChatbot },
+  ];
 
   if (loading) {
     return (
