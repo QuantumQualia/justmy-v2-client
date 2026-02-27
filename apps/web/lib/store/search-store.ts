@@ -27,9 +27,19 @@ interface PerplexitySearchResultDto {
   [key: string]: any;
 }
 
-interface SearchPerplexityResponseDto {
-  summary: string;
-  results: PerplexitySearchResultDto[];
+interface AlgoliaSearchResultDto {
+  hits: any[];
+  nbHits: number;
+}
+interface SearchResponseDto {
+  aiResults: {
+    summary: string;
+    results: PerplexitySearchResultDto[];
+  };
+  profiles?: AlgoliaSearchResultDto[];
+  pages?: AlgoliaSearchResultDto[];
+  posts?: AlgoliaSearchResultDto[];
+  vectorResults?: any[]
 }
 
 interface SearchStore {
@@ -98,30 +108,31 @@ export const useSearchStore = create<SearchStore>()(
 
         try {
           // Matches backend DTO: SearchPerplexityDto { query: string }
-          const data = await apiRequest<SearchPerplexityResponseDto>(
-            "ai/search-perplexity",
+          const data = await apiRequest<SearchResponseDto>(
+            "search/hybrid",
             {
-              method: "POST",
-              body: JSON.stringify({ query: trimmed }),
+              method: "GET",
+              params: { query: trimmed },
             }
           );
 
+
           const mappedResults: SearchResultItem[] = Array.isArray(
-            data?.results
+            data?.aiResults.results
           )
-            ? data.results.map((item, index) => ({
-                // Use URL as a stable id when available
-                id: item.url || index,
-                title: item.title ?? item.url,
-                snippet: item.snippet,
-                // Preserve all other fields for flexible UI usage
-                ...item,
-              }))
+            ? data.aiResults.results.map((item, index) => ({
+              // Use URL as a stable id when available
+              id: item.url || index,
+              title: item.title ?? item.url,
+              snippet: item.snippet,
+              // Preserve all other fields for flexible UI usage
+              ...item,
+            }))
             : [];
 
           set({
             results: mappedResults,
-            summary: data?.summary ?? null,
+            summary: data?.aiResults.summary ?? null,
             isLoading: false,
             error: null,
           });

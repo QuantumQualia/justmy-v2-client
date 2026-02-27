@@ -79,8 +79,8 @@ export default function DashboardLobby() {
       <SearchResultsPanel />
 
       <div className="pt-20">
-        <WelcomeMessage />
-        <DayInHistory />
+        {/* <WelcomeMessage />
+        <DayInHistory /> */}
         <div className="w-full max-w-3xl mx-auto px-4 mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {QUICK_ACTIONS.filter((a) => a.variant === "panel").map((item, i) => (
