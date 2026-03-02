@@ -3,24 +3,24 @@ import { notFound, redirect } from "next/navigation";
 import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
 
-interface NestedHandlePageProps {
+interface ParentHandlePageProps {
   params: Promise<{
     handle: string;
-    subHandle: string;
+    parentHandle: string;
   }>;
 }
 
 export async function generateMetadata({
   params,
-}: NestedHandlePageProps): Promise<Metadata> {
-  const { handle, subHandle } = await params;
+}: ParentHandlePageProps): Promise<Metadata> {
+  const { handle, parentHandle } = await params;
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://justmy.com";
-  const pageUrl = `${siteUrl}/${handle}/${subHandle}`;
+  const pageUrl = `${siteUrl}/${handle}/${parentHandle}`;
 
   // Fetch Payload page
   let payloadPage = null;
   try {
-    payloadPage = await cmsService.getPageByNestedHandle(handle, subHandle);
+    payloadPage = await cmsService.getPageByNestedHandle(handle, parentHandle);
   } catch (error) {
     // If 401 or other error, return not found metadata
     // Don't expose auth requirements in metadata
@@ -77,16 +77,16 @@ export async function generateMetadata({
   };
 }
 
-export default async function NestedHandlePage({
+export default async function ParentHandlePage({
   params,
-}: NestedHandlePageProps) {
+}: ParentHandlePageProps) {
   const resolvedParams = await params;
-  const { handle, subHandle } = resolvedParams;
+  const { handle, parentHandle } = resolvedParams;
 
   try {
     const payloadPage = await cmsService.getPageByNestedHandle(
       handle,
-      subHandle
+      parentHandle
     );
 
     // If page is null (200 response with null body), page doesn't exist
@@ -100,7 +100,7 @@ export default async function NestedHandlePage({
   } catch (error) {
     // If 401, redirect to login
     if (error instanceof ApiClientError && error.statusCode === 401) {
-      redirect(`/login?redirect=/${handle}/${subHandle}`);
+      redirect(`/login?redirect=/${handle}/${parentHandle}`);
     }
     // If other error, show not found
     console.error("Failed to fetch nested page:", error);
@@ -109,3 +109,4 @@ export default async function NestedHandlePage({
   // If we get here, page doesn't exist
   notFound();
 }
+
