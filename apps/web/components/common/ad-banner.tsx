@@ -16,6 +16,8 @@ export interface AdBannerProps {
   imageAlt?: string;
   /** Optional: custom element instead of Next Image (e.g. for external URLs) */
   imageElement?: React.ReactNode;
+  /** Optional: when set, clicking the banner image opens this URL (same tab). Use full URL for external. */
+  bannerLink?: string;
   /** Profile slug (e.g. @handle or profile identifier) shown under the image */
   profileSlug: string;
   /** Exactly 3 hotlinks under the image */
@@ -30,22 +32,39 @@ export function AdBanner({
   imageSrc,
   imageAlt = "Banner",
   imageElement,
+  bannerLink,
   profileSlug,
   hotlinks,
   className,
 }: AdBannerProps) {
+  const imageArea = (
+    <div className="relative w-full aspect-[6/1]">
+      {imageElement ?? (
+        <Image
+          src={imageSrc}
+          alt={imageAlt}
+          fill
+          className="rounded-lg rounded-br-none"
+        />
+      )}
+    </div>
+  );
+
+  const wrappedImage = bannerLink ? (
+    <Link
+      href={bannerLink}
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg rounded-br-none"
+      aria-label={imageAlt || "Open banner link"}
+    >
+      {imageArea}
+    </Link>
+  ) : (
+    imageArea
+  );
+
   return (
     <section className={cn("relative w-full overflow-hidden", className)}>
-      <div className="relative w-full aspect-[6/1]">
-        {imageElement ?? (
-          <Image
-            src={imageSrc}
-            alt={imageAlt}
-            fill
-            className="rounded-lg rounded-br-none"
-          />
-        )}
-      </div>
+      {wrappedImage}
 
       <div className="flex flex-wrap items-center justify-end gap-2 pl-4 py-1.5 text-[11px] sm:text-xs md:text-[13px] md:pl-6">
         <span className="text-white/80">@{profileSlug}</span>

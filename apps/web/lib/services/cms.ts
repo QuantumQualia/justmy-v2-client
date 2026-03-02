@@ -23,8 +23,18 @@ export interface ResponsiveValue<T> {
  * Block Style Configuration
  */
 export interface BlockStyles {
+  // Shorthand spacing
   padding?: ResponsiveValue<string>;
   margin?: ResponsiveValue<string>;
+  // Per-side spacing (overrides shorthand when set)
+  paddingTop?: ResponsiveValue<string>;
+  paddingRight?: ResponsiveValue<string>;
+  paddingBottom?: ResponsiveValue<string>;
+  paddingLeft?: ResponsiveValue<string>;
+  marginTop?: ResponsiveValue<string>;
+  marginRight?: ResponsiveValue<string>;
+  marginBottom?: ResponsiveValue<string>;
+  marginLeft?: ResponsiveValue<string>;
   backgroundColor?: string;
   textColor?: string;
   borderRadius?: string;

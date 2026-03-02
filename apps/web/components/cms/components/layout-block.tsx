@@ -19,11 +19,12 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
     );
   }
 
-  // Get responsive values (using desktop as default for now)
+  // Get responsive values (desktop as primary, with tablet/mobile fallback)
   const getResponsiveValue = <T,>(value: T | ResponsiveValue<T> | undefined): T | undefined => {
     if (!value) return undefined;
     if (typeof value === "object" && !Array.isArray(value) && ("desktop" in value || "tablet" in value || "mobile" in value)) {
-      return (value as ResponsiveValue<T>).desktop || (value as ResponsiveValue<T>).tablet || (value as ResponsiveValue<T>).mobile;
+      const v = value as ResponsiveValue<T>;
+      return v.desktop || v.tablet || v.mobile;
     }
     return value as T;
   };
@@ -75,13 +76,52 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
   // Apply block styles
   const blockStyles: React.CSSProperties = {};
   if (styles?.backgroundColor) blockStyles.backgroundColor = styles.backgroundColor;
+  // Padding (shorthand + per-side)
   if (styles?.padding) {
     const padding = getResponsiveValue(styles.padding);
     if (padding) blockStyles.padding = padding;
   }
+  if (styles?.paddingTop) {
+    const paddingTop = getResponsiveValue(styles.paddingTop);
+    if (paddingTop) blockStyles.paddingTop = paddingTop;
+  }
+  if (styles?.paddingRight) {
+    const paddingRight = getResponsiveValue(styles.paddingRight);
+    if (paddingRight) blockStyles.paddingRight = paddingRight;
+  }
+  if (styles?.paddingBottom) {
+    const paddingBottom = getResponsiveValue(styles.paddingBottom);
+    if (paddingBottom) blockStyles.paddingBottom = paddingBottom;
+  }
+  if (styles?.paddingLeft) {
+    const paddingLeft = getResponsiveValue(styles.paddingLeft);
+    if (paddingLeft) blockStyles.paddingLeft = paddingLeft;
+  }
+  // Margin (shorthand + per-side)
   if (styles?.margin) {
     const margin = getResponsiveValue(styles.margin);
     if (margin) blockStyles.margin = margin;
+  }
+  if (styles?.marginTop) {
+    const marginTop = getResponsiveValue(styles.marginTop);
+    if (marginTop) blockStyles.marginTop = marginTop;
+  }
+  if (styles?.marginRight) {
+    const marginRight = getResponsiveValue(styles.marginRight);
+    if (marginRight) blockStyles.marginRight = marginRight;
+  }
+  if (styles?.marginBottom) {
+    const marginBottom = getResponsiveValue(styles.marginBottom);
+    if (marginBottom) blockStyles.marginBottom = marginBottom;
+  }
+  if (styles?.marginLeft) {
+    const marginLeft = getResponsiveValue(styles.marginLeft);
+    if (marginLeft) blockStyles.marginLeft = marginLeft;
+  }
+  // Max width
+  if (styles?.maxWidth) {
+    const maxWidth = getResponsiveValue(styles.maxWidth);
+    if (maxWidth) blockStyles.maxWidth = maxWidth;
   }
   if (styles?.borderRadius) blockStyles.borderRadius = styles.borderRadius;
   if (styles?.border) blockStyles.border = styles.border;
@@ -89,14 +129,54 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
   // Grid layout
   if (layout.grid) {
     const gridStyles: React.CSSProperties = {
-      display: "grid",
       ...blockStyles,
     };
 
-    const columns = getResponsiveValue(layout.grid.columns);
-    if (columns) {
-      gridStyles.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-    }
+    // Map responsive column config to Tailwind grid classes (mobile / tablet / desktop)
+    const columnsConfig = layout.grid.columns;
+
+    const resolveColumnsFor = (bp: "mobile" | "tablet" | "desktop"): number | undefined => {
+      if (!columnsConfig) return undefined;
+      if (typeof columnsConfig === "number") return columnsConfig;
+      const v = columnsConfig as ResponsiveValue<number>;
+      if (bp === "mobile") return v.mobile;
+      if (bp === "tablet") return v.tablet;
+      return v.desktop;
+    };
+
+    const clampCols = (n: number | undefined): number => {
+      if (!n || Number.isNaN(n)) return 1;
+      return Math.min(12, Math.max(1, n));
+    };
+
+    const toColsClass = (n: number) => {
+      const cols = clampCols(n);
+      switch (cols) {
+        case 1: return "grid-cols-1";
+        case 2: return "grid-cols-2";
+        case 3: return "grid-cols-3";
+        case 4: return "grid-cols-4";
+        case 5: return "grid-cols-5";
+        case 6: return "grid-cols-6";
+        case 7: return "grid-cols-7";
+        case 8: return "grid-cols-8";
+        case 9: return "grid-cols-9";
+        case 10: return "grid-cols-10";
+        case 11: return "grid-cols-11";
+        case 12: return "grid-cols-12";
+        default: return "grid-cols-1";
+      }
+    };
+
+    const mobileCols = clampCols(resolveColumnsFor("mobile") ?? 1);
+    const tabletCols = resolveColumnsFor("tablet");
+    const desktopCols = resolveColumnsFor("desktop");
+
+    const baseClass = toColsClass(mobileCols);
+    const tabletClass = tabletCols ? `sm:${toColsClass(tabletCols)}` : "";
+    const desktopClass = desktopCols ? `lg:${toColsClass(desktopCols)}` : "";
+
+    const columnClasses = ["grid", baseClass, tabletClass, desktopClass].filter(Boolean).join(" ");
 
     const gap = getResponsiveValue(layout.grid.gap);
     if (gap) gridStyles.gap = gap;
@@ -108,20 +188,16 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
     if (layout.columns && layout.columns.length > 0) {
       return (
         <div className={containerClasses} style={wrapperStyles}>
-          <div style={gridStyles}>
+          <div style={gridStyles} className={`${columnClasses} mx-auto`}>
             {layout.columns.map((column) => (
-              <div key={column.id} className="min-h-[100px]">
+              <div key={column.id}>
                 {column.blocks && column.blocks.length > 0 ? (
                   <div className="space-y-4">
                     {column.blocks.map((block, index) => (
-                      <BlockRenderer key={block.id || index} block={block} />
+                      <BlockRenderer key={block.id || index} block={block} disableContainer />
                     ))}
                   </div>
-                ) : (
-                  <div className="p-4 border-2 border-dashed border-slate-700 rounded text-slate-500 text-sm text-center">
-                    {column.name} (empty)
-                  </div>
-                )}
+                ) : null}
               </div>
             ))}
           </div>
@@ -133,22 +209,16 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
     if (children && children.length > 0) {
       return (
         <div className={containerClasses} style={wrapperStyles}>
-          <div style={gridStyles}>
+          <div style={gridStyles} className={`${columnClasses} mx-auto`}>
             {children.map((block, index) => (
-              <BlockRenderer key={block.id || index} block={block} />
+              <BlockRenderer key={block.id || index} block={block} disableContainer />
             ))}
           </div>
         </div>
       );
     }
 
-    return (
-      <div className={containerClasses} style={wrapperStyles}>
-        <div style={gridStyles} className="p-4 border-2 border-dashed border-slate-700 rounded text-slate-500 text-sm text-center">
-          Grid Layout (empty)
-        </div>
-      </div>
-    );
+    return null;
   }
 
   // Flex or simple container
@@ -173,10 +243,10 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
 
     return (
       <div className={containerClasses} style={wrapperStyles}>
-        <div style={flexStyles}>
+        <div style={flexStyles} className="mx-auto">
           {children && children.length > 0 ? (
             children.map((block, index) => (
-              <BlockRenderer key={block.id || index} block={block} />
+              <BlockRenderer key={block.id || index} block={block} disableContainer />
             ))
           ) : (
             <div className="p-4 border-2 border-dashed border-slate-700 rounded text-slate-500 text-sm text-center">
@@ -191,11 +261,11 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
   // Simple container
   return (
     <div className={containerClasses} style={wrapperStyles}>
-      <div style={blockStyles}>
+      <div style={blockStyles} className="mx-auto">
         {children && children.length > 0 ? (
           <div className="space-y-4">
             {children.map((block, index) => (
-              <BlockRenderer key={block.id || index} block={block} />
+              <BlockRenderer key={block.id || index} block={block} disableContainer />
             ))}
           </div>
         ) : (

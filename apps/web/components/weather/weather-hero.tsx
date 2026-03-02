@@ -41,7 +41,7 @@ export function WeatherHero({ data, className }: WeatherHeroProps) {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl bg-gradient-to-br from-sky-600 via-indigo-700 to-slate-900 px-4 py-3 sm:px-5 sm:py-4 shadow-xl text-white",
+        "relative overflow-hidden rounded-2xl rounded-br-none bg-gradient-to-br from-sky-600 via-indigo-700 to-slate-900 px-4 py-3 sm:px-5 sm:py-4 shadow-xl text-white",
         "border border-white/10 backdrop-blur-xl",
         className,
       )}
