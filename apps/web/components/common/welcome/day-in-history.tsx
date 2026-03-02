@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { aiService } from "@/lib/services/ai";
 import type { DayInHistoryResponse } from "@/lib/services/ai";
 
@@ -21,6 +22,20 @@ interface DayInHistoryProps {
  */
 export function DayInHistory({ embedded = false }: DayInHistoryProps) {
   const [data, setData] = React.useState<DayInHistoryResponse | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  function CardWrapper({ children }: { children: React.ReactNode }) {
+    return (
+      <div className="w-full max-w-3xl mx-auto">
+        <div className="rounded-2xl rounded-br-none border border-purple-500/30 bg-black/60 backdrop-blur-lg p-6 md:p-8 shadow-[0_0_24px_rgba(168,85,247,0.22)] relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-purple-500/10 to-transparent pointer-events-none" />
+          <div className="absolute -top-12 -right-12 w-28 h-28 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-purple-600/18 rounded-full blur-2xl pointer-events-none" />
+          <div className="relative z-10">{children}</div>
+        </div>
+      </div>
+    );
+  }
 
   React.useEffect(() => {
     async function fetchDayInHistory() {
@@ -29,11 +44,35 @@ export function DayInHistory({ embedded = false }: DayInHistoryProps) {
         setData(result);
       } catch (err) {
         console.error("Failed to fetch day in history:", err);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     fetchDayInHistory();
   }, []);
+
+  const skeletonContent = (
+    <>
+      <Skeleton className="mb-2 h-3 w-32 bg-purple-500/40" />
+      <Skeleton className="mb-1 h-4 w-3/4 bg-purple-500/30" />
+      <Skeleton className="mb-1 h-4 w-full bg-purple-500/20" />
+      <Skeleton className="mb-2 h-4 w-5/6 bg-purple-500/20" />
+      <Skeleton className="h-4 w-40 bg-purple-400/30" />
+    </>
+  );
+
+  if (isLoading) {
+    if (embedded) {
+      return (
+        <div className="mt-6 pt-6 border-t border-white/10">
+          {skeletonContent}
+        </div>
+      );
+    }
+
+    return <CardWrapper>{skeletonContent}</CardWrapper>;
+  }
 
   if (!data) {
     return null;
@@ -69,11 +108,11 @@ export function DayInHistory({ embedded = false }: DayInHistoryProps) {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 mb-6">
-      <div className="rounded-2xl rounded-br-none border border-purple-500/30 bg-black/60 backdrop-blur-2xl p-6 md:p-8 shadow-[0_0_60px_rgba(168,85,247,0.4)] relative overflow-hidden">
+    <div className="w-full max-w-3xl mx-auto">
+      <div className="rounded-2xl rounded-br-none border border-purple-500/30 bg-black/60 backdrop-blur-lg p-6 md:p-8 shadow-[0_0_24px_rgba(168,85,247,0.22)] relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-purple-500/10 to-transparent pointer-events-none" />
-        <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-purple-600/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-28 h-28 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-12 -left-12 w-28 h-28 bg-purple-600/18 rounded-full blur-2xl pointer-events-none" />
         <div className="relative z-10">{content}</div>
       </div>
     </div>

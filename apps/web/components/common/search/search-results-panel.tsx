@@ -37,7 +37,7 @@ export function SearchResultsPanel() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 mt-4">
+    <div className="w-full max-w-3xl mx-auto">
       <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           {/* Header / toggle */}

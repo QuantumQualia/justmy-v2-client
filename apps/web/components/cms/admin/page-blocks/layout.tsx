@@ -274,20 +274,19 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
               type="number"
               min="1"
               max="12"
-              value={(block.layout?.columns?.length || getGridValue("columns", activeBreakpoint) || 2).toString()}
+              value={(
+                getGridValue("columns", activeBreakpoint) ||
+                block.layout?.columns?.length ||
+                1
+              ).toString()}
               onChange={(e) => {
                 const raw = parseInt(e.target.value, 10);
                 const cols = Math.max(1, Math.min(12, Number.isNaN(raw) ? 1 : raw));
                 const currentCols = block.layout?.columns || [];
-                
-                // Update grid layout
-                updateGridLayout("columns", cols, activeBreakpoint);
-                
-                // Auto-create or adjust columns
-                let newColumns: GridColumn[];
+
+                // Ensure we have at least `cols` column containers, but never delete existing ones here
+                let newColumns: GridColumn[] = [...currentCols];
                 if (cols > currentCols.length) {
-                  // Add new columns
-                  newColumns = [...currentCols];
                   for (let i = currentCols.length; i < cols; i++) {
                     newColumns.push({
                       id: `col-${Date.now()}-${i}`,
@@ -295,17 +294,21 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
                       blocks: [],
                     });
                   }
-                } else if (cols < currentCols.length) {
-                  // Remove excess columns (keep first N)
-                  newColumns = currentCols.slice(0, cols);
-                } else {
-                  // Same number, keep existing
-                  newColumns = currentCols;
                 }
                 
+                // Persist responsive column count in grid.columns without clobbering other breakpoints
+                const currentColumnsConfig = (block.layout?.grid?.columns || {}) as ResponsiveValue<number>;
+                const updatedColumnsConfig: ResponsiveValue<number> = {
+                  ...currentColumnsConfig,
+                  [activeBreakpoint]: cols,
+                };
+
                 updateLayout({
                   ...block.layout,
-                  grid: { ...block.layout?.grid, columns: { [activeBreakpoint]: cols } },
+                  grid: {
+                    ...block.layout?.grid,
+                    columns: updatedColumnsConfig,
+                  },
                   columns: newColumns,
                 });
               }}

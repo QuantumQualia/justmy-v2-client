@@ -39,7 +39,7 @@ export function HourlyScroll({ points, className }: HourlyScrollProps) {
   return (
     <section
       className={cn(
-        "rounded-3xl bg-slate-900/80 border border-slate-800/80 p-4 sm:p-5 shadow-lg",
+        "rounded-2xl rounded-br-none bg-slate-900/80 border border-slate-800/80 p-4 sm:p-5 shadow-lg",
         className,
       )}
       aria-label="Hourly tactical scroll"
