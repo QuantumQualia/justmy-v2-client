@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { subscriptionService } from "@/lib/services/subscription";
 import { tokenStorage } from "@/lib/storage/token-storage";
 import { ApiClientError } from "@/lib/services/auth";
+import { useAppStore, resolveAppHomePath } from "@/lib/store/app-store";
 
 export default function StripeCallbackHandler() {
   const searchParams = useSearchParams();
@@ -34,8 +35,17 @@ export default function StripeCallbackHandler() {
             tokenStorage.setUser(response.user);
           }
 
-          // Redirect to dashboard with full page reload to ensure cookies are available for middleware
-          router.push("/dashboard?welcome=true");
+          // Store welcome app in global state if provided
+          if (response.welcomeApp) {
+            useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
+          }
+
+          // Redirect to current app homepage (or fallback to dashboard)
+          const homePath = resolveAppHomePath({
+            welcomeApp: response.welcomeApp,
+            fallback: "/dashboard?welcome=true",
+          });
+          router.push(homePath);
         } else {
           // If no user data, redirect to login
           router.push("/login?error=verification_failed");

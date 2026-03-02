@@ -5,21 +5,10 @@
  */
 
 import { apiRequest, ApiClientError } from "../api-client";
+import type { AuthResponse } from "./auth";
 
 export interface CheckoutResponse {
   url: string; // Stripe Checkout Session URL
-}
-
-export interface VerifyCheckoutResponse {
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
-  };
-  accessToken: string;
-  refreshToken?: string;
 }
 
 export type SubscriptionPlan = "GROWTH" | "FOUNDER";
@@ -59,9 +48,9 @@ export const subscriptionService = {
    * @param sessionId - The Stripe Checkout Session ID from the callback
    * @returns User data and authentication tokens
    */
-  async verifyCheckoutSession(sessionId: string): Promise<VerifyCheckoutResponse> {
+  async verifyCheckoutSession(sessionId: string): Promise<AuthResponse> {
     try {
-      const response = await apiRequest<VerifyCheckoutResponse>("subscriptions/verify-checkout", {
+      const response = await apiRequest<AuthResponse>("subscriptions/verify-checkout", {
         method: "POST",
         body: JSON.stringify({ sessionId }),
         skipAuth: true, // Don't require auth for this endpoint
