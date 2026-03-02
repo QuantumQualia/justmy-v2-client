@@ -20,6 +20,7 @@ import { InlineEditViewBlock } from "./components/mycard/inline-edit-view-block"
 import { LiveViewBlock } from "./components/mycard/live-view-block";
 import { MediaCardBlock } from "./components/mycard/media-card-block";
 import { QRCodeBlock } from "./components/mycard/qr-code-block";
+import { NavbarBlock } from "./components/navbar-block";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
 
 // Component registry - maps Payload block types to React components
@@ -48,6 +49,7 @@ export const ComponentRegistry: Record<
   "live-view-block": LiveViewBlock,
   "media-card-block": MediaCardBlock,
   "qr-code-block": QRCodeBlock,
+  "navbar-block": NavbarBlock,
 };
 
 /**
@@ -260,6 +262,7 @@ export function BlockRenderer({
     "market-events-block",
     "local-deals-block",
     "placeholder-panel-block",
+    "navbar-block",
   ];
   const isComponentBlock = componentBlocks.includes(block.blockType);
 
@@ -278,9 +281,23 @@ export function BlockRenderer({
     );
   }
 
-  // For top-level blocks, apply container wrapper and styles
+  // Determine container style: "full-width" or "container" (default)
+  const containerStyle = block.layout?.type || "container";
+
+  // Full-width blocks render edge-to-edge with no container wrapper.
+  // No wrapper div is added so that sticky/fixed positioning works correctly
+  // (sticky is bounded by its parent — a tight wrapper would kill it).
+  if (containerStyle === "full-width") {
+    return isComponentBlock ? (
+      <Component block={block} />
+    ) : (
+      <Component {...block} />
+    );
+  }
+
+  // Container blocks get a centered wrapper with max-width and padding
   const { containerClasses, containerStyles } = getContainerWrapper(block.layout);
-  
+
   return (
     <div className={containerClasses} style={containerStyles}>
       <div style={styleProps} className="mx-auto">

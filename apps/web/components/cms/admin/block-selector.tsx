@@ -20,6 +20,7 @@ import {
   CalendarRange,
   Tag,
   Box,
+  Menu,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -180,6 +181,13 @@ export const BLOCK_TYPES: BlockTypeConfig[] = [
     icon: <PanelTop className="h-5 w-5" />,
     description: "Collapsible panel showing search results from Super Search",
     category: "Components",
+  },
+  {
+    value: "navbar-block",
+    label: "Navbar",
+    icon: <Menu className="h-5 w-5" />,
+    description: "Sticky navbar with profile switcher, search bar, and hamburger menu",
+    category: "Navigation",
   },
 ];
 
