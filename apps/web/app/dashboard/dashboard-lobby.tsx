@@ -37,6 +37,7 @@ import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
 import { DayInHistory } from "@/components/common/welcome/day-in-history";
 import { AdBanner } from "@/components/common/ad-banner";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
+import { Navbar } from "@/components/common/navbar/navbar";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -76,8 +77,9 @@ export default function DashboardLobby() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white p-4 md:p-8 font-sans relative">
-      <SuperSearchBar />
+    <div className="min-h-screen bg-black text-white font-sans relative">
+
+      <Navbar />
       <SearchResultsPanel />
 
       <div className="pt-20">
