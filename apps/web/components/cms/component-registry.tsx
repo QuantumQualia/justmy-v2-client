@@ -21,6 +21,7 @@ import { LiveViewBlock } from "./components/mycard/live-view-block";
 import { MediaCardBlock } from "./components/mycard/media-card-block";
 import { QRCodeBlock } from "./components/mycard/qr-code-block";
 import { NavbarBlock } from "./components/navbar-block";
+import { ReferAFriendBlock } from "./components/refer-a-friend-block";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
 
 // Component registry - maps Payload block types to React components
@@ -50,6 +51,7 @@ export const ComponentRegistry: Record<
   "media-card-block": MediaCardBlock,
   "qr-code-block": QRCodeBlock,
   "navbar-block": NavbarBlock,
+  "refer-a-friend-block": ReferAFriendBlock,
 };
 
 /**
@@ -263,6 +265,7 @@ export function BlockRenderer({
     "local-deals-block",
     "placeholder-panel-block",
     "navbar-block",
+    "refer-a-friend-block",
   ];
   const isComponentBlock = componentBlocks.includes(block.blockType);
 

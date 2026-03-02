@@ -21,6 +21,7 @@ import {
   Tag,
   Box,
   Menu,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -188,6 +189,13 @@ export const BLOCK_TYPES: BlockTypeConfig[] = [
     icon: <Menu className="h-5 w-5" />,
     description: "Sticky navbar with profile switcher, search bar, and hamburger menu",
     category: "Navigation",
+  },
+  {
+    value: "refer-a-friend-block",
+    label: "Refer a Friend",
+    icon: <UserPlus className="h-5 w-5" />,
+    description: "Referral code, share link, and table of referred profiles",
+    category: "Components",
   },
 ];
 
