@@ -62,7 +62,7 @@ export function SuperSearchBar() {
    };
 
   return (
-    <div className="w-full max-w-2xl mx-auto px-4">
+    <div className="w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
         className="relative flex items-center gap-3 rounded-full border border-emerald-500/30 bg-slate-900/60 px-4 py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"

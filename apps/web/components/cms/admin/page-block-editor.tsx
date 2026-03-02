@@ -5,6 +5,7 @@ import { useState } from "react";
 import { ChevronUp, ChevronDown, Trash2, GripVertical, Minus, Settings, Monitor, Tablet, Smartphone, ChevronRight, Plus, Copy } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
+import { cn } from "@workspace/ui/lib/utils";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
 import { PageBlockText } from "./page-blocks/text";
 import { PageBlockLayout } from "./page-blocks/layout";
@@ -12,6 +13,21 @@ import { InlineEditViewBlockEditor } from "./page-blocks/mycard/inline-edit-view
 import { LiveViewBlockEditor } from "./page-blocks/mycard/live-view";
 import { MediaCardBlockEditor } from "./page-blocks/mycard/media-card";
 import { QRCodeBlockEditor } from "./page-blocks/mycard/qr-code";
+import { WelcomeMessageBlockEditor } from "./page-blocks/welcome-message";
+import { DayInHistoryBlockEditor } from "./page-blocks/day-in-history";
+import { QuickActionBlockEditor } from "./page-blocks/quick-action";
+import { AdBannerBlockEditor } from "./page-blocks/ad-banner";
+import { SuperSearchBarBlockEditor } from "./page-blocks/super-search-bar";
+import { SearchResultsPanelBlockEditor } from "./page-blocks/search-results-panel";
+import { WeatherHeroBlockEditor } from "./page-blocks/weather-hero";
+import { HourlyScrollBlockEditor } from "./page-blocks/hourly-scroll";
+import { LifestyleIndicesBlockEditor } from "./page-blocks/lifestyle-indices";
+import { SevenDayStrategyBlockEditor } from "./page-blocks/seven-day-strategy";
+import { RadarPanelBlockEditor } from "./page-blocks/radar-panel";
+import { TopNewsBriefingBlockEditor } from "./page-blocks/top-news-briefing";
+import { MarketEventsBlockEditor } from "./page-blocks/market-events";
+import { LocalDealsBlockEditor } from "./page-blocks/local-deals";
+import { PlaceholderPanelBlockEditor } from "./page-blocks/placeholder-panel";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
 
@@ -46,6 +62,7 @@ export function PageBlockEditor({
   const [isExpanded, setIsExpanded] = useState(true);
   const [showStyles, setShowStyles] = useState(false);
   const [activeBreakpoint, setActiveBreakpoint] = useState<Breakpoint>("desktop");
+  const [isDragOverHere, setIsDragOverHere] = useState(false);
 
   const breakpoints: { key: Breakpoint; label: string; icon: React.ReactNode }[] = [
     { key: "mobile", label: "Mobile", icon: <Smartphone className="h-4 w-4" /> },
@@ -107,11 +124,15 @@ export function PageBlockEditor({
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = "move";
+    if (!isDragOverHere) {
+      setIsDragOverHere(true);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsDragOverHere(false);
     const fromIndex = Number(e.dataTransfer.getData("text/plain"));
     if (!Number.isNaN(fromIndex) && fromIndex !== index) {
       onReorder(fromIndex, index);
@@ -148,6 +169,51 @@ export function PageBlockEditor({
       case "qr-code-block":
         return <QRCodeBlockEditor block={block} onUpdate={onUpdate} />;
 
+      case "welcome-message-block":
+        return <WelcomeMessageBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "day-in-history-block":
+        return <DayInHistoryBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "quick-action-block":
+        return <QuickActionBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "ad-banner-block":
+        return <AdBannerBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "super-search-bar-block":
+        return <SuperSearchBarBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "search-results-panel-block":
+        return <SearchResultsPanelBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "weather-hero-block":
+        return <WeatherHeroBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "hourly-scroll-block":
+        return <HourlyScrollBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "lifestyle-indices-block":
+        return <LifestyleIndicesBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "seven-day-strategy-block":
+        return <SevenDayStrategyBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "radar-panel-block":
+        return <RadarPanelBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "top-news-briefing-block":
+        return <TopNewsBriefingBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "market-events-block":
+        return <MarketEventsBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "local-deals-block":
+        return <LocalDealsBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "placeholder-panel-block":
+        return <PlaceholderPanelBlockEditor block={block} onUpdate={onUpdate} />;
+
       default:
         return (
           <div className="text-slate-400">
@@ -165,15 +231,38 @@ export function PageBlockEditor({
       "live-view-block": "Live View",
       "media-card-block": "Media Card",
       "qr-code-block": "QR Code",
+      "welcome-message-block": "Welcome Message",
+      "day-in-history-block": "Day in History",
+      "quick-action-block": "Quick Action",
+      "ad-banner-block": "Ad Banner",
+      "super-search-bar-block": "Super Search Bar",
+      "search-results-panel-block": "Search Results Panel",
+      "weather-hero-block": "Weather Hero",
+      "hourly-scroll-block": "Hourly Scroll",
+      "lifestyle-indices-block": "Lifestyle Indices",
+      "seven-day-strategy-block": "7-Day Strategy",
+      "radar-panel-block": "Radar Panel",
+      "top-news-briefing-block": "Top News Briefing",
+      "market-events-block": "Market Events",
+      "local-deals-block": "Local Deals",
+      "placeholder-panel-block": "Placeholder Panel",
     };
     return labels[block.blockType] || block.blockType;
   };
 
   return (
     <div
-      className="bg-slate-800/50 rounded-lg border border-slate-700 w-full max-w-full"
+      className={cn(
+        "bg-slate-800/50 rounded-lg border border-slate-700 w-full max-w-full transition-all duration-150",
+        isDragOverHere && "border-blue-500/70 shadow-[0_0_0_1px_rgba(59,130,246,0.6)] bg-slate-800/80 translate-y-0.5"
+      )}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onDragLeave={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOverHere(false);
+      }}
     >
       {/* Block Header */}
       <div className="flex items-center justify-between p-4 border-b border-slate-700">
@@ -182,6 +271,7 @@ export function PageBlockEditor({
             className="h-5 w-5 flex items-center justify-center text-slate-500 cursor-move"
             draggable
             onDragStart={handleDragStart}
+            onDragEnd={() => setIsDragOverHere(false)}
           >
             <GripVertical className="h-4 w-4" />
           </div>
@@ -288,24 +378,94 @@ export function PageBlockEditor({
                 <div className="space-y-3">
                   <h4 className="text-xs font-medium text-slate-400">Spacing</h4>
                   <div>
-                    <Label className="text-xs text-slate-500">Padding</Label>
-                    <input
-                      type="text"
-                      value={getStyleValue("padding", activeBreakpoint)}
-                      onChange={(e) => updateStyle("padding", e.target.value, activeBreakpoint)}
-                      placeholder="16px"
-                      className="w-full mt-1 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <Label className="text-xs text-slate-500">Padding (per side)</Label>
+                    <div className="mt-1 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Top</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("paddingTop", activeBreakpoint)}
+                          onChange={(e) => updateStyle("paddingTop", e.target.value, activeBreakpoint)}
+                          placeholder="16px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Right</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("paddingRight", activeBreakpoint)}
+                          onChange={(e) => updateStyle("paddingRight", e.target.value, activeBreakpoint)}
+                          placeholder="16px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Bottom</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("paddingBottom", activeBreakpoint)}
+                          onChange={(e) => updateStyle("paddingBottom", e.target.value, activeBreakpoint)}
+                          placeholder="16px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Left</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("paddingLeft", activeBreakpoint)}
+                          onChange={(e) => updateStyle("paddingLeft", e.target.value, activeBreakpoint)}
+                          placeholder="16px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
-                    <Label className="text-xs text-slate-500">Margin</Label>
-                    <input
-                      type="text"
-                      value={getStyleValue("margin", activeBreakpoint)}
-                      onChange={(e) => updateStyle("margin", e.target.value, activeBreakpoint)}
-                      placeholder="24px"
-                      className="w-full mt-1 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
+                    <Label className="text-xs text-slate-500">Margin (per side)</Label>
+                    <div className="mt-1 grid grid-cols-2 gap-2">
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Top</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("marginTop", activeBreakpoint)}
+                          onChange={(e) => updateStyle("marginTop", e.target.value, activeBreakpoint)}
+                          placeholder="24px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Right</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("marginRight", activeBreakpoint)}
+                          onChange={(e) => updateStyle("marginRight", e.target.value, activeBreakpoint)}
+                          placeholder="24px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Bottom</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("marginBottom", activeBreakpoint)}
+                          onChange={(e) => updateStyle("marginBottom", e.target.value, activeBreakpoint)}
+                          placeholder="24px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <Label className="text-[10px] text-slate-500">Left</Label>
+                        <input
+                          type="text"
+                          value={getStyleValue("marginLeft", activeBreakpoint)}
+                          onChange={(e) => updateStyle("marginLeft", e.target.value, activeBreakpoint)}
+                          placeholder="24px"
+                          className="w-full mt-0.5 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <Label className="text-xs text-slate-500">Gap</Label>
@@ -361,9 +521,21 @@ export function PageBlockEditor({
                 </div>
 
                 {/* Layout */}
-                {/* Border & Radius */}
+                {/* Max Width, Border & Radius */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-medium text-slate-400">Border</h4>
+                  <h4 className="text-xs font-medium text-slate-400">Layout & Border</h4>
+                  <div>
+                    <Label className="text-xs text-slate-500">
+                      Max Width ({activeBreakpoint})
+                    </Label>
+                    <input
+                      type="text"
+                      value={getStyleValue("maxWidth", activeBreakpoint)}
+                      onChange={(e) => updateStyle("maxWidth", e.target.value, activeBreakpoint)}
+                      placeholder="e.g. 800px or 100%"
+                      className="w-full mt-1 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
                   <div>
                     <Label className="text-xs text-slate-500">Border</Label>
                     <input

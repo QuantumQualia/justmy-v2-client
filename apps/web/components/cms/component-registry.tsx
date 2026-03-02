@@ -1,6 +1,21 @@
 import React from "react";
 import { TextBlock } from "./components/text-block";
 import { LayoutBlock } from "./components/layout-block";
+import { WelcomeMessageBlock } from "./components/welcome-message-block";
+import { DayInHistoryBlock } from "./components/day-in-history-block";
+import { QuickActionBlock } from "./components/quick-action-block";
+import { AdBannerBlock } from "./components/ad-banner-block";
+import { SuperSearchBarBlock } from "./components/super-search-bar-block";
+import { SearchResultsPanelBlock } from "./components/search-results-panel-block";
+import { WeatherHeroBlock } from "./components/weather-hero-block";
+import { HourlyScrollBlock } from "./components/hourly-scroll-block";
+import { LifestyleIndicesBlock } from "./components/lifestyle-indices-block";
+import { SevenDayStrategyBlock } from "./components/seven-day-strategy-block";
+import { RadarPanelBlock } from "./components/radar-panel-block";
+import { TopNewsBriefingBlock } from "./components/top-news-briefing-block";
+import { MarketEventsBlock } from "./components/market-events-block";
+import { LocalDealsBlock } from "./components/local-deals-block";
+import { PlaceholderPanelBlock } from "./components/placeholder-panel-block";
 import { InlineEditViewBlock } from "./components/mycard/inline-edit-view-block";
 import { LiveViewBlock } from "./components/mycard/live-view-block";
 import { MediaCardBlock } from "./components/mycard/media-card-block";
@@ -14,6 +29,21 @@ export const ComponentRegistry: Record<
 > = {
   "text-block": TextBlock,
   "layout-block": LayoutBlock,
+  "welcome-message-block": WelcomeMessageBlock,
+  "day-in-history-block": DayInHistoryBlock,
+  "quick-action-block": QuickActionBlock,
+  "ad-banner-block": AdBannerBlock,
+  "super-search-bar-block": SuperSearchBarBlock,
+  "search-results-panel-block": SearchResultsPanelBlock,
+  "weather-hero-block": WeatherHeroBlock,
+  "hourly-scroll-block": HourlyScrollBlock,
+  "lifestyle-indices-block": LifestyleIndicesBlock,
+  "seven-day-strategy-block": SevenDayStrategyBlock,
+  "radar-panel-block": RadarPanelBlock,
+  "top-news-briefing-block": TopNewsBriefingBlock,
+  "market-events-block": MarketEventsBlock,
+  "local-deals-block": LocalDealsBlock,
+  "placeholder-panel-block": PlaceholderPanelBlock,
   "inline-edit-view-block": InlineEditViewBlock,
   "live-view-block": LiveViewBlock,
   "media-card-block": MediaCardBlock,
@@ -44,11 +74,29 @@ function blockStylesToCSS(styles?: BlockStyles): React.CSSProperties {
     return value as T;
   };
 
+  // Padding (shorthand + per-side)
   const padding = getResponsiveValue(styles.padding);
   if (padding) css.padding = padding;
+  const paddingTop = getResponsiveValue(styles.paddingTop);
+  if (paddingTop) css.paddingTop = paddingTop;
+  const paddingRight = getResponsiveValue(styles.paddingRight);
+  if (paddingRight) css.paddingRight = paddingRight;
+  const paddingBottom = getResponsiveValue(styles.paddingBottom);
+  if (paddingBottom) css.paddingBottom = paddingBottom;
+  const paddingLeft = getResponsiveValue(styles.paddingLeft);
+  if (paddingLeft) css.paddingLeft = paddingLeft;
 
+  // Margin (shorthand + per-side)
   const margin = getResponsiveValue(styles.margin);
   if (margin) css.margin = margin;
+  const marginTop = getResponsiveValue(styles.marginTop);
+  if (marginTop) css.marginTop = marginTop;
+  const marginRight = getResponsiveValue(styles.marginRight);
+  if (marginRight) css.marginRight = marginRight;
+  const marginBottom = getResponsiveValue(styles.marginBottom);
+  if (marginBottom) css.marginBottom = marginBottom;
+  const marginLeft = getResponsiveValue(styles.marginLeft);
+  if (marginLeft) css.marginLeft = marginLeft;
 
   const width = getResponsiveValue(styles.width);
   if (width) css.width = width;
@@ -164,8 +212,17 @@ function getContainerWrapper(layout?: PageBlock["layout"]) {
 
 /**
  * Render a single block
+ *
+ * When disableContainer is true, we skip the outer layout container wrapper
+ * (used for nested blocks inside layout-block columns).
  */
-export function BlockRenderer({ block }: { block: PageBlock }) {
+export function BlockRenderer({
+  block,
+  disableContainer,
+}: {
+  block: PageBlock;
+  disableContainer?: boolean;
+}) {
   const Component = ComponentRegistry[block.blockType];
 
   if (!Component) {
@@ -183,16 +240,50 @@ export function BlockRenderer({ block }: { block: PageBlock }) {
   }
 
   // Component blocks that need the block prop
-  const componentBlocks = ["inline-edit-view-block", "live-view-block", "media-card-block", "qr-code-block"];
+  const componentBlocks = [
+    "inline-edit-view-block",
+    "live-view-block",
+    "media-card-block",
+    "qr-code-block",
+    "welcome-message-block",
+    "day-in-history-block",
+    "quick-action-block",
+    "ad-banner-block",
+    "super-search-bar-block",
+    "search-results-panel-block",
+    "weather-hero-block",
+    "hourly-scroll-block",
+    "lifestyle-indices-block",
+    "seven-day-strategy-block",
+    "radar-panel-block",
+    "top-news-briefing-block",
+    "market-events-block",
+    "local-deals-block",
+    "placeholder-panel-block",
+  ];
   const isComponentBlock = componentBlocks.includes(block.blockType);
 
-  // For other blocks, apply container wrapper and styles
-  const { containerClasses, containerStyles } = getContainerWrapper(block.layout);
   const styleProps = blockStylesToCSS(block.styles);
+
+  // When nested inside another layout (e.g. layout-block columns), don't add another container
+  if (disableContainer) {
+    return (
+      <div style={styleProps}>
+        {isComponentBlock ? (
+          <Component block={block} />
+        ) : (
+          <Component {...block} />
+        )}
+      </div>
+    );
+  }
+
+  // For top-level blocks, apply container wrapper and styles
+  const { containerClasses, containerStyles } = getContainerWrapper(block.layout);
   
   return (
     <div className={containerClasses} style={containerStyles}>
-      <div style={styleProps}>
+      <div style={styleProps} className="mx-auto">
         {isComponentBlock ? (
           <Component block={block} />
         ) : (

@@ -28,7 +28,7 @@ export function LifestyleIndices({ gauges, className }: LifestyleIndicesProps) {
   return (
     <section
       className={cn(
-        "rounded-3xl bg-slate-950/80 border border-slate-800 p-4 sm:p-5 shadow-lg",
+        "rounded-2xl rounded-br-none bg-slate-950/80 border border-slate-800 p-4 sm:p-5 shadow-lg",
         className,
       )}
       aria-label="Lifestyle indices"
