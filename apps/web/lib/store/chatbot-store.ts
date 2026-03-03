@@ -207,13 +207,6 @@ export const useChatbotStore = create<ChatbotStore>()(
               ? error.message
               : "Failed to send message. Please try again.";
 
-          // Remove optimistic user message on error
-          set((state) => ({
-            messages: state.messages.filter((msg) => msg.id !== userMessage.id),
-            error: message,
-            isLoading: false,
-          }));
-
           // Add error message
           const errorMessage: ChatMessage = {
             id: `error-${Date.now()}`,
@@ -223,6 +216,8 @@ export const useChatbotStore = create<ChatbotStore>()(
           };
           set((state) => ({
             messages: [...state.messages, errorMessage],
+            error: message,
+            isLoading: false,
           }));
         }
       },
