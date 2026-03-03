@@ -22,6 +22,7 @@ import {
   Box,
   Menu,
   UserPlus,
+  AppWindow,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -195,6 +196,13 @@ export const BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Refer a Friend",
     icon: <UserPlus className="h-5 w-5" />,
     description: "Referral code, share link, and table of referred profiles",
+    category: "Components",
+  },
+  {
+    value: "app-hub-block",
+    label: "App Hub",
+    icon: <AppWindow className="h-5 w-5" />,
+    description: "Active apps dock and discovery library for the user's Personal OS",
     category: "Components",
   },
 ];

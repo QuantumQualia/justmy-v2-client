@@ -30,6 +30,7 @@ import { LocalDealsBlockEditor } from "./page-blocks/local-deals";
 import { PlaceholderPanelBlockEditor } from "./page-blocks/placeholder-panel";
 import { NavbarBlockEditor } from "./page-blocks/navbar";
 import { ReferAFriendBlockEditor } from "./page-blocks/refer-a-friend";
+import { AppHubBlockEditor } from "./page-blocks/app-hub";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
 
@@ -234,6 +235,9 @@ export function PageBlockEditor({
       case "refer-a-friend-block":
         return <ReferAFriendBlockEditor block={block} onUpdate={onUpdate} />;
 
+      case "app-hub-block":
+        return <AppHubBlockEditor block={block} onUpdate={onUpdate} />;
+
       default:
         return (
           <div className="text-slate-400">
@@ -268,6 +272,7 @@ export function PageBlockEditor({
       "placeholder-panel-block": "Placeholder Panel",
       "navbar-block": "Navbar",
       "refer-a-friend-block": "Refer a Friend",
+      "app-hub-block": "App Hub",
     };
     return labels[block.blockType] || block.blockType;
   };
