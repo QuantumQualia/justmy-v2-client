@@ -9,7 +9,9 @@ export { ApiClientError };
 
 export interface AppNavigationResponseDto {
   label: string;
+  type?: "page" | "app";
   path?: string | null;
+  appId?: number | null;
   isHome?: boolean;
   isActive?: boolean;
   children?: AppNavigationResponseDto[];
