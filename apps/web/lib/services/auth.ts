@@ -30,15 +30,24 @@ export interface AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
-    profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
   };
   profile?: any; // Profile response from formatProfileResponse
+  // Default app based on user's OS
   welcomeApp?: {
     id: string;
     name: string;
-    icon?: string;
-    homePath: string;
-  }; // Default app based on user's OS
+    description?: string | null;
+    icon?: string | null;
+    isActive: boolean;
+    createdAt: string;
+    updatedAt: string;
+    navigation?: any[] | null;
+    osApps?: Array<{
+      osId: number;
+      isWelcome: boolean;
+      isStandard: boolean;
+    }>;
+  };
   // Support both naming conventions (NestJS typically uses accessToken)
   accessToken?: string;
   token?: string; // Fallback for compatibility
@@ -107,11 +116,12 @@ export const authService = {
         useProfileStore.getState().setData(profileData);
       }
 
-      // Store default app info if available
+      // Store welcome app info in global state if available
       if (response.welcomeApp) {
-        // Could store in localStorage or state if needed for later use
         if (typeof window !== "undefined") {
-          localStorage.setItem("welcomeApp", JSON.stringify(response.welcomeApp));
+          // Dynamic import to avoid circular deps
+          const { useAppStore } = await import("../store/app-store");
+          useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
         }
       }
 
@@ -157,6 +167,12 @@ export const authService = {
         useProfileStore.getState().setData(profileData);
       }
 
+      // Store welcome app info in global state if available
+      if (response.welcomeApp && typeof window !== "undefined") {
+        const { useAppStore } = await import("../store/app-store");
+        useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
+      }
+
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {
@@ -184,6 +200,9 @@ export const authService = {
       // Clear profile store
       const { useProfileStore } = await import("../store/profile-store");
       useProfileStore.getState().reset();
+      // Clear current app store
+      const { useAppStore } = await import("../store/app-store");
+      useAppStore.getState().clear();
     }
   },
 
@@ -242,6 +261,12 @@ export const authService = {
         const { useProfileStore } = await import("../store/profile-store");
         const profileData = mapApiProfileToProfileData(response.profile);
         useProfileStore.getState().setData(profileData);
+      }
+
+      // Store welcome app info in global state if available
+      if (response.welcomeApp && typeof window !== "undefined") {
+        const { useAppStore } = await import("../store/app-store");
+        useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
       }
 
       return response;

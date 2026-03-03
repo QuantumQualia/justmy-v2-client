@@ -10,6 +10,7 @@ import { LogIn } from "lucide-react";
 import Link from "next/link";
 import { authService, ApiClientError } from "@/lib/services/auth";
 import { tokenStorage } from "@/lib/storage/token-storage";
+import { resolveAppHomePath } from "@/lib/store/app-store";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -23,7 +24,8 @@ export default function LoginForm() {
       const user = await tokenStorage.getUser();
       
       if (accessToken || refreshToken || user) {
-        router.push(redirect);
+        const homePath = resolveAppHomePath({ fallback: redirect });
+        router.push(homePath);
       }
     }
     checkAuth();
@@ -43,12 +45,12 @@ export default function LoginForm() {
 
     try {
       const response = await authService.login(formData);
-      // Success -> Redirect to default app homepage if available, otherwise use redirect URL
-      if (response.welcomeApp?.homePath) {
-        router.push(response.welcomeApp.homePath);
-      } else {
-        router.push(redirect);
-      }
+      // Success -> Redirect to current app homepage (or fallback to redirect URL)
+      const homePath = resolveAppHomePath({
+        welcomeApp: response.welcomeApp,
+        fallback: redirect,
+      });
+      router.push(homePath);
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
         setError(err.message || "Login failed. Please try again.");

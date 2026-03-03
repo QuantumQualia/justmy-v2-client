@@ -1,6 +1,9 @@
 "use client";
 
+import { useMemo } from "react";
 import { BlockRenderer } from "./component-registry";
+import { QuickActionHandlerProvider } from "./components/quick-action-handler-context";
+import { useChatbotStore } from "@/lib/store/chatbot-store";
 import type { PayloadPage, PageBlock } from "@/lib/services/cms";
 
 interface PayloadPageRendererProps {
@@ -8,6 +11,16 @@ interface PayloadPageRendererProps {
 }
 
 export function PayloadPageRenderer({ page }: PayloadPageRendererProps) {
+  const openChatbot = useChatbotStore((s) => s.open);
+
+  // Built-in action handlers available to all CMS quick-action blocks
+  const actionHandlers = useMemo(
+    () => ({
+      openChatbot,
+    }),
+    [openChatbot]
+  );
+
   if (!page.isPublished) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
@@ -22,19 +35,21 @@ export function PayloadPageRenderer({ page }: PayloadPageRendererProps) {
   }
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Page Content */}
-      <main className="w-full">
-        {page.content && page.content.length > 0 ? (
-          page.content.map((block: PageBlock, index: number) => (
-            <BlockRenderer key={block.id || index} block={block} />
-          ))
-        ) : (
-          <div className="text-center py-12 text-slate-400">
-            <p>No content available for this page.</p>
-          </div>
-        )}
-      </main>
-    </div>
+    <QuickActionHandlerProvider handlers={actionHandlers}>
+      <div className="min-h-screen bg-black">
+        {/* Page Content */}
+        <main className="w-full">
+          {page.content && page.content.length > 0 ? (
+            page.content.map((block: PageBlock, index: number) => (
+              <BlockRenderer key={block.id || index} block={block} />
+            ))
+          ) : (
+            <div className="text-center py-12 text-slate-400">
+              <p>No content available for this page.</p>
+            </div>
+          )}
+        </main>
+      </div>
+    </QuickActionHandlerProvider>
   );
 }

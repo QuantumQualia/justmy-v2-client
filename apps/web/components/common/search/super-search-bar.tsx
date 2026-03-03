@@ -65,28 +65,28 @@ export function SuperSearchBar() {
     <div className="w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="relative flex items-center gap-3 rounded-full border border-emerald-500/30 bg-slate-900/60 px-4 py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
+        className="relative flex items-center gap-2 md:gap-3 rounded-full border border-emerald-500/30 bg-slate-900/60 px-2 md:px-4 py-1.5 md:py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
       >
         {/* Leading icon */}
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400">
-          <Search className="h-4 w-4" />
+        <div className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 flex-shrink-0">
+          <Search className="h-3 w-3 md:h-4 md:w-4" />
         </div>
 
         {/* Input + neon cursor */}
-        <div className="relative flex-1 flex items-center gap-2">
+        <div className="relative flex-1 flex items-center gap-2 min-w-0">
           <Input
             type="text"
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
             placeholder="Search profiles, markets, content…"
-            className="h-9 border-0 bg-transparent px-0 text-sm text-slate-100 placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+            className="h-7 md:h-9 border-0 bg-transparent px-0 text-xs md:text-sm text-slate-100 placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
           />
         </div>
 
         {/* Right-side controls: loader + mic + submit */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           {isLoading && (
-            <Loader2 className="h-4 w-4 animate-spin text-emerald-400" aria-hidden="true" />
+            <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin text-emerald-400" aria-hidden="true" />
           )}
 
           <Button
@@ -95,20 +95,20 @@ export function SuperSearchBar() {
             size="icon"
             onClick={handleMicClick}
             disabled={!micSupported}
-            className={`h-8 w-8 rounded-full border ${
+            className={`h-6 w-6 md:h-8 md:w-8 rounded-full border ${
               isRecording
                 ? "border-red-500/50 bg-red-500/20 text-red-300 hover:bg-red-500/30"
                 : "border-emerald-500/30 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
             } ${micSupported ? "" : "opacity-40 cursor-not-allowed"}`}
             aria-label="Voice search (coming soon)"
           >
-            <Mic className="h-4 w-4" />
+            <Mic className="h-3 w-3 md:h-4 md:w-4" />
           </Button>
 
           <Button
             type="submit"
             size="sm"
-            className="h-8 rounded-full bg-emerald-500 px-4 text-xs font-semibold text-black hover:bg-emerald-400"
+            className="h-6 md:h-8 rounded-full bg-emerald-500 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-black hover:bg-emerald-400"
             disabled={isLoading}
           >
             {isLoading ? "Searching…" : "Search"}

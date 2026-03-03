@@ -19,7 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@workspace/ui/components/select";
-import { Loader2, Save, Home, GripVertical, Trash2, AppWindow, FileText } from "lucide-react";
+import {
+  Loader2,
+  Save,
+  Home,
+  GripVertical,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  CornerDownRight,
+  CornerUpLeft, AppWindow, FileText
+
+} from "lucide-react";
 import debounce from "lodash/debounce";
 
 interface MenuNodeData {
@@ -222,6 +233,161 @@ export default function NavigationManagerPage() {
     });
   };
 
+  // ----- Manual reordering helpers (for toolbar buttons) -----
+
+  const handleMoveUp = (id: number) => {
+    setTreeData((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((n) => n.id === id);
+      if (index <= 0) return prev;
+
+      const node = updated[index];
+      if (!node) return prev;
+      const parentId = node.parent;
+
+      // Sibling indices (same parent, in current order)
+      const siblingIndices = updated
+        .map((n, i) => ({ n, i }))
+        .filter(({ n }) => n.parent === parentId)
+        .map(({ i }) => i);
+
+      const siblingPos = siblingIndices.indexOf(index);
+      if (siblingPos <= 0) return prev;
+
+      const targetIndex = siblingIndices[siblingPos - 1];
+      if (targetIndex == null) return prev;
+      const targetNode = updated[targetIndex];
+      if (!targetNode) return prev;
+      const currentNode = updated[index];
+      if (!currentNode) return prev;
+      updated[targetIndex] = currentNode;
+      updated[index] = targetNode;
+      return updated;
+    });
+  };
+
+  const handleMoveDown = (id: number) => {
+    setTreeData((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((n) => n.id === id);
+      if (index === -1) return prev;
+
+      const node = updated[index];
+      if (!node) return prev;
+      const parentId = node.parent;
+
+      const siblingIndices = updated
+        .map((n, i) => ({ n, i }))
+        .filter(({ n }) => n.parent === parentId)
+        .map(({ i }) => i);
+
+      const siblingPos = siblingIndices.indexOf(index);
+      if (siblingPos === -1 || siblingPos === siblingIndices.length - 1)
+        return prev;
+
+      const targetIndex = siblingIndices[siblingPos + 1];
+      if (targetIndex == null) return prev;
+      const targetNode = updated[targetIndex];
+      if (!targetNode) return prev;
+      const currentNode = updated[index];
+      if (!currentNode) return prev;
+      updated[targetIndex] = currentNode;
+      updated[index] = targetNode;
+      return updated;
+    });
+  };
+
+  const handleIndent = (id: number) => {
+    setTreeData((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((n) => n.id === id);
+      if (index <= 0) return prev;
+
+      const node = updated[index];
+      if (!node) return prev;
+      // Previous visible node becomes new parent
+      const prevNode = updated[index - 1];
+      if (!prevNode) return prev;
+
+      updated[index] = {
+        ...node,
+        parent: prevNode.id,
+      };
+
+      return updated;
+    });
+  };
+
+  const handleOutdent = (id: number) => {
+    setTreeData((prev) => {
+      const updated = [...prev];
+      const index = updated.findIndex((n) => n.id === id);
+      if (index === -1) return prev;
+
+      const node = updated[index];
+      if (!node) return prev;
+      const parentNode = updated.find((n) => n.id === node.parent);
+      if (!parentNode) return prev;
+
+      // Move to same level as parent (grandparent becomes new parent)
+      updated[index] = {
+        ...node,
+        parent: parentNode.parent,
+      };
+
+      return updated;
+    });
+  };
+
+  /**
+   * Custom drop handler for the navigation tree.
+   *
+   * By default, dropping one root item directly onto another root item
+   * makes it a child of that item. For the navigation manager we want
+   * a more intuitive behavior: when both the dragged item and the drop
+   * target are root items, treat the drop as a reorder between siblings
+   * instead of nesting.
+   */
+  const handleTreeDrop = (
+    newTree: MenuTreeNode[],
+    // Use `any` here so we don't depend on the library's internal types
+    options?: any
+  ) => {
+    setTreeData((prev) => {
+      const dragSourceId = options?.dragSourceId as number | undefined;
+      const dropTargetId = options?.dropTargetId as number | undefined;
+
+      if (!dragSourceId || !dropTargetId) {
+        return newTree;
+      }
+
+      const prevSource = prev.find((node) => node.id === dragSourceId);
+      const prevTarget = prev.find((node) => node.id === dropTargetId);
+
+      // If both source and target were root items before the drop,
+      // reorder them instead of nesting.
+      if (prevSource && prevTarget && prevSource.parent === 0 && prevTarget.parent === 0) {
+        const updated = [...prev];
+        const sourceIndex = updated.findIndex((node) => node.id === dragSourceId);
+        const targetIndex = updated.findIndex((node) => node.id === dropTargetId);
+
+        if (sourceIndex === -1 || targetIndex === -1) {
+          return prev;
+        }
+
+        const [moved] = updated.splice(sourceIndex, 1);
+        // Ensure it stays a root item
+        moved!.parent = 0;
+        updated.splice(targetIndex, 0, moved!);
+
+        return updated;
+      }
+
+      // In all other cases, keep the library's default behavior.
+      return newTree;
+    });
+  };
+
   const handleSave = async () => {
     setLoading(true);
     try {
@@ -330,6 +496,10 @@ export default function NavigationManagerPage() {
                           onRemove={handleRemoveNode}
                           allApps={allApps}
                           dragHandleProps={dragHandleProps}
+                          onMoveUp={handleMoveUp}
+                          onMoveDown={handleMoveDown}
+                          onIndent={handleIndent}
+                          onOutdent={handleOutdent}
                         />
                       );
                     }}
@@ -338,11 +508,15 @@ export default function NavigationManagerPage() {
                         {monitorProps.item.text}
                       </div>
                     )}
-                    onDrop={setTreeData}
+                    onDrop={handleTreeDrop}
+                    sort={false}
+                    dropTargetOffset={8}
                     classes={{
                       root: "space-y-1",
                       draggingSource: "opacity-50",
                       dropTarget: "bg-slate-800/60",
+                      placeholder:
+                        "h-2 rounded bg-emerald-500/70 mx-2 my-1 transition-all duration-150",
                     }}
                   />
                 </div>
@@ -389,6 +563,10 @@ interface MenuTreeNodeRowProps {
   onRemove: (id: number) => void;
   allApps: AppResponseDto[];
   dragHandleProps: React.HTMLAttributes<HTMLButtonElement>;
+  onMoveUp: (id: number) => void;
+  onMoveDown: (id: number) => void;
+  onIndent: (id: number) => void;
+  onOutdent: (id: number) => void;
 }
 
 function MenuTreeNodeRow({
@@ -405,6 +583,10 @@ function MenuTreeNodeRow({
   onRemove,
   allApps,
   dragHandleProps,
+  onMoveUp,
+  onMoveDown,
+  onIndent,
+  onOutdent,
 }: MenuTreeNodeRowProps) {
   const data = node.data as MenuNodeData | undefined;
   const nodeType = data?.type ?? "page";
@@ -439,11 +621,10 @@ function MenuTreeNodeRow({
       <button
         type="button"
         onClick={() => onTypeChange(node.id as number, isAppType ? "page" : "app")}
-        className={`p-1.5 rounded border shrink-0 ${
-          isAppType
-            ? "bg-emerald-600/20 border-emerald-500/50 text-emerald-400"
-            : "bg-slate-800/50 border-slate-700 text-slate-400 hover:text-slate-200"
-        }`}
+        className={`p-1.5 rounded border shrink-0 ${isAppType
+          ? "bg-emerald-600/20 border-emerald-500/50 text-emerald-400"
+          : "bg-slate-800/50 border-slate-700 text-slate-400 hover:text-slate-200"
+          }`}
         title={isAppType ? "App menu (click to switch to Page)" : "Page link (click to switch to App)"}
       >
         {isAppType ? <AppWindow className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
@@ -501,14 +682,47 @@ function MenuTreeNodeRow({
       </div>
 
       <div className="flex items-center gap-2">
+        {/* Reorder / nesting controls */}
+        <button
+          type="button"
+          onClick={() => onMoveUp(node.id as number)}
+          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          title="Move up"
+        >
+          <ArrowUp className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onMoveDown(node.id as number)}
+          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          title="Move down"
+        >
+          <ArrowDown className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onIndent(node.id as number)}
+          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          title="Step in (make child of previous)"
+        >
+          <CornerDownRight className="h-3.5 w-3.5" />
+        </button>
+        <button
+          type="button"
+          onClick={() => onOutdent(node.id as number)}
+          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          title="Step out (move up a level)"
+        >
+          <CornerUpLeft className="h-3.5 w-3.5" />
+        </button>
+
         <button
           type="button"
           onClick={() => onSetHome(node.id as number)}
-          className={`p-2 rounded-full border ${
-            data?.isHome
-              ? "bg-blue-600 border-blue-500 text-white"
-              : "border-slate-700 text-slate-300 hover:bg-slate-800"
-          }`}
+          className={`p-2 rounded-full border ${data?.isHome
+            ? "bg-blue-600 border-blue-500 text-white"
+            : "border-slate-700 text-slate-300 hover:bg-slate-800"
+            }`}
           title="Set as home"
         >
           <Home className="h-4 w-4" />

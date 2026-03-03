@@ -235,6 +235,35 @@ export const cmsService = {
   },
 
   /**
+   * Get page by deep nested handle (firstHandle/secondHandle/thirdHandle)
+   * Used for third-level routes like /personal-os/mydrive/everything
+   */
+  async getPageByDeepNestedHandle(
+    firstHandle: string,
+    secondHandle: string,
+    thirdHandle: string
+  ): Promise<PayloadPage | null> {
+    try {
+      const page = await apiRequest<PayloadPage | null>(
+        `cms/pages/by-handle/${firstHandle}/${secondHandle}/${thirdHandle}`,
+        {
+          method: "GET",
+        }
+      );
+
+      return page;
+    } catch (error) {
+      if (error instanceof ApiClientError && error.statusCode === 401) {
+        throw error;
+      }
+      if (error instanceof ApiClientError && error.statusCode === 404) {
+        return null;
+      }
+      return null;
+    }
+  },
+
+  /**
    * Get all pages (for admin)
    */
   async getAllPages(params?: {

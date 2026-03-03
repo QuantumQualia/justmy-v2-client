@@ -2,7 +2,7 @@
 
 import type React from "react";
 import { useState } from "react";
-import { ChevronUp, ChevronDown, Trash2, GripVertical, Minus, Settings, Monitor, Tablet, Smartphone, ChevronRight, Plus, Copy } from "lucide-react";
+import { ChevronUp, ChevronDown, Trash2, GripVertical, Minus, Settings, Monitor, Tablet, Smartphone, ChevronRight, Plus, Copy, Maximize2, AlignCenter } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import { cn } from "@workspace/ui/lib/utils";
@@ -28,6 +28,9 @@ import { TopNewsBriefingBlockEditor } from "./page-blocks/top-news-briefing";
 import { MarketEventsBlockEditor } from "./page-blocks/market-events";
 import { LocalDealsBlockEditor } from "./page-blocks/local-deals";
 import { PlaceholderPanelBlockEditor } from "./page-blocks/placeholder-panel";
+import { NavbarBlockEditor } from "./page-blocks/navbar";
+import { ReferAFriendBlockEditor } from "./page-blocks/refer-a-friend";
+import { AppHubBlockEditor } from "./page-blocks/app-hub";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
 
@@ -101,6 +104,18 @@ export function PageBlockEditor({
     }
 
     updateStyles(updated);
+  };
+
+  const containerStyle = block.layout?.type || "container";
+
+  const updateContainerStyle = (type: "container" | "full-width") => {
+    onUpdate({
+      ...block,
+      layout: {
+        ...block.layout,
+        type,
+      },
+    });
   };
 
   const getStyleValue = (key: keyof BlockStyles, breakpoint?: Breakpoint): string => {
@@ -214,6 +229,15 @@ export function PageBlockEditor({
       case "placeholder-panel-block":
         return <PlaceholderPanelBlockEditor block={block} onUpdate={onUpdate} />;
 
+      case "navbar-block":
+        return <NavbarBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "refer-a-friend-block":
+        return <ReferAFriendBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "app-hub-block":
+        return <AppHubBlockEditor block={block} onUpdate={onUpdate} />;
+
       default:
         return (
           <div className="text-slate-400">
@@ -246,6 +270,9 @@ export function PageBlockEditor({
       "market-events-block": "Market Events",
       "local-deals-block": "Local Deals",
       "placeholder-panel-block": "Placeholder Panel",
+      "navbar-block": "Navbar",
+      "refer-a-friend-block": "Refer a Friend",
+      "app-hub-block": "App Hub",
     };
     return labels[block.blockType] || block.blockType;
   };
@@ -276,6 +303,33 @@ export function PageBlockEditor({
             <GripVertical className="h-4 w-4" />
           </div>
           <span className="font-medium text-white">{getBlockTypeLabel()}</span>
+          {/* Container Style Toggle */}
+          <div className="flex items-center gap-0.5 ml-2 bg-slate-900/60 rounded-md p-0.5">
+            <button
+              onClick={() => updateContainerStyle("container")}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                containerStyle === "container"
+                  ? "bg-blue-600/80 text-white"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+              title="Container (centered, max-width)"
+            >
+              <AlignCenter className="h-3 w-3" />
+              Container
+            </button>
+            <button
+              onClick={() => updateContainerStyle("full-width")}
+              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
+                containerStyle === "full-width"
+                  ? "bg-blue-600/80 text-white"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+              title="Full Width (edge-to-edge)"
+            >
+              <Maximize2 className="h-3 w-3" />
+              Full Width
+            </button>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <Button
