@@ -13,6 +13,13 @@ import { appsService, type AppNavigationResponseDto } from "@/lib/services/apps"
 import type { AppResponseDto } from "@/lib/services/apps";
 import { toast } from "sonner";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
+import {
   Loader2,
   Save,
   Home,
@@ -21,13 +28,16 @@ import {
   ArrowUp,
   ArrowDown,
   CornerDownRight,
-  CornerUpLeft,
+  CornerUpLeft, AppWindow, FileText
+
 } from "lucide-react";
 import debounce from "lodash/debounce";
 
 interface MenuNodeData {
   label: string;
+  type: "page" | "app";
   path: string;
+  appId?: number | null;
   isHome: boolean;
 }
 
@@ -41,6 +51,7 @@ export default function NavigationManagerPage() {
   const [loadingData, setLoadingData] = useState(true);
   const [app, setApp] = useState<AppResponseDto | null>(null);
   const [treeData, setTreeData] = useState<MenuTreeNode[]>([]);
+  const [allApps, setAllApps] = useState<AppResponseDto[]>([]);
 
   useEffect(() => {
     loadAppAndNavigation();
@@ -49,12 +60,14 @@ export default function NavigationManagerPage() {
   const loadAppAndNavigation = debounce(async () => {
     try {
       setLoadingData(true);
-      const [appData, navigation] = await Promise.all([
+      const [appData, navigation, apps] = await Promise.all([
         appsService.getAppById(appId),
         appsService.getAppNavigationByAppId(appId),
+        appsService.getAllApps(),
       ]);
 
       setApp(appData);
+      setAllApps(apps.filter((a) => a.id !== appId));
       const appName = appData.name;
 
       const safeNavigation: AppNavigationResponseDto[] = navigation ?? [];
@@ -72,7 +85,9 @@ export default function NavigationManagerPage() {
             text: item.label,
             data: {
               label: item.label,
+              type: item.type ?? "page",
               path: item.path ?? "",
+              appId: item.appId ?? null,
               isHome: item.isHome ?? false,
             },
           });
@@ -92,6 +107,7 @@ export default function NavigationManagerPage() {
           text: appName,
           data: {
             label: appName,
+            type: "page",
             path: "",
             isHome: true,
           },
@@ -114,15 +130,16 @@ export default function NavigationManagerPage() {
         if (node.id !== id) return node;
         const currentData: MenuNodeData = {
           label: node.data?.label ?? node.text ?? "",
+          type: node.data?.type ?? "page",
           path: node.data?.path ?? "",
+          appId: node.data?.appId ?? null,
           isHome: node.data?.isHome ?? false,
         };
+        const merged = { ...currentData, ...data };
         return {
           ...node,
-          data: {
-            ...currentData,
-            ...data,
-          },
+          text: merged.label,
+          data: merged,
         };
       })
     );
@@ -136,12 +153,31 @@ export default function NavigationManagerPage() {
     updateNode(id, { path });
   };
 
+  const handleTypeChange = (id: number, type: "page" | "app") => {
+    if (type === "page") {
+      updateNode(id, { type, appId: null });
+    } else {
+      updateNode(id, { type, path: "" });
+    }
+  };
+
+  const handleAppIdChange = (id: number, selectedAppId: number | null) => {
+    const selectedApp = allApps.find((a) => Number(a.id) === Number(selectedAppId));
+    
+    updateNode(id, {
+      appId: selectedAppId,
+      label: selectedApp?.name ?? "",
+    });
+  };
+
   const handleSetHome = (id: number) => {
     setTreeData((prev) =>
       prev.map((node) => {
         const currentData: MenuNodeData = {
           label: node.data?.label ?? node.text ?? "",
+          type: node.data?.type ?? "page",
           path: node.data?.path ?? "",
+          appId: node.data?.appId ?? null,
           isHome: node.data?.isHome ?? false,
         };
         return {
@@ -161,7 +197,7 @@ export default function NavigationManagerPage() {
       : Math.max(...treeData.map((n) => Number(n.id) || 0)) + 1;
 
   const handleAddRootItem = () => {
-    const appName = `Menu ${treeData.length + 1}`;
+    const itemName = `Menu ${treeData.length + 1}`;
     const id = getNextId();
 
     setTreeData((prev) => [
@@ -170,9 +206,10 @@ export default function NavigationManagerPage() {
         id,
         parent: 0,
         droppable: true,
-        text: appName,
+        text: itemName,
         data: {
-          label: appName,
+          label: itemName,
+          type: "page",
           path: "",
           isHome: prev.length === 0,
         },
@@ -359,7 +396,9 @@ export default function NavigationManagerPage() {
           .filter((node) => node.parent === parentId)
           .map((node) => ({
             label: node.data?.label ?? node.text ?? "",
-            path: node.data?.path ?? "/",
+            type: node.data?.type ?? "page",
+            path: node.data?.type === "app" ? null : (node.data?.path ?? "/"),
+            appId: node.data?.type === "app" ? (node.data?.appId ?? null) : null,
             isHome: node.data?.isHome ?? false,
             isActive: true,
             children: buildTree(node.id as number),
@@ -451,8 +490,11 @@ export default function NavigationManagerPage() {
                           onToggle={onToggle}
                           onLabelChange={handleLabelChange}
                           onPathChange={handlePathChange}
+                          onTypeChange={handleTypeChange}
+                          onAppIdChange={handleAppIdChange}
                           onSetHome={handleSetHome}
                           onRemove={handleRemoveNode}
+                          allApps={allApps}
                           dragHandleProps={dragHandleProps}
                           onMoveUp={handleMoveUp}
                           onMoveDown={handleMoveDown}
@@ -515,8 +557,11 @@ interface MenuTreeNodeRowProps {
   onToggle: () => void;
   onLabelChange: (id: number, label: string) => void;
   onPathChange: (id: number, path: string) => void;
+  onTypeChange: (id: number, type: "page" | "app") => void;
+  onAppIdChange: (id: number, appId: number | null) => void;
   onSetHome: (id: number) => void;
   onRemove: (id: number) => void;
+  allApps: AppResponseDto[];
   dragHandleProps: React.HTMLAttributes<HTMLButtonElement>;
   onMoveUp: (id: number) => void;
   onMoveDown: (id: number) => void;
@@ -532,8 +577,11 @@ function MenuTreeNodeRow({
   onToggle,
   onLabelChange,
   onPathChange,
+  onTypeChange,
+  onAppIdChange,
   onSetHome,
   onRemove,
+  allApps,
   dragHandleProps,
   onMoveUp,
   onMoveDown,
@@ -541,6 +589,8 @@ function MenuTreeNodeRow({
   onOutdent,
 }: MenuTreeNodeRowProps) {
   const data = node.data as MenuNodeData | undefined;
+  const nodeType = data?.type ?? "page";
+  const isAppType = nodeType === "app";
 
   return (
     <div
@@ -567,25 +617,68 @@ function MenuTreeNodeRow({
         <GripVertical className="h-4 w-4" />
       </button>
 
+      {/* Type toggle */}
+      <button
+        type="button"
+        onClick={() => onTypeChange(node.id as number, isAppType ? "page" : "app")}
+        className={`p-1.5 rounded border shrink-0 ${isAppType
+          ? "bg-emerald-600/20 border-emerald-500/50 text-emerald-400"
+          : "bg-slate-800/50 border-slate-700 text-slate-400 hover:text-slate-200"
+          }`}
+        title={isAppType ? "App menu (click to switch to Page)" : "Page link (click to switch to App)"}
+      >
+        {isAppType ? <AppWindow className="h-4 w-4" /> : <FileText className="h-4 w-4" />}
+      </button>
+
       <div className="flex-1 grid grid-cols-2 gap-2">
-        <div>
-          <Label className="sr-only">Label</Label>
-          <Input
-            value={data?.label ?? node.text ?? ""}
-            onChange={(e) => onLabelChange(node.id as number, e.target.value)}
-            placeholder="Menu label"
-            className="bg-black/40 border-slate-700 text-white h-8 text-sm"
-          />
-        </div>
-        <div>
-          <Label className="sr-only">Path</Label>
-          <Input
-            value={data?.path ?? ""}
-            onChange={(e) => onPathChange(node.id as number, e.target.value)}
-            placeholder="/path"
-            className="bg-black/40 border-slate-700 text-white h-8 text-sm"
-          />
-        </div>
+        {isAppType ? (
+          <>
+            {/* App type: app selector + label (auto-filled) */}
+            <Select
+              value={data?.appId ? String(data.appId) : ""}
+              onValueChange={(val) =>
+                onAppIdChange(node.id as number, val ? Number(val) : null)
+              }
+            >
+              <SelectTrigger className="bg-black/40 border-slate-700 text-white h-8 text-sm">
+                <SelectValue placeholder="Select an app..." />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-slate-700">
+                {allApps.map((a) => (
+                  <SelectItem
+                    key={a.id}
+                    value={String(a.id)}
+                    className="text-slate-200 focus:bg-slate-800 focus:text-white"
+                  >
+                    {a.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Input
+              value={data?.label ?? node.text ?? ""}
+              onChange={(e) => onLabelChange(node.id as number, e.target.value)}
+              placeholder="Group label (auto-filled)"
+              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+            />
+          </>
+        ) : (
+          <>
+            {/* Page type: label + path */}
+            <Input
+              value={data?.label ?? node.text ?? ""}
+              onChange={(e) => onLabelChange(node.id as number, e.target.value)}
+              placeholder="Menu label"
+              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+            />
+            <Input
+              value={data?.path ?? ""}
+              onChange={(e) => onPathChange(node.id as number, e.target.value)}
+              placeholder="/path"
+              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+            />
+          </>
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -626,11 +719,10 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onSetHome(node.id as number)}
-          className={`p-2 rounded-full border ${
-            data?.isHome
-              ? "bg-blue-600 border-blue-500 text-white"
-              : "border-slate-700 text-slate-300 hover:bg-slate-800"
-          }`}
+          className={`p-2 rounded-full border ${data?.isHome
+            ? "bg-blue-600 border-blue-500 text-white"
+            : "border-slate-700 text-slate-300 hover:bg-slate-800"
+            }`}
           title="Set as home"
         >
           <Home className="h-4 w-4" />
