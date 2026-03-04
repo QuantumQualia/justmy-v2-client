@@ -24,7 +24,7 @@ const fontMono = Geist_Mono({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://justmy.com"),
   title: {
-    default: "JustMy.com - Personal Operating System",
+    default: "Personal Operating System",
     template: "%s | JustMy.com",
   },
   description: "The first Personal Operating System for your life, business, and community. Manage your digital identity, connect with your local market, and grow your business.",

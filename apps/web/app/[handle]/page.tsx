@@ -58,8 +58,8 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
     // Profile exists, use profile metadata
     const profileUrl = `${siteUrl}/${handle}`;
     const title = profile.name
-      ? `${profile.name}${profile.tagline ? ` - ${profile.tagline}` : ""} | JustMy.com`
-      : `${handle} | JustMy.com`;
+      ? `${profile.name}${profile.tagline ? ` - ${profile.tagline}` : ""}`
+      : `${handle}`;
     
     const description = profile.about || profile.tagline || `View ${handle}'s profile on JustMy.com - Connect and discover their digital identity.`;
     
@@ -145,7 +145,7 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
       : `${siteUrl}/og-image.png`;
 
     return {
-      title: `${title} | JustMy.com`,
+      title: `${title}`,
       description,
       alternates: {
         canonical: pageUrl,
@@ -181,7 +181,7 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
 
   // Neither profile nor page exists, return generic metadata
   return {
-    title: `${handle} | JustMy.com`,
+    title: `${handle}`,
     description: `View ${handle} on JustMy.com`,
     alternates: {
       canonical: pageUrl,
