@@ -135,12 +135,11 @@ export default function NavigationManagerPage() {
           appId: node.data?.appId ?? null,
           isHome: node.data?.isHome ?? false,
         };
+        const merged = { ...currentData, ...data };
         return {
           ...node,
-          data: {
-            ...currentData,
-            ...data,
-          },
+          text: merged.label,
+          data: merged,
         };
       })
     );
@@ -163,7 +162,8 @@ export default function NavigationManagerPage() {
   };
 
   const handleAppIdChange = (id: number, selectedAppId: number | null) => {
-    const selectedApp = allApps.find((a) => a.id === selectedAppId);
+    const selectedApp = allApps.find((a) => Number(a.id) === Number(selectedAppId));
+    
     updateNode(id, {
       appId: selectedAppId,
       label: selectedApp?.name ?? "",

@@ -2,10 +2,9 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { X, ChevronRight, Grid3x3, LogOut } from "lucide-react";
+import { X, ChevronRight, ChevronDown, Grid3x3, LogOut, Loader2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import type { AppNavigationResponseDto } from "@/lib/services/apps";
+import { appsService, type AppNavigationResponseDto } from "@/lib/services/apps";
 import { authService } from "@/lib/services/auth";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -17,9 +16,14 @@ interface MobileSidebarProps {
 
 /**
  * Mobile Sidebar Component
- * 
+ *
  * Slide-in sidebar for mobile navigation with menu items
  * generated dynamically from app navigation.
+ *
+ * Supports two item types:
+ *  - "page" (default): a direct link with label + path
+ *  - "app": references another app; renders that app's menus as a
+ *    collapsible group labelled with the parent item's label
  */
 export function MobileSidebar({
   isOpen,
@@ -32,7 +36,54 @@ export function MobileSidebar({
     new Set()
   );
 
-  // Close sidebar when clicking outside
+  // Resolved navigation for "app" type items keyed by appId
+  const [appNavCache, setAppNavCache] = React.useState<
+    Record<number, AppNavigationResponseDto[]>
+  >({});
+  const [loadingApps, setLoadingApps] = React.useState<Set<number>>(new Set());
+
+  // Fetch navigation for all "app"-type items when navigation changes
+  React.useEffect(() => {
+    const appItems = navigation.filter(
+      (item) => item.type === "app" && item.appId
+    );
+    if (appItems.length === 0) return;
+
+    const idsToFetch = appItems
+      .map((item) => item.appId!)
+      .filter((id) => !(id in appNavCache));
+
+    if (idsToFetch.length === 0) return;
+
+    setLoadingApps((prev) => {
+      const next = new Set(prev);
+      idsToFetch.forEach((id) => next.add(id));
+      return next;
+    });
+
+    Promise.allSettled(
+      idsToFetch.map(async (id) => {
+        const nav = await appsService.getAppNavigationByAppId(id);
+        return { id, nav: nav ?? [] };
+      })
+    ).then((results) => {
+      const resolved: Record<number, AppNavigationResponseDto[]> = {};
+      results.forEach((r) => {
+        if (r.status === "fulfilled") {
+          resolved[r.value.id] = r.value.nav;
+        }
+      });
+
+      setAppNavCache((prev) => ({ ...prev, ...resolved }));
+      setLoadingApps((prev) => {
+        const next = new Set(prev);
+        idsToFetch.forEach((id) => next.delete(id));
+        return next;
+      });
+    });
+  }, [navigation]);
+
+  // Close sidebar on Escape
   React.useEffect(() => {
     if (isOpen) {
       const handleEscape = (e: KeyboardEvent) => {
@@ -45,13 +96,13 @@ export function MobileSidebar({
     }
   }, [isOpen, onClose]);
 
-  const toggleExpanded = (label: string) => {
+  const toggleExpanded = (key: string) => {
     setExpandedItems((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) {
-        next.delete(label);
+      if (next.has(key)) {
+        next.delete(key);
       } else {
-        next.add(label);
+        next.add(key);
       }
       return next;
     });
@@ -71,24 +122,27 @@ export function MobileSidebar({
       onClose();
     } catch (error) {
       console.error("Logout error:", error);
-      // Still redirect to login even if logout fails
       router.push("/login");
       onClose();
     }
   };
 
-  const renderNavItem = (item: AppNavigationResponseDto, level = 0) => {
+  const renderPageItem = (
+    item: AppNavigationResponseDto,
+    level: number,
+    keyPrefix: string
+  ) => {
     const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedItems.has(item.label);
+    const isExpanded = expandedItems.has(keyPrefix);
     const isActive =
       pathname === item.path ||
       (item.path && pathname?.startsWith(item.path + "/"));
 
     if (hasChildren) {
       return (
-        <div key={item.label}>
+        <div key={keyPrefix}>
           <button
-            onClick={() => toggleExpanded(item.label)}
+            onClick={() => toggleExpanded(keyPrefix)}
             className={cn(
               "w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
               level === 0
@@ -96,8 +150,8 @@ export function MobileSidebar({
                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                   : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
                 : isActive
-                ? "bg-slate-800/50 text-emerald-400"
-                : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
+                  ? "bg-slate-800/50 text-emerald-400"
+                  : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
             )}
             style={{ paddingLeft: `${1 + level * 1}rem` }}
           >
@@ -111,7 +165,9 @@ export function MobileSidebar({
           </button>
           {isExpanded && (
             <div className="mt-1 space-y-1">
-              {item.children!.map((child) => renderNavItem(child, level + 1))}
+              {item.children!.map((child, ci) =>
+                renderPageItem(child, level + 1, `${keyPrefix}-${ci}`)
+              )}
             </div>
           )}
         </div>
@@ -120,7 +176,7 @@ export function MobileSidebar({
 
     return (
       <button
-        key={item.label}
+        key={keyPrefix}
         onClick={() => handleNavClick(item.path)}
         className={cn(
           "w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
@@ -129,14 +185,75 @@ export function MobileSidebar({
               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
               : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
             : isActive
-            ? "bg-slate-800/50 text-emerald-400"
-            : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
+              ? "bg-slate-800/50 text-emerald-400"
+              : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
         )}
         style={{ paddingLeft: `${1 + level * 1}rem` }}
       >
         <span className="font-medium">{item.label}</span>
       </button>
     );
+  };
+
+  const renderAppGroup = (item: AppNavigationResponseDto, index: number) => {
+    const appId = item.appId!;
+    const groupKey = `app-${appId}`;
+    const isExpanded = expandedItems.has(groupKey);
+    const isLoading = loadingApps.has(appId);
+    const appNav = appNavCache[appId] ?? [];
+
+    return (
+      <div key={groupKey}>
+        {/* Group header - always visible, acts as a collapsible toggle */}
+        <button
+          onClick={() => toggleExpanded(groupKey)}
+          className={cn(
+            "w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
+            isExpanded
+              ? "bg-slate-800/60 text-white"
+              : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+          )}
+        >
+          <span className="font-semibold text-sm tracking-wider">
+            {item.label}
+          </span>
+          {isLoading ? (
+            <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+          ) : (
+            <ChevronDown
+              className={cn(
+                "h-4 w-4 transition-transform",
+                !isExpanded && "-rotate-90"
+              )}
+            />
+          )}
+        </button>
+
+        {/* App's menu items */}
+        {isExpanded && (
+          <div className="mt-1 space-y-1">
+            {isLoading ? (
+              <div className="px-6 py-2 text-xs text-slate-500">Loading...</div>
+            ) : appNav.length > 0 ? (
+              appNav.map((child, ci) =>
+                renderPageItem(child, 1, `${groupKey}-${ci}`)
+              )
+            ) : (
+              <div className="px-6 py-2 text-xs text-slate-500">
+                No menu items
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderNavItem = (item: AppNavigationResponseDto, index: number) => {
+    if (item.type === "app" && item.appId) {
+      return renderAppGroup(item, index);
+    }
+    return renderPageItem(item, 0, `page-${index}`);
   };
 
   return (
@@ -175,7 +292,7 @@ export function MobileSidebar({
         <nav className="flex flex-col flex-1 min-h-0 overflow-hidden">
           <div className="flex-1 overflow-y-auto p-4 space-y-2">
             {navigation.length > 0 ? (
-              navigation.map((item) => renderNavItem(item))
+              navigation.map((item, i) => renderNavItem(item, i))
             ) : (
               <div className="px-4 py-8 text-center text-slate-500">
                 <p>No menu items available</p>
@@ -189,7 +306,8 @@ export function MobileSidebar({
               onClick={() => handleNavClick("/app-hub")}
               className={cn(
                 "w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
-                pathname === "/lab/app-hub" || pathname?.startsWith("/lab/app-hub/")
+                pathname === "/lab/app-hub" ||
+                  pathname?.startsWith("/lab/app-hub/")
                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
                   : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
               )}
