@@ -67,7 +67,7 @@ export default function NavigationManagerPage() {
       ]);
 
       setApp(appData);
-      setAllApps(apps.filter((a) => a.id !== appId));
+      setAllApps(apps.filter((a) => Number(a.id) !== Number(appId)));
       const appName = appData.name;
 
       const safeNavigation: AppNavigationResponseDto[] = navigation ?? [];
