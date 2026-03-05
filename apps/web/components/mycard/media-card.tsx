@@ -395,81 +395,85 @@ export function MediaCard({
 
   return (
     <div className="space-y-4">
-      {/* Preview Card */}
-      <div
-        ref={cardRef}
-        className="relative w-full max-w-4xl mx-auto rounded-lg rounded-br-none overflow-hidden shadow-2xl"
-        style={{
-          aspectRatio: "16/9",
-          backgroundImage: `url(${placeholderPath})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
-      >
-        {/* Left Section - Profile Photo Overlay */}
-        <div 
-          className="absolute left-0 top-0 w-[50%] h-[calc(100%-67px)] flex items-center justify-center overflow-hidden"
-          style={{ 
-            backgroundColor: 'transparent',
-            borderTopLeftRadius: '8px', // Match rounded-lg
-          }}
-        >
-          {profileData.photo ? (
-            <img
-              src={profileData.photo}
-              alt={profileData.name}
-              className="w-full h-full object-cover"
-              style={{ 
+      {/* Horizontally scrollable wrapper for the preview card */}
+      <div className="overflow-x-auto scrollbar-horizontal-dark">
+        <div className="min-w-[860px] max-w-4xl mx-auto">
+          <div
+            ref={cardRef}
+            className="relative w-full rounded-lg rounded-br-none overflow-hidden shadow-2xl"
+            style={{
+              aspectRatio: "16/9",
+              backgroundImage: `url(${placeholderPath})`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            {/* Left Section - Profile Photo Overlay */}
+            <div
+              className="absolute left-0 top-0 w-[50%] h-[calc(100%-67px)] flex items-center justify-center overflow-hidden"
+              style={{
                 backgroundColor: 'transparent',
-                borderTopLeftRadius: '8px', // Ensure photo respects the corner radius
-              }}
-            />
-          ) : (
-            <div 
-              className="w-full h-full flex items-center justify-center"
-              style={{ 
-                backgroundColor: 'rgba(226, 232, 240, 0.5)',
                 borderTopLeftRadius: '8px',
               }}
             >
-              <span 
-                className="text-4xl font-bold"
-                style={{ color: '#94a3b8' }}
+              {profileData.photo ? (
+                <img
+                  src={profileData.photo}
+                  alt={profileData.name}
+                  className="w-full h-full object-cover"
+                  style={{
+                    backgroundColor: 'transparent',
+                    borderTopLeftRadius: '8px',
+                  }}
+                />
+              ) : (
+                <div
+                  className="w-full h-full flex items-center justify-center"
+                  style={{
+                    backgroundColor: 'rgba(226, 232, 240, 0.5)',
+                    borderTopLeftRadius: '8px',
+                  }}
+                >
+                  <span
+                    className="text-4xl font-bold"
+                    style={{ color: '#94a3b8' }}
+                  >
+                    {profileData.name?.charAt(0) || "?"}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Right Section - QR Code Overlay */}
+            <div className="absolute right-[11%] top-1/2 -translate-y-1/2">
+              <div
+                className="p-3 rounded-lg"
+                style={{ backgroundColor: '#ffffff' }}
               >
-                {profileData.name?.charAt(0) || "?"}
+                <QRCodeSVG
+                  value={profileUrl}
+                  size={200}
+                  level="H"
+                  includeMargin={true}
+                  fgColor="#000000"
+                  bgColor="#FFFFFF"
+                />
+              </div>
+            </div>
+
+            {/* Bottom Strip - URL Overlay */}
+            <div
+              className="absolute bottom-0 left-[80px] w-full h-[60px] flex items-center px-5"
+              style={{ backgroundColor: 'transparent' }}
+            >
+              <span
+                className="font-medium"
+                style={{ color: '#ffffff' }}
+              >
+                {profileUrl}
               </span>
             </div>
-          )}
-        </div>
-
-        {/* Right Section - QR Code Overlay */}
-        <div className="absolute right-[11%] top-1/2 -translate-y-1/2">
-          <div 
-            className="p-3 rounded-lg"
-            style={{ backgroundColor: '#ffffff' }}
-          >
-            <QRCodeSVG
-              value={profileUrl}
-              size={200}
-              level="H"
-              includeMargin={true}
-              fgColor="#000000"
-              bgColor="#FFFFFF"
-            />
           </div>
-        </div>
-
-        {/* Bottom Strip - URL Overlay */}
-        <div 
-          className="absolute bottom-0 left-[80px] w-full h-[60px] flex items-center px-5"
-          style={{ backgroundColor: 'transparent' }}
-        >
-          <span 
-            className="font-medium"
-            style={{ color: '#ffffff' }}
-          >
-            {profileUrl}
-          </span>
         </div>
       </div>
 
