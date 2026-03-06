@@ -30,7 +30,7 @@ export function QRCode({
 
   // Reusable QR code render with hashtag
   const renderQRCodeWithHashtag = () => (
-    <div className="flex flex-col items-center bg-white p-4 rounded-lg">
+    <div className="flex flex-col items-center bg-white p-4 rounded-lg max-w-[240px] mx-auto">
       <div ref={qrRef}>
         <QRCodeSVG
           value={url}
@@ -135,12 +135,16 @@ export function QRCode({
   };
 
   if (variant === "simple") {
-    return renderQRCodeWithHashtag();
+    return (
+      <div className="min-w-[240px] max-w-md mx-auto">
+        {renderQRCodeWithHashtag()}
+      </div>
+    );
   }
 
   // Full variant
   return (
-    <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
+    <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center min-w-[280px] max-w-2xl mx-auto">
       {/* QR Code */}
       {renderQRCodeWithHashtag()}
 

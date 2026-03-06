@@ -241,6 +241,28 @@ function mapSocialTypeToName(type: SocialLink["type"]): string {
 }
 
 /**
+ * If the value is a full S3 URL, return only the object key (path after the
+ * bucket hostname). Data-URLs (new uploads) and bare keys are returned as-is.
+ */
+function extractS3Key(value: string): string {
+  if (!value || value.startsWith("data:")) return value;
+
+  try {
+    const url = new URL(value);
+    const isS3 =
+      url.hostname.includes(".s3.") ||
+      url.hostname.includes("s3.amazonaws.com");
+    if (isS3) {
+      return url.pathname.replace(/^\//, "");
+    }
+  } catch {
+    // Not a URL — already a key
+  }
+
+  return value;
+}
+
+/**
  * Map ProfileData to UpdateProfileDto format for API
  */
 export function mapProfileDataToUpdateDto(profileData: ProfileData): UpdateProfileDto {
@@ -249,8 +271,8 @@ export function mapProfileDataToUpdateDto(profileData: ProfileData): UpdateProfi
   // Basic fields
   if (profileData.name) dto.name = profileData.name;
   if (profileData.tagline) dto.tagline = profileData.tagline;
-  if (profileData.photo) dto.photo = profileData.photo;
-  if (profileData.banner) dto.banner = profileData.banner;
+  if (profileData.photo) dto.photo = extractS3Key(profileData.photo);
+  if (profileData.banner) dto.banner = extractS3Key(profileData.banner);
   if (profileData.about) dto.about = profileData.about;
 
   if (profileData.email) dto.email = profileData.email;

@@ -85,7 +85,7 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
       </div>
 
       {/* Sticky Footer with View Toggle & Share */}
-      <div className="sticky bottom-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800/50 mt-6">
+      <div className="sticky bottom-0 z-40 backdrop-blur-md mt-6">
         <div className="flex items-center justify-center gap-3 py-4 px-4">
           <Button
             variant="outline"
