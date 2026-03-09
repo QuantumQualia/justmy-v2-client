@@ -39,7 +39,57 @@ interface SearchResponseDto {
   profiles?: AlgoliaSearchResultDto[];
   pages?: AlgoliaSearchResultDto[];
   posts?: AlgoliaSearchResultDto[];
-  vectorResults?: any[]
+  vectorResults?: any[];
+}
+
+/** Business search API response (GET /search/businesses) */
+interface BusinessCardDto {
+  name: string;
+  brief?: string; // Tagline or short description
+  url?: string; // JustMy profile link (e.g. /slug)
+  website?: string; // External website URL
+  photo?: string; // Logo or profile photo URL
+  rating?: number; // Google star rating
+  isVerified?: boolean;
+  location?: string; // Market name or address
+  phone?: string; // Primary phone number
+  osName?: string; // OS name when this business is a JustMy Partner (e.g. "Founder")
+  /** Per-item source: 'local' = internal directory, 'external' = Gemini/external recommendations */
+  source: "local" | "external";
+}
+interface BusinessSearchResponseDto {
+  businesses: BusinessCardDto[];
+  source: "local" | "gemini";
+  totalLocal: number;
+}
+
+/** Map BusinessCategory ID to label for the businesses API */
+const BUSINESS_CATEGORY_LABELS: Record<BusinessCategory, string> = {
+  "eats-drinks": "Eats & Drinks",
+  "home-services": "Home Services",
+  "health-wellness": "Health & Wellness",
+  "shopping-retail": "Shopping & Retail",
+  professional: "Professional",
+  "auto-travel": "Auto & Travel",
+  "things-to-do": "Things to Do",
+  community: "Community",
+};
+
+export type BusinessCategory = 
+  | "eats-drinks"
+  | "home-services"
+  | "health-wellness"
+  | "shopping-retail"
+  | "professional"
+  | "auto-travel"
+  | "things-to-do"
+  | "community";
+
+export interface CategoryConfig {
+  id: BusinessCategory;
+  label: string;
+  icon: string;
+  hasFoundingPartner?: boolean;
 }
 
 interface SearchStore {
@@ -50,9 +100,18 @@ interface SearchStore {
   summary: string | null;
   isLoading: boolean;
   error: string | null;
+  
+  // Business search state
+  isBusinessSearchMode: boolean;
+  selectedCategories: BusinessCategory[]; // Max 3
+  /** When set, results are from business search: first N are JustMy Partners, rest are Local Results */
+  businessSearchTotalLocal: number | null;
 
   // Actions
   setQuery: (query: string) => void;
+  setBusinessSearchMode: (enabled: boolean) => void;
+  toggleCategory: (category: BusinessCategory) => void;
+  removeCategory: (category: BusinessCategory) => void;
   clear: () => void;
   runSearch: (query: string) => Promise<void>;
 }
@@ -67,8 +126,37 @@ export const useSearchStore = create<SearchStore>()(
       summary: null,
       isLoading: false,
       error: null,
+      isBusinessSearchMode: false,
+      selectedCategories: [],
+      businessSearchTotalLocal: null,
 
       setQuery: (query) => set({ query }),
+      
+      setBusinessSearchMode: (enabled) => set({ isBusinessSearchMode: enabled }),
+      
+      toggleCategory: (category) =>
+        set((state) => {
+          const isSelected = state.selectedCategories.includes(category);
+          if (isSelected) {
+            // Remove category
+            return {
+              selectedCategories: state.selectedCategories.filter((c) => c !== category),
+            };
+          } else {
+            // Add category (max 3)
+            if (state.selectedCategories.length >= 3) {
+              return state; // Don't add if already at max
+            }
+            return {
+              selectedCategories: [...state.selectedCategories, category],
+            };
+          }
+        }),
+      
+      removeCategory: (category) =>
+        set((state) => ({
+          selectedCategories: state.selectedCategories.filter((c) => c !== category),
+        })),
 
       clear: () =>
         set({
@@ -78,23 +166,27 @@ export const useSearchStore = create<SearchStore>()(
           summary: null,
           isLoading: false,
           error: null,
+          selectedCategories: [],
+          businessSearchTotalLocal: null,
         }),
 
       /**
        * Run a search against the API.
-       * NOTE: Endpoint and params are generic and can be adjusted to match the backend.
+       * Standard mode: GET search/hybrid (hybrid search).
+       * Business mode: GET businesses (business search with optional categories).
        */
       runSearch: async (query: string) => {
         const trimmed = query.trim();
 
         if (!trimmed) {
-          // Empty query clears results but does not show an error
           set({
             query: "",
             lastQuery: null,
             results: [],
+            summary: null,
             isLoading: false,
             error: null,
+            businessSearchTotalLocal: null,
           });
           return;
         }
@@ -106,46 +198,81 @@ export const useSearchStore = create<SearchStore>()(
           error: null,
         });
 
+        const state = useSearchStore.getState();
+        const isBusinessMode = state.isBusinessSearchMode;
+        const selectedCategories = state.selectedCategories;
+
         try {
-          // Matches backend DTO: SearchPerplexityDto { query: string }
-          const data = await apiRequest<SearchResponseDto>(
-            "search/hybrid",
-            {
+          if (isBusinessMode) {
+            // Business search: GET /businesses (SearchRequestDto: query, categories?)
+            const params: Record<string, string> = { query: trimmed };
+            if (selectedCategories.length > 0) {
+              const categoryLabels = selectedCategories.map(
+                (id) => BUSINESS_CATEGORY_LABELS[id]
+              );
+              params.categories = categoryLabels.join(",");
+            }
+            const data = await apiRequest<BusinessSearchResponseDto>("search/businesses", {
+              method: "GET",
+              params,
+            });
+
+            const mappedResults: SearchResultItem[] = Array.isArray(data?.businesses)
+              ? data.businesses.map((b, index) => ({
+                  id: b.url || b.website || b.name || index,
+                  title: b.name,
+                  subtitle: b.location,
+                  snippet: b.brief,
+                  // Prefer internal profile link; fall back to external website
+                  url: b.url ?? b.website,
+                  type: "business",
+                  ...b,
+                }))
+              : [];
+
+            set({
+              results: mappedResults,
+              summary: null,
+              isLoading: false,
+              error: null,
+              businessSearchTotalLocal: data?.totalLocal ?? 0,
+            });
+          } else {
+            // Standard search: GET search/hybrid
+            const data = await apiRequest<SearchResponseDto>("search/hybrid", {
               method: "GET",
               params: { query: trimmed },
-            }
-          );
+            });
 
+            const mappedResults: SearchResultItem[] = Array.isArray(
+              data?.aiResults?.results
+            )
+              ? data.aiResults.results.map((item, index) => ({
+                  id: item.url || index,
+                  title: item.title ?? item.url,
+                  snippet: item.snippet,
+                  ...item,
+                }))
+              : [];
 
-          const mappedResults: SearchResultItem[] = Array.isArray(
-            data?.aiResults.results
-          )
-            ? data.aiResults.results.map((item, index) => ({
-              // Use URL as a stable id when available
-              id: item.url || index,
-              title: item.title ?? item.url,
-              snippet: item.snippet,
-              // Preserve all other fields for flexible UI usage
-              ...item,
-            }))
-            : [];
-
-          set({
-            results: mappedResults,
-            summary: data?.aiResults.summary ?? null,
-            isLoading: false,
-            error: null,
-          });
+            set({
+              results: mappedResults,
+              summary: data?.aiResults?.summary ?? null,
+              isLoading: false,
+              error: null,
+              businessSearchTotalLocal: null,
+            });
+          }
         } catch (err: unknown) {
           const message =
             err instanceof ApiClientError
               ? err.message
               : "Search failed. Please try again.";
-
           set({
             results: [],
             isLoading: false,
             error: message,
+            businessSearchTotalLocal: null,
           });
         }
       },
