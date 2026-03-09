@@ -13,15 +13,23 @@ import { MobileSidebar } from "./mobile-sidebar";
 import { ProfileSwitcher } from "./profile-switcher";
 import { cn } from "@workspace/ui/lib/utils";
 
+export interface NavbarProps {
+  /**
+   * Passed to SuperSearchBar: enable business search mode (category bento + ghost phrases).
+   * Defaults to false when omitted.
+   */
+  businessSearchMode?: boolean;
+}
+
 /**
  * Navbar Component
- * 
+ *
  * Responsive navbar with:
  * - Profile switcher on the left
  * - Super search bar in the center
  * - Hamburger menu on the right (mobile)
  */
-export function Navbar() {
+export function Navbar({ businessSearchMode }: NavbarProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const isMobile = useIsMobile(768); // md breakpoint
   const pathname = usePathname();
@@ -58,7 +66,7 @@ export function Navbar() {
 
           {/* Center: Super Search Bar (visible on all screens) */}
           <div className="flex flex-1 justify-center max-w-2xl mx-2 md:mx-4 min-w-0">
-            <SuperSearchBar businessSearchMode={true} />
+            <SuperSearchBar businessSearchMode={businessSearchMode} />
           </div>
 
           {/* Right: Hamburger Menu */}
