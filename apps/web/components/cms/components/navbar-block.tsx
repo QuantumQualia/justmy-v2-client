@@ -13,5 +13,6 @@ interface NavbarBlockProps {
  * Includes profile switcher, super search bar, and hamburger menu.
  */
 export function NavbarBlock({ block }: NavbarBlockProps) {
-  return <Navbar />;
+  const businessSearchMode = Boolean((block as { businessSearchMode?: boolean }).businessSearchMode);
+  return <Navbar businessSearchMode={businessSearchMode} />;
 }
