@@ -11,10 +11,20 @@ interface ThirdLevelHandlePageProps {
   }>;
 }
 
+const RESERVED_HANDLES = new Set([".well-known", "api", "_next", "favicon.ico"]);
+
 export async function generateMetadata({
   params,
 }: ThirdLevelHandlePageProps): Promise<Metadata> {
   const { handle, parentHandle, subHandle } = await params;
+
+  if (RESERVED_HANDLES.has(handle)) {
+    return {
+      title: "Page Not Found | JustMy.com",
+      description: "The requested page could not be found.",
+    };
+  }
+
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://justmy.com";
   const pageUrl = `${siteUrl}/${handle}/${parentHandle}/${subHandle}`;
 
@@ -87,6 +97,10 @@ export default async function ThirdLevelHandlePage({
 }: ThirdLevelHandlePageProps) {
   const resolvedParams = await params;
   const { handle, parentHandle, subHandle } = resolvedParams;
+
+  if (RESERVED_HANDLES.has(handle)) {
+    notFound();
+  }
 
   try {
     const payloadPage = await cmsService.getPageByDeepNestedHandle(

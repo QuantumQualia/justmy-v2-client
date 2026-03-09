@@ -8,4 +8,4 @@ export type { ProfileData, SocialLink, Hotlink, Phone, Address, SocialType } fro
 export { mapApiProfileToProfileData } from "./profile-mapper";
 export type { ApiProfileResponse } from "./profile-mapper";
 export { useSearchStore } from "./search-store";
-export type { SearchResultItem } from "./search-store";
+export type { SearchResultItem, BusinessCategory, CategoryConfig } from "./search-store";

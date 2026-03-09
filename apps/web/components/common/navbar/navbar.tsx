@@ -58,7 +58,7 @@ export function Navbar() {
 
           {/* Center: Super Search Bar (visible on all screens) */}
           <div className="flex flex-1 justify-center max-w-2xl mx-2 md:mx-4 min-w-0">
-            <SuperSearchBar />
+            <SuperSearchBar businessSearchMode={true} />
           </div>
 
           {/* Right: Hamburger Menu */}
