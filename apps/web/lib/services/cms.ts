@@ -80,7 +80,7 @@ export interface ContainerLayout {
 }
 
 /**
- * Payload Page Block
+ * Payload Page Block (shared structure for page and post content blocks)
  */
 export interface PageBlock {
   blockType: string;
@@ -90,6 +90,9 @@ export interface PageBlock {
   children?: PageBlock[]; // For container/layout blocks, nested blocks
   [key: string]: any;
 }
+
+/** Alias for shared use in page and post rendering */
+export type ContentBlock = PageBlock;
 
 /**
  * Payload Page
@@ -154,6 +157,70 @@ export interface CreatePageDto {
  */
 export interface UpdatePageDto extends Partial<CreatePageDto> {
   id: string;
+}
+
+/**
+ * Payload Post (matches backend response)
+ */
+export interface PayloadPost {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt?: string | null;
+  content: PageBlock[];
+  tags?: string[] | null;
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string | { url: string };
+  } | null;
+  isPublished: boolean;
+  author?: string | { id: string; email: string };
+  publishedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Paginated Posts Response
+ */
+export interface PaginatedPostsResponse {
+  docs: PayloadPost[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
+}
+
+/**
+ * Create Post DTO (matches backend CreatePostDto)
+ */
+export interface CreatePostDto {
+  title: string;
+  slug?: string;
+  excerpt?: string;
+  content?: PageBlock[];
+  tags?: string[];
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
+  isPublished?: boolean;
+}
+
+/**
+ * Update Post DTO (matches backend UpdatePostDto)
+ */
+export interface UpdatePostDto extends Partial<CreatePostDto> {
+  id?: string;
 }
 
 /**
@@ -364,6 +431,106 @@ export const cmsService = {
         throw error;
       }
       throw new ApiClientError("Failed to delete page.");
+    }
+  },
+
+  // ─── Posts ─────────────────────────────────────────────────────────────
+
+  /**
+   * Get all posts (for admin)
+   */
+  async getAllPosts(params?: {
+    page?: number;
+    limit?: number;
+    search?: string;
+  }): Promise<PaginatedPostsResponse> {
+    try {
+      const queryParams: Record<string, string> = {};
+      if (params?.page) queryParams.page = params.page.toString();
+      if (params?.limit) queryParams.limit = params.limit.toString();
+      if (params?.search) queryParams.search = params.search;
+
+      return await apiRequest<PaginatedPostsResponse>("cms/posts", {
+        method: "GET",
+        params: queryParams,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to fetch posts.");
+    }
+  },
+
+  /**
+   * Get post by ID
+   */
+  async getPostById(id: string): Promise<PayloadPost> {
+    try {
+      return await apiRequest<PayloadPost>(`cms/posts/${id}`, {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to fetch post.");
+    }
+  },
+
+  /**
+   * Get post by slug (public)
+   */
+  async getPostBySlug(slug: string): Promise<PayloadPost | null> {
+    try {
+      return await apiRequest<PayloadPost | null>(`cms/posts/by-slug/${slug}`, {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError && error.statusCode === 404) {
+        return null;
+      }
+      throw error;
+    }
+  },
+
+  /**
+   * Create a new post
+   */
+  async createPost(data: CreatePostDto): Promise<PayloadPost> {
+    try {
+      return await apiRequest<PayloadPost>("cms/posts", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to create post.");
+    }
+  },
+
+  /**
+   * Update a post
+   */
+  async updatePost(id: string, data: Partial<CreatePostDto>): Promise<PayloadPost> {
+    try {
+      return await apiRequest<PayloadPost>(`cms/posts/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to update post.");
+    }
+  },
+
+  /**
+   * Delete a post
+   */
+  async deletePost(id: string): Promise<void> {
+    try {
+      return await apiRequest<void>(`cms/posts/${id}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to delete post.");
     }
   },
 };

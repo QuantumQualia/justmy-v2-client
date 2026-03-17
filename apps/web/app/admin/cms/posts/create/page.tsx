@@ -16,51 +16,55 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
+import { TagInput } from "@/components/ui/tag-input";
 import { cmsService } from "@/lib/services/cms";
-import { CreatePageDto } from "@/lib/services/cms";
+import type { CreatePostDto } from "@/lib/services/cms";
 
-export default function CreatePagePage() {
+export default function CreatePostPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<CreatePageDto>({
+  const [formData, setFormData] = useState<CreatePostDto>({
     title: "",
-    handle: "",
-    parentHandle: "",
-    description: "",
+    slug: "",
+    excerpt: "",
+    tags: [],
     isPublished: false,
-    requiresAuth: false,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const page = await cmsService.createPage(formData);
-      toast.success("Page created");
-      router.push(`/admin/cms/pages/${page.id}/edit`);
+      const payload: CreatePostDto = {
+        ...formData,
+        slug: formData.slug?.trim() || undefined,
+        excerpt: formData.excerpt?.trim() || undefined,
+        tags: formData.tags?.length ? formData.tags : undefined,
+      };
+      const post = await cmsService.createPost(payload);
+      toast.success("Post created");
+      router.push(`/admin/cms/posts/${post.id}/edit`);
     } catch (error) {
-      console.error("Failed to create page:", error);
-      toast.error("Failed to create page");
+      console.error("Failed to create post:", error);
+      toast.error("Failed to create post");
     } finally {
       setLoading(false);
     }
   };
 
-  const generateHandle = (title: string) => {
-    return title
+  const generateSlug = (title: string) =>
+    title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
-  };
 
   return (
     <div className="min-h-screen bg-black p-10">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Create New Page</h1>
-            <p className="text-slate-400">Create a new dynamic page</p>
+            <h1 className="text-3xl font-bold text-white">Create New Post</h1>
+            <p className="text-slate-400">Create a new blog post</p>
           </div>
         </div>
 
@@ -69,7 +73,7 @@ export default function CreatePagePage() {
             <CardHeader>
               <CardTitle className="text-white">Basic Information</CardTitle>
               <CardDescription className="text-slate-400">
-                Title, handle, and options for your page.
+                Title, slug, excerpt, and tags for your post.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -86,70 +90,64 @@ export default function CreatePagePage() {
                   onBlur={() => {
                     setFormData({
                       ...formData,
-                      handle: formData.handle || generateHandle(formData.title),
+                      slug: formData.slug || generateSlug(formData.title),
                     });
                   }}
-                  placeholder="My Page Title"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                  placeholder="Post title"
+                  className="bg-black/50 border-slate-700 text-white"
                   required
                 />
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="handle" className="text-slate-300">
-                  Handle (URL) *
+                <Label htmlFor="slug" className="text-slate-300">
+                  Slug (URL)
                 </Label>
                 <Input
-                  id="handle"
-                  value={formData.handle}
+                  id="slug"
+                  value={formData.slug ?? ""}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      handle: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                      slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "") || undefined,
                     })
                   }
-                  placeholder="my-page"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
-                  required
+                  onBlur={() => {
+                    if (!formData.slug && formData.title) {
+                      setFormData({
+                        ...formData,
+                        slug: generateSlug(formData.title),
+                      });
+                    }
+                  }}
+                  placeholder="my-post"
+                  className="bg-black/50 border-slate-700 text-white"
                 />
                 <p className="text-xs text-slate-500">
-                  URL-friendly identifier (e.g., &quot;my-page&quot; becomes /my-page)
+                  Optional. URL: /blog/{formData.slug || "my-post"}
                 </p>
               </div>
-
               <div className="space-y-2">
-                <Label htmlFor="parentHandle" className="text-slate-300">
-                  Parent Handle (optional)
-                </Label>
-                <Input
-                  id="parentHandle"
-                  value={formData.parentHandle || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, parentHandle: e.target.value })
-                  }
-                  placeholder="parent-page"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
-                />
-                <p className="text-xs text-slate-500">
-                  For nested routes (e.g., /parent-page/my-page)
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-300">
-                  Description
+                <Label htmlFor="excerpt" className="text-slate-300">
+                  Excerpt
                 </Label>
                 <Textarea
-                  id="description"
-                  value={formData.description || ""}
+                  id="excerpt"
+                  value={formData.excerpt ?? ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                    setFormData({ ...formData, excerpt: e.target.value || undefined })
                   }
-                  placeholder="Page description..."
-                  className="min-h-[100px] bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none"
+                  placeholder="Short excerpt..."
+                  className="min-h-[80px] bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none"
                 />
               </div>
-
+              <TagInput
+                id="tags"
+                label="Tags"
+                value={formData.tags ?? []}
+                onChange={(tags) => setFormData({ ...formData, tags })}
+                placeholder="Add tag (Enter or comma)"
+                className="text-slate-300"
+              />
               <div className="flex items-center gap-2">
                 <Switch
                   id="isPublished"
@@ -165,39 +163,20 @@ export default function CreatePagePage() {
                   Publish immediately
                 </Label>
               </div>
-              <div className="flex items-center gap-2">
-                <Switch
-                  id="requiresAuth"
-                  checked={formData.requiresAuth ?? false}
-                  onCheckedChange={(checked) =>
-                    setFormData({ ...formData, requiresAuth: checked })
-                  }
-                />
-                <Label
-                  htmlFor="requiresAuth"
-                  className="text-slate-300 cursor-pointer font-normal"
-                >
-                  Requires Authentication
-                </Label>
-              </div>
             </CardContent>
           </Card>
 
           <div className="flex justify-end gap-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => router.back()}
-            >
+            <Button type="button" variant="outline" onClick={() => router.back()}>
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={loading || !formData.title || !formData.handle}
+              disabled={loading || !formData.title}
               className="bg-blue-600 hover:bg-blue-700"
             >
               <Save className="h-4 w-4 mr-2" />
-              {loading ? "Creating..." : "Create Page"}
+              {loading ? "Creating..." : "Create Post"}
             </Button>
           </div>
         </form>

@@ -7,30 +7,32 @@ import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import { cn } from "@workspace/ui/lib/utils";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
-import { PageBlockText } from "./page-blocks/text";
-import { PageBlockLayout } from "./page-blocks/layout";
-import { InlineEditViewBlockEditor } from "./page-blocks/mycard/inline-edit-view";
-import { LiveViewBlockEditor } from "./page-blocks/mycard/live-view";
-import { MediaCardBlockEditor } from "./page-blocks/mycard/media-card";
-import { QRCodeBlockEditor } from "./page-blocks/mycard/qr-code";
-import { WelcomeMessageBlockEditor } from "./page-blocks/welcome-message";
-import { DayInHistoryBlockEditor } from "./page-blocks/day-in-history";
-import { QuickActionBlockEditor } from "./page-blocks/quick-action";
-import { AdBannerBlockEditor } from "./page-blocks/ad-banner";
-import { SuperSearchBarBlockEditor } from "./page-blocks/super-search-bar";
-import { SearchResultsPanelBlockEditor } from "./page-blocks/search-results-panel";
-import { WeatherHeroBlockEditor } from "./page-blocks/weather-hero";
-import { HourlyScrollBlockEditor } from "./page-blocks/hourly-scroll";
-import { LifestyleIndicesBlockEditor } from "./page-blocks/lifestyle-indices";
-import { SevenDayStrategyBlockEditor } from "./page-blocks/seven-day-strategy";
-import { RadarPanelBlockEditor } from "./page-blocks/radar-panel";
-import { TopNewsBriefingBlockEditor } from "./page-blocks/top-news-briefing";
-import { MarketEventsBlockEditor } from "./page-blocks/market-events";
-import { LocalDealsBlockEditor } from "./page-blocks/local-deals";
-import { PlaceholderPanelBlockEditor } from "./page-blocks/placeholder-panel";
-import { NavbarBlockEditor } from "./page-blocks/navbar";
-import { ReferAFriendBlockEditor } from "./page-blocks/refer-a-friend";
-import { AppHubBlockEditor } from "./page-blocks/app-hub";
+import {
+  PageBlockText,
+  PageBlockLayout,
+  InlineEditViewBlockEditor,
+  LiveViewBlockEditor,
+  MediaCardBlockEditor,
+  QRCodeBlockEditor,
+  WelcomeMessageBlockEditor,
+  DayInHistoryBlockEditor,
+  QuickActionBlockEditor,
+  AdBannerBlockEditor,
+  SuperSearchBarBlockEditor,
+  SearchResultsPanelBlockEditor,
+  WeatherHeroBlockEditor,
+  HourlyScrollBlockEditor,
+  LifestyleIndicesBlockEditor,
+  SevenDayStrategyBlockEditor,
+  RadarPanelBlockEditor,
+  TopNewsBriefingBlockEditor,
+  MarketEventsBlockEditor,
+  LocalDealsBlockEditor,
+  PlaceholderPanelBlockEditor,
+  NavbarBlockEditor,
+  ReferAFriendBlockEditor,
+  AppHubBlockEditor,
+} from "./blocks";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
 

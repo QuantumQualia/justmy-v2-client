@@ -84,7 +84,7 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
         description,
         images: [
           {
-            url: image,
+            url: image, 
             width: 1200,
             height: 630,
             alt: profile.name || handle,

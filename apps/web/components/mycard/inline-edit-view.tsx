@@ -9,6 +9,7 @@ import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
+import { apiRequest } from "@/lib/api-client";
 import { mapProfileDataToUpdateDto } from "@/lib/store/profile-mapper";
 import { combineAddressFields, extractAddressFields } from "@/lib/utils/address-utils";
 import {
@@ -25,6 +26,7 @@ import {
   X,
   Globe,
   Sparkles,
+  Loader2,
 } from "lucide-react";
 import {
   SiFacebook,
@@ -377,6 +379,7 @@ export default function InlineEdit({
   }>({});
   const [imageUploadType, setImageUploadType] = useState<"banner" | "profile" | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageUploading, setImageUploading] = useState(false);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   // Validation functions
@@ -668,22 +671,38 @@ export default function InlineEdit({
     reader.readAsDataURL(file);
   };
 
-  const handleImageCrop = (croppedImage: string) => {
-    if (imageUploadType === "banner") {
-      onDataChange({ banner: croppedImage });
-      // Save banner update to API
-      performSave({ ...data, banner: croppedImage });
-    } else if (imageUploadType === "profile") {
-      onDataChange({ photo: croppedImage });
-      // Save photo update to API
-      performSave({ ...data, photo: croppedImage });
+  const handleImageCrop = async (croppedImage: string) => {
+    if (!imageUploadType) return;
+
+    setImageUploading(true);
+    try {
+      const response = await apiRequest<{ key: string }>("files/images", {
+        method: "POST",
+        body: JSON.stringify({ base64Image: croppedImage }),
+      });
+
+      if (imageUploadType === "banner") {
+        // update the banner image in the data for immediate preview
+        onDataChange({ banner: croppedImage });
+        // Save banner update to API with stored key/URL
+        await performSave({ ...data, banner: response.key });
+      } else if (imageUploadType === "profile") {
+        // update the profile image in the data for immediate preview
+        onDataChange({ photo: croppedImage });
+        // Save photo update to API with stored key/URL
+        await performSave({ ...data, photo: response.key });
+      }
+    } catch (error) {
+      console.error("Failed to upload image:", error);
+    } finally {
+      setImagePreview(null);
+      setImageUploadType(null);
+      setImageUploading(false);
     }
-    setImagePreview(null);
-    setImageUploadType(null);
   };
 
   return (
-    <div className="text-white w-full">
+    <div className="text-white w-full relative">
       {/* Mobile View Container */}
       <div className="w-full max-w-[375px] mx-auto bg-slate-900 rounded-2xl shadow-2xl relative overflow-hidden">
         {/* Banner and Profile Image - Step 1 */}
@@ -1742,7 +1761,7 @@ export default function InlineEdit({
           {imageUploadType && imagePreview && (
             <ImageCropModal
               imageSrc={imagePreview}
-              aspectRatio={imageUploadType === "banner" ? 16 / 9 : 1}
+              aspectRatio={imageUploadType === "banner" ? 1200 / 630 : 1}
               onCrop={handleImageCrop}
               onCancel={() => {
                 setImagePreview(null);
@@ -1764,6 +1783,14 @@ export default function InlineEdit({
           />
         </div>
       </div>
+      {imageUploading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+            <span className="text-sm text-slate-100">Processing image…</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
