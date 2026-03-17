@@ -21,6 +21,7 @@ import {
   Menu,
   UserPlus,
   AppWindow,
+  Play,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -107,7 +108,14 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     value: "image-block",
     label: "Image",
     icon: <Image className="h-5 w-5" />,
-    description: "Simple image block with optional caption",
+    description: "Simple image block with optional title & description",
+    category: "Media",
+  },
+  {
+    value: "video-block",
+    label: "Video",
+    icon: <Play className="h-5 w-5" />,
+    description: "Embeddable video (YouTube, Vimeo, or direct URL)",
     category: "Media",
   },
   {
@@ -215,6 +223,7 @@ export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((bloc
   [
     "text-block",
     "image-block",
+    "video-block",
   ].includes(block.value)
 );
 

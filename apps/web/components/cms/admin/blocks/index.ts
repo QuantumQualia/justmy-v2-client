@@ -1,5 +1,6 @@
 export { PageBlockText } from "./text";
 export { ImageBlockEditor } from "./image";
+export { VideoBlockEditor } from "./video";
 export { PageBlockLayout } from "../page-blocks/layout";
 export { InlineEditViewBlockEditor } from "../page-blocks/mycard/inline-edit-view";
 export { LiveViewBlockEditor } from "../page-blocks/mycard/live-view";
