@@ -35,14 +35,14 @@ export interface BlockTypeConfig {
 export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
   {
     value: "text-block",
-    label: "Text Block",
+    label: "Text",
     icon: <Type className="h-5 w-5" />,
     description: "Rich text content with formatting options",
     category: "Content",
   },
   {
     value: "layout-block",
-    label: "Layout Block",
+    label: "Layout",
     icon: <Layout className="h-5 w-5" />,
     description: "Grid layout container for organizing blocks",
     category: "Layout",
@@ -52,28 +52,28 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Inline Edit View",
     icon: <Edit className="h-5 w-5" />,
     description: "Profile inline edit view component",
-    category: "Components",
+    category: "Profile",
   },
   {
     value: "live-view-block",
     label: "Live View",
     icon: <Eye className="h-5 w-5" />,
     description: "Profile live view card component",
-    category: "Components",
+    category: "Profile",
   },
   {
     value: "media-card-block",
     label: "Media Card",
     icon: <Image className="h-5 w-5" />,
     description: "Profile media card with QR code",
-    category: "Components",
+    category: "Profile",
   },
   {
     value: "qr-code-block",
     label: "QR Code",
     icon: <QrCode className="h-5 w-5" />,
     description: "QR code component for profile sharing",
-    category: "Components",
+    category: "Profile",
   },
   {
     value: "welcome-message-block",
@@ -94,14 +94,21 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Quick Action",
     icon: <Zap className="h-5 w-5" />,
     description: "Single quick action link (panel or button style)",
-    category: "Components",
+    category: "Actions",
   },
   {
     value: "ad-banner-block",
     label: "Ad Banner",
     icon: <Image className="h-5 w-5" />,
     description: "Image banner with profile slug and hotlinks",
-    category: "Components",
+    category: "Media",
+  },
+  {
+    value: "image-block",
+    label: "Image",
+    icon: <Image className="h-5 w-5" />,
+    description: "Simple image block with optional caption",
+    category: "Media",
   },
   {
     value: "weather-hero-block",
@@ -164,7 +171,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Placeholder Panel",
     icon: <Box className="h-5 w-5" />,
     description: "Dashed placeholder with custom text (default: Coming Soon)",
-    category: "Components",
+    category: "Utility",
   },
   {
     value: "super-search-bar-block",
@@ -192,14 +199,14 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Refer a Friend",
     icon: <UserPlus className="h-5 w-5" />,
     description: "Referral code, share link, and table of referred profiles",
-    category: "Components",
+    category: "Growth",
   },
   {
     value: "app-hub-block",
     label: "App Hub",
     icon: <AppWindow className="h-5 w-5" />,
     description: "Active apps dock and discovery library for the user's Personal OS",
-    category: "Components",
+    category: "Apps",
   },
 ];
 
@@ -207,6 +214,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
 export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((block) =>
   [
     "text-block",
+    "image-block",
   ].includes(block.value)
 );
 

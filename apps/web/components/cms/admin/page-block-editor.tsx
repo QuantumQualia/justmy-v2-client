@@ -7,6 +7,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import { cn } from "@workspace/ui/lib/utils";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
+import { PAGE_BLOCK_TYPES } from "./block-types";
 import {
   PageBlockText,
   PageBlockLayout,
@@ -14,6 +15,7 @@ import {
   LiveViewBlockEditor,
   MediaCardBlockEditor,
   QRCodeBlockEditor,
+  ImageBlockEditor,
   WelcomeMessageBlockEditor,
   DayInHistoryBlockEditor,
   QuickActionBlockEditor,
@@ -198,6 +200,9 @@ export function PageBlockEditor({
       case "ad-banner-block":
         return <AdBannerBlockEditor block={block} onUpdate={onUpdate} />;
 
+      case "image-block":
+        return <ImageBlockEditor block={block} onUpdate={onUpdate} />;
+
       case "super-search-bar-block":
         return <SuperSearchBarBlockEditor block={block} onUpdate={onUpdate} />;
 
@@ -250,33 +255,8 @@ export function PageBlockEditor({
   };
 
   const getBlockTypeLabel = () => {
-    const labels: Record<string, string> = {
-      "text-block": "Text Block",
-      "layout-block": "Layout Block",
-      "inline-edit-view-block": "Inline Edit View",
-      "live-view-block": "Live View",
-      "media-card-block": "Media Card",
-      "qr-code-block": "QR Code",
-      "welcome-message-block": "Welcome Message",
-      "day-in-history-block": "Day in History",
-      "quick-action-block": "Quick Action",
-      "ad-banner-block": "Ad Banner",
-      "super-search-bar-block": "Super Search Bar",
-      "search-results-panel-block": "Search Results Panel",
-      "weather-hero-block": "Weather Hero",
-      "hourly-scroll-block": "Hourly Scroll",
-      "lifestyle-indices-block": "Lifestyle Indices",
-      "seven-day-strategy-block": "7-Day Strategy",
-      "radar-panel-block": "Radar Panel",
-      "top-news-briefing-block": "Top News Briefing",
-      "market-events-block": "Market Events",
-      "local-deals-block": "Local Deals",
-      "placeholder-panel-block": "Placeholder Panel",
-      "navbar-block": "Navbar",
-      "refer-a-friend-block": "Refer a Friend",
-      "app-hub-block": "App Hub",
-    };
-    return labels[block.blockType] || block.blockType;
+    const config = PAGE_BLOCK_TYPES.find((b) => b.value === block.blockType);
+    return config?.label || block.blockType;
   };
 
   return (

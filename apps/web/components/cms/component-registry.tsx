@@ -5,6 +5,7 @@ import { WelcomeMessageBlock } from "./components/welcome-message-block";
 import { DayInHistoryBlock } from "./components/day-in-history-block";
 import { QuickActionBlock } from "./components/quick-action-block";
 import { AdBannerBlock } from "./components/ad-banner-block";
+import { ImageBlock } from "./components/image-block";
 import { SuperSearchBarBlock } from "./components/super-search-bar-block";
 import { SearchResultsPanelBlock } from "./components/search-results-panel-block";
 import { WeatherHeroBlock } from "./components/weather-hero-block";
@@ -36,6 +37,7 @@ export const ComponentRegistry: Record<
   "day-in-history-block": DayInHistoryBlock,
   "quick-action-block": QuickActionBlock,
   "ad-banner-block": AdBannerBlock,
+  "image-block": ImageBlock,
   "super-search-bar-block": SuperSearchBarBlock,
   "search-results-panel-block": SearchResultsPanelBlock,
   "weather-hero-block": WeatherHeroBlock,
