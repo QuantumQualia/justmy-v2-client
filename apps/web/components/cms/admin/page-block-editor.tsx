@@ -17,6 +17,7 @@ import {
   QRCodeBlockEditor,
   ImageBlockEditor,
   VideoBlockEditor,
+  LookBookBlockEditor,
   WelcomeMessageBlockEditor,
   DayInHistoryBlockEditor,
   QuickActionBlockEditor,
@@ -206,6 +207,9 @@ export function PageBlockEditor({
 
       case "video-block":
         return <VideoBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "lookbook-block":
+        return <LookBookBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "super-search-bar-block":
         return <SuperSearchBarBlockEditor block={block} onUpdate={onUpdate} />;

@@ -7,6 +7,7 @@ import { QuickActionBlock } from "./components/quick-action-block";
 import { AdBannerBlock } from "./components/ad-banner-block";
 import { ImageBlock } from "./components/image-block";
 import { VideoBlock } from "./components/video-block";
+import { LookBookBlock } from "./components/lookbook-block";
 import { SuperSearchBarBlock } from "./components/super-search-bar-block";
 import { SearchResultsPanelBlock } from "./components/search-results-panel-block";
 import { WeatherHeroBlock } from "./components/weather-hero-block";
@@ -40,6 +41,7 @@ export const ComponentRegistry: Record<
   "ad-banner-block": AdBannerBlock,
   "image-block": ImageBlock,
   "video-block": VideoBlock,
+  "lookbook-block": LookBookBlock,
   "super-search-bar-block": SuperSearchBarBlock,
   "search-results-panel-block": SearchResultsPanelBlock,
   "weather-hero-block": WeatherHeroBlock,

@@ -85,10 +85,11 @@ export function TagInput({
       )}
       <div
         className={cn(
-          "flex min-h-9 w-full flex-wrap items-center gap-2 rounded-md border px-3 py-2 text-sm text-slate-100 shadow-xs transition-[color,box-shadow] outline-none focus-within:ring-[3px]",
-          "border-slate-600 bg-black/40 focus-within:border-slate-500 focus-within:ring-slate-500/40",
-          "dark:border-slate-600 dark:bg-black/40 dark:text-slate-100 dark:focus-within:border-slate-500 dark:focus-within:ring-slate-500/40",
-          disabled && "pointer-events-none opacity-50",
+          // Match Input background, border, and focus styles
+          "flex min-h-9 w-full flex-wrap items-center gap-2 rounded-md border border-input px-3 py-1 text-base text-foreground shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
+          "bg-black/50 dark:bg-input/30",
+          "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+          "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           inputClassName
         )}
       >
@@ -97,7 +98,7 @@ export function TagInput({
             key={`${tag}-${index}`}
             variant="secondary"
             className={cn(
-              "gap-1 pr-1 font-normal border border-slate-600 bg-slate-700 text-slate-200 hover:bg-slate-600"
+              "gap-1 pr-1 font-normal border border-slate-600 bg-black/40 text-slate-200 hover:bg-black/60"
             )}
           >
             {tag}
@@ -121,7 +122,7 @@ export function TagInput({
           placeholder={value.length === 0 ? placeholder : ""}
           disabled={disabled}
           className={cn(
-            "min-w-[120px] flex-1 border-0 bg-transparent p-0 text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+            "min-w-[120px] flex-1 border-0 p-0 bg-transparent dark:bg-transparent text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
           )}
         />
       </div>

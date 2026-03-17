@@ -119,6 +119,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     category: "Media",
   },
   {
+    value: "lookbook-block",
+    label: "LookBook",
+    icon: <Image className="h-5 w-5" />,
+    description: "Grid image lookbook with per-image metadata",
+    category: "Media",
+  },
+  {
     value: "weather-hero-block",
     label: "Weather Hero",
     icon: <Sun className="h-5 w-5" />,
@@ -224,6 +231,7 @@ export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((bloc
     "text-block",
     "image-block",
     "video-block",
+    "lookbook-block",
   ].includes(block.value)
 );
 
