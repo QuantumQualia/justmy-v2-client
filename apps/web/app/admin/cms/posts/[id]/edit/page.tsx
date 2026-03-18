@@ -38,6 +38,7 @@ export default function EditPostPage() {
   const [formData, setFormData] = useState({
     title: "",
     slug: "",
+    externalUrl: "",
     excerpt: "",
     tags: [] as string[],
     isPublished: false,
@@ -50,6 +51,7 @@ export default function EditPostPage() {
   });
   const [content, setContent] = useState<PageBlock[]>([]);
   const loadedForRef = useRef<string | null>(null);
+  const isSharedPost = post?.type === "SHARED";
 
   const handleReorderBlock = (fromIndex: number, toIndex: number) => {
     setContent((prev) => {
@@ -83,6 +85,7 @@ export default function EditPostPage() {
       setFormData({
         title: data.title || "",
         slug: data.slug || "",
+        externalUrl: data.externalUrl || "",
         excerpt: data.excerpt ?? "",
         tags: data.tags ?? [],
         isPublished: data.isPublished || false,
@@ -108,18 +111,40 @@ export default function EditPostPage() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { seo, ...rest } = formData;
+      const { seo, slug, externalUrl, tags, ...rest } = formData;
       const { ogImage, ...seoWithoutOgImage } = seo;
-      const payload = {
-        ...rest,
-        content,
-        tags: formData.tags?.length ? formData.tags : undefined,
-        seo: {
-          ...seoWithoutOgImage,
-          ...(ogImageKey ? { ogImage: ogImageKey } : {}),
-        },
+
+      const seoPayload = {
+        ...seoWithoutOgImage,
+        ...(ogImageKey ? { ogImage: ogImageKey } : {}),
       };
-      await cmsService.updatePost(postId, payload);
+
+      if (isSharedPost) {
+        const updatedPost = await cmsService.updatePost(postId, {
+          title: rest.title,
+          externalUrl: externalUrl.trim() || undefined,
+          excerpt: rest.excerpt?.trim() || undefined,
+          tags: tags?.length ? tags : undefined,
+          isPublished: rest.isPublished,
+          seo: seoPayload,
+        });
+        setPost(updatedPost);
+      } else {
+        const updatedPost = await cmsService.updatePost(postId, {
+          ...rest,
+          slug: slug?.trim() || undefined,
+          content,
+          tags: tags?.length ? tags : undefined,
+          seo: seoPayload,
+        });
+        // Backend may adjust slug for uniqueness; reflect it in UI.
+        setPost(updatedPost);
+        setFormData((prev) => ({
+          ...prev,
+          slug: updatedPost.slug,
+        }));
+      }
+
       toast.success("Post saved");
     } catch (error) {
       console.error("Failed to save post:", error);
@@ -269,14 +294,18 @@ export default function EditPostPage() {
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={() => window.open(`/blog/${post.slug}`, "_blank")}
+              onClick={() => post.slug && window.open(`/blog/${post.slug}`, "_blank")}
+              disabled={!post.slug}
             >
               <Eye className="h-4 w-4 mr-2" />
               Preview
             </Button>
             <Button
               onClick={handleSave}
-              disabled={saving}
+              disabled={
+                saving ||
+                (isSharedPost ? !formData.externalUrl.trim() : false)
+              }
               className="bg-blue-600 hover:bg-blue-700"
             >
               {saving ? (
@@ -300,7 +329,9 @@ export default function EditPostPage() {
               <CardHeader>
                 <CardTitle className="text-white">Post Settings</CardTitle>
                 <CardDescription className="text-slate-400">
-                  Title, slug, excerpt, tags, and content blocks.
+                  {isSharedPost
+                    ? "Title, external URL, excerpt, tags, and publish settings."
+                    : "Title, slug, excerpt, tags, and content blocks."}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -313,22 +344,43 @@ export default function EditPostPage() {
                     className="bg-black/50 border-slate-700 text-white mt-1"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="slug" className="text-slate-300">Slug (URL) *</Label>
-                  <Input
-                    id="slug"
-                    value={formData.slug}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
-                      })
-                    }
-                    className="bg-black/50 border-slate-700 text-white mt-1"
-                    placeholder="my-post"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">/blog/{formData.slug || "my-post"}</p>
-                </div>
+                {isSharedPost ? (
+                  <div>
+                    <Label htmlFor="externalUrl" className="text-slate-300">External URL *</Label>
+                    <Input
+                      id="externalUrl"
+                      type="url"
+                      value={formData.externalUrl}
+                      disabled
+                      readOnly
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          externalUrl: e.target.value,
+                        })
+                      }
+                      className="bg-black/50 border-slate-700 text-white mt-1"
+                      placeholder="https://example.com/article"
+                    />
+                  </div>
+                ) : (
+                  <div>
+                    <Label htmlFor="slug" className="text-slate-300">Slug (URL) *</Label>
+                    <Input
+                      id="slug"
+                      value={formData.slug}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
+                        })
+                      }
+                      className="bg-black/50 border-slate-700 text-white mt-1"
+                      placeholder="my-post"
+                    />
+                    <p className="text-xs text-slate-500 mt-1">/blog/{formData.slug || "my-post"}</p>
+                  </div>
+                )}
                 <div>
                   <Label htmlFor="excerpt" className="text-slate-300">Excerpt</Label>
                   <Textarea
@@ -367,43 +419,45 @@ export default function EditPostPage() {
               </CardContent>
             </Card>
 
-            <Card className="border-slate-800 bg-slate-900/50">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <div>
-                  <CardTitle className="text-white">
-                    Content Blocks ({content.length})
-                  </CardTitle>
-                  <CardDescription className="text-slate-400">
-                    Add and reorder blocks for the post body.
-                  </CardDescription>
-                </div>
-                <PostBlockSelector onSelect={handleAddBlock} />
-              </CardHeader>
-              <CardContent>
-              {content.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
-                  <p>No content blocks yet. Add a block to get started.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {content.map((block: PageBlock, index: number) => (
-                    <PageBlockEditor
-                      key={block.id || index}
-                      block={block}
-                      index={index}
-                      onUpdate={(updatedBlock) => handleUpdateBlock(index, updatedBlock)}
-                      onDelete={() => handleDeleteBlock(index)}
-                      onMove={handleMoveBlock}
-                      onReorder={handleReorderBlock}
-                      onDuplicate={() => handleDuplicateBlock(index)}
-                      isFirst={index === 0}
-                      isLast={index === content.length - 1}
-                    />
-                  ))}
-                </div>
-              )}
-              </CardContent>
-            </Card>
+            {!isSharedPost && (
+              <Card className="border-slate-800 bg-slate-900/50">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+                  <div>
+                    <CardTitle className="text-white">
+                      Content Blocks ({content.length})
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      Add and reorder blocks for the post body.
+                    </CardDescription>
+                  </div>
+                  <PostBlockSelector onSelect={handleAddBlock} />
+                </CardHeader>
+                <CardContent>
+                {content.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400">
+                    <p>No content blocks yet. Add a block to get started.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {content.map((block: PageBlock, index: number) => (
+                      <PageBlockEditor
+                        key={block.id || index}
+                        block={block}
+                        index={index}
+                        onUpdate={(updatedBlock) => handleUpdateBlock(index, updatedBlock)}
+                        onDelete={() => handleDeleteBlock(index)}
+                        onMove={handleMoveBlock}
+                        onReorder={handleReorderBlock}
+                        onDuplicate={() => handleDuplicateBlock(index)}
+                        isFirst={index === 0}
+                        isLast={index === content.length - 1}
+                      />
+                    ))}
+                  </div>
+                )}
+                </CardContent>
+              </Card>
+            )}
           </div>
 
           <div className="space-y-6">

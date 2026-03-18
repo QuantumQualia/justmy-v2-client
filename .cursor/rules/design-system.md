@@ -110,7 +110,48 @@
 
 ---
 
-# 5. 🧩 Component System (shadcn/ui)
+# 5. 🔲 Border Radius System
+
+## Core Pattern (MANDATORY)
+
+We use a **signature asymmetric radius style**:
+
+👉 `rounded-lg rounded-br-none`
+
+Meaning:
+- top-left → rounded
+- top-right → rounded
+- bottom-left → rounded
+- bottom-right → NONE
+
+This creates a distinctive “cut corner” design.
+
+---
+
+## Rules
+
+- Default radius for components:
+  - `rounded-lg rounded-br-none`
+
+- This applies to:
+  - Cards
+  - Buttons (primary/secondary)
+  - Inputs
+  - Modals
+  - Dropdowns
+  - Containers
+
+---
+
+## Variants
+
+### Small components
+```tsx
+rounded-md rounded-br-none
+
+---
+
+# 6. 🧩 Component System (shadcn/ui)
 
 ## Rules
 
@@ -137,7 +178,7 @@ export function PrimaryButton(props) {
 
 ---
 
-# 6. 🌗 Dark Mode Rules
+# 7. 🌗 Dark Mode Rules
 
 ## Requirements
 
@@ -157,7 +198,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 7. 📦 Layout & Containers
+# 8. 📦 Layout & Containers
 
 ## Rules
 
@@ -181,7 +222,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 8. 🧱 Forms & Inputs
+# 9. 🧱 Forms & Inputs
 
 ## Rules
 
@@ -196,7 +237,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 9. 🔘 Buttons
+# 10. 🔘 Buttons
 
 ## Rules
 
@@ -216,7 +257,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 10. 📊 Data Display
+# 11. 📊 Data Display
 
 ## Rules
 
@@ -230,7 +271,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 11. 🧭 Navigation
+# 12. 🧭 Navigation
 
 ## Rules
 
@@ -244,7 +285,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 12. ♻️ Reusability
+# 13. ♻️ Reusability
 
 ## Rules
 
@@ -260,7 +301,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 13. 🚫 Anti-Patterns (DO NOT DO)
+# 14. 🚫 Anti-Patterns (DO NOT DO)
 
 * ❌ Hardcoded colors (#fff, #000)
 * ❌ Inline styles
@@ -270,7 +311,7 @@ className="bg-background text-foreground"
 
 ---
 
-# 14. ✅ Definition of Done (UI)
+# 15. ✅ Definition of Done (UI)
 
 A component is complete only if:
 
@@ -283,7 +324,7 @@ A component is complete only if:
 
 ---
 
-# 15. 🔥 Optional Enhancements
+# 16. 🔥 Optional Enhancements
 
 * Use `clsx` or `cn()` utility for class merging
 * Use `cva` (class-variance-authority) for variants

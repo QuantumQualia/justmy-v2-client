@@ -221,10 +221,21 @@ export async function apiRequest<T>(
     }
 
     if (!response.ok) {
+      // In many backends (e.g. NestJS ConflictException), the response body might be:
+      // { message: "...", post: {...} } without an `error` field.
+      // We include the full payload in `ApiClientError.error` so callers can inspect it.
+      const errorPayload = data && data.error !== undefined ? data.error : data;
+      const errorString =
+        typeof errorPayload === "string"
+          ? errorPayload
+          : errorPayload !== undefined
+            ? JSON.stringify(errorPayload)
+            : undefined;
+
       throw new ApiClientError(
         data.message || data.error || "An error occurred",
         response.status,
-        data.error
+        errorString
       );
     }
 

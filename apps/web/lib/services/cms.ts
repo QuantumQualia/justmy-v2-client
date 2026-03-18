@@ -166,8 +166,13 @@ export interface PayloadPost {
   id: string;
   title: string;
   slug: string;
+  // Post type discriminator from backend.
+  type: "ARTICLE" | "SHARED";
+  // Only present for "shared-from-url" posts created from external sources.
+  externalUrl?: string | null;
   excerpt?: string | null;
-  content: PageBlock[];
+  // Shared-from-url posts may not include editable content blocks.
+  content?: PageBlock[];
   tags?: string[] | null;
   seo?: {
     title?: string;
@@ -204,6 +209,8 @@ export interface PaginatedPostsResponse {
 export interface CreatePostDto {
   title: string;
   slug?: string;
+  // Only used for "shared-from-url" post type.
+  externalUrl?: string;
   excerpt?: string;
   content?: PageBlock[];
   tags?: string[];
@@ -214,6 +221,23 @@ export interface CreatePostDto {
     ogImage?: string;
   };
   isPublished?: boolean;
+}
+
+/**
+ * Create Shared Post DTO (matches backend CreateSharedPostDto)
+ */
+export interface CreateSharedPostDto {
+  externalUrl: string;
+  title?: string;
+  excerpt?: string;
+  tags?: string[];
+  isPublished?: boolean;
+  seo?: {
+    title?: string;
+    description?: string;
+    keywords?: string;
+    ogImage?: string;
+  };
 }
 
 /**
@@ -502,6 +526,23 @@ export const cmsService = {
     } catch (error) {
       if (error instanceof ApiClientError) throw error;
       throw new ApiClientError("Failed to create post.");
+    }
+  },
+
+  /**
+   * Create a post by fetching metadata from an external URL.
+   */
+  async createSharedPostFromUrl(
+    data: CreateSharedPostDto,
+  ): Promise<PayloadPost> {
+    try {
+      return await apiRequest<PayloadPost>("cms/posts/shared-from-url", {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to create shared post.");
     }
   },
 

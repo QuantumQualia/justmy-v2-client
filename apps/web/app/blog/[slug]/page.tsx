@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { cmsService } from "@/lib/services/cms";
 import { PayloadPostRenderer } from "@/components/cms/payload-post-renderer";
+import { SharedPostRedirector } from "@/components/cms/shared-post-redirector";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -42,7 +43,7 @@ export async function generateMetadata({
     title,
     description,
     alternates: {
-      canonical: postUrl,
+      canonical: postUrl, // Keep SEO on your domain.
     },
     openGraph: {
       type: "article",
@@ -75,6 +76,30 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 
   if (!post.isPublished) {
     notFound();
+  }
+
+  // For SHARED posts, keep HTML/metadata on your domain for SEO,
+  // but navigate users to the external URL on the client immediately.
+  if (post.type === "SHARED" && post.externalUrl) {
+    return (
+      <>
+        <SharedPostRedirector externalUrl={post.externalUrl} />
+        <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-8">
+          <div className="max-w-3xl text-center">
+            <h1 className="text-3xl font-bold">{post.seo?.title || post.title}</h1>
+            {post.excerpt && (
+              <p className="mt-4 text-muted-foreground">{post.excerpt}</p>
+            )}
+            <a
+              href={post.externalUrl}
+              className="mt-8 inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            >
+              Continue to source
+            </a>
+          </div>
+        </div>
+      </>
+    );
   }
 
   return <PayloadPostRenderer post={post} />;
