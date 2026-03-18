@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useRef } from "react"
+import { useDebounce } from "use-debounce"
 import { Label } from "@workspace/ui/components/label"
 import { Input } from "@workspace/ui/components/input"
 import { Button } from "@workspace/ui/components/button"
@@ -36,7 +37,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
   const [parentMarkets, setParentMarkets] = useState<MarketResponseDto[]>([])
   const [loadingParents, setLoadingParents] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
-  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [debouncedSearch] = useDebounce(searchQuery, 300)
   const [selectedParent, setSelectedParent] = useState<MarketResponseDto | null>(null)
   const selectedParentRef = useRef<MarketResponseDto | null>(null)
   const [formData, setFormData] = useState<MarketIdentityFormData>({
@@ -53,15 +54,6 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
   const prevInitialDataRef = useRef<string>("")
   const fetchingParentsRef = useRef<string | null>(null)
   const fetchingSelectedParentRef = useRef<string | null>(null)
-
-  // Debounce search query
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchQuery)
-    }, 300) // 300ms debounce
-
-    return () => clearTimeout(timer)
-  }, [searchQuery])
 
   // Update ref when selectedParent changes
   useEffect(() => {

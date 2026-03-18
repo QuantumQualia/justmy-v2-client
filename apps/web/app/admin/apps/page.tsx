@@ -16,7 +16,7 @@ export default function AppsPage() {
   const [appsList, setAppsList] = useState<AppResponseDto[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [debouncedSearch] = useDebounce(search, 400);
+  const [debouncedSearch] = useDebounce(search, 750);
 
   useEffect(() => {
     loadAllApps(debouncedSearch);

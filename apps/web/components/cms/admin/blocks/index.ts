@@ -11,6 +11,7 @@ export { WelcomeMessageBlockEditor } from "../page-blocks/welcome-message";
 export { DayInHistoryBlockEditor } from "../page-blocks/day-in-history";
 export { QuickActionBlockEditor } from "../page-blocks/quick-action";
 export { AdBannerBlockEditor } from "../page-blocks/ad-banner";
+export { ProfileSpotlightBlockEditor } from "./profile-spotlight";
 export { SuperSearchBarBlockEditor } from "../page-blocks/super-search-bar";
 export { SearchResultsPanelBlockEditor } from "../page-blocks/search-results-panel";
 export { WeatherHeroBlockEditor } from "../page-blocks/weather-hero";

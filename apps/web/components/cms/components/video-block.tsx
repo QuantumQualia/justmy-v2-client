@@ -1,4 +1,4 @@
-import type React from "react";
+import { getVideoEmbedUrl } from "@/lib/utils/video";
 
 interface VideoBlockProps {
   videoUrl: string;
@@ -6,43 +6,10 @@ interface VideoBlockProps {
   description?: string;
 }
 
-function getYouTubeEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtube.com")) {
-      const v = u.searchParams.get("v");
-      if (v) return `https://www.youtube.com/embed/${v}`;
-    }
-    if (u.hostname === "youtu.be") {
-      const id = u.pathname.slice(1);
-      if (id) return `https://www.youtube.com/embed/${id}`;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
-function getVimeoEmbedUrl(url: string): string | null {
-  try {
-    const u = new URL(url);
-    if (u.hostname.includes("vimeo.com")) {
-      const id = u.pathname.split("/").filter(Boolean).pop();
-      if (id) return `https://player.vimeo.com/video/${id}`;
-    }
-  } catch {
-    // ignore
-  }
-  return null;
-}
-
 export function VideoBlock({ videoUrl, title, description }: VideoBlockProps) {
   if (!videoUrl) return null;
 
-  const youTubeEmbed = getYouTubeEmbedUrl(videoUrl);
-  const vimeoEmbed = getVimeoEmbedUrl(videoUrl);
-
-  const embedUrl = youTubeEmbed || vimeoEmbed || null;
+  const embedUrl = getVideoEmbedUrl(videoUrl);
 
   return (
     <section className="w-full">
@@ -82,4 +49,3 @@ export function VideoBlock({ videoUrl, title, description }: VideoBlockProps) {
     </section>
   );
 }
-

@@ -77,6 +77,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     category: "Profile",
   },
   {
+    value: "profile-spotlight-block",
+    label: "Profile Spotlight & Feed",
+    icon: <UserPlus className="h-5 w-5" />,
+    description: "Hero profile spotlight with supporting profile feed row",
+    category: "Profile",
+  },
+  {
     value: "welcome-message-block",
     label: "Welcome Message",
     icon: <Type className="h-5 w-5" />,
@@ -232,6 +239,7 @@ export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((bloc
     "image-block",
     "video-block",
     "lookbook-block",
+    "profile-spotlight-block",
   ].includes(block.value)
 );
 

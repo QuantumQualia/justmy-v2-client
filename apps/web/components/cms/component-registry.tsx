@@ -26,6 +26,7 @@ import { QRCodeBlock } from "./components/mycard/qr-code-block";
 import { NavbarBlock } from "./components/navbar-block";
 import { ReferAFriendBlock } from "./components/refer-a-friend-block";
 import { AppHubBlock } from "./components/app-hub-block";
+import { ProfileSpotlightBlock } from "./components/profile-spotlight-block";
 import type { PageBlock, BlockStyles, ResponsiveValue } from "@/lib/services/cms";
 
 // Component registry - maps Payload block types to React components
@@ -60,6 +61,7 @@ export const ComponentRegistry: Record<
   "navbar-block": NavbarBlock,
   "refer-a-friend-block": ReferAFriendBlock,
   "app-hub-block": AppHubBlock,
+  "profile-spotlight-block": ProfileSpotlightBlock,
 };
 
 /**
@@ -275,6 +277,7 @@ export function BlockRenderer({
     "navbar-block",
     "refer-a-friend-block",
     "app-hub-block",
+    "profile-spotlight-block",
   ];
   const isComponentBlock = componentBlocks.includes(block.blockType);
 

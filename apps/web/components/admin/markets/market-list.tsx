@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef, useMemo } from "react"
+import { useDebounce } from "use-debounce"
 import Link from "next/link"
 import { ColumnDef } from "@tanstack/react-table"
 import { Button } from "@workspace/ui/components/button"
@@ -22,18 +23,14 @@ export function MarketList() {
   const [totalPages, setTotalPages] = useState(0)
 
   // Debounce search to avoid too many API calls
-  const [debouncedSearch, setDebouncedSearch] = useState("")
+  const [debouncedSearch] = useDebounce(searchTerm, 750)
   const fetchingRef = useRef(false)
   const lastFetchParamsRef = useRef<string>("")
 
+  // Reset to page 1 when debounced search changes
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm)
-      setCurrentPage(1) // Reset to page 1 when search changes
-    }, 750) // 750ms debounce
-
-    return () => clearTimeout(timer)
-  }, [searchTerm])
+    setCurrentPage(1)
+  }, [debouncedSearch])
 
   // Fetch markets from API
   const fetchMarkets = useCallback(async () => {

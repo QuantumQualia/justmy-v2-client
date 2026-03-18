@@ -18,6 +18,7 @@ import {
   ImageBlockEditor,
   VideoBlockEditor,
   LookBookBlockEditor,
+  ProfileSpotlightBlockEditor,
   WelcomeMessageBlockEditor,
   DayInHistoryBlockEditor,
   QuickActionBlockEditor,
@@ -210,6 +211,8 @@ export function PageBlockEditor({
 
       case "lookbook-block":
         return <LookBookBlockEditor block={block} onUpdate={onUpdate} />;
+      case "profile-spotlight-block":
+        return <ProfileSpotlightBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "super-search-bar-block":
         return <SuperSearchBarBlockEditor block={block} onUpdate={onUpdate} />;

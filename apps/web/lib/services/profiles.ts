@@ -57,6 +57,25 @@ export interface GetProfilesParams {
   search?: string;
 }
 
+// Public-facing summary returned from profiles/market
+export interface MarketProfileSummary {
+  id: string;
+  name: string;
+  slug: string;
+  type?: string;
+  zipCode?: string;
+  description?: string;
+  [key: string]: any;
+}
+
+export interface PaginatedMarketProfilesResponse {
+  data: MarketProfileSummary[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 // Update Profile DTOs (matching backend UpdateProfileDto)
 export interface SocialLinkDto {
   name: string; // e.g., "facebook", "instagram", "twitter", "linkedin"
@@ -135,6 +154,38 @@ export const profilesService = {
   },
 
   /**
+   * Get paginated list of profiles in the signed-in user's markets
+   * (uses /profiles/market, requires auth)
+   */
+  async getMarketProfiles(
+    params: GetProfilesParams = {},
+  ): Promise<PaginatedMarketProfilesResponse> {
+    try {
+      const queryParams: Record<string, string | number> = {};
+
+      if (params.page !== undefined) {
+        queryParams.page = params.page;
+      }
+      if (params.limit !== undefined) {
+        queryParams.limit = params.limit;
+      }
+      if (params.search) {
+        queryParams.search = params.search;
+      }
+
+      return await apiRequest<PaginatedMarketProfilesResponse>("profiles/market", {
+        method: "GET",
+        params: queryParams,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to fetch market profiles.");
+    }
+  },
+
+  /**
    * Get profile by slug (public endpoint)
    */
   async getProfileBySlug(slug: string): Promise<{ profile: any } | null> {
@@ -149,6 +200,22 @@ export const profilesService = {
       // }
       // throw new ApiClientError("Failed to fetch profile.");
       return null;
+    }
+  },
+
+  /**
+   * Bulk-fetch profiles by slugs (public endpoint)
+   */
+  async getProfilesBySlugs(slugs: string[]): Promise<{ profiles: any[] }> {
+    if (slugs.length === 0) return { profiles: [] };
+    try {
+      return await apiRequest<{ profiles: any[] }>("profiles/slugs", {
+        method: "GET",
+        params: { slugs: slugs.join(",") },
+        skipAuth: true,
+      });
+    } catch {
+      return { profiles: [] };
     }
   },
 
