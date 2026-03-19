@@ -8,6 +8,8 @@ import { appsService, type AppNavigationResponseDto } from "@/lib/services/apps"
 import { authService } from "@/lib/services/auth";
 import { cn } from "@workspace/ui/lib/utils";
 
+const appNavRequestCache = new Map<number, Promise<AppNavigationResponseDto[]>>();
+
 interface MobileSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -44,6 +46,7 @@ export function MobileSidebar({
 
   // Fetch navigation for all "app"-type items when navigation changes
   React.useEffect(() => {
+    let cancelled = false;
     const appItems = navigation.filter(
       (item) => item.type === "app" && item.appId
     );
@@ -63,10 +66,26 @@ export function MobileSidebar({
 
     Promise.allSettled(
       idsToFetch.map(async (id) => {
-        const nav = await appsService.getAppNavigationByAppId(id);
+        const existingRequest = appNavRequestCache.get(id);
+        if (existingRequest) {
+          const nav = await existingRequest;
+          return { id, nav };
+        }
+
+        const request = appsService
+          .getAppNavigationByAppId(id)
+          .then((nav) => nav ?? [])
+          .finally(() => {
+            appNavRequestCache.delete(id);
+          });
+
+        appNavRequestCache.set(id, request);
+        const nav = await request;
         return { id, nav: nav ?? [] };
       })
     ).then((results) => {
+      if (cancelled) return;
+
       const resolved: Record<number, AppNavigationResponseDto[]> = {};
       results.forEach((r) => {
         if (r.status === "fulfilled") {
@@ -81,6 +100,10 @@ export function MobileSidebar({
         return next;
       });
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [navigation]);
 
   // Close sidebar on Escape

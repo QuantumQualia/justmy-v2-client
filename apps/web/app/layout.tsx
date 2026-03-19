@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
@@ -65,18 +66,21 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const cookieStore = await cookies()
+  const initialIsAuthed = !!cookieStore.get("auth_access_token")?.value
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
         <Providers>
-          <Navbar />
+          <Navbar initialIsAuthed={initialIsAuthed} />
           <div className="mt-5">
             <SearchResultsPanel />
             {children}

@@ -21,6 +21,7 @@ export interface NavbarProps {
    * Defaults to false when omitted.
    */
   businessSearchMode?: boolean;
+  initialIsAuthed?: boolean;
 }
 
 /**
@@ -106,9 +107,12 @@ function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
  * - When logged out: show the fixed marketing navbar.
  * - When logged in: show the app-based navbar (profile switcher + super search).
  */
-export function Navbar({ businessSearchMode }: NavbarProps = {}) {
+export function Navbar({
+  businessSearchMode,
+  initialIsAuthed = false,
+}: NavbarProps = {}) {
   const pathname = usePathname();
-  const [isAuthed, setIsAuthed] = React.useState<boolean | null>(null);
+  const [isAuthed, setIsAuthed] = React.useState<boolean>(initialIsAuthed);
 
   React.useEffect(() => {
     let mounted = true;
@@ -128,7 +132,7 @@ export function Navbar({ businessSearchMode }: NavbarProps = {}) {
     };
   }, [pathname]);
 
-  // Default to marketing during initial auth-check to avoid a flash of app UI.
+  // Render marketing for logged-out users (or while auth state is unknown).
   if (isAuthed) {
     return <AppNavbar businessSearchMode={businessSearchMode} />;
   }
