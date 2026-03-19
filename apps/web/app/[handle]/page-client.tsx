@@ -11,7 +11,7 @@ interface MyCardPageClientProps {
 export default function MyCardPageClient({ params, initialData }: MyCardPageClientProps) {
   if (!initialData) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-black flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-4">Profile Not Found</h1>
           <p className="text-slate-400">The profile you're looking for doesn't exist.</p>

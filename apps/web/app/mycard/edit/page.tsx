@@ -30,7 +30,7 @@ export default function ProfilePage() {
   }, [fetchProfileData]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       {/* Header Section */}
       <div className="sticky top-0 z-40 bg-slate-900/80 backdrop-blur-md border-b border-slate-800/50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

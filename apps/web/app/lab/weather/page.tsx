@@ -148,14 +148,14 @@ export default function WeatherLabPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 to-slate-950 text-slate-50 flex items-center justify-center p-6">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-gradient-to-b from-slate-950 to-slate-950 text-slate-50 flex items-center justify-center p-6">
         <p className="text-white/70">Loading your Strategic Weather…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950 text-slate-50">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950 text-slate-50">
       <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8 sm:space-y-10">
         <header className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">

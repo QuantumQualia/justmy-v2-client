@@ -14,7 +14,7 @@ interface PayloadPageRendererProps {
 export function PayloadPageRenderer({ page }: PayloadPageRendererProps) {
   if (!page.isPublished) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Page Not Published</h1>
           <p className="text-muted-foreground">
@@ -28,7 +28,7 @@ export function PayloadPageRenderer({ page }: PayloadPageRendererProps) {
   return (
     <BlocksRenderer
       blocks={page.content || []}
-      className="min-h-screen bg-background text-foreground"
+      className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground"
       emptyMessage="No content available for this page."
     />
   );

@@ -18,7 +18,6 @@ import {
   CalendarRange,
   Tag,
   Box,
-  Menu,
   UserPlus,
   AppWindow,
   Play,
@@ -201,20 +200,6 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     icon: <Search className="h-5 w-5" />,
     description: "Floating search bar with voice search; drives global search",
     category: "Components",
-  },
-  {
-    value: "search-results-panel-block",
-    label: "Search Results Panel",
-    icon: <PanelTop className="h-5 w-5" />,
-    description: "Collapsible panel showing search results from Super Search",
-    category: "Components",
-  },
-  {
-    value: "navbar-block",
-    label: "Navbar",
-    icon: <Menu className="h-5 w-5" />,
-    description: "Sticky navbar with profile switcher, search bar, and hamburger menu",
-    category: "Navigation",
   },
   {
     value: "refer-a-friend-block",

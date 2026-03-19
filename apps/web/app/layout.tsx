@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
+import { Navbar } from "@/components/common/navbar/navbar"
+import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
 
 // Configure fonts with fallback to handle network issues during build
 const fontSans = Geist({
@@ -73,7 +75,13 @@ export default function RootLayout({
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar />
+          <div className="mt-5">
+            <SearchResultsPanel />
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   )

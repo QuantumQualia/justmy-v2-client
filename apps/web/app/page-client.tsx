@@ -42,26 +42,8 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white font-sans selection:bg-emerald-500 selection:text-black">
       {/* --- NAVIGATION --- */}
-      <nav className="border-b border-white/10 bg-black/50 backdrop-blur-md sticky top-0 z-50">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="text-xl font-bold tracking-tighter">
-            JustMy<span className="text-emerald-500">.com</span>
-          </div>
-          <div className="flex gap-4">
-            <Button variant="ghost" className="cursor-pointer text-slate-400 hover:text-white hover:bg-white/10" onClick={() => router.push("/login")}>
-              Login
-            </Button>
-            <Button 
-              className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-6"
-              onClick={() => handleFreeSignup("personal")}
-            >
-              Get Started
-            </Button>
-          </div>
-        </div>
-      </nav>
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-20 pb-32 overflow-hidden">
@@ -140,7 +122,7 @@ export default function LandingPage() {
             />
 
             {/* 4. FOUNDERS GROWTH OS ($350/yr) */}
-            <div className="relative transform md:-translate-y-4">
+            <div className="relative transform md:-translate-y-4" id="pricing_founder">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-black px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide z-10">
                 Best Value
               </div>

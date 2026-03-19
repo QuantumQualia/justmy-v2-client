@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white flex items-center justify-center p-4">
       <Suspense fallback={<div className="text-white">Loading...</div>}>
         <LoginForm />
       </Suspense>

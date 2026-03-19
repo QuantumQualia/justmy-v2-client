@@ -261,7 +261,7 @@ export function MobileSidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 transition-opacity"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -270,7 +270,7 @@ export function MobileSidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900 border-l border-slate-800 z-50 transform transition-transform duration-300 ease-in-out flex flex-col",
+          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900 border-l border-slate-800 z-70 transform transition-transform duration-300 ease-in-out flex flex-col",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >

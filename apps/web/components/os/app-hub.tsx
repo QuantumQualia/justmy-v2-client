@@ -8,6 +8,7 @@ import {
   AccordionTrigger,
 } from "@workspace/ui/components/accordion";
 import { Button } from "@workspace/ui/components/button";
+import { Badge } from "@workspace/ui/components/badge";
 import { Play, Plus, Minus } from "lucide-react";
 import { appsService, type AppResponseDto, type ProfileAppResponseDto } from "@/lib/services/apps";
 import { useProfileStore } from "@/lib/store/profile-store";
@@ -18,6 +19,9 @@ type AppRecord = {
   name: string;
   icon?: string | null;
   description: string;
+  isActive: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
   video_preview_url: string;
   is_installed: boolean;
   url: string;
@@ -133,6 +137,9 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
           name: app.name,
           icon: app.icon ?? null,
           description: app.description ?? "",
+          isActive: app.isActive,
+          createdAt: app.createdAt,
+          updatedAt: app.updatedAt,
           // Temporary shared promo video until per-app previews exist
           video_preview_url: "https://player.vimeo.com/video/347119375",
           is_installed: installedAppIds.has(app.id),
@@ -234,9 +241,45 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
     console.log("Open app:", app);
   };
 
+  const getAppStatus = (app: AppRecord) => {
+    const isActive = !!app.isActive;
+
+    if (!isActive) {
+      return {
+        label: "Coming Soon",
+        variant: "outline" as const,
+        className: "border-slate-700 text-slate-300 bg-transparent",
+      };
+    }
+
+    const updatedAt = app.updatedAt ? new Date(app.updatedAt) : null;
+    const ageMs = updatedAt && !Number.isNaN(updatedAt.getTime())
+      ? Date.now() - updatedAt.getTime()
+      : null;
+
+    // If the app was updated very recently, label it as "Updating"
+    const updatingThresholdMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+    const isUpdating = typeof ageMs === "number" && ageMs < updatingThresholdMs;
+
+    if (isUpdating) {
+      return {
+        label: "Updating",
+        variant: "secondary" as const,
+        className: "bg-amber-500/10 text-amber-300 border border-amber-500/20",
+      };
+    }
+
+    return {
+      label: "Live",
+      variant: "secondary" as const,
+      className: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20",
+    };
+  };
+
   const renderAppBar = (app: AppRecord, area: "active" | "available") => {
     const isExpanded = expandedId === String(app.id);
     const isNewlyInstalled = justInstalledId === app.id;
+    const status = getAppStatus(app);
 
     return (
       <AccordionItem
@@ -262,9 +305,17 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
               </span>
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="text-sm sm:text-base font-semibold text-white tracking-tight">
-                {app.name}
-              </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-sm sm:text-base font-semibold text-white tracking-tight">
+                  {app.name}
+                </span>
+                <Badge
+                  variant={status.variant}
+                  className={`px-2 py-0.5 rounded-full text-[10px] ${status.className}`}
+                >
+                  {status.label}
+                </Badge>
+              </div>
               <span className="text-[11px] sm:text-xs text-slate-400 uppercase tracking-[0.16em]">
                 {area === "active" ? "Installed" : "Available"}
               </span>
@@ -347,7 +398,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white px-4 py-6 sm:px-6 sm:py-10 font-sans">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white px-4 py-6 sm:px-6 sm:py-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-8 sm:space-y-10">
         <header className="space-y-2 sm:space-y-3">
           <div className="text-xs sm:text-sm font-semibold tracking-[0.22em] text-emerald-400 uppercase">

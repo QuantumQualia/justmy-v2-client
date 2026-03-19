@@ -14,7 +14,7 @@ interface PayloadPostRendererProps {
 export function PayloadPostRenderer({ post }: PayloadPostRendererProps) {
   if (!post.isPublished) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-background flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground mb-4">Post Not Published</h1>
           <p className="text-muted-foreground">
@@ -28,7 +28,7 @@ export function PayloadPostRenderer({ post }: PayloadPostRendererProps) {
   return (
     <BlocksRenderer
       blocks={post.content || []}
-      className="min-h-screen bg-background text-foreground"
+      className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground"
       emptyMessage="No content available for this post."
     />
   );

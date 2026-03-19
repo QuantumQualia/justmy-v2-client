@@ -12,6 +12,8 @@ import { SuperSearchBar } from "../search/super-search-bar";
 import { MobileSidebar } from "./mobile-sidebar";
 import { ProfileSwitcher } from "./profile-switcher";
 import { cn } from "@workspace/ui/lib/utils";
+import { isAuthenticated } from "@/lib/services/session";
+import { FixedMarketingNavbar } from "./fixed-marketing-navbar";
 
 export interface NavbarProps {
   /**
@@ -29,7 +31,7 @@ export interface NavbarProps {
  * - Super search bar in the center
  * - Hamburger menu on the right (mobile)
  */
-export function Navbar({ businessSearchMode }: NavbarProps = {}) {
+function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
   const isMobile = useIsMobile(768); // md breakpoint
   const pathname = usePathname();
@@ -97,4 +99,39 @@ export function Navbar({ businessSearchMode }: NavbarProps = {}) {
       />
     </>
   );
+}
+
+/**
+ * Auth-aware Navbar:
+ * - When logged out: show the fixed marketing navbar.
+ * - When logged in: show the app-based navbar (profile switcher + super search).
+ */
+export function Navbar({ businessSearchMode }: NavbarProps = {}) {
+  const pathname = usePathname();
+  const [isAuthed, setIsAuthed] = React.useState<boolean | null>(null);
+
+  React.useEffect(() => {
+    let mounted = true;
+    void (async () => {
+      try {
+        const authed = await isAuthenticated();
+        if (!mounted) return;
+        setIsAuthed(authed);
+      } catch {
+        if (!mounted) return;
+        setIsAuthed(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [pathname]);
+
+  // Default to marketing during initial auth-check to avoid a flash of app UI.
+  if (isAuthed) {
+    return <AppNavbar businessSearchMode={businessSearchMode} />;
+  }
+
+  return <FixedMarketingNavbar />;
 }

@@ -7,7 +7,7 @@ import { Button } from "@workspace/ui/components/button";
 
 export default function ReferPage() {
   return (
-    <div className="min-h-screen bg-black text-white p-4 md:p-8 font-sans">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white p-4 md:p-8 font-sans">
       <div className="w-full max-w-2xl mx-auto pt-8">
         <Link href="/dashboard">
           <Button

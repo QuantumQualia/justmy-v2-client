@@ -105,14 +105,14 @@ export default function DailyDropPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white flex items-center justify-center p-6">
         <p className="text-white/70">Loading your Daily Drop…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white font-sans">
       <div className="max-w-3xl mx-auto px-4 py-6 sm:py-8 space-y-10">
         <header className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">

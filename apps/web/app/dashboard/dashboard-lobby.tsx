@@ -30,14 +30,12 @@ import Link from "next/link";
 import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { getCurrentUser } from "@/lib/services/session";
 import { SuperSearchBar } from "@/components/common/search/super-search-bar";
-import { SearchResultsPanel } from "@/components/common/search/search-results-panel";
 import { GreetingCard } from "@/components/common/welcome/greeting-card";
 import { QuickActionItem, type QuickActionItemConfig } from "@/components/common/quick-action-item";
 import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
 import { DayInHistory } from "@/components/common/welcome/day-in-history";
 import { AdBanner } from "@/components/common/ad-banner";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
-import { Navbar } from "@/components/common/navbar/navbar";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -70,18 +68,14 @@ export default function DashboardLobby() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white flex items-center justify-center">
         <div>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans relative">
-
-      <Navbar />
-      <SearchResultsPanel />
-
+    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white font-sans relative">
       <div className="pt-20">
         {/* <WelcomeMessage />
         <DayInHistory /> */}
