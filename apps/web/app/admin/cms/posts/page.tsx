@@ -9,6 +9,18 @@ import { cmsService } from "@/lib/services/cms";
 import type { PayloadPost } from "@/lib/services/cms";
 import { useRouter } from "next/navigation";
 
+const STATUS_LABELS: Record<PayloadPost["status"], string> = {
+  draft: "Draft",
+  publish: "Published",
+  archive: "Archived",
+};
+
+const STATUS_BADGE_CLASSES: Record<PayloadPost["status"], string> = {
+  draft: "bg-yellow-500/20 text-yellow-400",
+  publish: "bg-green-500/20 text-green-400",
+  archive: "bg-slate-500/20 text-slate-300",
+};
+
 export default function CmsPostsPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<PayloadPost[]>([]);
@@ -112,16 +124,11 @@ export default function CmsPostsPage() {
                         <div className="flex items-center gap-3">
                           <h3 className="font-semibold text-white">{post.title}</h3>
                           <span className="text-xs text-slate-400">/{post.slug}</span>
-                          {!post.isPublished && (
-                            <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
-                              Draft
-                            </span>
-                          )}
-                          {post.isPublished && (
-                            <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
-                              Published
-                            </span>
-                          )}
+                          <span
+                            className={`text-xs px-2 py-1 rounded ${STATUS_BADGE_CLASSES[post.status ?? "draft"]}`}
+                          >
+                            {STATUS_LABELS[post.status ?? "draft"]}
+                          </span>
                         </div>
                         {(post.excerpt || post.tags?.length) && (
                           <p className="text-sm text-slate-400 mt-1">

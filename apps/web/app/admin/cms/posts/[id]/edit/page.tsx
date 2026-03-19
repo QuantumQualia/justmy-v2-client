@@ -9,7 +9,6 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   Card,
   CardContent,
@@ -18,6 +17,13 @@ import {
   CardTitle,
 } from "@workspace/ui/components/card";
 import { TagInput } from "@/components/ui/tag-input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { cmsService } from "@/lib/services/cms";
 import { apiRequest } from "@/lib/api-client";
 import { ImageCropModal } from "@/components/common/image-crop/image-crop-modal";
@@ -41,7 +47,7 @@ export default function EditPostPage() {
     externalUrl: "",
     excerpt: "",
     tags: [] as string[],
-    isPublished: false,
+    status: "draft" as "draft" | "publish" | "archive",
     seo: {
       title: "",
       description: "",
@@ -88,7 +94,7 @@ export default function EditPostPage() {
         externalUrl: data.externalUrl || "",
         excerpt: data.excerpt ?? "",
         tags: data.tags ?? [],
-        isPublished: data.isPublished || false,
+        status: data.status ?? "draft",
         seo: {
           title: data.seo?.title || "",
           description: data.seo?.description || "",
@@ -125,7 +131,7 @@ export default function EditPostPage() {
           externalUrl: externalUrl.trim() || undefined,
           excerpt: rest.excerpt?.trim() || undefined,
           tags: tags?.length ? tags : undefined,
-          isPublished: rest.isPublished,
+          status: rest.status,
           seo: seoPayload,
         });
         setPost(updatedPost);
@@ -401,20 +407,31 @@ export default function EditPostPage() {
                   onChange={(tags) => setFormData({ ...formData, tags })}
                   placeholder="Add tag (Enter or comma)"
                 />
-                <div className="flex items-center gap-2">
-                  <Switch
-                    id="isPublished"
-                    checked={formData.isPublished}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, isPublished: checked })
-                    }
-                  />
-                  <Label
-                    htmlFor="isPublished"
-                    className="text-slate-300 cursor-pointer font-normal"
-                  >
-                    Published
+                <div className="space-y-2">
+                  <Label htmlFor="status" className="text-slate-300">
+                    Status
                   </Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as "draft" | "publish" | "archive",
+                      })
+                    }
+                  >
+                    <SelectTrigger
+                      id="status"
+                      className="bg-black/50 border-slate-700 text-white"
+                    >
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                      <SelectItem value="draft">Draft</SelectItem>
+                      <SelectItem value="publish">Publish</SelectItem>
+                      <SelectItem value="archive">Archive</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
               </CardContent>
             </Card>

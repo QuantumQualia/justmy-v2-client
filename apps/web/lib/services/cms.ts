@@ -180,7 +180,7 @@ export interface PayloadPost {
     keywords?: string;
     ogImage?: string | { url: string };
   } | null;
-  isPublished: boolean;
+  status: "draft" | "publish" | "archive";
   author?: string | { id: string; email: string };
   publishedAt?: string | null;
   createdAt: string;
@@ -220,7 +220,7 @@ export interface CreatePostDto {
     keywords?: string;
     ogImage?: string;
   };
-  isPublished?: boolean;
+  status?: "draft" | "publish" | "archive";
 }
 
 /**
@@ -231,7 +231,7 @@ export interface CreateSharedPostDto {
   title?: string;
   excerpt?: string;
   tags?: string[];
-  isPublished?: boolean;
+  status?: "draft" | "publish" | "archive";
   seo?: {
     title?: string;
     description?: string;

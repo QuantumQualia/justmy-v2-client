@@ -12,13 +12,13 @@ interface PayloadPostRendererProps {
  * block rendering is delegated to BlocksRenderer.
  */
 export function PayloadPostRenderer({ post }: PayloadPostRendererProps) {
-  if (!post.isPublished) {
+  if (post.status !== "publish") {
     return (
       <div className="min-h-[calc(100vh-4.1rem)] bg-background flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground mb-4">Post Not Published</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-4">Post Not Available</h1>
           <p className="text-muted-foreground">
-            This post is not yet published and is not publicly accessible.
+            This post is not publicly accessible.
           </p>
         </div>
       </div>

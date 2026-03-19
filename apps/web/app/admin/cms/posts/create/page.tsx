@@ -8,7 +8,6 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { Switch } from "@workspace/ui/components/switch";
 import {
   Card,
   CardContent,
@@ -36,7 +35,7 @@ export default function CreatePostPage() {
     slug: "",
     excerpt: "",
     tags: [],
-    isPublished: false,
+    status: "draft",
   });
   const [sharedExternalUrl, setSharedExternalUrl] = useState("");
 
@@ -259,23 +258,31 @@ export default function CreatePostPage() {
                     placeholder="Add tag (Enter or comma)"
                     className="text-slate-300"
                   />
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      id="isPublished"
-                      checked={standardFormData.isPublished}
-                      onCheckedChange={(checked) =>
+                  <div className="space-y-2">
+                    <Label htmlFor="status" className="text-slate-300">
+                      Status
+                    </Label>
+                    <Select
+                      value={standardFormData.status ?? "draft"}
+                      onValueChange={(value) =>
                         setStandardFormData({
                           ...standardFormData,
-                          isPublished: checked,
+                          status: value as "draft" | "publish" | "archive",
                         })
                       }
-                    />
-                    <Label
-                      htmlFor="isPublished"
-                      className="text-slate-300 cursor-pointer font-normal"
                     >
-                      Publish immediately
-                    </Label>
+                      <SelectTrigger
+                        id="status"
+                        className="bg-black/50 border-slate-700 text-white"
+                      >
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                        <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="publish">Publish</SelectItem>
+                        <SelectItem value="archive">Archive</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </>
               ) : (

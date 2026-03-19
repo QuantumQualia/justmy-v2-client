@@ -25,7 +25,7 @@ export async function generateMetadata({
   const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://justmy.com";
   const postUrl = `${siteUrl}/blog/${slug}`;
 
-  if (!post || !post.isPublished) {
+  if (!post || post.status !== "publish") {
     return {
       title: "Post not found",
     };
@@ -74,7 +74,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     notFound();
   }
 
-  if (!post.isPublished) {
+  if (post.status !== "publish") {
     notFound();
   }
 
