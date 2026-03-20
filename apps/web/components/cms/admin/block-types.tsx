@@ -21,6 +21,7 @@ import {
   UserPlus,
   AppWindow,
   Play,
+  FolderKanban,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -213,6 +214,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "App Hub",
     icon: <AppWindow className="h-5 w-5" />,
     description: "Active apps dock and discovery library for the user's Personal OS",
+    category: "Apps",
+  },
+  {
+    value: "content-hub-view-block",
+    label: "Content Hub View",
+    icon: <FolderKanban className="h-5 w-5" />,
+    description: "Manage content hubs, tabs, and tab posts for the current profile",
     category: "Apps",
   },
 ];

@@ -12,4 +12,6 @@ export * from "./ai";
 export { aiService } from "./ai";
 export * from "./cms";
 export { cmsService } from "./cms";
+export * from "./content";
+export { contentService } from "./content";
 

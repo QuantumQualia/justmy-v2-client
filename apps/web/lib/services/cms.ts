@@ -11,7 +11,9 @@ import { apiRequest, ApiClientError } from "../api-client";
 export { ApiClientError };
 
 /**
- * Responsive Style Values
+ * Responsive style values (mobile-first CSS).
+ * Rendered with `@media (min-width: 768px)` for `tablet` and `min-width: 1024px` for `desktop`
+ * — see `apps/web/components/cms/block-responsive-styles.ts`.
  */
 export interface ResponsiveValue<T> {
   mobile?: T;

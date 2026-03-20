@@ -315,7 +315,7 @@ export function BusinessInternalResultsPanel() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto mt-5">
       <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
@@ -423,7 +423,7 @@ export function BusinessExternalResultsPanel() {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto mt-5">
       <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">

@@ -37,6 +37,7 @@ import {
   NavbarBlockEditor,
   ReferAFriendBlockEditor,
   AppHubBlockEditor,
+  ContentHubViewBlockEditor,
 } from "./blocks";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
@@ -255,6 +256,9 @@ export function PageBlockEditor({
 
       case "app-hub-block":
         return <AppHubBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "content-hub-view-block":
+        return <ContentHubViewBlockEditor block={block} onUpdate={onUpdate} />;
 
       default:
         return (

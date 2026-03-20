@@ -81,10 +81,8 @@ export default async function RootLayout({
       >
         <Providers>
           <Navbar initialIsAuthed={initialIsAuthed} />
-          <div className="mt-5">
-            <SearchResultsPanel />
-            {children}
-          </div>
+          <SearchResultsPanel />
+          {children}
         </Providers>
       </body>
     </html>
