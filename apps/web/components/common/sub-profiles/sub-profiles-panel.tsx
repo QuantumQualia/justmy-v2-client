@@ -20,16 +20,17 @@ import {
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
 
 /**
- * ContentCard button schema — map roles to Button variants (colors from CSS tokens: --primary, --destructive, --border, …).
+ * ContentCard button schema — map roles to Button variants (tokens in `packages/ui/src/styles/globals.css`: --success, --primary, --destructive, …).
  *
  * | Role              | Variant       | Tokens used                          |
  * |-------------------|---------------|--------------------------------------|
- * | Primary CTA       | `default`     | `bg-primary`, `text-primary-foreground` |
+ * | Primary CTA (green) | `success`   | `bg-success`, `text-success-foreground` |
+ * | Primary (neutral)   | `default`   | `bg-primary`, `text-primary-foreground` |
  * | Cancel / secondary| `outline`     | `border-border`, `hover:bg-accent`   |
  * | Row: open / edit  | `outline`     | same as secondary                    |
  * | Row / confirm del.| `destructive` | `bg-destructive`, destructive ring   |
  *
- * Brand color for green CTAs: set `.dark { --primary: … }` / `--primary-foreground` in theme (e.g. `packages/ui/src/styles/globals.css`).
+ * Tweak green CTAs: edit `--success` / `--success-foreground` under `:root` and `.dark` in that CSS file.
  */
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/i;
 
@@ -248,7 +249,7 @@ export function SubProfilesPanel() {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex justify-end">
-            <Button type="button" variant="default" onClick={openCreate} className="rounded-lg rounded-br-none">
+            <Button type="button" variant="success" onClick={openCreate} className="rounded-lg rounded-br-none">
               <Plus className="size-4" aria-hidden />
               Create
             </Button>
@@ -402,7 +403,7 @@ export function SubProfilesPanel() {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="default" disabled={submitting} className="rounded-lg rounded-br-none">
+              <Button type="submit" variant="success" disabled={submitting} className="rounded-lg rounded-br-none">
                 {submitting ? (
                   <Loader2 className="size-4 animate-spin" aria-hidden />
                 ) : (
@@ -491,7 +492,7 @@ export function SubProfilesPanel() {
               >
                 Cancel
               </Button>
-              <Button type="submit" variant="default" disabled={submitting} className="rounded-lg rounded-br-none">
+              <Button type="submit" variant="success" disabled={submitting} className="rounded-lg rounded-br-none">
                 {submitting ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
                 Save changes
               </Button>

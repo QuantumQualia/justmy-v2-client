@@ -53,7 +53,9 @@ import { ApiClientError } from "@/lib/api-client";
 import { cmsService } from "@/lib/services/cms";
 import type { PayloadPost } from "@/lib/services/cms";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
+import { DeployContentHubDialog } from "@/components/content/deploy-content-hub-dialog";
 import { PostEditorDialog, type PostType } from "@/components/content/post-editor-dialog";
+import { useProfileStore } from "@/lib/store";
 import {
   contentService,
   type ContentHubResponseDto,
@@ -62,6 +64,11 @@ import {
   type TabPostResponseDto,
 } from "@/lib/services/content";
 
+/**
+ * Buttons in this view use shadcn `Button` variants only — colors come from theme tokens
+ * (`--primary`, `--destructive`, `--muted-foreground`, `--accent`, … in `packages/ui/src/styles/globals.css`).
+ * Prefer `default` / `success` / `outline` / `ghost` / `destructive`; avoid raw `bg-*` / `text-*` palette classes on Button.
+ */
 const TAB_REORDER_DEBOUNCE_MS = 2000;
 const TAB_REORDER_MAX_WAIT_MS = 5000;
 const TAB_POSTS_PAGE_SIZE = 10;
@@ -133,7 +140,7 @@ function SortablePostItem({
               variant="ghost"
               size="sm"
               asChild
-              className="h-7 w-7 p-0 text-slate-400 hover:text-emerald-400"
+              className="h-7 w-7 p-0 text-muted-foreground hover:text-primary"
               title="Open published post"
             >
               <a
@@ -149,7 +156,7 @@ function SortablePostItem({
             variant="ghost"
             size="sm"
             onClick={() => onEdit(item.postId)}
-            className="h-7 w-7 p-0 text-slate-400 hover:text-blue-400"
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-foreground"
             title="Edit post"
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -158,7 +165,7 @@ function SortablePostItem({
             variant="ghost"
             size="sm"
             onClick={() => onRemove(item.postId)}
-            className="h-7 w-7 p-0 text-slate-400 hover:text-red-400"
+            className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
             title="Remove or delete post"
           >
             <Trash2 className="h-3.5 w-3.5" />
@@ -170,6 +177,8 @@ function SortablePostItem({
 }
 
 export function ContentHubView() {
+  const allowsSubProfiles = useProfileStore((s) => s.data.allowsSubProfiles === true);
+
   const [hubs, setHubs] = React.useState<ContentHubResponseDto[]>([]);
   const [selectedHubId, setSelectedHubId] = React.useState<number | null>(null);
   const [selectedTabId, setSelectedTabId] = React.useState<number | null>(null);
@@ -209,6 +218,8 @@ export function ContentHubView() {
   const [postEditorMode, setPostEditorMode] = React.useState<"create" | "edit">("create");
   const [postEditorPostId, setPostEditorPostId] = React.useState<string | undefined>();
   const [postEditorPostType, setPostEditorPostType] = React.useState<PostType>("standard");
+
+  const [deployHubDialogOpen, setDeployHubDialogOpen] = React.useState(false);
 
   const [typePickerOpen, setTypePickerOpen] = React.useState(false);
   const [removePostDialogOpen, setRemovePostDialogOpen] = React.useState(false);
@@ -322,14 +333,13 @@ export function ContentHubView() {
     try {
       const nextHubs = await contentService.getCurrentProfileHubs();
       setHubs(nextHubs);
-      if (!selectedHubId && nextHubs.length > 0) setSelectedHubId(nextHubs[0]!.id);
     } catch (error) {
       console.error("Failed to load content hubs:", error);
       toast.error("Failed to load content hubs");
     } finally {
       setLoading(false);
     }
-  }, [selectedHubId]);
+  }, []);
 
   React.useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearchPosts(searchPosts), 300);
@@ -786,7 +796,7 @@ export function ContentHubView() {
                 variant="ghost"
                 size="icon"
                 onClick={closeHubModal}
-                className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="h-8 w-8 rounded-lg rounded-br-none"
                 aria-label="Close"
                 disabled={hubModalSaving}
               >
@@ -826,15 +836,16 @@ export function ContentHubView() {
                 variant="outline"
                 onClick={closeHubModal}
                 disabled={hubModalSaving}
-                className="rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
+                className="rounded-lg rounded-br-none"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
+                variant="success"
                 onClick={() => void handleSubmitHubModal()}
                 disabled={hubModalSaving || !hubFormTitle.trim()}
-                className="rounded-lg rounded-br-none bg-emerald-600 text-white hover:bg-emerald-700"
+                className="rounded-lg rounded-br-none"
               >
                 {hubModalSaving ? (
                   <>
@@ -876,7 +887,7 @@ export function ContentHubView() {
                 size="icon"
                 onClick={closeTabModal}
                 disabled={tabModalSaving}
-                className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="h-8 w-8 rounded-lg rounded-br-none"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -909,15 +920,16 @@ export function ContentHubView() {
                 variant="outline"
                 onClick={closeTabModal}
                 disabled={tabModalSaving}
-                className="rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
+                className="rounded-lg rounded-br-none"
               >
                 Cancel
               </Button>
               <Button
                 type="button"
+                variant="success"
                 onClick={() => void handleSubmitTabModal()}
                 disabled={tabModalSaving || !tabFormTitle.trim()}
-                className="rounded-lg rounded-br-none bg-blue-600 text-white hover:bg-blue-700"
+                className="rounded-lg rounded-br-none"
               >
                 {tabModalSaving ? (
                   <>
@@ -941,6 +953,13 @@ export function ContentHubView() {
       {hubModal}
       {tabModal}
 
+      <DeployContentHubDialog
+        open={deployHubDialogOpen}
+        onOpenChange={setDeployHubDialogOpen}
+        hubId={selectedHub?.id ?? null}
+        hubTitle={selectedHub?.title ?? ""}
+      />
+
       {/* ── Post type picker ── */}
       <Dialog open={typePickerOpen} onOpenChange={setTypePickerOpen}>
         <DialogContent
@@ -955,7 +974,7 @@ export function ContentHubView() {
                 variant="ghost"
                 size="icon"
                 onClick={() => setTypePickerOpen(false)}
-                className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+                className="h-8 w-8 rounded-lg rounded-br-none"
                 aria-label="Close"
               >
                 <X className="h-4 w-4" />
@@ -1024,7 +1043,7 @@ export function ContentHubView() {
               variant="ghost"
               size="icon"
               onClick={() => setRemovePostDialogOpen(false)}
-              className="h-8 w-8 shrink-0 rounded-md text-slate-500 hover:bg-slate-800/80 hover:text-slate-200"
+              className="h-8 w-8 shrink-0 rounded-lg rounded-br-none"
               aria-label="Close"
             >
               <X className="h-4 w-4" />
@@ -1135,16 +1154,26 @@ export function ContentHubView() {
                 Manage hubs, tabs, and posts for your profile.
               </CardDescription>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => toast.info("Profile connection flow can be wired here.")}
-                className="rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
-              >
-                <Link2 className="mr-2 h-4 w-4" />
-                Connect to Profile
-              </Button>
-            </div>
+            {allowsSubProfiles ? (
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="rounded-lg rounded-br-none"
+                  disabled={!selectedHub || selectedHub.isShared === true}
+                  title={
+                    !selectedHub
+                      ? "Select a library first"
+                      : selectedHub.isShared
+                        ? "Shared hubs cannot be redeployed from this view"
+                        : "Choose which sub-profiles receive this hub"
+                  }
+                  onClick={() => setDeployHubDialogOpen(true)}
+                >
+                  <Link2 className="mr-2 h-4 w-4" />
+                  Connect to Profile
+                </Button>
+              </div>
+            ) : null}
           </CardHeader>
 
           <div className="grid grid-cols-1 lg:grid-cols-12">
@@ -1162,9 +1191,10 @@ export function ContentHubView() {
                   </p>
                   <Button
                     type="button"
+                    variant="success"
                     onClick={openHubModalCreate}
                     disabled={saving}
-                    className="mt-4 h-10 w-full rounded-lg rounded-br-none bg-emerald-600 font-medium text-white shadow-sm hover:bg-emerald-700 disabled:opacity-50"
+                    className="mt-4 h-10 w-full rounded-lg rounded-br-none font-medium shadow-sm"
                   >
                     {saving ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1238,7 +1268,7 @@ export function ContentHubView() {
                               variant="ghost"
                               size="icon"
                               onClick={() => openHubModalEdit(hub)}
-                              className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+                              className="h-8 w-8 rounded-lg rounded-br-none text-muted-foreground hover:text-foreground"
                               title="Edit hub"
                             >
                               <Pencil className="h-3.5 w-3.5" />
@@ -1248,7 +1278,7 @@ export function ContentHubView() {
                               variant="ghost"
                               size="icon"
                               onClick={() => requestDeleteHub(hub.id)}
-                              className="h-8 w-8 rounded-lg rounded-br-none text-slate-500 hover:bg-red-500/10 hover:text-red-400"
+                              className="h-8 w-8 rounded-lg rounded-br-none text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                               title="Delete hub"
                             >
                               <Trash2 className="h-3.5 w-3.5" />
@@ -1285,9 +1315,10 @@ export function ContentHubView() {
                   <div className="flex justify-end">
                     <Button
                       type="button"
+                      variant="success"
                       onClick={openTabModalCreate}
                       disabled={saving}
-                      className="rounded-lg rounded-br-none bg-blue-600 text-white hover:bg-blue-700"
+                      className="rounded-lg rounded-br-none"
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Add tab
@@ -1314,8 +1345,11 @@ export function ContentHubView() {
                             className="overflow-hidden rounded-xl rounded-br-none border-slate-800 bg-slate-900/60 py-0"
                           >
                             <div
-                              className={`flex items-center justify-between px-4 py-3 ${isSelected ? "bg-blue-600/90" : "bg-slate-800/80"
-                                }`}
+                              className={`flex items-center justify-between px-4 py-3 ${
+                                isSelected
+                                  ? "bg-success text-success-foreground"
+                                  : "bg-muted/80 text-foreground"
+                              }`}
                             >
                               <button
                                 type="button"
@@ -1323,12 +1357,18 @@ export function ContentHubView() {
                                 className="flex items-center gap-2 text-left cursor-pointer"
                               >
                                 {isSelected ? (
-                                  <ChevronUp className="h-4 w-4 text-white" />
+                                  <ChevronUp className="h-4 w-4 opacity-90" />
                                 ) : (
-                                  <ChevronDown className="h-4 w-4 text-slate-300" />
+                                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
                                 )}
-                                <span className="font-semibold text-white">{tab.title}</span>
-                                <span className="text-xs text-blue-100/90">({tabPostCountForHeader})</span>
+                                <span className="font-semibold">{tab.title}</span>
+                                <span
+                                  className={
+                                    isSelected ? "text-xs opacity-90" : "text-xs text-muted-foreground"
+                                  }
+                                >
+                                  ({tabPostCountForHeader})
+                                </span>
                               </button>
                               <div className="flex items-center gap-1">
                                 <Button
@@ -1339,7 +1379,11 @@ export function ContentHubView() {
                                     e.stopPropagation();
                                     openTabModalEdit(tab);
                                   }}
-                                  className="h-7 w-7 p-0 text-white/90 hover:bg-white/15 hover:text-white"
+                                  className={
+                                    isSelected
+                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
+                                      : "h-7 w-7 p-0"
+                                  }
                                   title="Edit tab name"
                                 >
                                   <Pencil className="h-3.5 w-3.5" />
@@ -1348,7 +1392,11 @@ export function ContentHubView() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => void handleMoveTab(tab.id, "up")}
-                                  className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/15"
+                                  className={
+                                    isSelected
+                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
+                                      : "h-7 w-7 p-0"
+                                  }
                                   title="Move up"
                                 >
                                   <ChevronUp className="h-3.5 w-3.5" />
@@ -1357,7 +1405,11 @@ export function ContentHubView() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => void handleMoveTab(tab.id, "down")}
-                                  className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/15"
+                                  className={
+                                    isSelected
+                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
+                                      : "h-7 w-7 p-0"
+                                  }
                                   title="Move down"
                                 >
                                   <ChevronDown className="h-3.5 w-3.5" />
@@ -1366,7 +1418,11 @@ export function ContentHubView() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => requestDeleteTab(tab.id)}
-                                  className="h-7 w-7 p-0 text-white/90 hover:text-white hover:bg-white/15"
+                                  className={
+                                    isSelected
+                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15 hover:text-destructive"
+                                      : "h-7 w-7 p-0 hover:text-destructive"
+                                  }
                                   title="Delete tab"
                                 >
                                   <Trash2 className="h-3.5 w-3.5" />
@@ -1389,8 +1445,9 @@ export function ContentHubView() {
                                       />
                                     </div>
                                     <Button
+                                      variant="success"
                                       onClick={() => setTypePickerOpen(true)}
-                                      className="rounded-lg rounded-br-none bg-emerald-600 hover:bg-emerald-700"
+                                      className="rounded-lg rounded-br-none"
                                     >
                                       <Plus className="h-4 w-4 mr-2" />
                                       Create Post
@@ -1431,7 +1488,7 @@ export function ContentHubView() {
                                                 variant="ghost"
                                                 onClick={() => void handleAddPostToTab(post.id)}
                                                 disabled={addingPostId !== null}
-                                                className="shrink-0 h-7 px-2 text-xs text-blue-400 hover:bg-blue-500/10 hover:text-blue-300"
+                                                className="shrink-0 h-7 px-2 text-xs text-primary hover:bg-primary/10"
                                               >
                                                 {addingPostId === post.id ? (
                                                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -1494,8 +1551,8 @@ export function ContentHubView() {
                                 {/* ── Tab posts (server-paginated, drag-and-drop sortable) ── */}
                                 <div className="space-y-2">
                                   {loadingTabPosts ? (
-                                    <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
-                                      <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+                                    <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
+                                      <Loader2 className="h-5 w-5 animate-spin text-primary" />
                                       Loading posts…
                                     </div>
                                   ) : displayTabPosts.length === 0 ? (
@@ -1545,7 +1602,7 @@ export function ContentHubView() {
                                         size="sm"
                                         disabled={tabPostsPage <= 1}
                                         onClick={() => setTabPostsPage((p) => Math.max(1, p - 1))}
-                                        className="h-8 rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
+                                        className="h-8 rounded-lg rounded-br-none"
                                       >
                                         Previous
                                       </Button>
@@ -1560,7 +1617,7 @@ export function ContentHubView() {
                                         onClick={() =>
                                           setTabPostsPage((p) => Math.min(tabPostsTotalPages, p + 1))
                                         }
-                                        className="h-8 rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
+                                        className="h-8 rounded-lg rounded-br-none"
                                       >
                                         Next
                                       </Button>

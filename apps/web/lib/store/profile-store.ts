@@ -69,6 +69,8 @@ export interface ProfileData {
   about: string;
   /** Unique code for refer-a-friend; set from API on login/me/refresh */
   referralCode?: string;
+  /** Master profile: can create sub-profiles and deploy hubs to them (from API). */
+  allowsSubProfiles?: boolean;
 }
 
 interface ProfileStore {
@@ -109,6 +111,7 @@ const initialData: ProfileData = {
   markets: [],
   about: "",
   referralCode: undefined,
+  allowsSubProfiles: undefined,
 };
 
 export const useProfileStore = create<ProfileStore>()(

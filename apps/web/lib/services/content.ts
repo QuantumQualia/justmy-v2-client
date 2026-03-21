@@ -29,11 +29,28 @@ export interface ContentTabResponseDto {
 export interface ContentHubResponseDto {
   id: number;
   profileId: number;
+  /** When true, hub is owned elsewhere and shared into the viewer profile (structure read-only). */
+  isShared?: boolean;
   title: string;
   description?: string | null;
   createdAt: string;
   updatedAt: string;
   tabs: ContentTabResponseDto[];
+}
+
+export interface ContentHubShareEntryDto {
+  id: number;
+  hubId: number;
+  targetProfileId: number;
+  createdAt: string;
+}
+
+export interface ContentHubSharesListResponseDto {
+  shares: ContentHubShareEntryDto[];
+}
+
+export interface ShareContentHubDto {
+  targetProfileId: number;
 }
 
 export interface ContentHubsListResponseDto {
@@ -140,6 +157,41 @@ export const contentService = {
     } catch (error) {
       if (error instanceof ApiClientError) throw error;
       throw new ApiClientError("Failed to delete content hub.");
+    }
+  },
+
+  async listHubShares(hubId: number): Promise<ContentHubShareEntryDto[]> {
+    try {
+      const res = await apiRequest<ContentHubSharesListResponseDto>(`content/hubs/${hubId}/shares`, {
+        method: "GET",
+      });
+      return res.shares ?? [];
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to load hub shares.");
+    }
+  },
+
+  async shareHub(hubId: number, dto: ShareContentHubDto): Promise<ContentHubShareEntryDto> {
+    try {
+      return await apiRequest<ContentHubShareEntryDto>(`content/hubs/${hubId}/shares`, {
+        method: "POST",
+        body: JSON.stringify(dto),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to share hub with profile.");
+    }
+  },
+
+  async unshareHub(hubId: number, targetProfileId: number): Promise<void> {
+    try {
+      await apiRequest<void>(`content/hubs/${hubId}/shares/${targetProfileId}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to remove hub share.");
     }
   },
 
