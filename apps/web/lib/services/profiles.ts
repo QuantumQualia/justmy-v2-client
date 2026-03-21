@@ -102,6 +102,7 @@ export interface LocationDto {
 
 export interface UpdateProfileDto {
   name?: string;
+  slug?: string;
   tagline?: string;
   photo?: string;
   banner?: string;
@@ -118,6 +119,24 @@ export interface UpdateProfileDto {
 export interface UpdateProfileResponse {
   message: string;
   profile: any; // Profile response from formatProfileResponse
+}
+
+export interface SubProfileSummaryDto {
+  id: string;
+  name: string;
+  slug: string;
+  parentProfileId: string | null;
+  createdAt: string;
+}
+
+export interface SubProfilesListResponseDto {
+  subProfiles: SubProfileSummaryDto[];
+}
+
+export interface CreateSubProfileDto {
+  name: string;
+  slug: string;
+  email?: string;
 }
 
 /**
@@ -222,7 +241,7 @@ export const profilesService = {
   /**
    * Update a profile
    */
-  async updateProfile(profileId: number, updateData: UpdateProfileDto): Promise<UpdateProfileResponse> {
+  async updateProfile(profileId: number | string, updateData: UpdateProfileDto): Promise<UpdateProfileResponse> {
     try {
       return await apiRequest<UpdateProfileResponse>(`profiles/${profileId}`, {
         method: "PATCH",
@@ -233,6 +252,55 @@ export const profilesService = {
         throw error;
       }
       throw new ApiClientError("Failed to update profile.");
+    }
+  },
+
+  /**
+   * List direct child profiles for a parent (requires access to parent).
+   */
+  async listSubProfiles(parentId: number): Promise<SubProfilesListResponseDto> {
+    try {
+      return await apiRequest<SubProfilesListResponseDto>(`profiles/${parentId}/sub-profiles`, {
+        method: "GET",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to load sub-profiles.");
+    }
+  },
+
+  /**
+   * Create a sub-profile under a parent (parent must allow sub-profiles; ADMIN+ on parent).
+   */
+  async createSubProfile(parentId: number, dto: CreateSubProfileDto): Promise<UpdateProfileResponse> {
+    try {
+      return await apiRequest<UpdateProfileResponse>(`profiles/${parentId}/sub-profiles`, {
+        method: "POST",
+        body: JSON.stringify(dto),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to create sub-profile.");
+    }
+  },
+
+  /**
+   * Delete a profile by id (e.g. a content card / sub-profile). Backend: DELETE profiles/:id.
+   */
+  async deleteSubProfile(subProfileId: string): Promise<void> {
+    try {
+      await apiRequest(`profiles/${subProfileId}`, {
+        method: "DELETE",
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to delete sub-profile.");
     }
   },
 };

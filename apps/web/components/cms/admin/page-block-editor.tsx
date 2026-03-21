@@ -38,6 +38,7 @@ import {
   ReferAFriendBlockEditor,
   AppHubBlockEditor,
   ContentHubViewBlockEditor,
+  SubProfilesBlockEditor,
 } from "./blocks";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
@@ -259,6 +260,9 @@ export function PageBlockEditor({
 
       case "content-hub-view-block":
         return <ContentHubViewBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "sub-profiles-block":
+        return <SubProfilesBlockEditor block={block} onUpdate={onUpdate} />;
 
       default:
         return (

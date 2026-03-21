@@ -22,6 +22,7 @@ import {
   AppWindow,
   Play,
   FolderKanban,
+  LayoutGrid,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -222,6 +223,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     icon: <FolderKanban className="h-5 w-5" />,
     description: "Manage content hubs, tabs, and tab posts for the current profile",
     category: "Apps",
+  },
+  {
+    value: "sub-profiles-block",
+    label: "ContentCard",
+    icon: <LayoutGrid className="h-5 w-5" />,
+    description: "List and create content cards (linked sub-profiles) under the current profile",
+    category: "Profile",
   },
 ];
 

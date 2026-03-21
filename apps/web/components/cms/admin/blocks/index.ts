@@ -27,4 +27,5 @@ export { NavbarBlockEditor } from "../page-blocks/navbar";
 export { ReferAFriendBlockEditor } from "../page-blocks/refer-a-friend";
 export { AppHubBlockEditor } from "../page-blocks/app-hub";
 export { ContentHubViewBlockEditor } from "../page-blocks/content-hub-view";
+export { SubProfilesBlockEditor } from "../page-blocks/sub-profiles";
 
