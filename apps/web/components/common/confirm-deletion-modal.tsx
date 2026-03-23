@@ -22,6 +22,8 @@ export type ConfirmDeletionModalProps = {
   title?: string;
   description: React.ReactNode;
   confirmText?: string;
+  /** Shown on the confirm button while `loading` is true (e.g. after click until async work finishes). */
+  loadingConfirmText?: string;
   cancelText?: string;
   danger?: boolean;
 };
@@ -34,6 +36,7 @@ export function ConfirmDeletionModal({
   title = "Confirm deletion",
   description,
   confirmText = "Delete",
+  loadingConfirmText = "Working...",
   cancelText = "Cancel",
   danger = true,
 }: ConfirmDeletionModalProps) {
@@ -49,7 +52,13 @@ export function ConfirmDeletionModal({
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={loading ? undefined : onOpenChange}>
+    <AlertDialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen && loading) return;
+        onOpenChange(nextOpen);
+      }}
+    >
       <AlertDialogContent className="rounded-2xl rounded-br-none border-slate-700/80 bg-slate-900 shadow-2xl shadow-black/40">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-white">{title}</AlertDialogTitle>
@@ -75,7 +84,7 @@ export function ConfirmDeletionModal({
             {loading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Working...
+                {loadingConfirmText}
               </>
             ) : (
               confirmText

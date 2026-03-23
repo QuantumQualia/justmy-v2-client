@@ -2,11 +2,50 @@ import { apiRequest, ApiClientError } from "../api-client";
 
 export { ApiClientError };
 
+/**
+ * Mirrors CMS `PostSeoDto` (`apps/api` cms `post.dto.ts`).
+ */
+export interface ContentPostSeoSummary {
+  title?: string | null;
+  description?: string | null;
+  keywords?: string | null;
+  ogImage?: string | null;
+}
+
+/**
+ * Post fields embedded on tab-post rows — aligned with CMS post DTO surface
+ * (`CreatePostDto` / post payload: title, slug, excerpt, tags, status, seo).
+ * Omits `content` (not used for list/summary responses).
+ */
 export interface ContentPostSummary {
   id: number | string;
   title?: string;
   slug?: string;
+  excerpt?: string | null;
+  tags?: string[];
   status?: "draft" | "publish" | "archive";
+  seo?: ContentPostSeoSummary | null;
+}
+
+/** Normalize og:image to a URL string (supports legacy `{ url: string }` from some CMS payloads). */
+export function resolveContentOgImageUrl(
+  og?: string | { url: string } | null
+): string | null {
+  if (og == null) return null;
+  if (typeof og === "string") {
+    const s = og.trim();
+    return s || null;
+  }
+  const u = og.url?.trim();
+  return u || null;
+}
+
+/** `seo.ogImage` from an embedded post summary (tab posts / hub listings). */
+export function resolveContentPostOgImageUrl(
+  post: ContentPostSummary | null | undefined
+): string | null {
+  if (!post) return null;
+  return resolveContentOgImageUrl(post.seo?.ogImage ?? null);
 }
 
 export interface TabPostResponseDto {
@@ -96,6 +135,17 @@ export interface PaginatedTabPostsResponseDto {
   limit: number;
   page: number;
   totalPages: number;
+}
+
+/** JSON APIs often return numeric ids as strings; use for query enable + keys. */
+export function resolveContentNumericId(id: unknown): number | null {
+  if (id == null || id === "") return null;
+  if (typeof id === "number" && Number.isFinite(id)) return id;
+  if (typeof id === "string") {
+    const n = Number(id);
+    if (Number.isFinite(n)) return n;
+  }
+  return null;
 }
 
 export const contentService = {

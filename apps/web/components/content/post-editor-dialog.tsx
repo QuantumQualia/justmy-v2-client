@@ -43,7 +43,9 @@ export interface PostEditorDialogProps {
   editPostId?: string;
   /** Pre-selected post type for create mode (chosen before dialog opens). */
   initialPostType?: PostType;
-  onSaved: (post: PayloadPost) => void;
+  /** When true, successful create does not close the dialog (parent should switch to edit mode). */
+  keepOpenAfterCreate?: boolean;
+  onSaved: (post: PayloadPost) => void | Promise<void>;
 }
 
 interface PostFormData {
@@ -83,6 +85,7 @@ export function PostEditorDialog({
   mode,
   editPostId,
   initialPostType = "standard",
+  keepOpenAfterCreate = false,
   onSaved,
 }: PostEditorDialogProps) {
   const [postType, setPostType] = React.useState<PostType>(initialPostType);
@@ -219,8 +222,10 @@ export function PostEditorDialog({
         toast.success("Post saved");
       }
 
-      onSaved(savedPost);
-      close();
+      await Promise.resolve(onSaved(savedPost));
+      if (!(mode === "create" && keepOpenAfterCreate)) {
+        close();
+      }
     } catch (error) {
       console.error("Failed to save post:", error);
       if (

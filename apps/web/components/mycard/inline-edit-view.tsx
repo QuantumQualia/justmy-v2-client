@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { ImageCropModal } from "@/components/common/image-crop/image-crop-modal";
 import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
+import { ContentHubLiteView } from "@/components/content/content-hub-lite-view";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
@@ -145,9 +146,8 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${
-          error ? "border-red-500 focus:border-red-500" : ""
-        }`}
+        className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${error ? "border-red-500 focus:border-red-500" : ""
+          }`}
         autoFocus
       />
       {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
@@ -251,19 +251,19 @@ export default function InlineEdit({
 }: InlineEditProps) {
 
   const isEditMode = mode === "edit";
-  
+
   // Get profileId from data
   const profileId = data.id;
-  
+
   // Auto-save state
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  
+
   // Track initial load and last saved data
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const lastSavedDataRef = useRef<string>("");
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   // Extract only auto-save fields (name, tagline) for comparison
   const getAutoSaveFields = (profileData: ProfileData) => {
     return JSON.stringify({
@@ -271,7 +271,7 @@ export default function InlineEdit({
       tagline: profileData.tagline,
     });
   };
-  
+
   // Save function
   const performSave = async (profileData: ProfileData) => {
     if (!profileId) {
@@ -281,11 +281,11 @@ export default function InlineEdit({
     try {
       setIsSaving(true);
       setSaveError(null);
-      
+
       const updateDto = mapProfileDataToUpdateDto(profileData);
 
       await profilesService.updateProfile(profileId, updateDto);
-      
+
       setIsSaving(false);
       // Update last saved auto-save fields after successful save
       lastSavedDataRef.current = getAutoSaveFields(profileData);
@@ -309,7 +309,7 @@ export default function InlineEdit({
         // Only track auto-save fields for comparison
         lastSavedDataRef.current = getAutoSaveFields(data);
       }, 1000); // 1 second grace period for initial load
-      
+
       return () => clearTimeout(initTimer);
     }
   }, [isInitialLoad, data, profileId]);
@@ -333,7 +333,7 @@ export default function InlineEdit({
 
     // Only check auto-save fields (name, tagline, about)
     const currentAutoSaveFields = getAutoSaveFields(data);
-    
+
     // Check if auto-save fields actually changed
     if (lastSavedDataRef.current === currentAutoSaveFields) {
       return;
@@ -515,7 +515,7 @@ export default function InlineEdit({
       setValidationErrors((prev) => ({ ...prev, phone: undefined }));
     } else if (editingFixedItem === "address") {
       if (!newAddress.address.trim()) return;
-      
+
       // Combine address fields into a single address string
       const combinedAddress = combineAddressFields({
         address: newAddress.address.trim(),
@@ -524,16 +524,16 @@ export default function InlineEdit({
         zipCode: newAddress.zipCode.trim() || undefined,
         country: newAddress.country.trim() || undefined,
       });
-      
+
       if (editingAddressId) {
         // Update existing address
         const updatedAddresses = data.addresses?.map((addr) =>
           addr.id === editingAddressId
             ? {
-                ...addr,
-                title: newAddress.title.trim() || undefined,
-                address: combinedAddress,
-              }
+              ...addr,
+              title: newAddress.title.trim() || undefined,
+              address: combinedAddress,
+            }
             : addr
         ) || [];
         onDataChange({ addresses: updatedAddresses });
@@ -996,9 +996,9 @@ export default function InlineEdit({
           {editingSocialLink && (() => {
             const link = data.socialLinks.find(l => l.id === editingSocialLink);
             if (!link) return null;
-            
+
             const currentUrl = editingSocialLinkUrl !== undefined ? editingSocialLinkUrl : link.url;
-            
+
             return (
               <ModalWrapper
                 onClose={() => {
@@ -1051,9 +1051,8 @@ export default function InlineEdit({
                     }
                   }}
                   placeholder="https://..."
-                  className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${
-                    validationErrors.socialLink ? "border-red-500 focus:border-red-500" : ""
-                  }`}
+                  className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${validationErrors.socialLink ? "border-red-500 focus:border-red-500" : ""
+                    }`}
                   autoFocus
                 />
                 {validationErrors.socialLink && (
@@ -1251,76 +1250,75 @@ export default function InlineEdit({
                 }}
               />
               <>
-                    <div className="space-y-3 mb-4">
-                      {data.phones?.map((phone) => (
-                        <div key={phone.id} className="flex items-center gap-2 p-3 bg-slate-900/50 rounded-lg">
-                          <div className="flex-1">
-                            <div className="text-sm font-medium text-white">{phone.number}</div>
-                            {phone.type && <div className="text-xs text-slate-400">{phone.type}</div>}
-                          </div>
-                          <button
-                            onClick={() => {
-                              const updatedPhones = data.phones?.filter((p) => p.id !== phone.id);
-                              onDataChange({ phones: updatedPhones });
-                              performSave({ ...data, phones: updatedPhones });
-                            }}
-                            className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="space-y-2 mb-4">
-                      <div>
-                        <Input
-                          type="tel"
-                          value={newPhoneNumber}
-                          onChange={(e) => {
-                            const value = e.target.value;
-                            setNewPhoneNumber(value);
-                            const error = validatePhone(value);
-                            setValidationErrors((prev) => ({ ...prev, phone: error }));
-                          }}
-                          placeholder="Phone number"
-                          className={`w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500 ${
-                            validationErrors.phone ? "border-red-500 focus:border-red-500" : ""
-                          }`}
-                        />
-                        {validationErrors.phone && (
-                          <p className="text-xs text-red-400 mt-1">{validationErrors.phone}</p>
-                        )}
+                <div className="space-y-3 mb-4">
+                  {data.phones?.map((phone) => (
+                    <div key={phone.id} className="flex items-center gap-2 p-3 bg-slate-900/50 rounded-lg">
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-white">{phone.number}</div>
+                        {phone.type && <div className="text-xs text-slate-400">{phone.type}</div>}
                       </div>
-                      <Input
-                        value={newPhoneType}
-                        onChange={(e) => setNewPhoneType(e.target.value)}
-                        placeholder="Type (e.g., mobile, work)"
-                        className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                      />
                       <button
                         onClick={() => {
-                          const error = validatePhone(newPhoneNumber);
-                          if (!error) {
-                            handleSaveFixedItem();
-                            setValidationErrors((prev) => ({ ...prev, phone: undefined }));
-                          }
+                          const updatedPhones = data.phones?.filter((p) => p.id !== phone.id);
+                          onDataChange({ phones: updatedPhones });
+                          performSave({ ...data, phones: updatedPhones });
                         }}
-                        disabled={!newPhoneNumber.trim() || !!validationErrors.phone}
-                        className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                        className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
                       >
-                        Add Phone
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        setEditingFixedItem(null);
-                        setValidationErrors({});
+                  ))}
+                </div>
+                <div className="space-y-2 mb-4">
+                  <div>
+                    <Input
+                      type="tel"
+                      value={newPhoneNumber}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setNewPhoneNumber(value);
+                        const error = validatePhone(value);
+                        setValidationErrors((prev) => ({ ...prev, phone: error }));
                       }}
-                      className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
-                    >
-                      Done
-                    </button>
-                  </>
+                      placeholder="Phone number"
+                      className={`w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500 ${validationErrors.phone ? "border-red-500 focus:border-red-500" : ""
+                        }`}
+                    />
+                    {validationErrors.phone && (
+                      <p className="text-xs text-red-400 mt-1">{validationErrors.phone}</p>
+                    )}
+                  </div>
+                  <Input
+                    value={newPhoneType}
+                    onChange={(e) => setNewPhoneType(e.target.value)}
+                    placeholder="Type (e.g., mobile, work)"
+                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                  />
+                  <button
+                    onClick={() => {
+                      const error = validatePhone(newPhoneNumber);
+                      if (!error) {
+                        handleSaveFixedItem();
+                        setValidationErrors((prev) => ({ ...prev, phone: undefined }));
+                      }
+                    }}
+                    disabled={!newPhoneNumber.trim() || !!validationErrors.phone}
+                    className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                  >
+                    Add Phone
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingFixedItem(null);
+                    setValidationErrors({});
+                  }}
+                  className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
+                >
+                  Done
+                </button>
+              </>
             </ModalWrapper>
           )}
 
@@ -1345,122 +1343,122 @@ export default function InlineEdit({
                 }}
               />
               <>
-                    <div className="space-y-3 mb-4">
-                      {data.addresses?.map((address) => {
-                        // Extract address fields for display/editing
-                        const extractedFields = extractAddressFields(address.address);
-                        return (
-                          <div key={address.id} className="p-3 bg-slate-900/50 rounded-lg">
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1 text-sm text-white">
-                                {address.title && (
-                                  <div className="font-semibold text-blue-400 mb-1">{address.title}</div>
-                                )}
-                                <div className="font-medium">{extractedFields.address}</div>
-                                {(extractedFields.city || extractedFields.state || extractedFields.zipCode) && (
-                                  <div className="text-xs text-slate-400 mt-1">
-                                    {[extractedFields.city, extractedFields.state, extractedFields.zipCode].filter(Boolean).join(", ")}
-                                  </div>
-                                )}
-                                {extractedFields.country && <div className="text-xs text-slate-400">{extractedFields.country}</div>}
+                <div className="space-y-3 mb-4">
+                  {data.addresses?.map((address) => {
+                    // Extract address fields for display/editing
+                    const extractedFields = extractAddressFields(address.address);
+                    return (
+                      <div key={address.id} className="p-3 bg-slate-900/50 rounded-lg">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 text-sm text-white">
+                            {address.title && (
+                              <div className="font-semibold text-blue-400 mb-1">{address.title}</div>
+                            )}
+                            <div className="font-medium">{extractedFields.address}</div>
+                            {(extractedFields.city || extractedFields.state || extractedFields.zipCode) && (
+                              <div className="text-xs text-slate-400 mt-1">
+                                {[extractedFields.city, extractedFields.state, extractedFields.zipCode].filter(Boolean).join(", ")}
                               </div>
-                              <div className="flex gap-2 ml-2">
-                                <button
-                                  onClick={() => {
-                                    // Load address into edit form
-                                    setEditingAddressId(address.id);
-                                    setNewAddress({
-                                      title: address.title || "",
-                                      address: extractedFields.address || "",
-                                      city: extractedFields.city || "",
-                                      state: extractedFields.state || "",
-                                      zipCode: extractedFields.zipCode || "",
-                                      country: extractedFields.country || "",
-                                    });
-                                  }}
-                                  className="p-1.5 text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
-                                  title="Edit"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    const updatedAddresses = data.addresses?.filter((a) => a.id !== address.id);
-                                    onDataChange({ addresses: updatedAddresses });
-                                    performSave({ ...data, addresses: updatedAddresses });
-                                  }}
-                                  className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
-                                  title="Delete"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </div>
+                            )}
+                            {extractedFields.country && <div className="text-xs text-slate-400">{extractedFields.country}</div>}
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div className="space-y-2 mb-4">
-                      <Input
-                        value={newAddress.title}
-                        onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
-                        placeholder="Title (e.g., Office, Home)"
-                        className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                      />
-                      <Input
-                        value={newAddress.address}
-                        onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
-                        placeholder="Street address"
-                        className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                      />
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          value={newAddress.city}
-                          onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
-                          placeholder="City"
-                          className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                        />
-                        <Input
-                          value={newAddress.state}
-                          onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
-                          placeholder="State"
-                          className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                        />
+                          <div className="flex gap-2 ml-2">
+                            <button
+                              onClick={() => {
+                                // Load address into edit form
+                                setEditingAddressId(address.id);
+                                setNewAddress({
+                                  title: address.title || "",
+                                  address: extractedFields.address || "",
+                                  city: extractedFields.city || "",
+                                  state: extractedFields.state || "",
+                                  zipCode: extractedFields.zipCode || "",
+                                  country: extractedFields.country || "",
+                                });
+                              }}
+                              className="p-1.5 text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                              title="Edit"
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const updatedAddresses = data.addresses?.filter((a) => a.id !== address.id);
+                                onDataChange({ addresses: updatedAddresses });
+                                performSave({ ...data, addresses: updatedAddresses });
+                              }}
+                              className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Input
-                          value={newAddress.zipCode}
-                          onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
-                          placeholder="ZIP Code"
-                          className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                        />
-                        <Input
-                          value={newAddress.country}
-                          onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
-                          placeholder="Country"
-                          className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
-                        />
-                      </div>
-                      <button
-                        onClick={handleSaveFixedItem}
-                        disabled={!newAddress.address.trim()}
-                        className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
-                      >
-                        {editingAddressId ? "Update Address" : "Add Address"}
-                      </button>
-                    </div>
-                      <button
-                        onClick={() => {
-                          setEditingFixedItem(null);
-                          setEditingAddressId(null);
-                          setNewAddress({ title: "", address: "", city: "", state: "", zipCode: "", country: "" });
-                          setValidationErrors({});
-                        }}
-                        className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
-                      >
-                        Done
-                      </button>
-                  </>
+                    );
+                  })}
+                </div>
+                <div className="space-y-2 mb-4">
+                  <Input
+                    value={newAddress.title}
+                    onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
+                    placeholder="Title (e.g., Office, Home)"
+                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                  />
+                  <Input
+                    value={newAddress.address}
+                    onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
+                    placeholder="Street address"
+                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                  />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      value={newAddress.city}
+                      onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                      placeholder="City"
+                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    />
+                    <Input
+                      value={newAddress.state}
+                      onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                      placeholder="State"
+                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Input
+                      value={newAddress.zipCode}
+                      onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
+                      placeholder="ZIP Code"
+                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    />
+                    <Input
+                      value={newAddress.country}
+                      onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                      placeholder="Country"
+                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    />
+                  </div>
+                  <button
+                    onClick={handleSaveFixedItem}
+                    disabled={!newAddress.address.trim()}
+                    className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                  >
+                    {editingAddressId ? "Update Address" : "Add Address"}
+                  </button>
+                </div>
+                <button
+                  onClick={() => {
+                    setEditingFixedItem(null);
+                    setEditingAddressId(null);
+                    setNewAddress({ title: "", address: "", city: "", state: "", zipCode: "", country: "" });
+                    setValidationErrors({});
+                  }}
+                  className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
+                >
+                  Done
+                </button>
+              </>
             </ModalWrapper>
           )}
 
@@ -1586,11 +1584,10 @@ export default function InlineEdit({
                             }));
                           }}
                           placeholder="https://example.com"
-                          className={`bg-slate-900/90 border-2 text-sm text-slate-100 font-medium focus:ring-2 h-12 rounded-xl px-4 transition-all duration-200 shadow-sm focus:shadow-md ${
-                            validationErrors.hotlink?.[hotlink.id]
+                          className={`bg-slate-900/90 border-2 text-sm text-slate-100 font-medium focus:ring-2 h-12 rounded-xl px-4 transition-all duration-200 shadow-sm focus:shadow-md ${validationErrors.hotlink?.[hotlink.id]
                               ? "border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:shadow-red-500/20"
                               : "border-slate-600/40 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-blue-500/20"
-                          }`}
+                            }`}
                         />
                         {validationErrors.hotlink?.[hotlink.id] && (
                           <p className="text-xs text-red-400 mt-1">{validationErrors.hotlink[hotlink.id]}</p>
@@ -1756,6 +1753,19 @@ export default function InlineEdit({
               </>
             )}
           </div>
+
+          {data.type === "personal" ? (
+            <div className="relative">
+              {isEditMode && (
+                <div className="absolute left-0 top-2 flex items-center gap-2 z-20">
+                  <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                    4
+                  </div>
+                </div>
+              )}
+              <ContentHubLiteView />
+            </div>
+          ) : null}
 
           {/* Image Crop Modal */}
           {imageUploadType && imagePreview && (

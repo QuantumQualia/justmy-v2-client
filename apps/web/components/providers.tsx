@@ -6,6 +6,7 @@ import { Toaster } from "@workspace/ui/components/sonner"
 import { GlobalShareHost } from "@/components/common/share/share-host"
 import { AIChatbot } from "@/components/common/chatbot/ai-chatbot"
 import { ChatbotButton } from "@/components/common/chatbot/chatbot-button"
+import { QueryProvider } from "@/components/providers/query-provider"
 
 /**
  * Sync localStorage tokens to cookies on app load
@@ -31,19 +32,21 @@ export function Providers({ children }: { children: React.ReactNode }) {
       disableTransitionOnChange
       enableColorScheme
     >
-      <AuthSync />
-      {children}
-      <GlobalShareHost />
-      <AIChatbot />
-      <ChatbotButton />
-      <Toaster 
-        position="top-right"
-        richColors
-        expand={true}
-        toastOptions={{
-          duration: 3000,
-        }}
-      />
+      <QueryProvider>
+        <AuthSync />
+        {children}
+        <GlobalShareHost />
+        <AIChatbot />
+        <ChatbotButton />
+        <Toaster
+          position="top-right"
+          richColors
+          expand={true}
+          toastOptions={{
+            duration: 3000,
+          }}
+        />
+      </QueryProvider>
     </NextThemesProvider>
   )
 }

@@ -56,7 +56,12 @@ import {
 import type { ProfileKind } from "@/components/mycard/inline-edit-view";
 import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import { openShare } from "@/components/common/share/share-store";
+import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
 import type { ProfileData, SocialLink } from "@/lib/store";
+
+/** Same `Button` styles for hotlinks (`asChild` → `<a>`) and Save / Send myCARD. */
+const MY_CARD_CTA_BUTTON_CLASSNAME =
+  "w-full bg-gradient-to-r rounded-lg rounded-br-none from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium";
 
 const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
   const iconSize = size === "sm" ? 16 : 20;
@@ -288,7 +293,7 @@ export default function MyCardLive({
         </div>
 
         {/* Main Content */}
-        <div className="px-4 pt-16 pb-8 space-y-6">
+        <div className="px-4 pt-16 pb-8">
           {/* Social Links - Swiper Slider */}
           <div className="relative" ref={swiperRef}>
             <Swiper
@@ -474,48 +479,35 @@ export default function MyCardLive({
             <p className="text-sm text-slate-400 break-words">{data.tagline}</p>
           </div>
 
-          {/* Action Buttons */}
+          {/* Hotlinks + action buttons — identical `Button` component / styles */}
           <div className="flex flex-col gap-2">
-            <Button className="w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium">
-              Save to Contacts
-            </Button>
-            <Button className="w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium">
-              Send myCARD
-            </Button>
-          </div>
-
-          {/* Hotlinks */}
-          {data.hotlinks.length > 0 && (
-            <div className="space-y-2">
-              {data.hotlinks.map((hotlink) => (
+            {data.hotlinks.map((hotlink) => (
+              <Button key={hotlink.id} asChild className={MY_CARD_CTA_BUTTON_CLASSNAME}>
                 <a
-                  key={hotlink.id}
                   href={hotlink.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-4 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 backdrop-blur-sm group"
+                  title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
+                  className="inline-flex min-w-0 max-w-full items-center justify-center gap-2"
                 >
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-semibold text-slate-100 block truncate">
-                      {hotlink.title}
-                    </span>
-                    {hotlink.url && (
-                      <span className="text-xs text-slate-400/80 block truncate mt-1">
-                        {hotlink.url}
-                      </span>
-                    )}
-                  </div>
-                  <LinkIcon className="h-4 w-4 text-slate-400 group-hover:text-blue-400 transition-colors flex-shrink-0" />
+                  <span className="min-w-0 truncate">{hotlink.title}</span>
                 </a>
-              ))}
-            </div>
-          )}
+              </Button>
+            ))}
+            <Button className={MY_CARD_CTA_BUTTON_CLASSNAME}>Save to Contacts</Button>
+            <Button className={MY_CARD_CTA_BUTTON_CLASSNAME}>Send myCARD</Button>
+          </div>
+
+          {/* About Section */}
+          {data.type === "personal" ? (
+            <MyCardContentLiteView profileType={data.type} />
+          ) : null}
 
           {/* About Section */}
           {data.about && (
             <div className="space-y-2">
               <h2 className="text-lg font-bold text-slate-100">About</h2>
-              <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+              <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-lg rounded-br-none border border-slate-700/50 backdrop-blur-sm">
                 <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
                   {data.about}
                 </p>
