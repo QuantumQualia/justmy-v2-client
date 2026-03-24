@@ -293,7 +293,7 @@ export default function MyCardLive({
         </div>
 
         {/* Main Content */}
-        <div className="px-4 pt-16 pb-8">
+        <div className="px-4 pt-16 pb-8 space-y-6">
           {/* Social Links - Swiper Slider */}
           <div className="relative" ref={swiperRef}>
             <Swiper
