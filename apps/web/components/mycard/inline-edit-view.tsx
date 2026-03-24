@@ -676,21 +676,24 @@ export default function InlineEdit({
 
     setImageUploading(true);
     try {
-      const response = await apiRequest<{ key: string }>("files/images", {
+      const response = await apiRequest<{ key: string, url: string }>("files/images", {
         method: "POST",
         body: JSON.stringify({ base64Image: croppedImage }),
       });
 
+      const imageKey = response.key;
+      const imageUrl = response.url;
+
       if (imageUploadType === "banner") {
         // update the banner image in the data for immediate preview
-        onDataChange({ banner: croppedImage });
+        onDataChange({ banner: imageUrl });
         // Save banner update to API with stored key/URL
-        await performSave({ ...data, banner: response.key });
+        await performSave({ ...data, banner: imageKey });
       } else if (imageUploadType === "profile") {
         // update the profile image in the data for immediate preview
-        onDataChange({ photo: croppedImage });
+        onDataChange({ photo: imageUrl });
         // Save photo update to API with stored key/URL
-        await performSave({ ...data, photo: response.key });
+        await performSave({ ...data, photo: imageKey });
       }
     } catch (error) {
       console.error("Failed to upload image:", error);
