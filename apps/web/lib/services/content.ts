@@ -68,8 +68,11 @@ export interface ContentTabResponseDto {
 export interface ContentHubResponseDto {
   id: number;
   profileId: number;
-  /** When true, hub is owned elsewhere and shared into the viewer profile (structure read-only). */
-  isShared?: boolean;
+  /**
+   * When true, hub is owned by another profile and shared into the viewer’s current profile
+   * (structure read-only for the viewer).
+   */
+  isShared: boolean;
   title: string;
   description?: string | null;
   createdAt: string;
@@ -158,6 +161,30 @@ export const contentService = {
     } catch (error) {
       if (error instanceof ApiClientError) throw error;
       throw new ApiClientError("Failed to fetch content hubs.");
+    }
+  },
+
+  /**
+   * Public hub for a profile slug (no auth). GET content/hubs/public/:slug
+   * Same response shape as getHubById (`{ hub }`). Returns null if `hub` is missing (never undefined — TanStack Query).
+   */
+  async getPublicHubsBySlug(slug: string): Promise<ContentHubResponseDto[]> {
+    const trimmed = slug.trim();
+    if (!trimmed) {
+      throw new ApiClientError("Profile slug is required.");
+    }
+    try {
+      const response = await apiRequest<{ hubs: ContentHubResponseDto[] }>(
+        `content/hubs/public/${encodeURIComponent(trimmed)}`,
+        {
+          method: "GET",
+          skipAuth: true,
+        }
+      );
+      return response.hubs ?? [];
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to fetch public content hub.");
     }
   },
 
@@ -325,6 +352,38 @@ export const contentService = {
     } catch (error) {
       if (error instanceof ApiClientError) throw error;
       throw new ApiClientError("Failed to fetch tab posts.");
+    }
+  },
+
+  /**
+   * Public paginated tab posts (no auth). GET content/hubs/public/:slug/tabs/:tabId/posts
+   */
+  async getPublicTabPosts(
+    profileSlug: string,
+    tabId: number,
+    params?: { page?: number; limit?: number; search?: string }
+  ): Promise<PaginatedTabPostsResponseDto> {
+    const trimmed = profileSlug.trim();
+    if (!trimmed) {
+      throw new ApiClientError("Profile slug is required.");
+    }
+    try {
+      const queryParams: Record<string, string> = {};
+      if (params?.page != null) queryParams.page = String(params.page);
+      if (params?.limit != null) queryParams.limit = String(params.limit);
+      if (params?.search?.trim()) queryParams.search = params.search.trim();
+
+      return await apiRequest<PaginatedTabPostsResponseDto>(
+        `content/hubs/public/${encodeURIComponent(trimmed)}/tabs/${tabId}/posts`,
+        {
+          method: "GET",
+          params: queryParams,
+          skipAuth: true,
+        }
+      );
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to fetch public tab posts.");
     }
   },
 

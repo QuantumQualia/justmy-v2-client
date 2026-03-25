@@ -27,6 +27,16 @@ export async function GET(request: NextRequest) {
 
     try {
       const url = new URL(imageUrl);
+
+      if (url.protocol !== "https:") {
+        return NextResponse.json(
+          { error: "Only HTTPS image URLs are allowed." },
+          { status: 400 },
+        );
+      }
+
+      const isUnsplashImageHost =
+        url.hostname === "images.unsplash.com" || url.hostname === "plus.unsplash.com";
       
       // Check if it's an S3 URL or matches allowed domains
       const isS3Url = url.hostname.includes('.s3.') || url.hostname.includes('s3.amazonaws.com');
@@ -34,10 +44,10 @@ export async function GET(request: NextRequest) {
         url.hostname.includes(domain)
       );
 
-      if (!isAllowed && !isS3Url) {
+      if (!isAllowed && !isS3Url && !isUnsplashImageHost) {
         console.warn('Blocked image proxy request for domain:', url.hostname);
         return NextResponse.json(
-          { error: 'Domain not allowed. Only S3 buckets are permitted.' },
+          { error: "Domain not allowed for image proxy." },
           { status: 403 }
         );
       }

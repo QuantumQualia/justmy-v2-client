@@ -24,6 +24,8 @@ function absoluteBlogPostUrl(slug: string): string {
 
 interface MyCardContentLiteViewProps {
   profileType?: string;
+  /** Profile slug for `content/hubs/public/:slug` (required for public hub + posts). */
+  profileSlug: string;
 }
 
 /**
@@ -111,31 +113,33 @@ function PostThumbnail({ imageUrl, title }: { imageUrl: string | null; title: st
   return <TitleAvatar title={title} />;
 }
 
-export function MyCardContentLiteView({ profileType }: MyCardContentLiteViewProps) {
+export function MyCardContentLiteView({ profileType, profileSlug }: MyCardContentLiteViewProps) {
   const isPersonal = !profileType || profileType === "personal";
+  const slugKey = profileSlug.trim();
 
-  const hubsQuery = useQuery({
-    queryKey: contentQueryKeys.hubsCurrent(),
-    queryFn: () => contentService.getCurrentProfileHubs(),
-    enabled: isPersonal,
+  const hubQuery = useQuery({
+    queryKey: contentQueryKeys.hubPublic(slugKey),
+    queryFn: () => contentService.getPublicHubsBySlug(slugKey),
+    enabled: isPersonal && slugKey.length > 0,
   });
 
-  const hubs = hubsQuery.data;
-  const hub = hubs?.length ? hubs[0] : null;
-  const onlyTab = hub && hub.tabs?.length ? firstSortedTab(hub) : null;
+  const hubs = hubQuery.data ?? null;
+  const onlyTab = hubs && hubs.length > 0 && hubs[0]?.tabs?.length ? firstSortedTab(hubs[0]) : null;
   const tabId = resolveContentNumericId(onlyTab?.id);
-
+  
   const postsInfiniteQuery = useInfiniteQuery({
-    queryKey: tabId != null ? contentQueryKeys.mycardTabPostsInfinite(tabId) : ["content", "mycardInfinite", "idle"],
+    queryKey:
+      tabId != null && slugKey
+        ? contentQueryKeys.mycardPublicTabPostsInfinite(slugKey, tabId)
+        : ["content", "mycardPublicInfinite", "idle"],
     queryFn: ({ pageParam }) =>
-      contentService.getTabPosts(tabId!, {
+      contentService.getPublicTabPosts(slugKey, tabId!, {
         page: pageParam,
         limit: PAGE_SIZE,
-        status: "publish",
       }),
     initialPageParam: 1,
     getNextPageParam,
-    enabled: isPersonal && tabId != null,
+    enabled: isPersonal && slugKey.length > 0 && tabId != null,
   });
 
   if (!isPersonal) {
@@ -146,7 +150,7 @@ export function MyCardContentLiteView({ profileType }: MyCardContentLiteViewProp
   const tabPosts: TabPostResponseDto[] =
     postsInfiniteQuery.data?.pages.flatMap((p) => p.docs) ?? [];
 
-  const loading = hubsQuery.isPending || (tabId != null && postsInfiniteQuery.isPending);
+  const loading = hubQuery.isPending || (tabId != null && postsInfiniteQuery.isPending);
 
   if (loading) {
     return null;

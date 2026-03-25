@@ -500,7 +500,7 @@ export default function MyCardLive({
 
           {/* About Section */}
           {data.type === "personal" ? (
-            <MyCardContentLiteView profileType={data.type} />
+            <MyCardContentLiteView profileType={data.type} profileSlug={data.slug} />
           ) : null}
 
           {/* About Section */}

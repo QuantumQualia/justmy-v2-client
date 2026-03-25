@@ -1,12 +1,14 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Image as ImageIcon, Loader2, Trash2 } from "lucide-react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import type { PageBlock } from "@/lib/services/cms";
-import { apiRequest } from "@/lib/api-client";
+import { uploadBase64Image } from "@/lib/api-client";
+import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
+import { readFilesAsDataUrls } from "@/lib/read-image-files";
 
 interface LookBookBlockEditorProps {
   block: PageBlock;
@@ -25,8 +27,9 @@ const MAX_IMAGES = 24;
 
 export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProps) {
   const [uploading, setUploading] = useState(false);
-  const [uploadedCount, setUploadedCount] = useState(0);
-  const [uploadTotal, setUploadTotal] = useState(0);
+  const [insertOpen, setInsertOpen] = useState(false);
+  const [pendingCropUrls, setPendingCropUrls] = useState<string[]>([]);
+  const [activeCropSrc, setActiveCropSrc] = useState<string | null>(null);
   const [previews, setPreviews] = useState<Record<string, string>>({});
   const [dragIndex, setDragIndex] = useState<number | null>(null);
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -40,6 +43,8 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
       linkUrl: (item as any).linkUrl,
     }),
   );
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
   const title = (block as any).title as string | undefined;
   const description = (block as any).description as string | undefined;
 
@@ -66,57 +71,41 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
     updateBlock({ items: next } as any);
   };
 
-  const handleFilesSelected = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(event.target.files ?? []);
-    if (!files.length) return;
+  useEffect(() => {
+    if (activeCropSrc !== null) return;
+    if (pendingCropUrls.length === 0) return;
+    const [next, ...rest] = pendingCropUrls;
+    if (!next) return;
+    setActiveCropSrc(next);
+    setPendingCropUrls(rest);
+  }, [activeCropSrc, pendingCropUrls]);
 
-    const remaining = MAX_IMAGES - items.length;
-    if (remaining <= 0) return;
-    const toUpload = files.slice(0, remaining);
+  const handleLookbookCrop = async (croppedImage: string) => {
+    const currentItems = itemsRef.current;
+    const remainingSlots = MAX_IMAGES - currentItems.length;
+    if (remainingSlots <= 0) {
+      setActiveCropSrc(null);
+      setPendingCropUrls([]);
+      return;
+    }
 
     setUploading(true);
-    setUploadTotal(toUpload.length);
-    setUploadedCount(0);
-    const newItems: LookBookItem[] = [];
-
     try {
-      for (const file of toUpload) {
-        const reader = new FileReader();
-
-        const base64 = await new Promise<string>((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result as string);
-          reader.onerror = () => reject(reader.error);
-          reader.readAsDataURL(file);
-        });
-
-        const response = await apiRequest<{ key: string }>("files/images", {
-          method: "POST",
-          body: JSON.stringify({ base64Image: base64 }),
-        });
-
-        const id = `lookbook-item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-        newItems.push({
-          id,
-          image: response.key,
-        });
-
-        // Use the base64 data for local preview (S3 key alone is not renderable)
-        setPreviews((prev) => ({
-          ...prev,
-          [id]: base64,
-        }));
-        setUploadedCount((prev) => prev + 1);
-      }
-
-      if (newItems.length) {
-        updateBlock({ items: [...items, ...newItems] } as any);
-      }
+      const response = await uploadBase64Image<{ key: string }>(croppedImage);
+      const id = `lookbook-item-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      updateBlock({ items: [...currentItems, { id, image: response.key }] } as any);
+      setPreviews((prev) => ({ ...prev, [id]: croppedImage }));
     } catch (error) {
-      console.error("Failed to upload lookbook images:", error);
+      console.error("Failed to upload lookbook image:", error);
     } finally {
       setUploading(false);
-      event.target.value = "";
+      setActiveCropSrc(null);
     }
+  };
+
+  const cancelCropQueue = () => {
+    setPendingCropUrls([]);
+    setActiveCropSrc(null);
   };
 
   const resolveThumbSrc = (item: LookBookItem) => {
@@ -157,30 +146,27 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
       <div className="space-y-2">
         <Label className="text-slate-300">Images ({items.length}/{MAX_IMAGES})</Label>
         <div className="space-y-2">
-          <label
-            htmlFor={`lookbook-upload-${block.id}`}
-            className="block relative w-full overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 hover:border-blue-500/70 hover:bg-slate-900/80 transition-colors cursor-pointer group"
+          <button
+            type="button"
+            onClick={() => {
+              if (items.length >= MAX_IMAGES) return;
+              setInsertOpen(true);
+            }}
+            disabled={items.length >= MAX_IMAGES}
+            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 text-left transition-colors hover:border-blue-500/70 hover:bg-slate-900/80 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <div className="flex h-32 flex-col items-center justify-center gap-2 text-slate-400">
               <ImageIcon className="h-7 w-7 text-slate-500" />
               <span className="text-xs font-medium">
-                Drop or click to upload up to {MAX_IMAGES - items.length} images
+                Add up to {MAX_IMAGES - items.length} images
               </span>
               <span className="text-[11px] text-slate-500">
-                We recommend consistent aspect ratios for best grid layout
+                Device or Unsplash; crop each image before upload
               </span>
             </div>
-            <input
-              id={`lookbook-upload-${block.id}`}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={handleFilesSelected}
-            />
-          </label>
+          </button>
           <p className="text-xs text-slate-500">
-            JPEG, PNG, or WebP. Images are uploaded to S3 via the `files/images` API.
+            JPEG, PNG, or WebP. Images are uploaded via the files/images API.
           </p>
         </div>
       </div>
@@ -285,18 +271,39 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
         </div>
       )}
 
+      <ImageInsertDialog
+        open={insertOpen}
+        onOpenChange={setInsertOpen}
+        allowMultipleLocal
+        onPick={async (result) => {
+          const remaining = MAX_IMAGES - items.length;
+          if (remaining <= 0) return;
+
+          let urls: string[];
+          if (result.kind === "url") {
+            urls = [result.imageSrc];
+          } else {
+            const capped = result.files.slice(0, remaining);
+            urls = await readFilesAsDataUrls(capped);
+          }
+          if (!urls.length) return;
+          setPendingCropUrls((prev) => [...prev, ...urls]);
+        }}
+      />
+
+      {activeCropSrc && (
+        <ImageCropModal
+          imageSrc={activeCropSrc}
+          onCrop={handleLookbookCrop}
+          onCancel={cancelCropQueue}
+        />
+      )}
+
       {uploading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+          <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-3 shadow-xl">
             <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">
-              Processing images…
-              {uploadTotal > 0 && (
-                <span className="ml-1 text-slate-300">
-                  {uploadedCount}/{uploadTotal}
-                </span>
-              )}
-            </span>
+            <span className="text-sm text-slate-100">Processing image…</span>
           </div>
         </div>
       )}

@@ -4,13 +4,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
-import { ImageCropModal } from "@/components/common/image-crop/image-crop-modal";
+import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
+import { readFileAsDataUrl } from "@/lib/read-image-files";
 import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
 import { ContentHubLiteView } from "@/components/content/content-hub-lite-view";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
-import { apiRequest } from "@/lib/api-client";
+import { uploadBase64Image } from "@/lib/api-client";
 import { mapProfileDataToUpdateDto } from "@/lib/store/profile-mapper";
 import { combineAddressFields, extractAddressFields } from "@/lib/utils/address-utils";
 import {
@@ -379,7 +380,8 @@ export default function InlineEdit({
   }>({});
   const [imageUploadType, setImageUploadType] = useState<"banner" | "profile" | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [imageUploading, setImageUploading] = useState(false);
+  const [imageInsertOpen, setImageInsertOpen] = useState(false);
+  const pendingImageKindRef = useRef<"banner" | "profile" | null>(null);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
 
   // Validation functions
@@ -659,27 +661,16 @@ export default function InlineEdit({
     (type) => !data.socialLinks.some((link) => link.type === type)
   );
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, type: "banner" | "profile") => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result as string);
-      setImageUploadType(type);
-    };
-    reader.readAsDataURL(file);
+  const openImageInsert = (kind: "banner" | "profile") => {
+    pendingImageKindRef.current = kind;
+    setImageInsertOpen(true);
   };
 
   const handleImageCrop = async (croppedImage: string) => {
     if (!imageUploadType) return;
 
-    setImageUploading(true);
     try {
-      const response = await apiRequest<{ key: string, url: string }>("files/images", {
-        method: "POST",
-        body: JSON.stringify({ base64Image: croppedImage }),
-      });
+      const response = await uploadBase64Image<{ key: string; url: string }>(croppedImage);
 
       const imageKey = response.key;
       const imageUrl = response.url;
@@ -700,7 +691,6 @@ export default function InlineEdit({
     } finally {
       setImagePreview(null);
       setImageUploadType(null);
-      setImageUploading(false);
     }
   };
 
@@ -721,30 +711,27 @@ export default function InlineEdit({
           <div className="relative">
             <div className="relative h-48 bg-gradient-to-r from-orange-600 to-amber-600 overflow-hidden group">
               <div className="absolute inset-0 bg-black/10" />
-              <label className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-lg p-2 transition-colors touch-manipulation cursor-pointer z-10">
+              <button
+                type="button"
+                onClick={() => openImageInsert("banner")}
+                className="absolute top-3 right-3 z-10 rounded-lg cursor-pointer bg-black/50 p-2 backdrop-blur-sm transition-colors touch-manipulation hover:bg-black/70"
+                aria-label="Edit banner image"
+              >
                 <Pencil className="h-4 w-4 text-white" />
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageUpload(e, "banner")}
-                  className="hidden"
-                />
-              </label>
+              </button>
               {data.banner ? (
                 <img src={data.banner} alt="Banner" className="w-full h-full object-cover" />
               ) : (
-                <label className="absolute inset-0 flex items-center justify-center cursor-pointer">
+                <button
+                  type="button"
+                  onClick={() => openImageInsert("banner")}
+                  className="absolute inset-0 flex cursor-pointer items-center justify-center"
+                >
                   <div className="text-center">
-                    <ImageIcon className="h-8 w-8 text-white/50 mx-auto mb-2" />
+                    <ImageIcon className="mx-auto mb-2 h-8 w-8 text-white/50" />
                     <p className="text-xs text-white/70">Tap to upload banner</p>
                   </div>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleImageUpload(e, "banner")}
-                    className="hidden"
-                  />
-                </label>
+                </button>
               )}
             </div>
 
@@ -752,15 +739,14 @@ export default function InlineEdit({
             <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
               <div className="relative group">
                 <div className="h-24 w-24 rounded-full bg-slate-800 border-4 border-slate-900 overflow-hidden">
-                  <label className="absolute inset-0 bg-black/40 hover:bg-black/60 flex items-center justify-center transition-colors rounded-full touch-manipulation opacity-0 group-hover:opacity-100 cursor-pointer">
+                  <button
+                    type="button"
+                    onClick={() => openImageInsert("profile")}
+                    className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-colors touch-manipulation hover:bg-black/60 group-hover:opacity-100"
+                    aria-label="Edit profile photo"
+                  >
                     <Pencil className="h-5 w-5 text-white" />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, "profile")}
-                      className="hidden"
-                    />
-                  </label>
+                  </button>
                   {data.photo ? (
                     <img src={data.photo} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
@@ -1770,6 +1756,26 @@ export default function InlineEdit({
             </div>
           ) : null}
 
+          <ImageInsertDialog
+            open={imageInsertOpen}
+            onOpenChange={setImageInsertOpen}
+            onPick={async (result) => {
+              const kind = pendingImageKindRef.current;
+              if (!kind) return;
+              pendingImageKindRef.current = null;
+              let src: string;
+              if (result.kind === "url") {
+                src = result.imageSrc;
+              } else {
+                const f = result.files[0];
+                if (!f) return;
+                src = await readFileAsDataUrl(f);
+              }
+              setImageUploadType(kind);
+              setImagePreview(src);
+            }}
+          />
+
           {/* Image Crop Modal */}
           {imageUploadType && imagePreview && (
             <ImageCropModal
@@ -1796,14 +1802,6 @@ export default function InlineEdit({
           />
         </div>
       </div>
-      {imageUploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">Processing image…</span>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

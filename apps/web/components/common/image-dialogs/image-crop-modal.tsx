@@ -1,16 +1,19 @@
 "use client";
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect, useRef } from "react";
 import Cropper from "react-easy-crop";
 import "react-easy-crop/react-easy-crop.css";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Area } from "react-easy-crop";
 
 interface ImageCropModalProps {
   imageSrc: string;
-  aspectRatio: number;
-  onCrop: (croppedImage: string) => void;
+  /** Omit for free-form crop (e.g. lookbook tiles). */
+  aspectRatio?: number;
+  /** May be async (e.g. upload); the modal shows progress until it settles. */
+  onCrop: (croppedImage: string) => void | Promise<void>;
   onCancel: () => void;
 }
 
@@ -23,6 +26,14 @@ export function ImageCropModal({
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
+  const [isApplying, setIsApplying] = useState(false);
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
 
   const onCropComplete = useCallback(
     (croppedArea: Area, croppedAreaPixels: Area) => {
@@ -83,35 +94,55 @@ export function ImageCropModal({
   };
 
   const handleCrop = async () => {
-    if (!croppedAreaPixels) return;
+    if (!croppedAreaPixels || isApplying) return;
+    setIsApplying(true);
     try {
       const croppedImage = await getCroppedImg(imageSrc, croppedAreaPixels);
-      onCrop(croppedImage);
+      await Promise.resolve(onCrop(croppedImage));
     } catch (error) {
       console.error("Error cropping image:", error);
+    } finally {
+      if (mountedRef.current) setIsApplying(false);
     }
   };
 
+  const cropTitle =
+    aspectRatio == null
+      ? "Crop image"
+      : aspectRatio > 1.45
+        ? "Crop banner image"
+        : Math.abs(aspectRatio - 1) < 0.02
+          ? "Crop profile image"
+          : "Crop image";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
       <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">
-            Crop {aspectRatio === 16 / 9 ? "Banner" : "Profile"} Image
-          </h3>
+          <h3 className="text-lg font-bold text-white">{cropTitle}</h3>
           <button
+            type="button"
             onClick={onCancel}
-            className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors"
+            disabled={isApplying}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 transition-colors hover:bg-slate-600 disabled:pointer-events-none disabled:opacity-40"
+            aria-label="Close"
           >
             <X className="h-4 w-4 text-slate-300" />
           </button>
         </div>
 
-        <div 
-          className="relative w-full mb-4 mx-auto rounded-lg overflow-hidden bg-slate-900"
-          style={{ 
-            height: aspectRatio === 16 / 9 ? "180px" : "300px",
-            maxWidth: aspectRatio === 16 / 9 ? "100%" : "300px"
+        <div
+          className={cn(
+            "relative mx-auto mb-4 w-full overflow-hidden rounded-lg bg-slate-900",
+            isApplying && "pointer-events-none opacity-60",
+          )}
+          style={{
+            height:
+              aspectRatio != null && aspectRatio > 1.45
+                ? "180px"
+                : "300px",
+            maxWidth:
+              aspectRatio != null && aspectRatio > 1.45 ? "100%" : "300px",
           }}
         >
           <Cropper
@@ -144,23 +175,35 @@ export function ImageCropModal({
             step="0.1"
             value={zoom}
             onChange={(e) => setZoom(parseFloat(e.target.value))}
-            className="w-full"
+            disabled={isApplying}
+            className="w-full disabled:opacity-50"
           />
         </div>
 
         <div className="flex gap-2">
           <Button
+            type="button"
             onClick={onCancel}
+            disabled={isApplying}
             variant="outline"
-            className="flex-1 bg-slate-700 hover:bg-slate-600 border-slate-600 text-white"
+            className="flex-1 border-slate-600 bg-slate-700 text-white hover:bg-slate-600 disabled:opacity-50"
           >
             Cancel
           </Button>
           <Button
-            onClick={handleCrop}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            type="button"
+            onClick={() => void handleCrop()}
+            disabled={isApplying || !croppedAreaPixels}
+            className="flex-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            Apply Crop
+            {isApplying ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Applying…
+              </>
+            ) : (
+              "Apply crop"
+            )}
           </Button>
         </div>
       </div>

@@ -249,3 +249,65 @@ export async function apiRequest<T>(
     );
   }
 }
+
+export type UploadBase64ImageResponse = { key: string; url?: string };
+
+/**
+ * Upload a base64 image via the Next.js app (same origin), which proxies to the backend.
+ * Avoids browser CORS when NEXT_PUBLIC_API_URL is on another origin (e.g. Unsplash-sized payloads).
+ */
+export async function uploadBase64Image<T extends UploadBase64ImageResponse = UploadBase64ImageResponse>(
+  base64Image: string,
+): Promise<T> {
+  if (typeof window === "undefined") {
+    throw new ApiClientError("uploadBase64Image is only available in the browser");
+  }
+
+  async function postWithToken(token: string | null): Promise<Response> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+
+    return fetch("/api/files/images", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ base64Image }),
+    });
+  }
+
+  let token = await getValidAccessToken();
+  let response = await postWithToken(token);
+
+  if (response.status === 401) {
+    const refreshed = await attemptTokenRefresh();
+    if (refreshed) {
+      response = await postWithToken(refreshed);
+    }
+  }
+
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+
+  if (!response.ok) {
+    const errorPayload =
+      data && data.error !== undefined ? data.error : data;
+    const errorString =
+      typeof errorPayload === "string"
+        ? errorPayload
+        : errorPayload !== undefined
+          ? JSON.stringify(errorPayload)
+          : undefined;
+
+    throw new ApiClientError(
+      (typeof data.message === "string" && data.message) ||
+        (typeof data.error === "string" && data.error) ||
+        "Image upload failed",
+      response.status,
+      errorString,
+    );
+  }
+
+  return data as T;
+}

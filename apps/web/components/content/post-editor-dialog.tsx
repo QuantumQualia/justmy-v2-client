@@ -27,9 +27,10 @@ import {
   type PayloadPost,
   type PageBlock,
 } from "@/lib/services/cms";
-import { apiRequest } from "@/lib/api-client";
+import { uploadBase64Image } from "@/lib/api-client";
 import { TagInput } from "@/components/ui/tag-input";
-import { ImageCropModal } from "@/components/common/image-crop/image-crop-modal";
+import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
+import { readFileAsDataUrl } from "@/lib/read-image-files";
 import { PageBlockEditor } from "@/components/cms/admin/page-block-editor";
 import { PostBlockSelector } from "@/components/cms/admin/post-block-selector";
 import { cn } from "@workspace/ui/lib/utils";
@@ -97,6 +98,7 @@ export function PostEditorDialog({
   const loadedRef = React.useRef<string | null>(null);
 
   const [ogImagePreview, setOgImagePreview] = React.useState<string | null>(null);
+  const [ogInsertOpen, setOgInsertOpen] = React.useState(false);
   const [ogImageKey, setOgImageKey] = React.useState<string | null>(null);
   const [uploadingOgImage, setUploadingOgImage] = React.useState(false);
 
@@ -347,21 +349,10 @@ export function PostEditorDialog({
 
   // ── OG image ───────────────────────────────────────────────────────
 
-  const handleOgImageFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => setOgImagePreview(reader.result as string);
-    reader.readAsDataURL(file);
-  };
-
   const handleOgImageCrop = async (croppedImage: string) => {
     setUploadingOgImage(true);
     try {
-      const response = await apiRequest<{ key: string }>("files/images", {
-        method: "POST",
-        body: JSON.stringify({ base64Image: croppedImage }),
-      });
+      const response = await uploadBase64Image<{ key: string }>(croppedImage);
       setOgImageKey(response.key);
       setFormData((prev) => ({
         ...prev,
@@ -708,10 +699,11 @@ export function PostEditorDialog({
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="peSeoOgImage" className="text-slate-300">OG Image</Label>
-                  <label
-                    htmlFor="peSeoOgImage"
-                    className="block relative w-full overflow-hidden rounded-lg rounded-br-none border border-slate-700 bg-black/30 hover:border-blue-500/70 hover:bg-black/40 transition-colors cursor-pointer group"
+                  <Label className="text-slate-300">OG Image</Label>
+                  <button
+                    type="button"
+                    onClick={() => setOgInsertOpen(true)}
+                    className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-700 bg-black/30 text-left transition-colors hover:border-blue-500/70 hover:bg-black/40"
                   >
                     {formData.seo.ogImage ? (
                       <>
@@ -720,8 +712,8 @@ export function PostEditorDialog({
                           alt="OG preview"
                           className="w-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                          <span className="px-3 py-1.5 text-xs font-medium rounded-full bg-black/70 text-slate-100 border border-slate-600">
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
+                          <span className="rounded-full border border-slate-600 bg-black/70 px-3 py-1.5 text-xs font-medium text-slate-100">
                             Change image
                           </span>
                         </div>
@@ -729,18 +721,11 @@ export function PostEditorDialog({
                     ) : (
                       <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-400">
                         <ImageIcon className="h-6 w-6 text-slate-500" />
-                        <span className="text-xs font-medium">Upload OG image</span>
+                        <span className="text-xs font-medium">Add OG image</span>
                         <span className="text-[11px] text-slate-500">1200 × 630 recommended</span>
                       </div>
                     )}
-                    <input
-                      id="peSeoOgImage"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleOgImageFileSelect}
-                      className="hidden"
-                    />
-                  </label>
+                  </button>
                   <p className="text-xs text-slate-500">
                     Used for social sharing (Open Graph image).
                   </p>
@@ -834,6 +819,20 @@ export function PostEditorDialog({
             )}
           </Button>
         </div>
+
+        <ImageInsertDialog
+          open={ogInsertOpen}
+          onOpenChange={setOgInsertOpen}
+          onPick={async (result) => {
+            if (result.kind === "url") {
+              setOgImagePreview(result.imageSrc);
+            } else {
+              const f = result.files[0];
+              if (!f) return;
+              setOgImagePreview(await readFileAsDataUrl(f));
+            }
+          }}
+        />
 
         {ogImagePreview && (
           <ImageCropModal

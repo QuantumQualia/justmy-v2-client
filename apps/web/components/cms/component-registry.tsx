@@ -34,6 +34,30 @@ import { ProfileSpotlightBlock } from "./components/profile-spotlight-block";
 import { compileBlockStyles, compileContainerWrapper } from "./block-responsive-styles";
 import type { PageBlock } from "@/lib/services/cms";
 
+/** Deterministic string hash (FNV-1a style) for stable SSR/client IDs when `block.id` is missing. */
+function simpleHash(str: string): string {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0).toString(36);
+}
+
+function stableBlockStyleKey(block: PageBlock): string {
+  const rawId = block.id?.trim();
+  if (rawId) {
+    return rawId.replace(/[^a-zA-Z0-9_-]/g, "_");
+  }
+  return simpleHash(
+    `${block.blockType}\0${JSON.stringify(block.styles ?? null)}\0${JSON.stringify(block.layout ?? null)}`,
+  );
+}
+
+function cmsDataAttrId(role: "inner" | "wrap", block: PageBlock): string {
+  return `cms-${role}-${stableBlockStyleKey(block)}`;
+}
+
 // Component registry - maps Payload block types to React components
 export const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "text-block": TextBlock,
@@ -111,8 +135,8 @@ export function BlockRenderer({
 }) {
   const Component = ComponentRegistry[block.blockType];
 
-  const innerStyleId = React.useId().replace(/:/g, "");
-  const wrapStyleId = React.useId().replace(/:/g, "");
+  const innerStyleId = cmsDataAttrId("inner", block);
+  const wrapStyleId = cmsDataAttrId("wrap", block);
   const innerSelector = `[data-cms-style="${innerStyleId}"]`;
   const wrapSelector = `[data-cms-wrap="${wrapStyleId}"]`;
 
