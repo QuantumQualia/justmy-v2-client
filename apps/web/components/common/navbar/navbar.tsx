@@ -1,19 +1,18 @@
 "use client";
 
 import * as React from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
-import { Menu, X, ChevronDown, User } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { Menu, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { useProfileStore } from "@/lib/store/profile-store";
 import { useAppStore } from "@/lib/store/app-store";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import { SuperSearchBar } from "../search/super-search-bar";
 import { MobileSidebar } from "./mobile-sidebar";
 import { ProfileSwitcher } from "./profile-switcher";
 import { cn } from "@workspace/ui/lib/utils";
 import { isAuthenticated } from "@/lib/services/session";
 import { FixedMarketingNavbar } from "./fixed-marketing-navbar";
+import { MycardPublicNavbar } from "./mycard-public-navbar";
+import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
 
 export interface NavbarProps {
   /**
@@ -22,6 +21,14 @@ export interface NavbarProps {
    */
   businessSearchMode?: boolean;
   initialIsAuthed?: boolean;
+  /**
+   * Server-derived: URL is a public myCARD profile. Prevents navbar mode flash before client mounts.
+   */
+  initialMycardPublicNav?: boolean;
+  /** Server-derived `register?type=` for Get myCARD on that profile */
+  initialMycardRegisterType?: string;
+  /** Server-derived profile slug for myCARD menu "Home" */
+  initialMycardProfileSlug?: string;
 }
 
 /**
@@ -34,11 +41,7 @@ export interface NavbarProps {
  */
 function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const isMobile = useIsMobile(768); // md breakpoint
   const pathname = usePathname();
-  const router = useRouter();
-  
-  const profile = useProfileStore((state) => state.data);
   const navigation = useAppStore((state) => state.navigation);
 
   // Close mobile menu when route changes
@@ -104,15 +107,25 @@ function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
 
 /**
  * Auth-aware Navbar:
- * - When logged out: show the fixed marketing navbar.
- * - When logged in: show the app-based navbar (profile switcher + super search).
+ * - On public myCARD profile (`MyCardLive` with `usePublicNavbar`): floating menu control + full-screen overlay menu.
+ * - When logged in: app navbar (profile switcher + super search).
+ * - When logged out: fixed marketing navbar.
  */
 export function Navbar({
   businessSearchMode,
   initialIsAuthed = false,
+  initialMycardPublicNav = false,
+  initialMycardRegisterType = "personal",
+  initialMycardProfileSlug = "",
 }: NavbarProps = {}) {
   const pathname = usePathname();
   const [isAuthed, setIsAuthed] = React.useState<boolean>(initialIsAuthed);
+  const [navShellMounted, setNavShellMounted] = React.useState(false);
+  const fromStore = useMycardPublicNavStore((s) => s.isMycardPublicProfile);
+
+  React.useEffect(() => {
+    setNavShellMounted(true);
+  }, []);
 
   React.useEffect(() => {
     let mounted = true;
@@ -132,7 +145,18 @@ export function Navbar({
     };
   }, [pathname]);
 
-  // Render marketing for logged-out users (or while auth state is unknown).
+  const showMycardPublicNav =
+    fromStore || (!navShellMounted && initialMycardPublicNav);
+
+  if (showMycardPublicNav) {
+    return (
+      <MycardPublicNavbar
+        initialRegisterType={initialMycardRegisterType}
+        initialProfileSlug={initialMycardProfileSlug}
+      />
+    );
+  }
+
   if (isAuthed) {
     return <AppNavbar businessSearchMode={businessSearchMode} />;
   }

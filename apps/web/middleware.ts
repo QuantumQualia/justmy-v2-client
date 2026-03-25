@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
+
 /**
  * Public routes that don't require authentication
  */
@@ -9,17 +11,6 @@ const publicRoutes = [
   "/login",
   "/register",
   "/stripe-callback", // Stripe callback doesn't require auth (handles it internally)
-];
-
-/**
- * Protected single-segment routes that should never be treated as handles
- * These are routes that require authentication and are single segments
- * (e.g., /admin, /dashboard - not /api which is already excluded by matcher)
- */
-const protectedSingleSegmentRoutes = [
-  "/admin",
-  "/dashboard",
-  "/mycard"
 ];
 
 /**
@@ -37,7 +28,9 @@ function isHandleRoute(pathname: string): boolean {
 
   // Check if it matches any protected single-segment route
   // (e.g., /admin, /dashboard should not be treated as handles)
-  const isProtected = protectedSingleSegmentRoutes.includes(pathname);
+  const isProtected = PROTECTED_SINGLE_SEGMENT_ROUTES.includes(
+    pathname as (typeof PROTECTED_SINGLE_SEGMENT_ROUTES)[number]
+  );
 
   return !isProtected;
 }
@@ -70,9 +63,16 @@ function getAuthToken(request: NextRequest): string | null {
  * Authentication Middleware
  * Protects routes except public/auth routes
  */
+/** Pass pathname into Server Components via `headers().get("x-pathname")`. */
+function nextWithPathname(request: NextRequest) {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  
+
   // Allow public routes
   if (isPublicRoute(pathname)) {
     // If user is already authenticated and tries to access login/register, redirect to dashboard
@@ -80,12 +80,12 @@ export function middleware(request: NextRequest) {
     if (token && (pathname === "/login" || pathname === "/register")) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
-    return NextResponse.next();
+    return nextWithPathname(request);
   }
 
   // Check authentication for protected routes (everything that's not public)
   const token = getAuthToken(request);
-  
+
   if (!token) {
     // Redirect to login if not authenticated
     const loginUrl = new URL("/login", request.url);
@@ -95,7 +95,7 @@ export function middleware(request: NextRequest) {
   }
 
   // User is authenticated, allow the request
-  return NextResponse.next();
+  return nextWithPathname(request);
 }
 
 /**

@@ -13,5 +13,11 @@ export function LiveViewBlock({ block }: LiveViewBlockProps) {
   // Get profile data from store
   const data = useProfileStore((state) => state.data);
 
-  return <MyCardLive data={data} profileType={block.profileType} />;
+  return (
+    <MyCardLive
+      data={data}
+      profileType={block.profileType}
+      usePublicNavbar={false}
+    />
+  );
 }

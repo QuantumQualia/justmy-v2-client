@@ -1,12 +1,11 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import { Button } from "@workspace/ui/components/button";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import {
   Upload,
   Mail,
@@ -58,6 +57,8 @@ import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import { openShare } from "@/components/common/share/share-store";
 import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
 import type { ProfileData, SocialLink } from "@/lib/store";
+import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
+import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile";
 
 /** Same `Button` styles for hotlinks (`asChild` → `<a>`) and Save / Send myCARD. */
 const MY_CARD_CTA_BUTTON_CLASSNAME =
@@ -141,6 +142,11 @@ const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
 interface MyCardLiveProps {
   data: ProfileData;
   profileType?: ProfileKind;
+  /**
+   * When true (default), registers the global myCARD public navbar for this view.
+   * Set false for `/mycard/edit` preview and CMS embeds so the normal navbar stays in place.
+   */
+  usePublicNavbar?: boolean;
 }
 
 // Selection Modal Component
@@ -213,12 +219,44 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
 export default function MyCardLive({
   data,
   profileType = "personal",
+  usePublicNavbar = true,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
   const [shouldCenter, setShouldCenter] = useState(false);
-  const isMobile = useIsMobile();
+  /** Mobile-first: avoids one frame of phone chrome on phones before `matchMedia` runs. */
+  const [isNarrowViewport, setIsNarrowViewport] = useState(true);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const setMycardPublicProfile = useMycardPublicNavStore(
+    (s) => s.setMycardPublicProfile
+  );
+
+  useLayoutEffect(() => {
+    if (usePublicNavbar) {
+      setMycardPublicProfile(
+        true,
+        registerTypeFromProfile(data),
+        data.slug
+      );
+    } else {
+      setMycardPublicProfile(false);
+    }
+    return () => setMycardPublicProfile(false);
+  }, [
+    usePublicNavbar,
+    data.slug,
+    data.type,
+    data.osName,
+    setMycardPublicProfile,
+  ]);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setIsNarrowViewport(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   // Count total items
   const totalItems =
@@ -254,12 +292,12 @@ export default function MyCardLive({
   }, [totalItems]);
 
   const content = (
-    <div className="text-white w-full">
+    <div className="text-white w-full max-w-xl mx-auto">
       {/* Mobile View Container */}
       <div className="w-full mx-auto bg-slate-900 relative overflow-hidden">
         {/* Banner and Profile Image */}
         <div className="relative">
-          <div className="relative h-48 bg-gradient-to-r from-orange-600 to-amber-600 overflow-hidden rounded-b-lg">
+          <div className="relative h-48 bg-gradient-to-r from-orange-600 to-amber-600 overflow-hidden rounded-b-3xl">
             <div className="absolute inset-0 bg-black/10" />
             {data.banner ? (
               <img
@@ -583,7 +621,7 @@ export default function MyCardLive({
         onSelect={handleAddressSelect}
       />
 
-      {isMobile ? content : <PhoneCaseWrapper>{content}</PhoneCaseWrapper>}
+      {isNarrowViewport ? content : <PhoneCaseWrapper>{content}</PhoneCaseWrapper>}
     </>
   );
 }

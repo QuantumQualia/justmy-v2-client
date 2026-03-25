@@ -3,31 +3,14 @@ import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
 import MyCardPageClient from "./page-client";
 import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
-import type { ProfileData } from "@/lib/store";
-import { profilesService } from "@/lib/services/profiles";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
-import { mapApiProfileToProfileData } from "@/lib/store/profile-mapper";
+import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle";
 
 interface MyCardPageProps {
   params: Promise<{
     handle: string;
   }>;
 }
-
-// Cached helper function to fetch profile data (server-side)
-// Using cache() to deduplicate requests within the same render
-const fetchProfileByHandle = cache(async (handle: string): Promise<ProfileData | null> => {
-  try {
-    const response = await profilesService.getProfileBySlug(handle);
-    if (!response?.profile) {
-      return null;
-    }
-    return mapApiProfileToProfileData(response.profile);
-  } catch (error) {
-    console.error("Failed to fetch profile by handle:", error);
-    return null;
-  }
-});
 
 // Cached helper function to fetch page data (server-side)
 // Using cache() to deduplicate requests within the same render
@@ -52,7 +35,7 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
   const pageUrl = `${siteUrl}/${handle}`;
 
   // First, check profile
-  const profile = await fetchProfileByHandle(handle);
+  const profile = await fetchPublicProfileByHandle(handle);
 
   if (profile) {
     // Profile exists, use profile metadata
@@ -194,7 +177,7 @@ export default async function MyCardPage({ params }: MyCardPageProps) {
   const { handle } = resolvedParams;
 
   // First, check profile (using cached function to avoid duplicate calls)
-  const profileData = await fetchProfileByHandle(handle);
+  const profileData = await fetchPublicProfileByHandle(handle);
   
   if (profileData) {
     // Profile exists, render profile page

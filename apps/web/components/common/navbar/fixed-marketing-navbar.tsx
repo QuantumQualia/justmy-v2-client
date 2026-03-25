@@ -9,7 +9,6 @@ import { cn } from "@workspace/ui/lib/utils";
 import { subscriptionService, type SubscriptionPlan } from "@/lib/services/subscription";
 import { ApiClientError } from "@/lib/services/auth";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-is-mobile";
 import { createPortal } from "react-dom";
 
 type MarketingNavbarProps = {
@@ -44,7 +43,6 @@ export function FixedMarketingNavbar({
   becomeFounderLoading,
 }: MarketingNavbarProps) {
   const pathname = usePathname();
-  const isMobile = useIsMobile(768);
 
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
   const [osOpen, setOsOpen] = React.useState(false);
@@ -67,17 +65,19 @@ export function FixedMarketingNavbar({
 
   // Close mobile sidebar with Escape
   React.useEffect(() => {
-    if (!isMobile || !mobileMenuOpen) return;
+    if (!mobileMenuOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeAll();
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
-  }, [isMobile, mobileMenuOpen, closeAll]);
+  }, [mobileMenuOpen, closeAll]);
 
-  // Prevent background scrolling while mobile sidebar is open
+  // Prevent background scrolling while mobile sidebar is open (viewport matches mobile drawer)
   React.useEffect(() => {
-    if (!isMobile || !mobileMenuOpen) return;
+    if (!mobileMenuOpen) return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    if (!mq.matches) return;
 
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -85,7 +85,7 @@ export function FixedMarketingNavbar({
     return () => {
       document.body.style.overflow = prevOverflow;
     };
-  }, [isMobile, mobileMenuOpen]);
+  }, [mobileMenuOpen]);
 
   const handleBecomeFounder = async () => {
     try {
@@ -163,12 +163,11 @@ export function FixedMarketingNavbar({
           </Link>
         </div>
 
-        {/* Desktop links */}
-        {!isMobile ? (
-          <div
-            ref={dropdownRootRef}
-            className="flex items-center gap-8 ml-6 flex-1 justify-center"
-          >
+        {/* Desktop links — CSS-only breakpoint (no layout flash) */}
+        <div
+          ref={dropdownRootRef}
+          className="hidden md:flex items-center gap-8 ml-6 flex-1 justify-center"
+        >
             {/* Meet the OS */}
             <Link href="/vision" className="text-slate-300 hover:text-white">
               Meet the OS
@@ -247,12 +246,11 @@ export function FixedMarketingNavbar({
             <Link href="/#pricing" className="text-slate-300 hover:text-white">
               Pricing
             </Link>
-          </div>
-        ) : null}
+        </div>
 
         {/* Right - Global actions */}
         <div className="flex items-center gap-6">
-          {isMobile ? (
+          <div className="flex md:hidden">
             <Button
               variant="ghost"
               size="icon"
@@ -262,39 +260,38 @@ export function FixedMarketingNavbar({
             >
               {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </Button>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="text-slate-300 hover:text-white text-sm font-medium"
-              >
-                Log In
-              </Link>
-              <Button
-                className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-6"
-                onClick={() => void handleBecomeFounder()}
-                disabled={isCheckoutLoading}
-              >
-                {isCheckoutLoading ? "Processing..." : "Become a Founder"}
-              </Button>
-            </>
-          )}
+          </div>
+          <div className="hidden md:flex items-center gap-6">
+            <Link
+              href="/login"
+              className="text-slate-300 hover:text-white text-sm font-medium"
+            >
+              Log In
+            </Link>
+            <Button
+              className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-6"
+              onClick={() => void handleBecomeFounder()}
+              disabled={isCheckoutLoading}
+            >
+              {isCheckoutLoading ? "Processing..." : "Become a Founder"}
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMobile && mobileMenuOpen && portalTarget
+      {/* Mobile menu (drawer hidden at md+ via CSS even if state were stale) */}
+      {mobileMenuOpen && portalTarget
         ? createPortal(
           <>
           {/* Overlay */}
           <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 transition-opacity"
+            className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm transition-opacity md:hidden"
             onClick={closeAll}
             aria-hidden="true"
           />
 
           {/* Sidebar */}
-          <aside className="fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900 border-l border-slate-800 z-70 transform transition-transform duration-300 ease-in-out flex flex-col">
+          <aside className="fixed top-0 right-0 z-70 flex h-full w-80 max-w-[85vw] transform flex-col border-l border-slate-800 bg-slate-900 transition-transform duration-300 ease-in-out md:hidden">
             <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 flex-shrink-0">
               <h2 className="text-lg font-semibold text-white">Menu</h2>
               <Button

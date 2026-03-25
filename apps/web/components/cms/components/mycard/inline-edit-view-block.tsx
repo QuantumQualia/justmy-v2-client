@@ -80,7 +80,7 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
             onHotlinkRemove={removeHotlink}
           />
         ) : (
-          <MyCardLive data={data} />
+          <MyCardLive data={data} usePublicNavbar={false} />
         )}
       </div>
 

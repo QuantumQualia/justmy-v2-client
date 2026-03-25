@@ -1,6 +1,10 @@
 import { Geist, Geist_Mono } from "next/font/google"
 import type { Metadata } from "next"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
+
+import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle"
+import { firstPathSegment, isLikelyHandlePath } from "@/lib/mycard/handle-route"
+import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile"
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
@@ -74,15 +78,45 @@ export default async function RootLayout({
   const cookieStore = await cookies()
   const initialIsAuthed = !!cookieStore.get("auth_access_token")?.value
 
+  const headerList = await headers()
+  const pathname = headerList.get("x-pathname") ?? ""
+  let initialMycardPublicNav = false
+  let initialMycardRegisterType = "personal"
+  let initialMycardProfileSlug = ""
+  if (isLikelyHandlePath(pathname)) {
+    const handle = firstPathSegment(pathname)
+    if (handle) {
+      const profile = await fetchPublicProfileByHandle(handle)
+      if (profile != null) {
+        initialMycardPublicNav = true
+        initialMycardRegisterType = registerTypeFromProfile(profile)
+        initialMycardProfileSlug = profile.slug || handle
+      }
+    }
+  }
+
   return (
     <html lang="en" suppressHydrationWarning>
       <body
         className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
       >
         <Providers>
-          <Navbar initialIsAuthed={initialIsAuthed} />
+          <a
+            href="#site-main"
+            className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
+          >
+            Skip to content
+          </a>
+          <Navbar
+            initialIsAuthed={initialIsAuthed}
+            initialMycardPublicNav={initialMycardPublicNav}
+            initialMycardRegisterType={initialMycardRegisterType}
+            initialMycardProfileSlug={initialMycardProfileSlug}
+          />
           <SearchResultsPanel />
-          {children}
+          <div id="site-main" className="min-h-0">
+            {children}
+          </div>
         </Providers>
       </body>
     </html>

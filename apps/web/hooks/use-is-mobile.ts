@@ -1,28 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useLayoutEffect } from "react";
 
 /**
- * Custom hook to detect if the current viewport is mobile
- * @param breakpoint - The breakpoint in pixels to consider as mobile (default: 768px for md breakpoint)
- * @returns boolean - true if viewport width is less than breakpoint
+ * Viewport mobile check aligned to Tailwind `md` (default &lt; 768px).
+ * Uses `useLayoutEffect` + `matchMedia` so the value updates before paint and
+ * avoids a flash of the desktop layout on phones.
  */
 export function useIsMobile(breakpoint: number = 768): boolean {
   const [isMobile, setIsMobile] = useState(false);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < breakpoint);
-    };
-
-    // Check on mount
-    checkMobile();
-
-    // Listen for resize events
-    window.addEventListener("resize", checkMobile);
-
-    // Cleanup
-    return () => window.removeEventListener("resize", checkMobile);
+  useLayoutEffect(() => {
+    const query = `(max-width: ${breakpoint - 1}px)`;
+    const mq = window.matchMedia(query);
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
   }, [breakpoint]);
 
   return isMobile;
