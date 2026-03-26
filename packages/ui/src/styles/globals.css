@@ -8,42 +8,51 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --background: oklch(0.964 0.006 75); /* warm off-white #F2F0EB */
+  --foreground: oklch(0.22 0.01 60);
+  --card: oklch(1 0 0 / 0.75);
+  --card-foreground: oklch(0.22 0.01 60);
+  --popover: oklch(1 0 0 / 0.92);
+  --popover-foreground: oklch(0.22 0.01 60);
+  --primary: oklch(0.22 0.01 60);
+  --primary-foreground: oklch(0.97 0.005 75);
+  --secondary: oklch(0.94 0.008 75);
+  --secondary-foreground: oklch(0.22 0.01 60);
+  --muted: oklch(0.92 0.008 75);
+  --muted-foreground: oklch(0.50 0.01 60);
+  --accent: oklch(0.63 0.12 47); /* warm amber/orange accent */
+  --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
   /* Positive / go — emerald CTA (hue ~160 aligns with dark theme below) */
   --success: oklch(0.47 0.13 160);
   --success-foreground: oklch(0.99 0.01 160);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --border: oklch(0.88 0.008 75 / 0.6);
+  --input: oklch(0.94 0.008 75);
+  --ring: oklch(0.63 0.12 47 / 0.4);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 1rem;
+  --sidebar: oklch(0.97 0.006 75);
+  --sidebar-foreground: oklch(0.22 0.01 60);
+  --sidebar-primary: oklch(0.22 0.01 60);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.008 75);
+  --sidebar-accent-foreground: oklch(0.22 0.01 60);
+  --sidebar-border: oklch(0.88 0.008 75);
+  --sidebar-ring: oklch(0.63 0.12 47 / 0.4);
+
+  /* Sample-specific glass + CTA tokens (used with inline styles) */
+  --glass-bg: oklch(1 0 0 / 0.65);
+  --glass-border: oklch(1 0 0 / 0.5);
+  --overlay-bg: oklch(0.15 0.01 60 / 0.55);
+  /* Sample hotlink / action button background (translucent white) */
+  --hotlink-bg: oklch(1 0 0 / 0.8);
+  --cta-bg: oklch(0.22 0.01 60);
+  --cta-accent: oklch(0.73 0.14 200);
 }
 
 .dark {
@@ -138,6 +147,17 @@
 }
 
 @layer utilities {
+  /* Sample JustMy proprietary corner geometry */
+  .justmy-corners {
+    border-radius: 16px 16px 0px 16px;
+  }
+  .justmy-corners-lg {
+    border-radius: 20px 20px 0px 20px;
+  }
+  .justmy-corners-xl {
+    border-radius: 24px 24px 0px 24px;
+  }
+
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;

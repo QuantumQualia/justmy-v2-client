@@ -4,9 +4,16 @@ import React from "react";
 
 interface PhoneCaseWrapperProps {
   children: React.ReactNode;
+  /** Visual variant for the simulated phone device. */
+  variant?: "light" | "dark";
 }
 
-export default function PhoneCaseWrapper({ children }: PhoneCaseWrapperProps) {
+export default function PhoneCaseWrapper({
+  children,
+  variant = "dark",
+}: PhoneCaseWrapperProps) {
+  const screenBgClass =
+    variant === "light" ? "bg-background" : "bg-slate-900";
   // Phone dimensions: iPhone 14 Pro size (375px width, 812px height)
   // Adding padding for phone frame, total screen area is ~375x812
   const phoneWidth = 375;
@@ -19,7 +26,12 @@ export default function PhoneCaseWrapper({ children }: PhoneCaseWrapperProps) {
       <div className="relative">
         {/* Phone Frame - Using CSS to create a phone-like appearance */}
         <div 
-          className="relative bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 rounded-[3rem] p-3 shadow-2xl"
+          className={[
+            "relative rounded-[3rem] p-3 shadow-2xl",
+            variant === "light"
+              ? "bg-gradient-to-br from-muted/80 via-card to-muted/80"
+              : "bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950",
+          ].join(" ")}
           style={{ width: `${phoneWidth + framePadding * 2}px` }}
         >
           {/* Screen Bezel */}
@@ -29,7 +41,7 @@ export default function PhoneCaseWrapper({ children }: PhoneCaseWrapperProps) {
             
             {/* Screen Content - Fixed height with scroll */}
             <div 
-              className="relative bg-slate-900 rounded-[2.5rem] overflow-y-auto h-full custom-scrollbar"
+              className={`relative ${screenBgClass} rounded-[2.5rem] overflow-y-auto h-full custom-scrollbar`}
               style={{ 
                 height: `${phoneHeight}px`,
                 width: `${phoneWidth}px`
@@ -40,12 +52,16 @@ export default function PhoneCaseWrapper({ children }: PhoneCaseWrapperProps) {
           </div>
           
           {/* Home Indicator (for modern phones) */}
-          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/30 rounded-full" />
+          <div
+            className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full ${
+              variant === "light" ? "bg-foreground/15" : "bg-white/30"
+            }`}
+          />
         </div>
         
         {/* Decorative Elements */}
-        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-full blur-2xl -z-10" />
-        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-orange-500/20 to-pink-500/20 rounded-full blur-3xl -z-10" />
+        <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-accent/20 to-muted/20 rounded-full blur-2xl -z-10" />
+        <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-gradient-to-br from-accent/20 to-muted/20 rounded-full blur-3xl -z-10" />
       </div>
     </div>
   );

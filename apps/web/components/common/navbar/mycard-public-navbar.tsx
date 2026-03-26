@@ -138,9 +138,8 @@ export function MycardPublicNavbar({
           "fixed z-50 flex items-center gap-1 px-3 py-2",
           "top-[max(1rem,env(safe-area-inset-top))]",
           "right-[max(1rem,env(safe-area-inset-right))]",
-          "rounded-2xl rounded-br-none border border-white/70 bg-white/92",
+          "justmy-corners-lg border border-white/70 bg-white/92 shadow-lg cursor-pointer",
           "backdrop-blur-[20px]",
-          "shadow-[0_6px_24px_rgba(0,0,0,0.12)]",
           "transition-colors hover:bg-white active:scale-[0.98]"
         )}
         style={{

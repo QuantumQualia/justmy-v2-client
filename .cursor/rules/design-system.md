@@ -332,6 +332,58 @@ A component is complete only if:
 
 ---
 
+# 17. 🔄 TanStack Query Usage
+
+## Rules
+
+* Use TanStack Query for all server state (API data)
+* Do not use `useEffect` + `fetch` in components for server data
+* Keep local UI state in React state; keep remote state in Query cache
+* Query hooks should live in feature-level hooks/modules, not inline in page JSX
+
+## Query Keys
+
+* Use stable, array-based keys only
+* Format: `['resource', id, { filters }]`
+* Centralize key builders per feature to avoid mismatches
+
+Example:
+
+```tsx
+const mycardKeys = {
+  all: ['mycard'] as const,
+  detail: (id: string) => ['mycard', id] as const,
+  posts: (id: string, filter: string) => ['mycard', id, { filter }] as const,
+}
+```
+
+## Fetching
+
+* Always set `queryKey` and `queryFn`
+* Use `enabled` for dependent queries
+* Use `select` to shape API data for the UI instead of transforming repeatedly in components
+* Prefer sensible `staleTime` to reduce unnecessary refetching
+
+## Mutations
+
+* Use `useMutation` for writes only
+* On success, invalidate related query keys with `queryClient.invalidateQueries`
+* Use optimistic updates only when rollback behavior is defined
+
+## UX States
+
+* Show skeletons for initial loading and subtle pending states for background refetch
+* Always handle empty and error states consistently
+* Surface retry actions for recoverable failures
+
+## Constraints
+
+* Do not call APIs directly from presentational components when a query hook exists
+* Do not duplicate the same query in multiple components with different keys for the same data
+* Do not store Query results in additional global stores unless strictly necessary
+
+---
+
 # FINAL RULE
 
 If a design decision is unclear:

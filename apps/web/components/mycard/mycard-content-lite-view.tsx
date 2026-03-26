@@ -26,6 +26,7 @@ interface MyCardContentLiteViewProps {
   profileType?: string;
   /** Profile slug for `content/hubs/public/:slug` (required for public hub + posts). */
   profileSlug: string;
+  variant?: "light" | "dark";
 }
 
 /**
@@ -75,13 +76,20 @@ function initialsFromTitle(title: string): string {
   return t.slice(0, 2).toUpperCase();
 }
 
-function TitleAvatar({ title }: { title: string }) {
+function TitleAvatar({
+  title,
+  variant,
+}: {
+  title: string;
+  variant: "light" | "dark";
+}) {
   const initials = initialsFromTitle(title);
   const h = hueFromString(title);
   const h2 = (h + 48) % 360;
+  const textClass = variant === "light" ? "text-foreground" : "text-white";
   return (
     <div
-      className="flex h-full min-h-0 w-full items-center justify-center text-lg font-bold tracking-tight text-white shadow-inner"
+      className={`flex h-full min-h-0 w-full items-center justify-center text-lg font-bold tracking-tight ${textClass} shadow-inner`}
       style={{
         background: `linear-gradient(135deg, hsl(${h} 42% 32%), hsl(${h2} 45% 26%))`,
       }}
@@ -92,7 +100,15 @@ function TitleAvatar({ title }: { title: string }) {
   );
 }
 
-function PostThumbnail({ imageUrl, title }: { imageUrl: string | null; title: string }) {
+function PostThumbnail({
+  imageUrl,
+  title,
+  variant,
+}: {
+  imageUrl: string | null;
+  title: string;
+  variant: "light" | "dark";
+}) {
   const [broken, setBroken] = React.useState(false);
 
   React.useEffect(() => {
@@ -104,17 +120,22 @@ function PostThumbnail({ imageUrl, title }: { imageUrl: string | null; title: st
       <img
         src={imageUrl}
         alt=""
-        className="h-full min-h-0 w-full object-cover"
+        className="h-full min-h-0 w-full object-cover group-hover:scale-105 transition-transform duration-300"
         onError={() => setBroken(true)}
       />
     );
   }
 
-  return <TitleAvatar title={title} />;
+  return <TitleAvatar title={title} variant={variant} />;
 }
 
-export function MyCardContentLiteView({ profileType, profileSlug }: MyCardContentLiteViewProps) {
+export function MyCardContentLiteView({
+  profileType,
+  profileSlug,
+  variant = "dark",
+}: MyCardContentLiteViewProps) {
   const isPersonal = !profileType || profileType === "personal";
+  const isLight = variant === "light";
   const slugKey = profileSlug.trim();
 
   const hubQuery = useQuery({
@@ -160,7 +181,7 @@ export function MyCardContentLiteView({ profileType, profileSlug }: MyCardConten
 
   return (
     <div className="space-y-2">
-      <h2 className="text-lg font-bold text-slate-100">{title}</h2>
+      <h2 className="text-lg font-bold text-foreground">{title}</h2>
 
       <div className="space-y-2">
         {tabPosts.map((item) => {
@@ -177,22 +198,38 @@ export function MyCardContentLiteView({ profileType, profileSlug }: MyCardConten
           return (
             <article
               key={`${item.postId}-${item.position}`}
-              className="group flex items-stretch gap-0 overflow-hidden rounded-lg rounded-br-none border border-slate-700/50 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 backdrop-blur-sm transition-all duration-200 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+              className={`group flex items-stretch gap-0 overflow-hidden rounded-lg rounded-br-none border backdrop-blur-sm transition-all duration-200 ${
+                isLight
+                  ? "border-border bg-card/70 hover:border-primary/30 hover:shadow-lg"
+                  : "border-slate-700/50 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+              }`}
             >
-              <div className="flex min-h-0 w-28 shrink-0 self-stretch overflow-hidden border-r border-slate-700/40 bg-slate-800/80">
+              <div
+                className={`flex min-h-0 w-28 shrink-0 self-stretch overflow-hidden border-r ${
+                  isLight ? "border-border bg-card" : "border-slate-700/40 bg-slate-800/80"
+                }`}
+              >
                 {href ? (
                   <Link
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block h-full min-h-0 min-w-0 w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-900"
+                    className="block h-full min-h-0 min-w-0 w-full outline-none focus-visible:ring-2 focus-visible:ring-blue-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                     aria-label={`Open post: ${label}`}
                   >
-                    <PostThumbnail imageUrl={ogUrl} title={label} />
+                    <PostThumbnail
+                      imageUrl={ogUrl}
+                      title={label}
+                      variant={variant}
+                    />
                   </Link>
                 ) : (
                   <div className="h-full min-h-0 min-w-0 w-full">
-                    <PostThumbnail imageUrl={ogUrl} title={label} />
+                    <PostThumbnail
+                      imageUrl={ogUrl}
+                      title={label}
+                      variant={variant}
+                    />
                   </div>
                 )}
               </div>
@@ -203,21 +240,33 @@ export function MyCardContentLiteView({ profileType, profileSlug }: MyCardConten
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="line-clamp-2 text-sm font-semibold text-slate-100 transition-colors hover:text-blue-300"
+                      className="line-clamp-2 text-sm font-semibold text-foreground transition-colors hover:text-primary"
                     >
                       {label}
                     </Link>
                   ) : (
-                    <span className="line-clamp-2 text-sm font-semibold text-slate-100">{label}</span>
+                    <span className="line-clamp-2 text-sm font-semibold text-foreground">
+                      {label}
+                    </span>
                   )}
                   {excerpt ? (
-                    <p className="mt-1 line-clamp-2 text-xs text-slate-400/80">{excerpt}</p>
+                    <p
+                      className={`mt-1 line-clamp-2 text-xs ${
+                        isLight ? "text-muted-foreground" : "text-slate-400/80"
+                      }`}
+                    >
+                      {excerpt}
+                    </p>
                   ) : null}
                 </div>
                 {shareUrl ? (
                   <button
                     type="button"
-                    className="mt-auto shrink-0 cursor-pointer text-slate-400 transition-colors group-hover:text-blue-400"
+                    className={`mt-auto shrink-0 cursor-pointer transition-colors ${
+                        isLight
+                          ? "text-accent group-hover:text-accent"
+                          : "text-slate-400 group-hover:text-blue-400"
+                    }`}
                     aria-label={`Share ${label}`}
                     title="Share"
                     onClick={() =>
@@ -244,7 +293,11 @@ export function MyCardContentLiteView({ profileType, profileSlug }: MyCardConten
           <Button
             type="button"
             variant="ghost"
-            className="touch-manipulation hover:bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30"
+            className={`touch-manipulation ${
+              isLight
+                ? "hover:bg-muted"
+                : "hover:bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30"
+            }`}
             disabled={postsInfiniteQuery.isFetchingNextPage}
             onClick={() => void postsInfiniteQuery.fetchNextPage()}
           >

@@ -2,11 +2,13 @@
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode } from "swiper/modules";
+import { FreeMode, Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import { Button } from "@workspace/ui/components/button";
 import {
+  ChevronLeft,
+  ChevronRight,
   Upload,
   Mail,
   Calendar,
@@ -59,10 +61,13 @@ import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-v
 import type { ProfileData, SocialLink } from "@/lib/store";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile";
+import { useTheme } from "next-themes";
+import { apiRequest } from "@/lib/api-client";
+import { useQuery } from "@tanstack/react-query";
 
 /** Same `Button` styles for hotlinks (`asChild` → `<a>`) and Save / Send myCARD. */
 const MY_CARD_CTA_BUTTON_CLASSNAME =
-  "w-full bg-gradient-to-r rounded-lg rounded-br-none from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium";
+  "w-full bg-gradient-to-r justmy-corners from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white border border-purple-700/40 shadow-lg shadow-purple-900/10 touch-manipulation cursor-pointer font-medium";
 
 const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
   const iconSize = size === "sm" ? 16 : 20;
@@ -149,6 +154,8 @@ interface MyCardLiveProps {
   usePublicNavbar?: boolean;
 }
 
+const MYCARD_FOOTER_AD_KEY = "system/images/mycard_footer_20260326.png";
+
 // Selection Modal Component
 interface SelectionModalProps {
   isOpen: boolean;
@@ -157,6 +164,7 @@ interface SelectionModalProps {
   icon: React.ReactNode;
   items: Array<{ id: string; label: string; subtitle?: string }>;
   onSelect: (id: string) => void;
+  variant?: "light" | "dark";
 }
 
 const SelectionModal: React.FC<SelectionModalProps> = ({
@@ -166,32 +174,49 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
   icon,
   items,
   onSelect,
+  variant = "dark",
 }) => {
   if (!isOpen) return null;
 
+  const isLight = variant === "light";
+  const overlayClass = isLight ? "bg-black/30" : "bg-black/70";
+  const cardClass = isLight
+    ? "bg-card p-6 rounded-2xl border border-border shadow-2xl w-full max-w-sm"
+    : "bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm";
+  const closeBtnClass = isLight
+    ? "bg-muted hover:bg-muted"
+    : "bg-slate-700 hover:bg-slate-600";
+  const titleClass = isLight ? "text-foreground" : "text-white";
+  const itemBtnClass = isLight
+    ? "w-full p-4 border border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] hover:border-primary/30 justmy-corners transition-all text-left cursor-pointer"
+    : "w-full p-4 bg-slate-900/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 justmy-corners transition-all text-left cursor-pointer";
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in"
+      className={`fixed inset-0 z-50 flex items-center justify-center ${overlayClass} backdrop-blur-sm p-4 animate-in fade-in`}
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm animate-in zoom-in-95 max-h-[80vh] overflow-y-auto"
+        className={`${cardClass} animate-in zoom-in-95 max-h-[80vh] overflow-y-auto`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center">
+            <div
+              className={`h-10 w-10 rounded-full flex items-center justify-center ${isLight ? "bg-muted" : "bg-slate-700"
+                }`}
+            >
               {icon}
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">{title}</h3>
+              <h3 className={`text-lg font-bold ${titleClass}`}>{title}</h3>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+            className={`h-8 w-8 rounded-full ${closeBtnClass} flex items-center justify-center transition-colors cursor-pointer`}
           >
-            <X className="h-4 w-4 text-slate-300" />
+            <X className={`h-4 w-4 ${isLight ? "text-muted-foreground" : "text-slate-300"}`} />
           </button>
         </div>
         <div className="space-y-2">
@@ -200,13 +225,22 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
               key={item.id}
               onClick={() => {
                 onSelect(item.id);
-                onClose();
               }}
-              className="w-full p-4 bg-slate-900/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 rounded-lg transition-all text-left cursor-pointer"
+              className={itemBtnClass}
             >
-              <div className="text-sm font-medium text-white">{item.label}</div>
+              <div
+                className={`text-sm font-medium ${isLight ? "text-foreground" : "text-white"
+                  }`}
+              >
+                {item.label}
+              </div>
               {item.subtitle && (
-                <div className="text-xs text-slate-400 mt-1">{item.subtitle}</div>
+                <div
+                  className={`text-xs mt-1 ${isLight ? "text-muted-foreground" : "text-slate-400"
+                    }`}
+                >
+                  {item.subtitle}
+                </div>
               )}
             </button>
           ))}
@@ -222,14 +256,34 @@ export default function MyCardLive({
   usePublicNavbar = true,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
-  const [shouldCenter, setShouldCenter] = useState(false);
+  const contactPrevBtnRef = useRef<HTMLButtonElement>(null);
+  const contactNextBtnRef = useRef<HTMLButtonElement>(null);
   /** Mobile-first: avoids one frame of phone chrome on phones before `matchMedia` runs. */
   const [isNarrowViewport, setIsNarrowViewport] = useState(true);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
+  const [shouldCenterItems, setShouldCenterItems] = useState(true);
   const setMycardPublicProfile = useMycardPublicNavStore(
     (s) => s.setMycardPublicProfile
   );
+
+  // Keep the public myCARD in the light theme (sample design).
+  // This only changes Tailwind/theme tokens (via NextThemes' `.dark` class),
+  // and is scoped to the public profile view (`usePublicNavbar=true`).
+  const { resolvedTheme, setTheme } = useTheme();
+  const prevResolvedThemeRef = useRef<string | null>(null);
+
+  useLayoutEffect(() => {
+    if (!usePublicNavbar) return;
+
+    prevResolvedThemeRef.current = resolvedTheme ?? null;
+    setTheme("light");
+
+    return () => {
+      const prev = prevResolvedThemeRef.current;
+      setTheme(prev === "dark" || prev === "light" ? prev : "dark");
+    };
+  }, [usePublicNavbar, resolvedTheme, setTheme]);
 
   useLayoutEffect(() => {
     if (usePublicNavbar) {
@@ -249,6 +303,52 @@ export default function MyCardLive({
     data.osName,
     setMycardPublicProfile,
   ]);
+
+  const isLightMycard = usePublicNavbar;
+  const outerTextClass = isLightMycard ? "text-foreground" : "text-white";
+  const screenBgClass = isLightMycard ? "bg-background" : "bg-slate-900";
+  const avatarOuterClass = isLightMycard
+    ? "bg-card border-4 border-border shadow-xl"
+    : "bg-slate-800 border-4 border-slate-900";
+  const avatarPlaceholderBgClass = isLightMycard
+    ? "bg-muted"
+    : "bg-slate-700";
+  const avatarPlaceholderTextClass = isLightMycard
+    ? "text-muted-foreground"
+    : "text-slate-400";
+  const socialBtnColorClass = isLightMycard
+    ? "bg-muted hover:bg-muted/70 border-border"
+    : "bg-slate-800 hover:bg-slate-700 border-slate-700";
+  const socialIconTextClass = isLightMycard ? "text-foreground/60" : "text-white";
+  const actionGlassStyle = isLightMycard
+    ? {
+      background: "var(--glass-bg)",
+      border: "1px solid var(--glass-border)",
+      backdropFilter: "blur(12px)",
+      WebkitBackdropFilter: "blur(12px)",
+      boxShadow: "0 2px 12px oklch(0 0 0 / 0.08)",
+    }
+    : undefined;
+  const nameTextClass = isLightMycard ? "text-foreground" : "text-slate-200";
+  const taglineTextClass = isLightMycard
+    ? "text-muted-foreground"
+    : "text-slate-400";
+  const aboutTitleTextClass = isLightMycard
+    ? "text-foreground"
+    : "text-slate-100";
+  const aboutCardClass = isLightMycard
+    ? "p-5 bg-card/90 rounded-lg rounded-br-none border border-border backdrop-blur-sm"
+    : "p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-lg rounded-br-none border border-slate-700/50 backdrop-blur-sm";
+  const aboutBodyTextClass = isLightMycard
+    ? "text-muted-foreground"
+    : "text-slate-200";
+
+  const ctaButtonClassName = isLightMycard
+    ? "block w-full py-3 px-4 justmy-corners text-center text-sm font-medium text-foreground transition-all duration-200 active:scale-95 hover:shadow-md border-[1.5px] border-border bg-[var(--hotlink-bg)] touch-manipulation cursor-pointer"
+    : `block ${MY_CARD_CTA_BUTTON_CLASSNAME}`;
+  const registerHref = `/register?type=${encodeURIComponent(
+    registerTypeFromProfile(data)
+  )}&ref=${encodeURIComponent(data.slug)}`;
 
   useLayoutEffect(() => {
     const mq = window.matchMedia("(max-width: 1023px)");
@@ -283,7 +383,7 @@ export default function MyCardLive({
 
       const shouldCenterItems = estimatedTotalWidth < containerWidth * 0.8;
 
-      setShouldCenter(shouldCenterItems);
+      setShouldCenterItems(shouldCenterItems);
     };
 
     checkWidth();
@@ -291,27 +391,41 @@ export default function MyCardLive({
     return () => window.removeEventListener('resize', checkWidth);
   }, [totalItems]);
 
+  const footerAdQuery = useQuery({
+    queryKey: ["mycard-footer-ad-url", MYCARD_FOOTER_AD_KEY],
+    queryFn: async () => {
+      const payload = await apiRequest<{ url?: string }>("files/presigned-url", {
+        method: "GET",
+        params: { key: MYCARD_FOOTER_AD_KEY },
+        skipAuth: true,
+      });
+      return payload.url ?? "";
+    },
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+    retry: 1,
+  });
+  const footerAdUrl = footerAdQuery.data ?? "";
+
   const content = (
-    <div className="text-white w-full max-w-xl mx-auto">
+    <div className={`${outerTextClass} w-full max-w-xl mx-auto`}>
       {/* Mobile View Container */}
-      <div className="w-full mx-auto bg-slate-900 relative overflow-hidden">
+      <div className={`w-full mx-auto ${screenBgClass} relative overflow-hidden`}>
         {/* Banner and Profile Image */}
         <div className="relative">
-          <div className="relative h-48 bg-gradient-to-r from-orange-600 to-amber-600 overflow-hidden rounded-b-3xl">
+          <div className="relative h-48 overflow-hidden rounded-b-3xl">
             <div className="absolute inset-0 bg-black/10" />
-            {data.banner ? (
-              <img
-                src={data.banner}
-                alt="Banner"
-                className="w-full h-full object-cover"
-              />
-            ) : null}
+            <img
+              src={data.banner || "/images/banner.jpg"}
+              alt="Banner"
+              className="w-full h-full object-cover object-center"
+            />
           </div>
 
           {/* Profile Picture */}
           <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
             <div className="relative">
-              <div className="h-24 w-24 rounded-full bg-slate-800 border-4 border-slate-900 overflow-hidden">
+              <div className={`h-24 w-24 rounded-full ${avatarOuterClass} overflow-hidden`}>
                 {data.photo ? (
                   <img
                     src={data.photo}
@@ -319,8 +433,8 @@ export default function MyCardLive({
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="h-full w-full flex items-center justify-center bg-slate-700">
-                    <span className="text-2xl font-bold text-slate-400">
+                  <div className={`h-full w-full flex items-center justify-center ${avatarPlaceholderBgClass}`}>
+                    <span className={`text-2xl font-bold ${avatarPlaceholderTextClass}`}>
                       {data.name.charAt(0)}
                     </span>
                   </div>
@@ -334,14 +448,54 @@ export default function MyCardLive({
         <div className="px-4 pt-16 pb-8 space-y-6">
           {/* Social Links - Swiper Slider */}
           <div className="relative" ref={swiperRef}>
+            {!shouldCenterItems && (
+              <>
+                <button
+                  ref={contactPrevBtnRef}
+                  type="button"
+                  aria-label="Previous contact"
+                  className={`absolute -left-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border transition-all duration-200 ${isLightMycard
+                    ? "border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] text-foreground/60 hover:text-foreground"
+                    : "border-slate-700 bg-slate-900/50 text-white/60 hover:text-white"
+                    } active:scale-95`}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  ref={contactNextBtnRef}
+                  type="button"
+                  aria-label="Next contact"
+                  className={`absolute -right-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border transition-all duration-200 ${isLightMycard
+                    ? "border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] text-foreground/60 hover:text-foreground"
+                    : "border-slate-700 bg-slate-900/50 text-white/60 hover:text-white"
+                    } active:scale-95`}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </>
+            )}
             <Swiper
-              modules={[FreeMode]}
+              modules={[FreeMode, Navigation]}
+              navigation={true}
               freeMode={true}
               slidesPerView="auto"
               spaceBetween={12}
               mousewheel={true}
               grabCursor={true}
-              className={`!px-1 ${shouldCenter ? '[&_.swiper-wrapper]:justify-center' : '[&_.swiper-wrapper]:justify-start'}`}
+              className={`!px-4 ${shouldCenterItems ? '[&_.swiper-wrapper]:justify-center' : '[&_.swiper-wrapper]:justify-start'}`}
+              onBeforeInit={(swiper) => {
+                // Swiper navigation wiring needs an enabled `navigation` param.
+                // During init, the `prevEl/nextEl` refs may still be null, so we attach them here.
+                const params = swiper.params as any;
+                params.navigation = params.navigation === true ? {} : params.navigation ?? {};
+                params.navigation.prevEl = contactPrevBtnRef.current;
+                params.navigation.nextEl = contactNextBtnRef.current;
+              }}
+              onSwiper={(swiper) => {
+                if (swiper.navigation && typeof swiper.navigation.update === "function") {
+                  swiper.navigation.update();
+                }
+              }}
             >
               {/* Upload - Fixed, always first */}
               <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
@@ -357,10 +511,11 @@ export default function MyCardLive({
                       entityLabel: data.type || undefined,
                     });
                   }}
-                  className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                  className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                  style={actionGlassStyle}
                   title="Upload/Share"
                 >
-                  <div className="text-white group-hover:scale-110 transition-transform">
+                  <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                     <Upload className="h-5 w-5" />
                   </div>
                 </button>
@@ -382,18 +537,19 @@ export default function MyCardLive({
                         }
                       }
                     }}
-                    className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
                     title={
                       data.phones.length > 1
                         ? `Phone (${data.phones.length} numbers)`
                         : `Phone: ${data.phones[0]?.number}`
                     }
                   >
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       <Phone className="h-5 w-5" />
                     </div>
                     {data.phones.length > 1 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-blue-500 text-xs flex items-center justify-center text-white">
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
                         {data.phones.length}
                       </span>
                     )}
@@ -406,10 +562,11 @@ export default function MyCardLive({
                 <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
                   <a
                     href={`mailto:${data.email}`}
-                    className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
                     title={`Email: ${data.email}`}
                   >
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       <Mail className="h-5 w-5" />
                     </div>
                   </a>
@@ -419,8 +576,15 @@ export default function MyCardLive({
               {/* Website - if available */}
               {data.website && (
                 <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <a href={data.website} target="_blank" rel="noopener noreferrer" className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group" title={`Website: ${data.website}`}>
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                  <a
+                    href={data.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
+                    title={`Website: ${data.website}`}
+                  >
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       <Globe className="h-5 w-5" />
                     </div>
                   </a>
@@ -453,18 +617,19 @@ export default function MyCardLive({
                         }
                       }
                     }}
-                    className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
                     title={
                       data.addresses.length > 1
                         ? `Address (${data.addresses.length} locations)`
                         : `Address: ${data.addresses[0]?.address || ""}`
                     }
                   >
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       <MapPin className="h-5 w-5" />
                     </div>
                     {data.addresses.length > 1 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-blue-500 text-xs flex items-center justify-center text-white">
+                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
                         {data.addresses.length}
                       </span>
                     )}
@@ -479,10 +644,11 @@ export default function MyCardLive({
                     href={data.calendarLink}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
                     title="Calendar"
                   >
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       <Calendar className="h-5 w-5" />
                     </div>
                   </a>
@@ -499,10 +665,11 @@ export default function MyCardLive({
                         e.preventDefault();
                       }
                     }}
-                    className="flex-shrink-0 h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group"
+                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+                    style={actionGlassStyle}
                     title={link.label || link.type}
                   >
-                    <div className="text-white group-hover:scale-110 transition-transform">
+                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
                       {getSocialIcon(link.type)}
                     </div>
                   </a>
@@ -513,45 +680,89 @@ export default function MyCardLive({
 
           {/* Name and Tagline */}
           <div className="text-center space-y-2">
-            <h1 className="text-xl font-bold text-slate-200">{data.name}</h1>
-            <p className="text-sm text-slate-400 break-words">{data.tagline}</p>
+            <h1
+              className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}
+            >
+              {data.name}
+            </h1>
+            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
           </div>
 
           {/* Hotlinks + action buttons — identical `Button` component / styles */}
           <div className="flex flex-col gap-2">
             {data.hotlinks.map((hotlink) => (
-              <Button key={hotlink.id} asChild className={MY_CARD_CTA_BUTTON_CLASSNAME}>
-                <a
-                  href={hotlink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
-                  className="inline-flex min-w-0 max-w-full items-center justify-center gap-2"
-                >
-                  <span className="min-w-0 truncate">{hotlink.title}</span>
-                </a>
-              </Button>
+              <a
+                key={hotlink.id}
+                href={hotlink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
+                className={ctaButtonClassName}
+              >
+                <span className="min-w-0 truncate">{hotlink.title}</span>
+              </a>
             ))}
-            <Button className={MY_CARD_CTA_BUTTON_CLASSNAME}>Save to Contacts</Button>
-            <Button className={MY_CARD_CTA_BUTTON_CLASSNAME}>Send myCARD</Button>
+            <button type="button" className={ctaButtonClassName}>
+              Save to Contacts
+            </button>
+            <button type="button" className={ctaButtonClassName}>
+              Send myCARD
+            </button>
           </div>
 
           {/* About Section */}
           {data.type === "personal" ? (
-            <MyCardContentLiteView profileType={data.type} profileSlug={data.slug} />
+            <MyCardContentLiteView
+              profileType={data.type}
+              profileSlug={data.slug}
+              variant={usePublicNavbar ? "light" : "dark"}
+            />
           ) : null}
 
           {/* About Section */}
           {data.about && (
             <div className="space-y-2">
-              <h2 className="text-lg font-bold text-slate-100">About</h2>
-              <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-lg rounded-br-none border border-slate-700/50 backdrop-blur-sm">
-                <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">
+              <h2
+                className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}
+              >
+                About
+              </h2>
+
+              {isLightMycard ? (
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
                   {data.about}
                 </p>
-              </div>
+              ) : (
+                <div className={aboutCardClass}>
+                  <p
+                    className={`text-sm ${aboutBodyTextClass} leading-relaxed whitespace-pre-wrap`}
+                  >
+                    {data.about}
+                  </p>
+                </div>
+              )}
             </div>
           )}
+
+          <div className="flex flex-col gap-2">
+            {footerAdUrl ? (
+              <a href={registerHref} aria-label="Claim your free myCARD">
+                <img
+                  src={footerAdUrl}
+                  alt="Get Amplified Now - Claim Your Free myCARD"
+                  className="w-full rounded-md rounded-br-none object-cover"
+                  loading="lazy"
+                />
+              </a>
+            ) : null}
+
+            <a
+              href={registerHref}
+              className="block text-center text-sm underline underline-offset-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Click to create your free account
+            </a>
+          </div>
         </div>
       </div>
     </div>
@@ -609,6 +820,7 @@ export default function MyCardLive({
         icon={<Phone className="h-5 w-5" />}
         items={phoneItems}
         onSelect={handlePhoneSelect}
+        variant={usePublicNavbar ? "light" : "dark"}
       />
 
       {/* Address Selection Modal */}
@@ -619,9 +831,14 @@ export default function MyCardLive({
         icon={<MapPin className="h-5 w-5" />}
         items={addressItems}
         onSelect={handleAddressSelect}
+        variant={usePublicNavbar ? "light" : "dark"}
       />
 
-      {isNarrowViewport ? content : <PhoneCaseWrapper>{content}</PhoneCaseWrapper>}
+      {isNarrowViewport ? content : (
+        <PhoneCaseWrapper variant={usePublicNavbar ? "light" : "dark"}>
+          {content}
+        </PhoneCaseWrapper>
+      )}
     </>
   );
 }
