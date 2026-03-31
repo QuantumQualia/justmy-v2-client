@@ -27,6 +27,10 @@ interface MyCardContentLiteViewProps {
   /** Profile slug for `content/hubs/public/:slug` (required for public hub + posts). */
   profileSlug: string;
   variant?: "light" | "dark";
+  /** Optional explicit content tab id (used by desktop dynamic tab selection). */
+  selectedTabId?: number | null;
+  /** Optional explicit title to display for selected tab. */
+  selectedTabTitle?: string;
 }
 
 /**
@@ -133,20 +137,27 @@ export function MyCardContentLiteView({
   profileType,
   profileSlug,
   variant = "dark",
+  selectedTabId,
+  selectedTabTitle,
 }: MyCardContentLiteViewProps) {
   const isPersonal = !profileType || profileType === "personal";
   const isLight = variant === "light";
   const slugKey = profileSlug.trim();
+  const forcedTabId = resolveContentNumericId(selectedTabId);
+  const hasForcedTab = forcedTabId != null;
 
   const hubQuery = useQuery({
     queryKey: contentQueryKeys.hubPublic(slugKey),
     queryFn: () => contentService.getPublicHubsBySlug(slugKey),
-    enabled: isPersonal && slugKey.length > 0,
+    enabled: isPersonal && slugKey.length > 0 && !hasForcedTab,
   });
 
   const hubs = hubQuery.data ?? null;
-  const onlyTab = hubs && hubs.length > 0 && hubs[0]?.tabs?.length ? firstSortedTab(hubs[0]) : null;
-  const tabId = resolveContentNumericId(onlyTab?.id);
+  const onlyTab =
+    !hasForcedTab && hubs && hubs.length > 0 && hubs[0]?.tabs?.length
+      ? firstSortedTab(hubs[0])
+      : null;
+  const tabId = hasForcedTab ? forcedTabId : resolveContentNumericId(onlyTab?.id);
   
   const postsInfiniteQuery = useInfiniteQuery({
     queryKey:
@@ -167,11 +178,13 @@ export function MyCardContentLiteView({
     return null;
   }
 
-  const title = onlyTab?.title ?? "";
+  const title = selectedTabTitle?.trim() || (onlyTab?.title ?? "");
   const tabPosts: TabPostResponseDto[] =
     postsInfiniteQuery.data?.pages.flatMap((p) => p.docs) ?? [];
 
-  const loading = hubQuery.isPending || (tabId != null && postsInfiniteQuery.isPending);
+  const loading =
+    (!hasForcedTab && hubQuery.isPending) ||
+    (tabId != null && postsInfiniteQuery.isPending);
 
   if (loading) {
     return null;

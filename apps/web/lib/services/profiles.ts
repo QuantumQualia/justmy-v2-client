@@ -30,7 +30,7 @@ export interface ProfileResponseDto {
   id: string;
   name: string;
   slug: string;
-  type: string;
+  osName: string;
   zipCode: string;
   marketId?: string | null;
   latitude?: string | null;

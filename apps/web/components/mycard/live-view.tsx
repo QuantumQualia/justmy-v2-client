@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { FreeMode, Navigation } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/free-mode";
-import { Button } from "@workspace/ui/components/button";
 import {
-  ChevronLeft,
-  ChevronRight,
   Upload,
   Mail,
   Calendar,
@@ -18,7 +11,6 @@ import {
   Globe,
   X,
 } from "lucide-react";
-import type { Phone as PhoneType, Address } from "@/lib/store";
 import {
   SiFacebook,
   SiInstagram,
@@ -55,15 +47,15 @@ import {
   SiXing,
 } from "react-icons/si";
 import type { ProfileKind } from "@/components/mycard/inline-edit-view";
-import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import { openShare } from "@/components/common/share/share-store";
-import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
 import type { ProfileData, SocialLink } from "@/lib/store";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile";
 import { useTheme } from "next-themes";
 import { apiRequest } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
+import { MyCardMobileView } from "@/components/mycard/live-view-mobile";
+import { MyCardDesktopView } from "@/components/mycard/live-view-desktop";
 
 /** Same `Button` styles for hotlinks (`asChild` → `<a>`) and Save / Send myCARD. */
 const MY_CARD_CTA_BUTTON_CLASSNAME =
@@ -252,7 +244,6 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
 
 export default function MyCardLive({
   data,
-  profileType = "personal",
   usePublicNavbar = true,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
@@ -407,365 +398,171 @@ export default function MyCardLive({
   });
   const footerAdUrl = footerAdQuery.data ?? "";
 
-  const content = (
-    <div className={`${outerTextClass} w-full max-w-xl mx-auto`}>
-      {/* Mobile View Container */}
-      <div className={`w-full mx-auto ${screenBgClass} relative overflow-hidden`}>
-        {/* Banner and Profile Image */}
-        <div className="relative">
-          <div className="relative h-48 overflow-hidden rounded-b-3xl">
-            <div className="absolute inset-0 bg-black/10" />
-            <img
-              src={data.banner || "/images/banner.jpg"}
-              alt="Banner"
-              className="w-full h-full object-cover object-center"
-            />
-          </div>
+  const contactActions = (
+    <>
+      {/* Upload - Fixed, always first */}
+      <button
+        onClick={(e) => {
+          e.preventDefault();
 
-          {/* Profile Picture */}
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-            <div className="relative">
-              <div className={`h-24 w-24 rounded-full ${avatarOuterClass} overflow-hidden`}>
-                {data.photo ? (
-                  <img
-                    src={data.photo}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className={`h-full w-full flex items-center justify-center ${avatarPlaceholderBgClass}`}>
-                    <span className={`text-2xl font-bold ${avatarPlaceholderTextClass}`}>
-                      {data.name.charAt(0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          openShare({
+            title: data.name || "myCARD",
+            description: data.tagline || "Check out this myCARD",
+            url: `${process.env.NEXT_PUBLIC_APP_URL}/${data.slug}`,
+            imageUrl: data.banner || data.photo || undefined,
+            entityLabel: data.type || undefined,
+          });
+        }}
+        className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+        style={actionGlassStyle}
+        title="Upload/Share"
+      >
+        <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+          <Upload className="h-5 w-5" />
         </div>
+      </button>
 
-        {/* Main Content */}
-        <div className="px-4 pt-16 pb-8 space-y-6">
-          {/* Social Links - Swiper Slider */}
-          <div className="relative" ref={swiperRef}>
-            {!shouldCenterItems && (
-              <>
-                <button
-                  ref={contactPrevBtnRef}
-                  type="button"
-                  aria-label="Previous contact"
-                  className={`absolute -left-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border transition-all duration-200 ${isLightMycard
-                    ? "border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] text-foreground/60 hover:text-foreground"
-                    : "border-slate-700 bg-slate-900/50 text-white/60 hover:text-white"
-                    } active:scale-95`}
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                <button
-                  ref={contactNextBtnRef}
-                  type="button"
-                  aria-label="Next contact"
-                  className={`absolute -right-3 top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border transition-all duration-200 ${isLightMycard
-                    ? "border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] text-foreground/60 hover:text-foreground"
-                    : "border-slate-700 bg-slate-900/50 text-white/60 hover:text-white"
-                    } active:scale-95`}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </>
-            )}
-            <Swiper
-              modules={[FreeMode, Navigation]}
-              navigation={true}
-              freeMode={true}
-              slidesPerView="auto"
-              spaceBetween={12}
-              mousewheel={true}
-              grabCursor={true}
-              className={`!px-4 ${shouldCenterItems ? '[&_.swiper-wrapper]:justify-center' : '[&_.swiper-wrapper]:justify-start'}`}
-              onBeforeInit={(swiper) => {
-                // Swiper navigation wiring needs an enabled `navigation` param.
-                // During init, the `prevEl/nextEl` refs may still be null, so we attach them here.
-                const params = swiper.params as any;
-                params.navigation = params.navigation === true ? {} : params.navigation ?? {};
-                params.navigation.prevEl = contactPrevBtnRef.current;
-                params.navigation.nextEl = contactNextBtnRef.current;
-              }}
-              onSwiper={(swiper) => {
-                if (swiper.navigation && typeof swiper.navigation.update === "function") {
-                  swiper.navigation.update();
-                }
-              }}
-            >
-              {/* Upload - Fixed, always first */}
-              <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-
-                    openShare({
-                      title: data.name || "myCARD",
-                      description: data.tagline || "Check out this myCARD",
-                      url: `${process.env.NEXT_PUBLIC_APP_URL}/${data.slug}`,
-                      imageUrl: data.banner || data.photo || undefined,
-                      entityLabel: data.type || undefined,
-                    });
-                  }}
-                  className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                  style={actionGlassStyle}
-                  title="Upload/Share"
-                >
-                  <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                    <Upload className="h-5 w-5" />
-                  </div>
-                </button>
-              </SwiperSlide>
-
-              {/* Phone - if phones array has items (show all phones) */}
-              {data.phones && data.phones.length > 0 && (
-                <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (data.phones && data.phones.length > 1) {
-                        setShowPhoneModal(true);
-                      } else {
-                        // Single phone - call directly
-                        const firstPhone = data.phones?.[0];
-                        if (firstPhone) {
-                          window.location.href = `tel:${firstPhone.number}`;
-                        }
-                      }
-                    }}
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title={
-                      data.phones.length > 1
-                        ? `Phone (${data.phones.length} numbers)`
-                        : `Phone: ${data.phones[0]?.number}`
-                    }
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      <Phone className="h-5 w-5" />
-                    </div>
-                    {data.phones.length > 1 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
-                        {data.phones.length}
-                      </span>
-                    )}
-                  </button>
-                </SwiperSlide>
-              )}
-
-              {/* Email - if available */}
-              {data.email && (
-                <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <a
-                    href={`mailto:${data.email}`}
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title={`Email: ${data.email}`}
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      <Mail className="h-5 w-5" />
-                    </div>
-                  </a>
-                </SwiperSlide>
-              )}
-
-              {/* Website - if available */}
-              {data.website && (
-                <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <a
-                    href={data.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title={`Website: ${data.website}`}
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      <Globe className="h-5 w-5" />
-                    </div>
-                  </a>
-                </SwiperSlide>
-              )}
-
-              {/* Address - if addresses array has items (show all addresses) */}
-              {data.addresses && data.addresses.length > 0 && (
-                <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (data.addresses && data.addresses.length > 1) {
-                        setShowAddressModal(true);
-                      } else {
-                        // Single address - open directly
-                        const firstAddress = data.addresses?.[0];
-                        if (firstAddress) {
-                          // Use address string, or construct from latitude/longitude if available
-                          let queryString = firstAddress.address;
-                          if (firstAddress.latitude && firstAddress.longitude) {
-                            queryString = `${firstAddress.latitude},${firstAddress.longitude}`;
-                          } else if (!queryString && firstAddress.title) {
-                            queryString = firstAddress.title;
-                          }
-                          window.open(
-                            `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryString)}`,
-                            "_blank"
-                          );
-                        }
-                      }
-                    }}
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title={
-                      data.addresses.length > 1
-                        ? `Address (${data.addresses.length} locations)`
-                        : `Address: ${data.addresses[0]?.address || ""}`
-                    }
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      <MapPin className="h-5 w-5" />
-                    </div>
-                    {data.addresses.length > 1 && (
-                      <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
-                        {data.addresses.length}
-                      </span>
-                    )}
-                  </button>
-                </SwiperSlide>
-              )}
-
-              {/* Calendar Link - if available */}
-              {data.calendarLink && (
-                <SwiperSlide className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <a
-                    href={data.calendarLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title="Calendar"
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      <Calendar className="h-5 w-5" />
-                    </div>
-                  </a>
-                </SwiperSlide>
-              )}
-
-              {/* Social Links - actual social media platforms */}
-              {data.socialLinks.map((link) => (
-                <SwiperSlide key={link.id} className="!w-auto !h-[45px] !flex items-center justify-center">
-                  <a
-                    href={link.url || "#"}
-                    onClick={(e) => {
-                      if (!link.url) {
-                        e.preventDefault();
-                      }
-                    }}
-                    className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
-                    style={actionGlassStyle}
-                    title={link.label || link.type}
-                  >
-                    <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
-                      {getSocialIcon(link.type)}
-                    </div>
-                  </a>
-                </SwiperSlide>
-              ))}
-            </Swiper>
+      {/* Phone - if phones array has items (show all phones) */}
+      {data.phones && data.phones.length > 0 && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            if (data.phones && data.phones.length > 1) {
+              setShowPhoneModal(true);
+            } else {
+              const firstPhone = data.phones?.[0];
+              if (firstPhone) {
+                window.location.href = `tel:${firstPhone.number}`;
+              }
+            }
+          }}
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title={
+            data.phones.length > 1
+              ? `Phone (${data.phones.length} numbers)`
+              : `Phone: ${data.phones[0]?.number}`
+          }
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            <Phone className="h-5 w-5" />
           </div>
-
-          {/* Name and Tagline */}
-          <div className="text-center space-y-2">
-            <h1
-              className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}
-            >
-              {data.name}
-            </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
-          </div>
-
-          {/* Hotlinks + action buttons — identical `Button` component / styles */}
-          <div className="flex flex-col gap-2">
-            {data.hotlinks.map((hotlink) => (
-              <a
-                key={hotlink.id}
-                href={hotlink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
-                className={ctaButtonClassName}
-              >
-                <span className="min-w-0 truncate">{hotlink.title}</span>
-              </a>
-            ))}
-            <button type="button" className={ctaButtonClassName}>
-              Save to Contacts
-            </button>
-            <button type="button" className={ctaButtonClassName}>
-              Send myCARD
-            </button>
-          </div>
-
-          {/* About Section */}
-          {data.type === "personal" ? (
-            <MyCardContentLiteView
-              profileType={data.type}
-              profileSlug={data.slug}
-              variant={usePublicNavbar ? "light" : "dark"}
-            />
-          ) : null}
-
-          {/* About Section */}
-          {data.about && (
-            <div className="space-y-2">
-              <h2
-                className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}
-              >
-                About
-              </h2>
-
-              {isLightMycard ? (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {data.about}
-                </p>
-              ) : (
-                <div className={aboutCardClass}>
-                  <p
-                    className={`text-sm ${aboutBodyTextClass} leading-relaxed whitespace-pre-wrap`}
-                  >
-                    {data.about}
-                  </p>
-                </div>
-              )}
-            </div>
+          {data.phones.length > 1 && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
+              {data.phones.length}
+            </span>
           )}
+        </button>
+      )}
 
-          <div className="flex flex-col gap-2">
-            {footerAdUrl ? (
-              <a href={registerHref} aria-label="Claim your free myCARD">
-                <img
-                  src={footerAdUrl}
-                  alt="Get Amplified Now - Claim Your Free myCARD"
-                  className="w-full rounded-md rounded-br-none object-cover"
-                  loading="lazy"
-                />
-              </a>
-            ) : null}
-
-            <a
-              href={registerHref}
-              className="block text-center text-sm underline underline-offset-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Click to create your free account
-            </a>
+      {/* Email - if available */}
+      {data.email && (
+        <a
+          href={`mailto:${data.email}`}
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title={`Email: ${data.email}`}
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            <Mail className="h-5 w-5" />
           </div>
-        </div>
-      </div>
-    </div>
+        </a>
+      )}
+
+      {/* Website - if available */}
+      {data.website && (
+        <a
+          href={data.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title={`Website: ${data.website}`}
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            <Globe className="h-5 w-5" />
+          </div>
+        </a>
+      )}
+
+      {/* Address - if addresses array has items (show all addresses) */}
+      {data.addresses && data.addresses.length > 0 && (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            if (data.addresses && data.addresses.length > 1) {
+              setShowAddressModal(true);
+            } else {
+              const firstAddress = data.addresses?.[0];
+              if (firstAddress) {
+                let queryString = firstAddress.address;
+                if (firstAddress.latitude && firstAddress.longitude) {
+                  queryString = `${firstAddress.latitude},${firstAddress.longitude}`;
+                } else if (!queryString && firstAddress.title) {
+                  queryString = firstAddress.title;
+                }
+                window.open(
+                  `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(queryString)}`,
+                  "_blank"
+                );
+              }
+            }
+          }}
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title={
+            data.addresses.length > 1
+              ? `Address (${data.addresses.length} locations)`
+              : `Address: ${data.addresses[0]?.address || ""}`
+          }
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            <MapPin className="h-5 w-5" />
+          </div>
+          {data.addresses.length > 1 && (
+            <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-accent text-xs flex items-center justify-center text-accent-foreground">
+              {data.addresses.length}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Calendar Link - if available */}
+      {data.calendarLink && (
+        <a
+          href={data.calendarLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title="Calendar"
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            <Calendar className="h-5 w-5" />
+          </div>
+        </a>
+      )}
+
+      {/* Social Links - actual social media platforms */}
+      {data.socialLinks.map((link) => (
+        <a
+          key={link.id}
+          href={link.url || "#"}
+          onClick={(e) => {
+            if (!link.url) {
+              e.preventDefault();
+            }
+          }}
+          className={`flex-shrink-0 h-10 w-10 rounded-full ${socialBtnColorClass} border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer group`}
+          style={actionGlassStyle}
+          title={link.label || link.type}
+        >
+          <div className={`${socialIconTextClass} group-hover:scale-110 transition-transform`}>
+            {getSocialIcon(link.type)}
+          </div>
+        </a>
+      ))}
+    </>
   );
 
   // Prepare phone selection items
@@ -808,8 +605,6 @@ export default function MyCardLive({
     }
   };
 
-  // On mobile, render content directly without phone case
-  // On desktop, wrap in PhoneCaseWrapper to simulate mobile device
   return (
     <>
       {/* Phone Selection Modal */}
@@ -834,10 +629,42 @@ export default function MyCardLive({
         variant={usePublicNavbar ? "light" : "dark"}
       />
 
-      {isNarrowViewport ? content : (
-        <PhoneCaseWrapper variant={usePublicNavbar ? "light" : "dark"}>
-          {content}
-        </PhoneCaseWrapper>
+      {isNarrowViewport ? (
+        <MyCardMobileView
+          data={data}
+          usePublicNavbar={usePublicNavbar}
+          outerTextClass={outerTextClass}
+          screenBgClass={screenBgClass}
+          avatarOuterClass={avatarOuterClass}
+          avatarPlaceholderBgClass={avatarPlaceholderBgClass}
+          avatarPlaceholderTextClass={avatarPlaceholderTextClass}
+          nameTextClass={nameTextClass}
+          taglineTextClass={taglineTextClass}
+          aboutTitleTextClass={aboutTitleTextClass}
+          aboutCardClass={aboutCardClass}
+          aboutBodyTextClass={aboutBodyTextClass}
+          ctaButtonClassName={ctaButtonClassName}
+          registerHref={registerHref}
+          footerAdUrl={footerAdUrl}
+          shouldCenterItems={shouldCenterItems}
+          swiperRef={swiperRef}
+          contactPrevBtnRef={contactPrevBtnRef}
+          contactNextBtnRef={contactNextBtnRef}
+          contactActions={contactActions}
+          isLightMycard={isLightMycard}
+        />
+      ) : (
+        <MyCardDesktopView
+          data={data}
+          usePublicNavbar={usePublicNavbar}
+          outerTextClass={outerTextClass}
+          avatarOuterClass={avatarOuterClass}
+          avatarPlaceholderBgClass={avatarPlaceholderBgClass}
+          avatarPlaceholderTextClass={avatarPlaceholderTextClass}
+          ctaButtonClassName={ctaButtonClassName}
+          registerHref={registerHref}
+          contactActions={contactActions}
+        />
       )}
     </>
   );
