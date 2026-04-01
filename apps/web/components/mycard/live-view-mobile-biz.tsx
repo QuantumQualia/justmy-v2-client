@@ -152,7 +152,7 @@ export function MyCardMobileBizView({
             </button>
           </div>
 
-          {data.type === "personal" ? (
+          {data.type === "biz" ? (
             <MyCardContentLiteView
               profileType={data.type}
               profileSlug={data.slug}
