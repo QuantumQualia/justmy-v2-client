@@ -152,14 +152,6 @@ export function MyCardMobileBizView({
             </button>
           </div>
 
-          {data.type === "biz" ? (
-            <MyCardContentLiteView
-              profileType={data.type}
-              profileSlug={data.slug}
-              variant={usePublicNavbar ? "light" : "dark"}
-            />
-          ) : null}
-
           {data.about && (
             <div className="space-y-2">
               <h2 className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}>About</h2>
