@@ -9,7 +9,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
 import type { ProfileData } from "@/lib/store";
 
-interface MyCardMobileViewProps {
+interface MyCardMobileBizViewProps {
   data: ProfileData;
   usePublicNavbar: boolean;
   outerTextClass: string;
@@ -33,7 +33,7 @@ interface MyCardMobileViewProps {
   isLightMycard: boolean;
 }
 
-export function MyCardMobileView({
+export function MyCardMobileBizView({
   data,
   usePublicNavbar,
   outerTextClass,
@@ -55,7 +55,7 @@ export function MyCardMobileView({
   contactNextBtnRef,
   contactActions,
   isLightMycard,
-}: MyCardMobileViewProps) {
+}: MyCardMobileBizViewProps) {
   return (
     <div className={`${outerTextClass} w-full max-w-xl mx-auto`}>
       <div className={`w-full mx-auto ${screenBgClass} relative overflow-hidden`}>
@@ -91,6 +91,13 @@ export function MyCardMobileView({
         </div>
 
         <div className="px-4 pt-16 pb-8 space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
+              {data.name}
+            </h1>
+            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
+          </div>
+
           <div className="relative" ref={swiperRef}>
             {!shouldCenterItems && (
               <>
@@ -145,13 +152,6 @@ export function MyCardMobileView({
                 </SwiperSlide>
               ))}
             </Swiper>
-          </div>
-
-          <div className="text-center space-y-2">
-            <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
-              {data.name}
-            </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
           </div>
 
           <div className="flex flex-col gap-2">

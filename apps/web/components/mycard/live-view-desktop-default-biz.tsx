@@ -7,7 +7,7 @@ import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
 
-interface MyCardDesktopDefaultViewProps {
+interface MyCardDesktopDefaultBizViewProps {
   data: ProfileData;
   usePublicNavbar: boolean;
   outerTextClass: string;
@@ -19,7 +19,7 @@ interface MyCardDesktopDefaultViewProps {
   contactActions: React.ReactNode;
 }
 
-export function MyCardDesktopDefaultView({
+export function MyCardDesktopDefaultBizView({
   data,
   usePublicNavbar,
   outerTextClass,
@@ -29,7 +29,7 @@ export function MyCardDesktopDefaultView({
   ctaButtonClassName,
   registerHref,
   contactActions,
-}: MyCardDesktopDefaultViewProps) {
+}: MyCardDesktopDefaultBizViewProps) {
   const [activeTab, setActiveTab] = useState<string>("about");
   const variant = usePublicNavbar ? "light" : "dark";
 

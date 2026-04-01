@@ -54,8 +54,8 @@ import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile
 import { useTheme } from "next-themes";
 import { apiRequest } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
-import { MyCardMobileView } from "@/components/mycard/live-view-mobile";
-import { MyCardDesktopView } from "@/components/mycard/live-view-desktop";
+import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
+import { MyCardDesktopBizView } from "@/components/mycard/live-view-desktop-biz";
 
 /** Same `Button` styles for hotlinks (`asChild` → `<a>`) and Save / Send myCARD. */
 const MY_CARD_CTA_BUTTON_CLASSNAME =
@@ -136,7 +136,7 @@ const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
   }
 };
 
-interface MyCardLiveProps {
+interface MyCardBizLiveProps {
   data: ProfileData;
   profileType?: ProfileKind;
   /**
@@ -242,10 +242,10 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
   );
 };
 
-export default function MyCardLive({
+export default function MyCardBizLive({
   data,
   usePublicNavbar = true,
-}: MyCardLiveProps) {
+}: MyCardBizLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
   const contactPrevBtnRef = useRef<HTMLButtonElement>(null);
   const contactNextBtnRef = useRef<HTMLButtonElement>(null);
@@ -630,7 +630,7 @@ export default function MyCardLive({
       />
 
       {isNarrowViewport ? (
-        <MyCardMobileView
+        <MyCardMobileBizView
           data={data}
           usePublicNavbar={usePublicNavbar}
           outerTextClass={outerTextClass}
@@ -654,7 +654,7 @@ export default function MyCardLive({
           isLightMycard={isLightMycard}
         />
       ) : (
-        <MyCardDesktopView
+        <MyCardDesktopBizView
           data={data}
           usePublicNavbar={usePublicNavbar}
           outerTextClass={outerTextClass}

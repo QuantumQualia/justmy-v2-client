@@ -1,9 +1,9 @@
 "use client";
 
 import type { ProfileData } from "@/lib/store";
-import { MyCardDesktopDefaultView } from "@/components/mycard/live-view-desktop-default";
+import { MyCardDesktopDefaultBizView } from "@/components/mycard/live-view-desktop-default-biz";
 
-interface MyCardDesktopViewProps {
+interface MyCardDesktopBizViewProps {
   data: ProfileData;
   usePublicNavbar: boolean;
   outerTextClass: string;
@@ -15,13 +15,13 @@ interface MyCardDesktopViewProps {
   contactActions: React.ReactNode;
 }
 
-export function MyCardDesktopView(props: MyCardDesktopViewProps) {
+export function MyCardDesktopBizView(props: MyCardDesktopBizViewProps) {
   const osName = (props.data.osName ?? "").trim().toLowerCase();
 
   switch (osName) {
     // Future: add OS-specific desktop views here.
     default:
-      return <MyCardDesktopDefaultView {...props} />;
+      return <MyCardDesktopDefaultBizView {...props} />;
   }
 }
 
