@@ -2,6 +2,7 @@
 
 import type { ProfileData } from "@/lib/store";
 import { MyCardMobileDefaultView } from "@/components/mycard/live-view-mobile-default";
+import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
 
 export interface MyCardMobileViewProps {
   data: ProfileData;
@@ -31,7 +32,8 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
   const osName = (props.data.osName ?? "").trim().toLowerCase();
 
   switch (osName) {
-    // Future: add OS-specific mobile views here.
+    case "biz":
+      return <MyCardMobileBizView {...props} />;
     default:
       return <MyCardMobileDefaultView {...props} />;
   }
