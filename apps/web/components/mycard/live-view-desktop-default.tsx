@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
+import { MyCardContentDesktopView } from "@/components/mycard/mycard-content-desktop-view";
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
@@ -53,9 +53,8 @@ export function MyCardDesktopDefaultView({
   const selectedDynamicTab = dynamicContentTabs.find((tab) => tab.id === selectedDynamicTabId) ?? null;
   const desktopTabs = useMemo(
     () => [
-      { key: "all", label: "All Content" },
       { key: "about", label: "About" },
-      ...dynamicContentTabs.map((tab) => ({
+      ...dynamicContentTabs.filter((tab) => tab.postCount > 0).map((tab) => ({
         key: `tab:${tab.id}`,
         label: tab.title,
       })),
@@ -169,14 +168,6 @@ export function MyCardDesktopDefaultView({
         </div>
 
         <div className="pt-6">
-          {activeTab === "all" && data.type === "personal" ? (
-            <MyCardContentLiteView
-              profileType={data.type}
-              profileSlug={data.slug}
-              variant={variant}
-            />
-          ) : null}
-
           {activeTab === "about" && data.about ? (
             <div className="max-w-5xl space-y-4">
               <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
@@ -186,9 +177,11 @@ export function MyCardDesktopDefaultView({
           ) : null}
 
           {selectedDynamicTab && data.type === "personal" ? (
-            <MyCardContentLiteView
+            <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}
+              profileName={data.name}
+              profilePhoto={data.photo}
               variant={variant}
               selectedTabId={selectedDynamicTab.id}
               selectedTabTitle={selectedDynamicTab.title}
