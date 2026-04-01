@@ -144,6 +144,11 @@
   body {
     @apply bg-background text-foreground;
   }
+  body.mycard-live-light-body {
+    background: oklch(0.964 0.006 75);
+    color: oklch(0.22 0.01 60);
+    color-scheme: light;
+  }
 }
 
 @layer utilities {

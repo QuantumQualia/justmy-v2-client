@@ -146,6 +146,7 @@ interface MyCardLiveProps {
 }
 
 const MYCARD_FOOTER_AD_KEY = "system/images/mycard_footer_20260326.png";
+const MYCARD_LIGHT_BODY_CLASS = "mycard-live-light-body";
 const SCOPED_LIGHT_THEME_VARS = {
   "--background": "oklch(0.964 0.006 75)",
   "--foreground": "oklch(0.22 0.01 60)",
@@ -312,6 +313,14 @@ export default function MyCardLive({
     data.osName,
     setMycardPublicProfile,
   ]);
+
+  useEffect(() => {
+    if (!usePublicNavbar) return;
+    document.body.classList.add(MYCARD_LIGHT_BODY_CLASS);
+    return () => {
+      document.body.classList.remove(MYCARD_LIGHT_BODY_CLASS);
+    };
+  }, [usePublicNavbar]);
 
   const isLightMycard = usePublicNavbar;
   const outerTextClass = isLightMycard ? "text-foreground" : "text-white";
