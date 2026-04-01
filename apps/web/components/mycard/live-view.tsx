@@ -51,7 +51,6 @@ import { openShare } from "@/components/common/share/share-store";
 import type { ProfileData, SocialLink } from "@/lib/store";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile";
-import { useTheme } from "next-themes";
 import { apiRequest } from "@/lib/api-client";
 import { useQuery } from "@tanstack/react-query";
 import { MyCardMobileView } from "@/components/mycard/live-view-mobile";
@@ -147,6 +146,43 @@ interface MyCardLiveProps {
 }
 
 const MYCARD_FOOTER_AD_KEY = "system/images/mycard_footer_20260326.png";
+const SCOPED_LIGHT_THEME_VARS = {
+  "--background": "oklch(0.964 0.006 75)",
+  "--foreground": "oklch(0.22 0.01 60)",
+  "--card": "oklch(1 0 0 / 0.75)",
+  "--card-foreground": "oklch(0.22 0.01 60)",
+  "--popover": "oklch(1 0 0 / 0.92)",
+  "--popover-foreground": "oklch(0.22 0.01 60)",
+  "--primary": "oklch(0.22 0.01 60)",
+  "--primary-foreground": "oklch(0.97 0.005 75)",
+  "--secondary": "oklch(0.94 0.008 75)",
+  "--secondary-foreground": "oklch(0.22 0.01 60)",
+  "--muted": "oklch(0.92 0.008 75)",
+  "--muted-foreground": "oklch(0.50 0.01 60)",
+  "--accent": "oklch(0.63 0.12 47)",
+  "--accent-foreground": "oklch(1 0 0)",
+  "--destructive": "oklch(0.577 0.245 27.325)",
+  "--destructive-foreground": "oklch(0.577 0.245 27.325)",
+  "--success": "oklch(0.47 0.13 160)",
+  "--success-foreground": "oklch(0.99 0.01 160)",
+  "--border": "oklch(0.88 0.008 75 / 0.6)",
+  "--input": "oklch(0.94 0.008 75)",
+  "--ring": "oklch(0.63 0.12 47 / 0.4)",
+  "--sidebar": "oklch(0.97 0.006 75)",
+  "--sidebar-foreground": "oklch(0.22 0.01 60)",
+  "--sidebar-primary": "oklch(0.22 0.01 60)",
+  "--sidebar-primary-foreground": "oklch(1 0 0)",
+  "--sidebar-accent": "oklch(0.94 0.008 75)",
+  "--sidebar-accent-foreground": "oklch(0.22 0.01 60)",
+  "--sidebar-border": "oklch(0.88 0.008 75)",
+  "--sidebar-ring": "oklch(0.63 0.12 47 / 0.4)",
+  "--glass-bg": "oklch(1 0 0 / 0.65)",
+  "--glass-border": "oklch(1 0 0 / 0.5)",
+  "--overlay-bg": "oklch(0.15 0.01 60 / 0.55)",
+  "--hotlink-bg": "oklch(1 0 0 / 0.8)",
+  "--cta-bg": "oklch(0.22 0.01 60)",
+  "--cta-accent": "oklch(0.73 0.14 200)",
+} as React.CSSProperties;
 
 // Selection Modal Component
 interface SelectionModalProps {
@@ -257,24 +293,6 @@ export default function MyCardLive({
   const setMycardPublicProfile = useMycardPublicNavStore(
     (s) => s.setMycardPublicProfile
   );
-
-  // Keep the public myCARD in the light theme (sample design).
-  // This only changes Tailwind/theme tokens (via NextThemes' `.dark` class),
-  // and is scoped to the public profile view (`usePublicNavbar=true`).
-  const { resolvedTheme, setTheme } = useTheme();
-  const prevResolvedThemeRef = useRef<string | null>(null);
-
-  useLayoutEffect(() => {
-    if (!usePublicNavbar) return;
-
-    prevResolvedThemeRef.current = resolvedTheme ?? null;
-    setTheme("light");
-
-    return () => {
-      const prev = prevResolvedThemeRef.current;
-      setTheme(prev === "dark" || prev === "light" ? prev : "dark");
-    };
-  }, [usePublicNavbar, resolvedTheme, setTheme]);
 
   useLayoutEffect(() => {
     if (usePublicNavbar) {
@@ -606,7 +624,7 @@ export default function MyCardLive({
   };
 
   return (
-    <>
+    <div style={usePublicNavbar ? SCOPED_LIGHT_THEME_VARS : undefined}>
       {/* Phone Selection Modal */}
       <SelectionModal
         isOpen={showPhoneModal}
@@ -666,7 +684,7 @@ export default function MyCardLive({
           contactActions={contactActions}
         />
       )}
-    </>
+    </div>
   );
 }
 
