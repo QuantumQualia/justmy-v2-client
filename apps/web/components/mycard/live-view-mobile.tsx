@@ -40,7 +40,7 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
        return <MyCardMobileBizView {...props} />;
     case OS_NAME.FOUNDER:
        return <MyCardMobileFounderView {...props} />;
-    case OS_NAME.COMMAND:
+    case OS_NAME.GROWTH:
        return <MyCardMobileCommandView {...props} />;
     default:
       return <MyCardMobileDefaultView {...props} />;
