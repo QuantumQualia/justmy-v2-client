@@ -10,7 +10,7 @@ import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-v
 import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
 
-export function MyCardMobileDefaultView({
+export function MyCardMobileCommandView({
   data,
   usePublicNavbar,
   outerTextClass,
