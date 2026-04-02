@@ -8,6 +8,16 @@ import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import type { Area } from "react-easy-crop";
 
+/** Longest edge (px) for cropped output; keeps uploads small while staying sharp on screens. */
+const MAX_CROP_OUTPUT_EDGE = 2560;
+/**
+ * Binary size cap before base64 (~4/3 growth). Keeps JSON body under typical 10MB limits with headroom.
+ */
+const MAX_OUTPUT_BYTES = 7 * 1024 * 1024;
+const JPEG_MIME = "image/jpeg";
+const INITIAL_JPEG_QUALITY = 0.88;
+const MIN_JPEG_QUALITY = 0.45;
+
 interface ImageCropModalProps {
   imageSrc: string;
   /** Omit for free-form crop (e.g. lookbook tiles). */
@@ -50,11 +60,45 @@ export function ImageCropModal({
       image.src = url;
     });
 
+  const blobToDataUrl = (blob: Blob): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.addEventListener("load", () => resolve(reader.result as string));
+      reader.addEventListener("error", (error) => reject(error));
+      reader.readAsDataURL(blob);
+    });
+
+  const canvasToJpegBlob = (
+    canvas: HTMLCanvasElement,
+    quality: number
+  ): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            reject(new Error("Canvas is empty"));
+            return;
+          }
+          resolve(blob);
+        },
+        JPEG_MIME,
+        quality
+      );
+    });
+
   const getCroppedImg = async (
     imageSrc: string,
     pixelCrop: Area
   ): Promise<string> => {
     const image = await createImage(imageSrc);
+    const srcW = pixelCrop.width;
+    const srcH = pixelCrop.height;
+    const longEdge = Math.max(srcW, srcH);
+    const scale =
+      longEdge > MAX_CROP_OUTPUT_EDGE ? MAX_CROP_OUTPUT_EDGE / longEdge : 1;
+    const outW = Math.max(1, Math.round(srcW * scale));
+    const outH = Math.max(1, Math.round(srcH * scale));
+
     const canvas = document.createElement("canvas");
     const ctx = canvas.getContext("2d");
 
@@ -62,11 +106,10 @@ export function ImageCropModal({
       throw new Error("No 2d context");
     }
 
-    // Set canvas size to match the cropped area
-    canvas.width = pixelCrop.width;
-    canvas.height = pixelCrop.height;
-
-    // Draw the cropped image
+    canvas.width = outW;
+    canvas.height = outH;
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, outW, outH);
     ctx.drawImage(
       image,
       pixelCrop.x,
@@ -75,22 +118,45 @@ export function ImageCropModal({
       pixelCrop.height,
       0,
       0,
-      pixelCrop.width,
-      pixelCrop.height
+      outW,
+      outH
     );
 
-    return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error("Canvas is empty"));
-          return;
-        }
-        const reader = new FileReader();
-        reader.addEventListener("load", () => resolve(reader.result as string));
-        reader.addEventListener("error", (error) => reject(error));
-        reader.readAsDataURL(blob);
-      }, "image/png");
-    });
+    let quality = INITIAL_JPEG_QUALITY;
+    let blob = await canvasToJpegBlob(canvas, quality);
+
+    while (blob.size > MAX_OUTPUT_BYTES && quality > MIN_JPEG_QUALITY) {
+      quality = Math.max(MIN_JPEG_QUALITY, quality - 0.07);
+      blob = await canvasToJpegBlob(canvas, quality);
+    }
+
+    let shrinkPasses = 0;
+    while (blob.size > MAX_OUTPUT_BYTES && shrinkPasses < 4) {
+      shrinkPasses += 1;
+      const nw = Math.max(1, Math.floor(canvas.width * 0.82));
+      const nh = Math.max(1, Math.floor(canvas.height * 0.82));
+      const down = document.createElement("canvas");
+      const dctx = down.getContext("2d");
+      if (!dctx) throw new Error("No 2d context");
+      down.width = nw;
+      down.height = nh;
+      dctx.fillStyle = "#ffffff";
+      dctx.fillRect(0, 0, nw, nh);
+      dctx.drawImage(canvas, 0, 0, nw, nh);
+      canvas.width = nw;
+      canvas.height = nh;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, nw, nh);
+      ctx.drawImage(down, 0, 0);
+      quality = INITIAL_JPEG_QUALITY;
+      blob = await canvasToJpegBlob(canvas, quality);
+      while (blob.size > MAX_OUTPUT_BYTES && quality > MIN_JPEG_QUALITY) {
+        quality = Math.max(MIN_JPEG_QUALITY, quality - 0.07);
+        blob = await canvasToJpegBlob(canvas, quality);
+      }
+    }
+
+    return blobToDataUrl(blob);
   };
 
   const handleCrop = async () => {
