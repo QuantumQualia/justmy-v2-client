@@ -177,7 +177,7 @@ export function MyCardDesktopCommandView({
             </div>
           ) : null}
 
-          {selectedDynamicTab && data.type === PROFILE_KIND.COMMAND ? (
+          {selectedDynamicTab && data.type === PROFILE_KIND.GROWTH ? (
             <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}
