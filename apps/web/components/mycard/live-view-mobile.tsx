@@ -3,6 +3,8 @@
 import type { ProfileData } from "@/lib/store";
 import { MyCardMobileDefaultView } from "@/components/mycard/live-view-mobile-default";
 import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
+import { MyCardDesktopFoundersView } from "@/components/mycard/live-view-mobile-founders";
+import { MyCardDesktopCommandView } from "@/components/mycard/live-view-mobile-command";
 
 export interface MyCardMobileViewProps {
   data: ProfileData;
@@ -32,6 +34,12 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
   const osName = (props.data.osName ?? "").trim().toLowerCase();
 
   switch (osName) {
+    case "biz":
+        return <MyCardMobileBizView {...props} />;
+    case "founders":
+        return <MyCardMobileFoundersView {...props} />;
+    case "command":
+        return <MyCardMobileCommandView {...props} />;
     case "biz":
       return <MyCardMobileBizView {...props} />;
     default:
