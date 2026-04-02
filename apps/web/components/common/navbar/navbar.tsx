@@ -13,6 +13,7 @@ import { isAuthenticated } from "@/lib/services/session";
 import { FixedMarketingNavbar } from "./fixed-marketing-navbar";
 import { MycardPublicNavbar } from "./mycard-public-navbar";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
+import { DEFAULT_PROFILE_KIND } from "@/lib/os-types";
 
 export interface NavbarProps {
   /**
@@ -115,7 +116,7 @@ export function Navbar({
   businessSearchMode,
   initialIsAuthed = false,
   initialMycardPublicNav = false,
-  initialMycardRegisterType = "personal",
+  initialMycardRegisterType = DEFAULT_PROFILE_KIND,
   initialMycardProfileSlug = "",
 }: NavbarProps = {}) {
   const pathname = usePathname();

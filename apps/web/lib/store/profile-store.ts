@@ -5,6 +5,7 @@
 
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
+import type { ProfileKind } from "@/lib/os-types";
 
 // Types (matching inline-edit)
 // Social links only include actual social media platforms (not upload, email, contact, phone, address)
@@ -52,7 +53,7 @@ export interface ProfileData {
   id?: number; // Profile ID for API calls
   osId?: string; // Operating System ID
   osName?: string;
-  type?: "personal" | "biz" | "growth" | "founder" | "city" | "network"; // Profile type (legacy, will be replaced by OS)
+  type?: ProfileKind; // Profile type (legacy, aligned with `osName`)
   slug: string;
   photo: string;
   banner: string;

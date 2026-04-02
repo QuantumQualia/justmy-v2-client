@@ -8,15 +8,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Label } from "@workspace/ui/components/label";
 import { MapPin, Briefcase, User } from "lucide-react";
 import { authService, ApiClientError } from "@/lib/services/auth";
+import {
+  DEFAULT_PROFILE_KIND,
+  isBusinessProfileKind,
+  profileKindDisplayShort,
+  profileKindToOsName,
+  resolveProfileKindOrDefault,
+  type ProfileKind,
+} from "@/lib/os-types";
 
 export default function RegisterForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   
   // 1. Detect Intent: Which profile type did they select?
-  const typeParam = searchParams.get("type") || "personal"; // default to personal
-  const profileType = typeParam.toUpperCase() as "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
-  const isBusiness = typeParam === "biz" || typeParam === "growth" || typeParam === "founder" || typeParam === "city" || typeParam === "network";
+  const profileKind: ProfileKind = resolveProfileKindOrDefault(
+    searchParams.get("type"),
+    DEFAULT_PROFILE_KIND
+  );
+  const profileType = profileKindToOsName(profileKind);
+  const isBusiness = isBusinessProfileKind(profileKind);
   
   // 2. Get referral code from URL (supports both ?ref= and ?referral=)
   const referralCodeFromUrl = searchParams.get("ref") || searchParams.get("referral") || "";
@@ -66,7 +77,7 @@ export default function RegisterForm() {
           {isBusiness ? <Briefcase className="h-6 w-6 text-white" /> : <User className="h-6 w-6 text-white" />}
         </div>
         <CardTitle className="text-2xl font-bold">
-          Create {typeParam.charAt(0).toUpperCase() + typeParam.slice(1)} Account
+          Create {profileKindDisplayShort(profileKind)} Account
         </CardTitle>
         <p className="text-slate-400 text-sm">
           {isBusiness 

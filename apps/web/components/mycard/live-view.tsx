@@ -46,7 +46,7 @@ import {
   SiWhatsapp,
   SiXing,
 } from "react-icons/si";
-import type { ProfileKind } from "@/components/mycard/inline-edit-view";
+import { profileKindToRegisterQueryParam, type ProfileKind } from "@/lib/os-types";
 import { openShare } from "@/components/common/share/share-store";
 import type { ProfileData, SocialLink } from "@/lib/store";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
@@ -299,7 +299,7 @@ export default function MyCardLive({
     if (usePublicNavbar) {
       setMycardPublicProfile(
         true,
-        registerTypeFromProfile(data),
+        profileKindToRegisterQueryParam(registerTypeFromProfile(data)),
         data.slug
       );
     } else {
@@ -365,7 +365,7 @@ export default function MyCardLive({
     ? "block w-full py-3 px-4 justmy-corners text-center text-sm font-medium text-foreground transition-all duration-200 active:scale-95 hover:shadow-md border-[1.5px] border-border bg-[var(--hotlink-bg)] touch-manipulation cursor-pointer"
     : `block ${MY_CARD_CTA_BUTTON_CLASSNAME}`;
   const registerHref = `/register?type=${encodeURIComponent(
-    registerTypeFromProfile(data)
+    profileKindToRegisterQueryParam(registerTypeFromProfile(data))
   )}&ref=${encodeURIComponent(data.slug)}`;
 
   useLayoutEffect(() => {

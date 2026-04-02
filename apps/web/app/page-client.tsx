@@ -8,6 +8,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { ArrowRight, Layout, Briefcase, TrendingUp, Award, Check } from "lucide-react";
 import { subscriptionService, SubscriptionPlan } from "@/lib/services/subscription";
 import { ApiClientError } from "@/lib/services/auth";
+import { DEFAULT_PROFILE_KIND, type ProfileKind } from "@/lib/os-types";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -31,7 +32,7 @@ export default function LandingPage() {
     }
   };
 
-  const handleFreeSignup = (type: "personal" | "biz" | "growth" | "founder" | "city" | "network" = "personal") => {
+  const handleFreeSignup = (type: ProfileKind = DEFAULT_PROFILE_KIND) => {
     // Preserve referral code from URL if present
     const referralCode = searchParams.get("ref") || searchParams.get("referral");
     const params = new URLSearchParams({ type });

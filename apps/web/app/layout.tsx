@@ -5,6 +5,7 @@ import { cookies, headers } from "next/headers"
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle"
 import { firstPathSegment, isLikelyHandlePath } from "@/lib/mycard/handle-route"
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile"
+import { DEFAULT_PROFILE_KIND, profileKindToRegisterQueryParam } from "@/lib/os-types"
 
 import "@workspace/ui/globals.css"
 import { Providers } from "@/components/providers"
@@ -81,7 +82,8 @@ export default async function RootLayout({
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
   let initialMycardPublicNav = false
-  let initialMycardRegisterType = "personal"
+  /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
+  let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
   let initialMycardProfileSlug = ""
   if (isLikelyHandlePath(pathname)) {
     const handle = firstPathSegment(pathname)
@@ -89,7 +91,9 @@ export default async function RootLayout({
       const profile = await fetchPublicProfileByHandle(handle)
       if (profile != null) {
         initialMycardPublicNav = true
-        initialMycardRegisterType = registerTypeFromProfile(profile)
+        initialMycardRegisterType = profileKindToRegisterQueryParam(
+          registerTypeFromProfile(profile)
+        )
         initialMycardProfileSlug = profile.slug || handle
       }
     }

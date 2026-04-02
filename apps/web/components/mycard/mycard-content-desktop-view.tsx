@@ -14,6 +14,7 @@ import {
   type TabPostResponseDto,
 } from "@/lib/services/content";
 import { contentQueryKeys, firstSortedTab } from "@/lib/query/content-query-keys";
+import { PROFILE_KIND } from "@/lib/os-types";
 
 const PAGE_SIZE = 12;
 
@@ -92,7 +93,7 @@ export function MyCardContentDesktopView({
   selectedTabId,
   selectedTabTitle,
 }: MyCardContentDesktopViewProps) {
-  const isPersonal = !profileType || profileType === "personal";
+  const isPersonal = !profileType || profileType === PROFILE_KIND.PERSONAL;
   const isLight = variant === "light";
   const slugKey = profileSlug.trim();
   const forcedTabId = resolveContentNumericId(selectedTabId);

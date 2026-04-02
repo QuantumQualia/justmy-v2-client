@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { DEFAULT_PROFILE_KIND } from "@/lib/os-types";
 
 /**
  * When true, the root layout shows {@link MycardPublicNavbar} instead of the
@@ -22,7 +23,7 @@ export const useMycardPublicNavStore = create<MycardPublicNavStore>((set) => ({
   /** Empty until a public myCARD view sets it; link falls back to server `initialRegisterType`. */
   registerTypeQuery: "",
   profileSlug: "",
-  setMycardPublicProfile: (value, registerTypeQuery = "personal", profileSlug = "") =>
+  setMycardPublicProfile: (value, registerTypeQuery = DEFAULT_PROFILE_KIND, profileSlug = "") =>
     set({
       isMycardPublicProfile: value,
       registerTypeQuery: value ? registerTypeQuery : "",

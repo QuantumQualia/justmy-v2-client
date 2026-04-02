@@ -5,6 +5,7 @@ import type { PageBlock } from "@/lib/services/cms";
 import { ContentHubView } from "@/components/content/content-hub-view";
 import { ContentHubLiteView } from "@/components/content/content-hub-lite-view";
 import { useProfileStore } from "@/lib/store";
+import { PROFILE_KIND } from "@/lib/os-types";
 
 interface ContentHubViewBlockProps {
   block: PageBlock;
@@ -16,7 +17,7 @@ interface ContentHubViewBlockProps {
 export function ContentHubViewBlock({ block }: ContentHubViewBlockProps) {
   const profileType = useProfileStore((s) => s.data.type);
   const allowsSubProfiles = useProfileStore((s) => s.data.allowsSubProfiles === true);
-  const isPersonalLite = profileType === "personal" && !allowsSubProfiles;
+  const isPersonalLite = profileType === PROFILE_KIND.PERSONAL && !allowsSubProfiles;
 
   return isPersonalLite ? <ContentHubLiteView /> : <ContentHubView />;
 }

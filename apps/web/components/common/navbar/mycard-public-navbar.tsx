@@ -16,6 +16,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { createPortal } from "react-dom";
 import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
+import { DEFAULT_PROFILE_KIND } from "@/lib/os-types";
 
 type NavItem = {
   label: string;
@@ -31,7 +32,7 @@ function profileHomeHref(profileSlug: string): string {
 }
 
 function buildMenuItems(registerType: string, profileSlug: string): NavItem[] {
-  const t = registerType.trim() || "personal";
+  const t = registerType.trim() || DEFAULT_PROFILE_KIND;
   const registerHref = `/register?type=${encodeURIComponent(t)}`;
   const homeHref = profileHomeHref(profileSlug);
   return [
@@ -80,7 +81,7 @@ export interface MycardPublicNavbarProps {
  * No full-width bar — only a floating control that stays in view; opens full-screen menu.
  */
 export function MycardPublicNavbar({
-  initialRegisterType = "personal",
+  initialRegisterType = DEFAULT_PROFILE_KIND,
   initialProfileSlug = "",
 }: MycardPublicNavbarProps = {}) {
   const pathname = usePathname();
@@ -89,7 +90,7 @@ export function MycardPublicNavbar({
   const registerType =
     registerTypeQuery.trim() !== ""
       ? registerTypeQuery
-      : initialRegisterType || "personal";
+      : initialRegisterType || DEFAULT_PROFILE_KIND;
   const profileSlug =
     profileSlugFromStore.trim() !== ""
       ? profileSlugFromStore

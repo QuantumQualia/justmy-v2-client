@@ -5,6 +5,7 @@
 
 import { apiRequest, ApiClientError } from "../api-client";
 import { tokenStorage } from "../storage/token-storage";
+import type { OsName } from "@/lib/os-types";
 
 export { ApiClientError };
 
@@ -20,7 +21,7 @@ export interface RegisterData {
   password: string;
   zipCode: string;
   businessName?: string;
-  profileType: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
+  profileType: OsName;
   referralCode?: string;
 }
 
@@ -59,7 +60,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
-  profileType?: "PERSONAL" | "BIZ" | "GROWTH" | "FOUNDER" | "CITY" | "NETWORK";
+  profileType?: OsName;
   businessName?: string;
   zipCode?: string;
   profile?: any; // Profile response from formatProfileResponse

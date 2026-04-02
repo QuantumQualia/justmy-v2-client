@@ -7,6 +7,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
+import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
 
 export function MyCardMobileDefaultView({
@@ -151,7 +152,7 @@ export function MyCardMobileDefaultView({
             </button>
           </div>
 
-          {data.type === "personal" ? (
+          {data.type === PROFILE_KIND.PERSONAL ? (
             <MyCardContentLiteView
               profileType={data.type}
               profileSlug={data.slug}

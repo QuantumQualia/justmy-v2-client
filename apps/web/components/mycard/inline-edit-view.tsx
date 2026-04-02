@@ -14,6 +14,7 @@ import { profilesService } from "@/lib/services/profiles";
 import { uploadBase64Image } from "@/lib/api-client";
 import { mapProfileDataToUpdateDto } from "@/lib/store/profile-mapper";
 import { combineAddressFields, extractAddressFields } from "@/lib/utils/address-utils";
+import { PROFILE_KIND, type ProfileKind } from "@/lib/os-types";
 import {
   Pencil,
   Image as ImageIcon,
@@ -69,7 +70,7 @@ import {
 // Types - SocialType is imported from store
 
 export type MyCardMode = "edit" | "live";
-export type ProfileKind = "personal" | "biz" | "growth" | "founder" | "city" | "network";
+export type { ProfileKind } from "@/lib/os-types";
 
 // Helper: Simple field edit modal props
 interface SimpleFieldEditModalProps {
@@ -1743,7 +1744,7 @@ export default function InlineEdit({
             )}
           </div>
 
-          {data.type === "personal" ? (
+          {data.type === PROFILE_KIND.PERSONAL ? (
             <div className="relative">
               {isEditMode && (
                 <div className="absolute left-0 top-2 flex items-center gap-2 z-20">

@@ -6,6 +6,7 @@ import { MyCardContentDesktopView } from "@/components/mycard/mycard-content-des
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
+import { PROFILE_KIND } from "@/lib/os-types";
 
 interface MyCardDesktopDefaultViewProps {
   data: ProfileData;
@@ -36,7 +37,7 @@ export function MyCardDesktopDefaultView({
   const hubQuery = useQuery({
     queryKey: contentQueryKeys.hubPublic(data.slug),
     queryFn: () => contentService.getPublicHubsBySlug(data.slug),
-    enabled: data.type === "personal" && data.slug.trim().length > 0,
+    enabled: data.slug.trim().length > 0,
   });
 
   const dynamicContentTabs = useMemo(() => {
@@ -176,7 +177,7 @@ export function MyCardDesktopDefaultView({
             </div>
           ) : null}
 
-          {selectedDynamicTab && data.type === "personal" ? (
+          {selectedDynamicTab && data.type === PROFILE_KIND.PERSONAL ? (
             <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}

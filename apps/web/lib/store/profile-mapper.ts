@@ -5,6 +5,8 @@
  */
 
 import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market } from "./profile-store";
+import type { ProfileKind } from "@/lib/os-types";
+import { normalizeProfileKindInput } from "@/lib/os-types";
 import type { UpdateProfileDto, SocialLinkDto, HotlinkDto, PhoneDto, LocationDto } from "../services/profiles";
 
 // API Response types (matching formatProfileResponse and formatPublicProfileResponse)
@@ -160,17 +162,16 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     }
   }
 
-  // Map type - support new profile types: personal, biz, growth, founder, city, network
-  // Also handle legacy mapping: old "business" type with subscription tier maps to new types
-  let profileType: "personal" | "biz" | "growth" | "founder" | "city" | "network" | undefined;
-  
+  // Map type — canonical OS kinds; legacy "business" maps to biz
+  let profileType: ProfileKind | undefined;
+
   const apiType = apiProfile.type?.toLowerCase();
-  
-  // Check if it's one of the new profile types
-  if (apiType === "personal" || apiType === "biz" || apiType === "growth" || 
-      apiType === "founder" || apiType === "city" || apiType === "network") {
-    profileType = apiType;
-  } else if (apiType === "business") {
+
+  if (apiType) {
+    const resolved = normalizeProfileKindInput(apiType);
+    if (resolved) profileType = resolved;
+  }
+  if (profileType === undefined && apiType === "business") {
     // Legacy: Map old "business" type based on subscription tier
     // This assumes the API response includes subscription info in a parent object
     // If subscription tier is available, map accordingly
