@@ -10,7 +10,7 @@ import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-v
 import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
 
-export function MyCardMobileDefaultView({
+export function MyCardMobileFounderView({
   data,
   usePublicNavbar,
   outerTextClass,
@@ -152,7 +152,7 @@ export function MyCardMobileDefaultView({
             </button>
           </div>
 
-          {data.type === PROFILE_KIND.BIZ ? (
+          {data.type === PROFILE_KIND.FOUNDER ? (
             <MyCardContentLiteView
               profileType={data.type}
               profileSlug={data.slug}
