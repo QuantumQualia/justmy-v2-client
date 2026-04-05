@@ -5,6 +5,8 @@ import { MyCardDesktopDefaultView } from "@/components/mycard/live-view-desktop-
 import { MyCardDesktopBizView } from "@/components/mycard/live-view-desktop-biz";
 import { MyCardDesktopFounderView } from "@/components/mycard/live-view-desktop-founder";
 import { MyCardDesktopCommandView } from "@/components/mycard/live-view-desktop-command";
+import { MyCardDesktopCityView } from "@/components/mycard/live-view-desktop-city";
+import { MyCardDesktopNetworkView } from "@/components/mycard/live-view-desktop-network";
 import { DEFAULT_OS_NAME, OS_NAME } from "@/lib/os-types";
 
 interface MyCardDesktopViewProps {
@@ -29,6 +31,10 @@ export function MyCardDesktopView(props: MyCardDesktopViewProps) {
       return <MyCardDesktopFounderView {...props} />;
     case OS_NAME.GROWTH:
       return <MyCardDesktopCommandView {...props} />;
+    case OS_NAME.CITY:
+      return <MyCardDesktopCityView {...props} />;
+    case OS_NAME.NETWORK:
+      return <MyCardDesktopNetworkView {...props} />;
     default:
       return <MyCardDesktopDefaultView {...props} />;
   }
