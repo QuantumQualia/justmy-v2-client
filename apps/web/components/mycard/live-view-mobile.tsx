@@ -5,6 +5,8 @@ import { MyCardMobileDefaultView } from "@/components/mycard/live-view-mobile-de
 import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
 import { MyCardMobileFounderView } from "@/components/mycard/live-view-mobile-founder";
 import { MyCardMobileCommandView } from "@/components/mycard/live-view-mobile-command";
+import { MyCardMobileCityView } from "@/components/mycard/live-view-mobile-city";
+import { MyCardMobileNetworkView } from "@/components/mycard/live-view-mobile-network";
 import { DEFAULT_OS_NAME, OS_NAME } from "@/lib/os-types";
 
 export interface MyCardMobileViewProps {
@@ -42,6 +44,10 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
        return <MyCardMobileFounderView {...props} />;
     case OS_NAME.GROWTH:
        return <MyCardMobileCommandView {...props} />;
+    case OS_NAME.CITY:
+       return <MyCardMobileCityView {...props} />;
+    case OS_NAME.NETWORK:
+       return <MyCardMobileNetowrkView {...props} />;
     default:
       return <MyCardMobileDefaultView {...props} />;
   }

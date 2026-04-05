@@ -7,10 +7,9 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
-import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
 
-export function MyCardMobileDefaultView({
+export function MyCardMobileCityView({
   data,
   usePublicNavbar,
   outerTextClass,
@@ -67,7 +66,14 @@ export function MyCardMobileDefaultView({
           </div>
         </div>
 
-        <div className="px-4 pt-16 pb-8 space-y-6">
+        <div className="px-4 pt-16 pb-8 space-y-6"> 
+          <div className="text-center space-y-2">
+            <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
+              {data.name}
+            </h1>
+            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
+          </div>
+
           <div className="relative" ref={swiperRef}>
             {!shouldCenterItems && (
               <>
@@ -124,12 +130,6 @@ export function MyCardMobileDefaultView({
             </Swiper>
           </div>
 
-          <div className="text-center space-y-2">
-            <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
-              {data.name}
-            </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
-          </div>
 
           <div className="flex flex-col gap-2">
             {data.hotlinks.map((hotlink) => (
@@ -152,7 +152,7 @@ export function MyCardMobileDefaultView({
             </button>
           </div>
 
-          {data.type === PROFILE_KIND.PERSONAL ? (
+          {data.type === PROFILE_KIND.CITY ? (
             <MyCardContentLiteView
               profileType={data.type}
               profileSlug={data.slug}
