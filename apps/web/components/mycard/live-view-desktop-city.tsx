@@ -177,7 +177,7 @@ export function MyCardDesktopCityView({
             </div>
           ) : null}
 
-          {selectedDynamicTab && data.type === PROFILE_KIND.GROWTH ? (
+          {selectedDynamicTab && data.type === PROFILE_KIND.CITY ? (
             <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}

@@ -177,7 +177,7 @@ export function MyCardDesktopNetworkView({
             </div>
           ) : null}
 
-          {selectedDynamicTab && data.type === PROFILE_KIND.GROWTH ? (
+          {selectedDynamicTab && data.type === PROFILE_KIND.FOUNDER ? (
             <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}
