@@ -47,7 +47,7 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
     case OS_NAME.CITY:
        return <MyCardMobileCityView {...props} />;
     case OS_NAME.NETWORK:
-       return <MyCardMobileNetowrkView {...props} />;
+       return <MyCardMobileNetworkView {...props} />;
     default:
       return <MyCardMobileDefaultView {...props} />;
   }

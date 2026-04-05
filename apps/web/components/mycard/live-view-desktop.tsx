@@ -34,7 +34,7 @@ export function MyCardDesktopView(props: MyCardDesktopViewProps) {
     case OS_NAME.CITY:
       return <MyCardDesktopCityView {...props} />;
     case OS_NAME.NETWORK:
-      return <MyCardDesktopNetowrkView {...props} />;
+      return <MyCardDesktopNetworkView {...props} />;
     default:
       return <MyCardDesktopDefaultView {...props} />;
   }
