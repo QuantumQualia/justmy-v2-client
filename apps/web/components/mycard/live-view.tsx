@@ -148,6 +148,11 @@ interface MyCardLiveProps {
    * myCARD page without registering the public navbar or changing `document.body`.
    */
   lightAppearance?: boolean;
+  /**
+   * When true, always renders the mobile myCARD layout (ignores viewport width).
+   * Use inside a fixed-width phone frame preview so desktop windows still show the phone UI.
+   */
+  forceMobileLayout?: boolean;
 }
 
 const MYCARD_FOOTER_AD_KEY = "system/images/mycard_footer_20260326.png";
@@ -288,6 +293,7 @@ export default function MyCardLive({
   data,
   usePublicNavbar = true,
   lightAppearance = true,
+  forceMobileLayout = false,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
   const contactPrevBtnRef = useRef<HTMLButtonElement>(null);
@@ -375,12 +381,16 @@ export default function MyCardLive({
   )}&ref=${encodeURIComponent(data.slug)}`;
 
   useLayoutEffect(() => {
+    if (forceMobileLayout) {
+      setIsNarrowViewport(true);
+      return;
+    }
     const mq = window.matchMedia("(max-width: 1023px)");
     const sync = () => setIsNarrowViewport(mq.matches);
     sync();
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
-  }, []);
+  }, [forceMobileLayout]);
 
   // Count total items
   const totalItems =

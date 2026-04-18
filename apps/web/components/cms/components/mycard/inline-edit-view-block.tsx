@@ -5,6 +5,7 @@ import { Eye, Pencil, Share2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import InlineEdit from "@/components/mycard/inline-edit-view";
 import MyCardLive from "@/components/mycard/live-view";
+import PhoneCaseWrapper from "@/components/mycard/phone-case-wrapper";
 import { useProfileStore } from "@/lib/store";
 import { openShare } from "@/components/common/share/share-store";
 import type { PageBlock } from "@/lib/services/cms";
@@ -80,16 +81,23 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
             onHotlinkRemove={removeHotlink}
           />
         ) : (
-          <MyCardLive data={data} usePublicNavbar={false} lightAppearance />
+          <PhoneCaseWrapper>
+            <MyCardLive
+              data={data}
+              usePublicNavbar={false}
+              lightAppearance
+              forceMobileLayout
+            />
+          </PhoneCaseWrapper>
         )}
       </div>
 
-      {/* Sticky Footer with View Toggle & Share */}
+      {/* Edit mode: toggle live preview + share. Live mode: only back to edit (preview is phone + myCARD only). */}
       <div className="sticky bottom-0 z-40 backdrop-blur-md mt-6">
         <div className="flex items-center justify-center gap-3 py-4 px-4">
           <Button
             variant="outline"
-            className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
+            className={`bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer ${viewMode === "live" ? "max-w-xs w-full" : "flex-1 max-w-[200px]"}`}
             onClick={() => setViewMode((prev) => (prev === "edit" ? "live" : "edit"))}
           >
             {viewMode === "edit" ? (
@@ -104,14 +112,16 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
               </>
             )}
           </Button>
-          <Button
-            variant="outline"
-            className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4 mr-2" />
-            Share myCARD
-          </Button>
+          {viewMode === "edit" ? (
+            <Button
+              variant="outline"
+              className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
+              onClick={handleShare}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              Share myCARD
+            </Button>
+          ) : null}
         </div>
       </div>
     </div>
