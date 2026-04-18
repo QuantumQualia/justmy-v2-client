@@ -143,6 +143,11 @@ interface MyCardLiveProps {
    * Set false for `/mycard/edit` preview and CMS embeds so the normal navbar stays in place.
    */
   usePublicNavbar?: boolean;
+  /**
+   * When true with `usePublicNavbar={false}`, applies the same light card theme as the public
+   * myCARD page without registering the public navbar or changing `document.body`.
+   */
+  lightAppearance?: boolean;
 }
 
 const MYCARD_FOOTER_AD_KEY = "system/images/mycard_footer_20260326.png";
@@ -282,6 +287,7 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
 export default function MyCardLive({
   data,
   usePublicNavbar = true,
+  lightAppearance = true,
 }: MyCardLiveProps) {
   const swiperRef = useRef<HTMLDivElement>(null);
   const contactPrevBtnRef = useRef<HTMLButtonElement>(null);
@@ -322,7 +328,7 @@ export default function MyCardLive({
     };
   }, [usePublicNavbar]);
 
-  const isLightMycard = usePublicNavbar;
+  const isLightMycard = usePublicNavbar || lightAppearance;
   const outerTextClass = isLightMycard ? "text-foreground" : "text-white";
   const screenBgClass = isLightMycard ? "bg-background" : "bg-slate-900";
   const avatarOuterClass = isLightMycard
@@ -633,7 +639,7 @@ export default function MyCardLive({
   };
 
   return (
-    <div style={usePublicNavbar ? SCOPED_LIGHT_THEME_VARS : undefined}>
+    <div style={isLightMycard ? SCOPED_LIGHT_THEME_VARS : undefined}>
       {/* Phone Selection Modal */}
       <SelectionModal
         isOpen={showPhoneModal}
@@ -642,7 +648,7 @@ export default function MyCardLive({
         icon={<Phone className="h-5 w-5" />}
         items={phoneItems}
         onSelect={handlePhoneSelect}
-        variant={usePublicNavbar ? "light" : "dark"}
+        variant={isLightMycard ? "light" : "dark"}
       />
 
       {/* Address Selection Modal */}
@@ -653,13 +659,13 @@ export default function MyCardLive({
         icon={<MapPin className="h-5 w-5" />}
         items={addressItems}
         onSelect={handleAddressSelect}
-        variant={usePublicNavbar ? "light" : "dark"}
+        variant={isLightMycard ? "light" : "dark"}
       />
 
       {isNarrowViewport ? (
         <MyCardMobileView
           data={data}
-          usePublicNavbar={usePublicNavbar}
+          usePublicNavbar={isLightMycard}
           outerTextClass={outerTextClass}
           screenBgClass={screenBgClass}
           avatarOuterClass={avatarOuterClass}
@@ -683,7 +689,7 @@ export default function MyCardLive({
       ) : (
         <MyCardDesktopView
           data={data}
-          usePublicNavbar={usePublicNavbar}
+          usePublicNavbar={isLightMycard}
           outerTextClass={outerTextClass}
           avatarOuterClass={avatarOuterClass}
           avatarPlaceholderBgClass={avatarPlaceholderBgClass}
