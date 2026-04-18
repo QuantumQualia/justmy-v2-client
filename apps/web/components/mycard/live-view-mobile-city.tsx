@@ -67,7 +67,7 @@ export function MyCardMobileCityView({
           </div>
         </div>
 
-        <div className="px-4 pt-16 pb-8 space-y-6"> 
+        <div className="px-4 pt-16 pb-8 space-y-6">
           <div className="text-center space-y-2">
             <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
               {data.name}
@@ -124,7 +124,7 @@ export function MyCardMobileCityView({
               }}
             >
               {React.Children.map(contactActions, (child, index) => (
-                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center">
+                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center gap-2">
                   {child}
                 </SwiperSlide>
               ))}
@@ -153,13 +153,11 @@ export function MyCardMobileCityView({
             </button>
           </div>
 
-          {data.type === PROFILE_KIND.CITY ? (
-            <MyCardContentLiteView
-              profileType={data.type}
-              profileSlug={data.slug}
-              variant={usePublicNavbar ? "light" : "dark"}
-            />
-          ) : null}
+          <MyCardContentLiteView
+            profileType={data.type}
+            profileSlug={data.slug}
+            variant={usePublicNavbar ? "light" : "dark"}
+          />
 
           {data.about && (
             <div className="space-y-2">

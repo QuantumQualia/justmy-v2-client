@@ -117,7 +117,7 @@ export function MyCardMobileBizView({
               }}
             >
               {React.Children.map(contactActions, (child, index) => (
-                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center">
+                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center gap-2">
                   {child}
                 </SwiperSlide>
               ))}
@@ -152,13 +152,11 @@ export function MyCardMobileBizView({
             </button>
           </div>
 
-          {data.type === PROFILE_KIND.BIZ ? (
-            <MyCardContentLiteView
-              profileType={data.type}
-              profileSlug={data.slug}
-              variant={usePublicNavbar ? "light" : "dark"}
-            />
-          ) : null}
+          <MyCardContentLiteView
+            profileType={data.type}
+            profileSlug={data.slug}
+            variant={usePublicNavbar ? "light" : "dark"}
+          />
 
           {data.about && (
             <div className="space-y-2">
