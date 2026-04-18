@@ -117,7 +117,7 @@ export function MyCardMobileDefaultView({
               }}
             >
               {React.Children.map(contactActions, (child, index) => (
-                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center">
+                <SwiperSlide key={index} className="!w-auto !h-[45px] !flex items-center justify-center gap-2">
                   {child}
                 </SwiperSlide>
               ))}
