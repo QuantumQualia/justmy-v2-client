@@ -23,6 +23,7 @@ import {
   Play,
   FolderKanban,
   LayoutGrid,
+  Code2,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -40,6 +41,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Text",
     icon: <Type className="h-5 w-5" />,
     description: "Rich text content with formatting options",
+    category: "Content",
+  },
+  {
+    value: "raw-html-css-block",
+    label: "Raw HTML & CSS",
+    icon: <Code2 className="h-5 w-5" />,
+    description: "Custom HTML fragment and optional CSS (trusted authors)",
     category: "Content",
   },
   {

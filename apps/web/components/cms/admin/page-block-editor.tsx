@@ -39,6 +39,7 @@ import {
   AppHubBlockEditor,
   ContentHubViewBlockEditor,
   SubProfilesBlockEditor,
+  RawHtmlCssBlockEditor,
 } from "./blocks";
 
 type Breakpoint = "mobile" | "tablet" | "desktop";
@@ -177,6 +178,9 @@ export function PageBlockEditor({
             </div>
           </div>
         );
+
+      case "raw-html-css-block":
+        return <RawHtmlCssBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "layout-block":
         return <PageBlockLayout block={block} onUpdate={onUpdate} />;

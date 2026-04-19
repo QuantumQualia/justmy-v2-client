@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { TextBlock } from "./components/text-block";
+import { RawHtmlCssBlock } from "./components/raw-html-css-block";
 import { LayoutBlock } from "./components/layout-block";
 import { WelcomeMessageBlock } from "./components/welcome-message-block";
 import { DayInHistoryBlock } from "./components/day-in-history-block";
@@ -61,6 +62,7 @@ function cmsDataAttrId(role: "inner" | "wrap", block: PageBlock): string {
 // Component registry - maps Payload block types to React components
 export const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "text-block": TextBlock,
+  "raw-html-css-block": RawHtmlCssBlock,
   "layout-block": LayoutBlock,
   "welcome-message-block": WelcomeMessageBlock,
   "day-in-history-block": DayInHistoryBlock,
