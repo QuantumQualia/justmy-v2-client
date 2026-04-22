@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { cmsService } from "@/lib/services/cms";
 import { PayloadPostRenderer } from "@/components/cms/payload-post-renderer";
 import { SharedPostRedirector } from "@/components/cms/shared-post-redirector";
@@ -9,12 +10,23 @@ interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
 }
 
+export const revalidate = 300;
+
 const fetchPostBySlug = cache(async (slug: string) => {
-  try {
-    return await cmsService.getPostBySlug(slug);
-  } catch {
-    return null;
-  }
+  return unstable_cache(
+    async () => {
+      try {
+        return await cmsService.getPostBySlug(slug);
+      } catch {
+        return null;
+      }
+    },
+    ["cms-post-by-slug", slug],
+    {
+      revalidate,
+      tags: [`cms-post:${slug}`],
+    }
+  )();
 });
 
 export async function generateMetadata({

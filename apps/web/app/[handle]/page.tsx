@@ -1,6 +1,8 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import MyCardPageClient from "./page-client";
 import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
@@ -12,20 +14,47 @@ interface MyCardPageProps {
   }>;
 }
 
+export const revalidate = 300;
+
 // Cached helper function to fetch page data (server-side)
 // Using cache() to deduplicate requests within the same render
 const fetchPageByHandle = cache(async (handle: string) => {
+  return unstable_cache(
+    async () => {
+      try {
+        return await cmsService.getPageByHandle(handle);
+      } catch (error) {
+        // If 401, rethrow it
+        if (error instanceof ApiClientError && error.statusCode === 401) {
+          throw error;
+        }
+        // For other errors, return null
+        return null;
+      }
+    },
+    ["cms-page-by-handle", handle],
+    {
+      revalidate,
+      tags: [`cms-page:${handle}`],
+    }
+  )();
+});
+
+const fetchPageByHandleAuthed = async (handle: string) => {
   try {
-    return await cmsService.getPageByHandle(handle);
+    return await cmsService.getPageByHandle(handle, { includeAuth: true });
   } catch (error) {
-    // If 401, rethrow it
     if (error instanceof ApiClientError && error.statusCode === 401) {
       throw error;
     }
-    // For other errors, return null
     return null;
   }
-});
+};
+
+async function shouldIncludeAuth(): Promise<boolean> {
+  const cookieStore = await cookies();
+  return Boolean(cookieStore.get("auth_access_token")?.value);
+}
 
 // Generate SEO metadata based on profile or page data
 // Check profile first, then page if profile doesn't exist
@@ -112,7 +141,10 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
   // Profile doesn't exist, check page
   let payloadPage = null;
   try {
-    payloadPage = await fetchPageByHandle(handle);
+    const includeAuth = await shouldIncludeAuth();
+    payloadPage = includeAuth
+      ? await fetchPageByHandleAuthed(handle)
+      : await fetchPageByHandle(handle);
   } catch (error) {
     // If 401 or other error, return generic metadata
     // Don't expose auth requirements in metadata
@@ -186,7 +218,10 @@ export default async function MyCardPage({ params }: MyCardPageProps) {
 
   // Profile doesn't exist, check page (using cached function to avoid duplicate calls)
   try {
-    const payloadPage = await fetchPageByHandle(handle);
+    const includeAuth = await shouldIncludeAuth();
+    const payloadPage = includeAuth
+      ? await fetchPageByHandleAuthed(handle)
+      : await fetchPageByHandle(handle);
     
     // If page is null (200 response with null body), page doesn't exist
     if (payloadPage === null) {

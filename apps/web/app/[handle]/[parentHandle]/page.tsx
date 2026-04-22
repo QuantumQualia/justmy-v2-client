@@ -1,5 +1,8 @@
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
 
@@ -8,6 +11,46 @@ interface ParentHandlePageProps {
     handle: string;
     parentHandle: string;
   }>;
+}
+
+export const revalidate = 300;
+
+const fetchNestedPage = cache(async (handle: string, parentHandle: string) => {
+  return unstable_cache(
+    async () => {
+      try {
+        return await cmsService.getPageByNestedHandle(handle, parentHandle);
+      } catch (error) {
+        if (error instanceof ApiClientError && error.statusCode === 401) {
+          throw error;
+        }
+        return null;
+      }
+    },
+    ["cms-page-by-nested-handle", handle, parentHandle],
+    {
+      revalidate,
+      tags: [`cms-page:${handle}/${parentHandle}`],
+    }
+  )();
+});
+
+const fetchNestedPageAuthed = async (handle: string, parentHandle: string) => {
+  try {
+    return await cmsService.getPageByNestedHandle(handle, parentHandle, {
+      includeAuth: true,
+    });
+  } catch (error) {
+    if (error instanceof ApiClientError && error.statusCode === 401) {
+      throw error;
+    }
+    return null;
+  }
+};
+
+async function shouldIncludeAuth(): Promise<boolean> {
+  const cookieStore = await cookies();
+  return Boolean(cookieStore.get("auth_access_token")?.value);
 }
 
 export async function generateMetadata({
@@ -20,7 +63,10 @@ export async function generateMetadata({
   // Fetch Payload page
   let payloadPage = null;
   try {
-    payloadPage = await cmsService.getPageByNestedHandle(handle, parentHandle);
+    const includeAuth = await shouldIncludeAuth();
+    payloadPage = includeAuth
+      ? await fetchNestedPageAuthed(handle, parentHandle)
+      : await fetchNestedPage(handle, parentHandle);
   } catch (error) {
     // If 401 or other error, return not found metadata
     // Don't expose auth requirements in metadata
@@ -84,10 +130,10 @@ export default async function ParentHandlePage({
   const { handle, parentHandle } = resolvedParams;
 
   try {
-    const payloadPage = await cmsService.getPageByNestedHandle(
-      handle,
-      parentHandle
-    );
+    const includeAuth = await shouldIncludeAuth();
+    const payloadPage = includeAuth
+      ? await fetchNestedPageAuthed(handle, parentHandle)
+      : await fetchNestedPage(handle, parentHandle);
 
     // If page is null (200 response with null body), page doesn't exist
     if (payloadPage === null) {

@@ -28,16 +28,16 @@ async function getCookie(name: string): Promise<string | null> {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       const value = cookieStore.get(name)?.value;
-      if (value) {
-        console.log(`[TokenStorage] Retrieved ${name} from server cookies`);
-      } else {
-        console.log(`[TokenStorage] ${name} not found in server cookies`);
-      }
+      // if (value) {
+      //   console.log(`[TokenStorage] Retrieved ${name} from server cookies`);
+      // } else {
+      //   console.log(`[TokenStorage] ${name} not found in server cookies`);
+      // }
       return value || null;
     } catch (error) {
       // cookies() might throw if called outside of Server Components/Actions/Route Handlers
       // This is expected in client components - the API client will work without the token
-      console.log(`[TokenStorage] Could not read ${name} from server cookies:`, error instanceof Error ? error.message : String(error));
+      // console.log(`[TokenStorage] Could not read ${name} from server cookies:`, error instanceof Error ? error.message : String(error));
       return null;
     }
   }

@@ -4,6 +4,7 @@
  */
 
 import { apiRequest, ApiClientError } from "../api-client";
+import { tokenStorage } from "../storage/token-storage";
 
 export { ApiClientError };
 
@@ -144,6 +145,36 @@ export interface CreateSubProfileDto {
  * Profiles Service
  */
 export const profilesService = {
+  async proxyMutationRequest<T>(
+    endpoint: string,
+    options: RequestInit,
+  ): Promise<T> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...((options.headers || {}) as Record<string, string>),
+    };
+    const accessToken = await tokenStorage.getAccessToken();
+    if (accessToken && !headers.Authorization) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    const response = await fetch(endpoint, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new ApiClientError(
+        data.message || data.error || "An error occurred",
+        response.status,
+        typeof data.error === "string" ? data.error : JSON.stringify(data.error ?? data),
+      );
+    }
+
+    return data as T;
+  },
   /**
    * Get paginated list of profiles (admin only)
    */
@@ -244,6 +275,12 @@ export const profilesService = {
    */
   async updateProfile(profileId: number | string, updateData: UpdateProfileDto): Promise<UpdateProfileResponse> {
     try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<UpdateProfileResponse>(`/api/profiles/${profileId}`, {
+          method: "PATCH",
+          body: JSON.stringify(updateData),
+        });
+      }
       return await apiRequest<UpdateProfileResponse>(`profiles/${profileId}`, {
         method: "PATCH",
         body: JSON.stringify(updateData),
@@ -277,6 +314,15 @@ export const profilesService = {
    */
   async createSubProfile(parentId: number, dto: CreateSubProfileDto): Promise<UpdateProfileResponse> {
     try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<UpdateProfileResponse>(
+          `/api/profiles/${parentId}/sub-profiles`,
+          {
+            method: "POST",
+            body: JSON.stringify(dto),
+          },
+        );
+      }
       return await apiRequest<UpdateProfileResponse>(`profiles/${parentId}/sub-profiles`, {
         method: "POST",
         body: JSON.stringify(dto),
@@ -294,6 +340,12 @@ export const profilesService = {
    */
   async deleteSubProfile(subProfileId: string): Promise<void> {
     try {
+      if (typeof window !== "undefined") {
+        await this.proxyMutationRequest<void>(`/api/profiles/${subProfileId}`, {
+          method: "DELETE",
+        });
+        return;
+      }
       await apiRequest(`profiles/${subProfileId}`, {
         method: "DELETE",
       });

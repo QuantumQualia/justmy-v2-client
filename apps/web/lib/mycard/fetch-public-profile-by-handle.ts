@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 import type { ProfileData } from "@/lib/store";
 import { mapApiProfileToProfileData } from "@/lib/store/profile-mapper";
@@ -18,14 +19,23 @@ import { profilesService } from "@/lib/services/profiles";
  */
 const fetchPublicProfileByHandleImpl = cache(
   async (handle: string): Promise<ProfileData | null> => {
-    try {
-      const response = await profilesService.getProfileBySlug(handle);
-      if (!response?.profile) return null;
-      return mapApiProfileToProfileData(response.profile);
-    } catch (error) {
-      console.error("Failed to fetch profile by handle:", error);
-      return null;
-    }
+    return unstable_cache(
+      async () => {
+        try {
+          const response = await profilesService.getProfileBySlug(handle);
+          if (!response?.profile) return null;
+          return mapApiProfileToProfileData(response.profile);
+        } catch (error) {
+          console.error("Failed to fetch profile by handle:", error);
+          return null;
+        }
+      },
+      ["public-profile-by-handle", handle],
+      {
+        revalidate: 300,
+        tags: [`public-profile:${handle}`],
+      }
+    )();
   }
 );
 

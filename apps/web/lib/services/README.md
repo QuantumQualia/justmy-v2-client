@@ -200,3 +200,46 @@ When a request returns 401 Unauthorized:
 - Tokens are cleared on logout or failed refresh
 - SSR-safe: token storage checks for browser environment
 
+## Cache Invalidation (Next.js Frontend)
+
+The frontend uses tag-based caching for dynamic public content and invalidates those tags from Next.js route handlers after successful mutations.
+
+### Canonical cache tags
+
+- `cms-page:<handle>`
+- `cms-page:<parentHandle>/<handle>`
+- `cms-page:<root>/<parent>/<sub>`
+- `cms-post:<slug>`
+- `public-profile:<slug>`
+
+### Authoritative mutation routes (frontend server-side)
+
+- Pages
+  - `POST /api/cms/pages`
+  - `PATCH /api/cms/pages/:id`
+  - `DELETE /api/cms/pages/:id`
+- Posts
+  - `POST /api/cms/posts`
+  - `POST /api/cms/posts/shared-from-url`
+  - `PATCH /api/cms/posts/:id`
+  - `DELETE /api/cms/posts/:id`
+- Profiles
+  - `PATCH /api/profiles/:id`
+  - `DELETE /api/profiles/:id`
+  - `POST /api/profiles/:id/sub-profiles`
+
+Client-side write calls should go through these Next routes (via services), not call backend mutation endpoints directly, so revalidation always runs.
+
+### Manual revalidation endpoint
+
+`POST /api/revalidate` is intended for controlled/manual use only and is disabled unless:
+
+- `ENABLE_MANUAL_REVALIDATE_ENDPOINT=true`
+- valid `REVALIDATE_SECRET` is provided
+
+Allowed tags are restricted to:
+
+- `cms-page:*`
+- `cms-post:*`
+- `public-profile:*`
+

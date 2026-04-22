@@ -7,6 +7,7 @@
  */
 
 import { apiRequest, ApiClientError } from "../api-client";
+import { tokenStorage } from "../storage/token-storage";
 
 export { ApiClientError };
 
@@ -253,14 +254,45 @@ export interface UpdatePostDto extends Partial<CreatePostDto> {
  * CMS Service
  */
 export const cmsService = {
+  async proxyMutationRequest<T>(
+    endpoint: string,
+    options: RequestInit,
+  ): Promise<T> {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+      ...((options.headers || {}) as Record<string, string>),
+    };
+    const accessToken = await tokenStorage.getAccessToken();
+    if (accessToken && !headers.Authorization) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+
+    const response = await fetch(endpoint, {
+      ...options,
+      headers,
+      credentials: "include",
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new ApiClientError(
+        data.message || data.error || "An error occurred",
+        response.status,
+        typeof data.error === "string" ? data.error : JSON.stringify(data.error ?? data),
+      );
+    }
+
+    return data as T;
+  },
   /**
    * Get page by handle
-   * Note: We don't use skipAuth here because:
-   * - If page requires auth and user is logged in, token will be sent automatically
-   * - If page requires auth and user is not logged in, backend will return 401
-   * - If page doesn't require auth, it works with or without token
+   * Public route fetch (used by cached dynamic pages).
+   * Must skip auth to avoid reading cookies inside unstable_cache scopes.
    */
-  async getPageByHandle(handle: string): Promise<PayloadPage | null> {
+  async getPageByHandle(
+    handle: string,
+    options?: { includeAuth?: boolean }
+  ): Promise<PayloadPage | null> {
     try {
       // Call NestJS backend endpoint
       // Backend should return single page or null (200 with null body)
@@ -269,8 +301,7 @@ export const cmsService = {
         `cms/pages/by-handle/${handle}`,
         {
           method: "GET",
-          // Don't skip auth - let API client send token if available
-          // Backend will check if page requires auth and validate accordingly
+          skipAuth: !options?.includeAuth,
         }
       );
 
@@ -290,14 +321,13 @@ export const cmsService = {
 
   /**
    * Get page by nested handle (parentHandle/subHandle)
-   * Note: We don't use skipAuth here because:
-   * - If page requires auth and user is logged in, token will be sent automatically
-   * - If page requires auth and user is not logged in, backend will return 401
-   * - If page doesn't require auth, it works with or without token
+   * Public route fetch (used by cached dynamic pages).
+   * Must skip auth to avoid reading cookies inside unstable_cache scopes.
    */
   async getPageByNestedHandle(
     parentHandle: string,
-    subHandle: string
+    subHandle: string,
+    options?: { includeAuth?: boolean }
   ): Promise<PayloadPage | null> {
     try {
       // Call NestJS backend endpoint
@@ -307,8 +337,7 @@ export const cmsService = {
         `cms/pages/by-handle/${parentHandle}/${subHandle}`,
         {
           method: "GET",
-          // Don't skip auth - let API client send token if available
-          // Backend will check if page requires auth and validate accordingly
+          skipAuth: !options?.includeAuth,
         }
       );
 
@@ -334,13 +363,15 @@ export const cmsService = {
   async getPageByDeepNestedHandle(
     firstHandle: string,
     secondHandle: string,
-    thirdHandle: string
+    thirdHandle: string,
+    options?: { includeAuth?: boolean }
   ): Promise<PayloadPage | null> {
     try {
       const page = await apiRequest<PayloadPage | null>(
         `cms/pages/by-handle/${firstHandle}/${secondHandle}/${thirdHandle}`,
         {
           method: "GET",
+          skipAuth: !options?.includeAuth,
         }
       );
 
@@ -412,7 +443,12 @@ export const cmsService = {
    */
   async createPage(data: CreatePageDto): Promise<PayloadPage> {
     try {
-      // Call NestJS backend endpoint
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<PayloadPage>("/api/cms/pages", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      }
       return await apiRequest<PayloadPage>("cms/pages", {
         method: "POST",
         body: JSON.stringify(data),
@@ -430,7 +466,12 @@ export const cmsService = {
    */
   async updatePage(id: string, data: Partial<CreatePageDto>): Promise<PayloadPage> {
     try {
-      // Call NestJS backend endpoint
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<PayloadPage>(`/api/cms/pages/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        });
+      }
       return await apiRequest<PayloadPage>(`cms/pages/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
@@ -448,7 +489,12 @@ export const cmsService = {
    */
   async deletePage(id: string): Promise<void> {
     try {
-      // Call NestJS backend endpoint
+      if (typeof window !== "undefined") {
+        await this.proxyMutationRequest<void>(`/api/cms/pages/${id}`, {
+          method: "DELETE",
+        });
+        return;
+      }
       return await apiRequest<void>(`cms/pages/${id}`, {
         method: "DELETE",
       });
@@ -507,6 +553,7 @@ export const cmsService = {
     try {
       return await apiRequest<PayloadPost | null>(`cms/posts/by-slug/${slug}`, {
         method: "GET",
+        skipAuth: true,
       });
     } catch (error) {
       if (error instanceof ApiClientError && error.statusCode === 404) {
@@ -521,6 +568,12 @@ export const cmsService = {
    */
   async createPost(data: CreatePostDto): Promise<PayloadPost> {
     try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<PayloadPost>("/api/cms/posts", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      }
       return await apiRequest<PayloadPost>("cms/posts", {
         method: "POST",
         body: JSON.stringify(data),
@@ -538,6 +591,12 @@ export const cmsService = {
     data: CreateSharedPostDto,
   ): Promise<PayloadPost> {
     try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<PayloadPost>("/api/cms/posts/shared-from-url", {
+          method: "POST",
+          body: JSON.stringify(data),
+        });
+      }
       return await apiRequest<PayloadPost>("cms/posts/shared-from-url", {
         method: "POST",
         body: JSON.stringify(data),
@@ -553,6 +612,12 @@ export const cmsService = {
    */
   async updatePost(id: string, data: Partial<CreatePostDto>): Promise<PayloadPost> {
     try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest<PayloadPost>(`/api/cms/posts/${id}`, {
+          method: "PATCH",
+          body: JSON.stringify(data),
+        });
+      }
       return await apiRequest<PayloadPost>(`cms/posts/${id}`, {
         method: "PATCH",
         body: JSON.stringify(data),
@@ -568,6 +633,12 @@ export const cmsService = {
    */
   async deletePost(id: string): Promise<void> {
     try {
+      if (typeof window !== "undefined") {
+        await this.proxyMutationRequest<void>(`/api/cms/posts/${id}`, {
+          method: "DELETE",
+        });
+        return;
+      }
       return await apiRequest<void>(`cms/posts/${id}`, {
         method: "DELETE",
       });
