@@ -24,6 +24,7 @@ import {
   FolderKanban,
   LayoutGrid,
   Code2,
+  Bot,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -230,6 +231,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Content Hub View",
     icon: <FolderKanban className="h-5 w-5" />,
     description: "Manage content hubs, tabs, and tab posts for the current profile",
+    category: "Apps",
+  },
+  {
+    value: "agents-management-block",
+    label: "Agents Management",
+    icon: <Bot className="h-5 w-5" />,
+    description: "Agents panel for the active profile with knowledge sources and ingestion controls",
     category: "Apps",
   },
   {

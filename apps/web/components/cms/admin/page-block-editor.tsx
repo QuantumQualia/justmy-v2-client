@@ -39,6 +39,7 @@ import {
   AppHubBlockEditor,
   ContentHubViewBlockEditor,
   SubProfilesBlockEditor,
+  AgentsManagementBlockEditor,
   RawHtmlCssBlockEditor,
 } from "./blocks";
 
@@ -264,6 +265,9 @@ export function PageBlockEditor({
 
       case "content-hub-view-block":
         return <ContentHubViewBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "agents-management-block":
+        return <AgentsManagementBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "sub-profiles-block":
         return <SubProfilesBlockEditor block={block} onUpdate={onUpdate} />;

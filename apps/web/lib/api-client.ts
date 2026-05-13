@@ -133,8 +133,11 @@ export async function apiRequest<T>(
   // Convert HeadersInit to Record<string, string> for easier manipulation
   const headers: Record<string, string> = {};
 
-  // Only set Content-Type if there's a body
-  if (fetchOptions.body) {
+  const isFormData =
+    typeof FormData !== "undefined" && fetchOptions.body instanceof FormData;
+
+  // Only set Content-Type automatically for JSON-like bodies.
+  if (fetchOptions.body && !isFormData) {
     headers["Content-Type"] = "application/json";
   }
 
