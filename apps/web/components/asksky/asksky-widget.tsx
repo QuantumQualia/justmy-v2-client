@@ -15,8 +15,11 @@ import {
   type SkyResolveResponse,
 } from "@/lib/services/sky";
 import { useProfileStore } from "@/lib/store/profile-store";
+import { cn } from "@workspace/ui/lib/utils";
 
 export type AskSkyVariant = "inline" | "voice" | "chatbot";
+
+export type AskSkyEmbedTheme = "light" | "dark";
 
 const STORAGE_PREFIX = "asksky:v1:";
 
@@ -39,6 +42,9 @@ function nextRevealEnd(full: string, visibleEnd: number): number {
 }
 
 const STREAM_WORD_MS = 58;
+
+/** Light embed: header + composer navy (user reference #121a31). */
+const SKY_LIGHT_CHROME_BG = "bg-[#121a31] dark:bg-[#121a31]";
 
 function storageKey(embedKey: string) {
   return `${STORAGE_PREFIX}${embedKey}`;
@@ -77,13 +83,32 @@ function persistConversation(embedKey: string, conversationId: number, visitorTo
   }
 }
 
-function RetrievedDocsSummary({ docs }: { docs: unknown[] }) {
+function RetrievedDocsSummary({
+  docs,
+  embedTheme = "dark",
+}: {
+  docs: unknown[];
+  embedTheme?: AskSkyEmbedTheme;
+}) {
   if (!docs.length) {
     return null;
   }
+  const isLight = embedTheme === "light";
   return (
-    <details className="mt-2 rounded-lg border border-slate-700/80 bg-slate-900/60 text-xs text-slate-400">
-      <summary className="cursor-pointer select-none px-2 py-1.5 text-slate-300 hover:text-slate-100">
+    <details
+      className={cn(
+        "mt-2 rounded-lg border text-xs",
+        isLight
+          ? "border-slate-200 bg-slate-100 text-slate-600"
+          : "border-slate-700/80 bg-slate-900/60 text-slate-400",
+      )}
+    >
+      <summary
+        className={cn(
+          "cursor-pointer select-none px-2 py-1.5",
+          isLight ? "text-slate-700 hover:text-slate-900" : "text-slate-300 hover:text-slate-100",
+        )}
+      >
         Sources ({docs.length})
       </summary>
       <ul className="max-h-40 list-disc space-y-1 overflow-y-auto px-5 pb-2">
@@ -107,12 +132,16 @@ type AskSkyChatMessage = Pick<SkyConversationMessage, "role" | "content" | "retr
 const chatScrollClasses =
   "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
 
+const chatScrollClassesLight =
+  "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-200 [&::-webkit-scrollbar-thumb]:bg-slate-400 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
+
 function AskSkyConversationView({
   resolve,
   profileSlug,
   agentToken,
   embedKey,
   conversationLayout = "inline",
+  embedTheme = "dark",
 }: {
   resolve: SkyResolveResponse;
   profileSlug: string;
@@ -120,6 +149,7 @@ function AskSkyConversationView({
   embedKey: string;
   /** `"panel"` | `"embed"` = flex fill inside a fixed-height shell (chatbot panel or iframe). */
   conversationLayout?: "inline" | "panel" | "embed";
+  embedTheme?: AskSkyEmbedTheme;
 }) {
   const profile = useProfileStore((s) => s.data);
   const [messages, setMessages] = React.useState<AskSkyChatMessage[]>([]);
@@ -298,22 +328,34 @@ function AskSkyConversationView({
   };
 
   const fillsParent = conversationLayout === "panel" || conversationLayout === "embed";
+  const isLight = embedTheme === "light";
+  const scrollBarCls = isLight ? chatScrollClassesLight : chatScrollClasses;
 
   return (
     <div
       className={`flex min-h-0 min-w-0 flex-col ${fillsParent ? "flex-1" : ""}`}
     >
       {banner ? (
-        <div className="mx-4 mb-3 shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
+        <div
+          className={cn(
+            "mx-4 mb-3 shrink-0 rounded-lg border px-3 py-2 text-sm",
+            isLight
+              ? "border-amber-600/40 bg-amber-50 text-amber-900"
+              : "border-amber-500/30 bg-amber-500/10 text-amber-200",
+          )}
+        >
           {banner}
         </div>
       ) : null}
 
       <div
         ref={scrollRef}
-        className={`flex-1 space-y-4 overflow-y-auto p-4 ${chatScrollClasses} ${
-          fillsParent ? "flex min-h-0 flex-col" : "max-h-[min(420px,55vh)] min-h-[360px]"
-        }`}
+        className={cn(
+          "flex-1 space-y-4 overflow-y-auto p-4",
+          scrollBarCls,
+          fillsParent ? "flex min-h-0 flex-col" : "max-h-[min(420px,55vh)] min-h-[360px]",
+          isLight ? "bg-slate-100 dark:bg-slate-100" : "bg-slate-900",
+        )}
       >
         {messages.length === 0 && !streamingText ? (
           <div
@@ -322,9 +364,11 @@ function AskSkyConversationView({
             }`}
           >
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600/20">
-              <MessageCircle className="h-6 w-6 text-blue-400" />
+              <MessageCircle className="h-6 w-6 text-blue-500" />
             </div>
-            <h4 className="mb-1 text-sm font-semibold text-white">How can I help you?</h4>
+            <h4 className={cn("mb-1 text-sm font-semibold", isLight ? "text-slate-900" : "text-white")}>
+              How can I help you?
+            </h4>
           </div>
         ) : null}
         {messages.map((m, i) => (
@@ -342,15 +386,21 @@ function AskSkyConversationView({
               className={`max-w-[75%] rounded-2xl px-4 py-2 ${
                 m.role === "user"
                   ? "rounded-br-sm bg-blue-600 text-white"
-                  : "rounded-bl-sm bg-slate-800 text-slate-100"
+                  : isLight
+                    ? "rounded-bl-sm border border-slate-200 bg-white text-slate-900 shadow-sm"
+                    : "rounded-bl-sm bg-slate-800 text-slate-100"
               }`}
             >
               <p className="whitespace-pre-wrap break-words text-sm">{m.content}</p>
-              {m.retrievedDocs?.length ? <RetrievedDocsSummary docs={m.retrievedDocs} /> : null}
+              {m.retrievedDocs?.length ? <RetrievedDocsSummary docs={m.retrievedDocs} embedTheme={embedTheme} /> : null}
               {typeof m.at === "number" ? (
                 <span
                   className={`mt-1 block text-[10px] ${
-                    m.role === "user" ? "text-blue-100" : "text-slate-400"
+                    m.role === "user"
+                      ? "text-blue-100"
+                      : isLight
+                        ? "text-slate-500"
+                        : "text-slate-400"
                   }`}
                 >
                   {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -358,7 +408,14 @@ function AskSkyConversationView({
               ) : null}
             </div>
             {m.role === "user" ? (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-600 bg-slate-700">
+              <div
+                className={cn(
+                  "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border",
+                  isLight
+                    ? "border-slate-400 bg-slate-200 text-slate-900"
+                    : "border-slate-600 bg-slate-700 text-slate-200",
+                )}
+              >
                 {profile?.photo ? (
                   <Image
                     src={profile.photo}
@@ -368,7 +425,12 @@ function AskSkyConversationView({
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs font-semibold text-slate-300">
+                  <span
+                    className={cn(
+                      "text-xs font-semibold",
+                      isLight ? "text-slate-900" : "text-slate-200",
+                    )}
+                  >
                     {((profile?.name || "U")[0] || "U").toUpperCase()}
                   </span>
                 )}
@@ -385,7 +447,12 @@ function AskSkyConversationView({
                 <Bot className="h-4 w-4 text-white" />
               )}
             </div>
-            <div className="max-w-[75%] rounded-2xl rounded-bl-sm bg-slate-800 px-4 py-2 text-slate-100">
+            <div
+              className={cn(
+                "max-w-[75%] rounded-2xl rounded-bl-sm px-4 py-2",
+                isLight ? "border border-slate-200 bg-white text-slate-900 shadow-sm" : "bg-slate-800 text-slate-100",
+              )}
+            >
               <p className="whitespace-pre-wrap break-words text-sm">{streamingText}</p>
             </div>
           </div>
@@ -393,7 +460,12 @@ function AskSkyConversationView({
       </div>
 
       <form
-        className="border-t border-slate-800 bg-slate-950 p-4"
+        className={cn(
+          "border-t p-4",
+          isLight
+            ? cn(SKY_LIGHT_CHROME_BG, "border-t border-white/10")
+            : "border-slate-800 bg-slate-950",
+        )}
         onSubmit={(e) => {
           e.preventDefault();
           void send();
@@ -407,7 +479,13 @@ function AskSkyConversationView({
             placeholder="Type your message..."
             rows={1}
             disabled={phase === "streaming"}
-            className={`min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus-visible:border-blue-500 ${chatScrollClasses}`}
+            className={cn(
+              "min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl px-4 py-2.5 shadow-sm transition-colors",
+              scrollBarCls,
+              isLight
+                ? "border-2 border-white/20 !bg-white text-slate-900 shadow-md shadow-black/20 placeholder:text-slate-500 focus-visible:border-blue-500 focus-visible:ring-2 focus-visible:ring-blue-400/40 dark:border-white/20 dark:!bg-white dark:text-slate-900 dark:placeholder:text-slate-500"
+                : "border-slate-700 bg-slate-800 text-white placeholder:text-slate-500 focus-visible:border-blue-500",
+            )}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -436,6 +514,7 @@ function AskSkyResolvedCard({
   embedKey,
   compactHeader,
   embedFill,
+  embedTheme = "dark",
 }: {
   resolve: SkyResolveResponse;
   profileSlug: string;
@@ -443,11 +522,20 @@ function AskSkyResolvedCard({
   embedKey: string;
   compactHeader?: boolean;
   embedFill?: boolean;
+  embedTheme?: AskSkyEmbedTheme;
 }) {
+  const isLight = embedTheme === "light";
   return (
     <div className={embedFill ? "flex min-h-0 min-w-0 flex-1 flex-col" : "flex flex-col"}>
       {compactHeader ? (
-        <div className="flex min-w-0 items-center gap-2 pb-3">
+        <div
+          className={cn(
+            "flex min-w-0 items-center gap-2",
+            isLight
+              ? cn("rounded-t-2xl border-b border-white/10 px-4 py-3", SKY_LIGHT_CHROME_BG)
+              : "pb-3",
+          )}
+        >
           {resolve.photo ? (
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-blue-600">
               <Image src={resolve.photo} alt="" fill className="object-cover" sizes="32px" unoptimized />
@@ -461,11 +549,18 @@ function AskSkyResolvedCard({
             <h3 className="truncate text-sm font-semibold text-white">
               {resolve.agentName.trim() || resolve.name}
             </h3>
-            <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
+            <p className={cn("truncate text-xs", isLight ? "text-slate-300" : "text-slate-400")}>
+              {resolve.tagline || resolve.name}
+            </p>
           </div>
         </div>
       ) : (
-        <div className="flex shrink-0 items-center gap-2 border-b border-slate-800 bg-slate-950 px-4 py-3 sm:px-6">
+        <div
+          className={cn(
+            "flex shrink-0 items-center gap-2 border-b px-4 py-3 sm:px-6",
+            isLight ? cn(SKY_LIGHT_CHROME_BG, "border-b border-white/10") : "border-slate-800 bg-slate-950",
+          )}
+        >
           {resolve.photo ? (
             <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-blue-600">
               <Image src={resolve.photo} alt="" fill className="object-cover" sizes="32px" unoptimized />
@@ -479,7 +574,9 @@ function AskSkyResolvedCard({
             <h3 className="truncate text-sm font-semibold text-white">
               {resolve.agentName.trim() || resolve.name}
             </h3>
-            <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
+            <p className={cn("truncate text-xs", isLight ? "text-slate-300" : "text-slate-400")}>
+              {resolve.tagline || resolve.name}
+            </p>
           </div>
         </div>
       )}
@@ -490,6 +587,7 @@ function AskSkyResolvedCard({
           agentToken={agentToken}
           embedKey={embedKey}
           conversationLayout={embedFill ? "embed" : "inline"}
+          embedTheme={embedTheme}
         />
       </div>
     </div>
@@ -501,15 +599,18 @@ function AskSkyChatbotPanel({
   agentToken,
   embedKey,
   onClose,
+  embedTheme = "dark",
 }: {
   profileSlug: string;
   agentToken: string;
   embedKey: string;
   onClose: () => void;
+  embedTheme?: AskSkyEmbedTheme;
 }) {
   const [resolve, setResolve] = React.useState<SkyResolveResponse | null>(null);
   const [resolveError, setResolveError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const isLight = embedTheme === "light";
 
   React.useEffect(() => {
     let cancelled = false;
@@ -537,13 +638,25 @@ function AskSkyChatbotPanel({
   }, [profileSlug, agentToken]);
 
   return (
-    <div className="pointer-events-auto flex h-[min(600px,85dvh)] w-[min(100vw-2rem,24rem)] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl sm:w-[24rem]">
-      <div className="flex shrink-0 items-center justify-between border-b border-slate-800 bg-slate-950 px-4 py-3">
+    <div
+      className={cn(
+        "pointer-events-auto flex h-[min(600px,85dvh)] w-[min(100vw-2rem,24rem)] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border shadow-2xl sm:w-[24rem]",
+        isLight ? "border border-slate-200 bg-white dark:border-slate-200 dark:bg-white" : "border-slate-800 bg-slate-900",
+      )}
+    >
+      <div
+        className={cn(
+          "flex shrink-0 items-center justify-between border-b px-4 py-3",
+          isLight ? cn(SKY_LIGHT_CHROME_BG, "border-b border-white/10") : "border-slate-800 bg-slate-950",
+        )}
+      >
         <div className="flex min-w-0 flex-1 items-center gap-2">
           {loading ? (
-            <span className="text-sm text-slate-400">Loading…</span>
+            <span className={cn("text-sm", isLight ? "text-slate-300" : "text-slate-400")}>Loading…</span>
           ) : resolveError || !resolve ? (
-            <span className="min-w-0 text-sm text-red-300">{resolveError || "Unavailable"}</span>
+            <span className={cn("min-w-0 text-sm", isLight ? "text-red-300" : "text-red-600")}>
+              {resolveError || "Unavailable"}
+            </span>
           ) : (
             <>
               {resolve.photo ? (
@@ -559,7 +672,9 @@ function AskSkyChatbotPanel({
                 <h3 className="truncate text-sm font-semibold text-white">
                   {resolve.agentName.trim() || resolve.name}
                 </h3>
-                <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
+                <p className={cn("truncate text-xs", isLight ? "text-slate-300" : "text-slate-400")}>
+                  {resolve.tagline || resolve.name}
+                </p>
               </div>
             </>
           )}
@@ -569,7 +684,10 @@ function AskSkyChatbotPanel({
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="h-8 w-8 shrink-0 p-0 text-slate-400 hover:bg-slate-800 hover:text-white"
+          className={cn(
+            "h-8 w-8 shrink-0 p-0",
+            isLight ? "text-slate-200 hover:bg-white/10 hover:text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white",
+          )}
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -577,7 +695,12 @@ function AskSkyChatbotPanel({
       </div>
       <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
         {loading ? (
-          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-slate-400">
+          <div
+            className={cn(
+              "flex flex-1 items-center justify-center gap-2 text-sm",
+              isLight ? "text-slate-600" : "text-slate-400",
+            )}
+          >
             <Loader2 className="h-5 w-5 animate-spin" />
             Connecting…
           </div>
@@ -588,6 +711,7 @@ function AskSkyChatbotPanel({
             agentToken={agentToken}
             embedKey={embedKey}
             conversationLayout="panel"
+            embedTheme={embedTheme}
           />
         )}
       </div>
@@ -601,16 +725,19 @@ function AskSkyResolveShell({
   embedKey,
   compactHeader,
   embedFill,
+  embedTheme = "dark",
 }: {
   profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
   embedFill?: boolean;
+  embedTheme?: AskSkyEmbedTheme;
 }) {
   const [resolve, setResolve] = React.useState<SkyResolveResponse | null>(null);
   const [resolveError, setResolveError] = React.useState<string | null>(null);
   const [loading, setLoading] = React.useState(true);
+  const isLight = embedTheme === "light";
 
   React.useEffect(() => {
     let cancelled = false;
@@ -640,11 +767,12 @@ function AskSkyResolveShell({
   if (loading) {
     return (
       <div
-        className={
+        className={cn(
           embedFill
-            ? "flex flex-1 items-center justify-center gap-2 px-6 py-16 text-sm text-slate-400"
-            : "flex items-center justify-center gap-2 px-6 py-16 text-sm text-slate-400"
-        }
+            ? "flex flex-1 items-center justify-center gap-2 px-6 py-16 text-sm"
+            : "flex items-center justify-center gap-2 px-6 py-16 text-sm",
+          isLight ? "text-slate-600" : "text-slate-400",
+        )}
       >
         <Loader2 className="h-5 w-5 animate-spin" />
         Connecting to AskSKY…
@@ -655,11 +783,14 @@ function AskSkyResolveShell({
   if (resolveError || !resolve) {
     return (
       <div
-        className={
+        className={cn(
           embedFill
-            ? "m-4 flex flex-1 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
-            : "m-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
-        }
+            ? "m-4 flex flex-1 items-center justify-center rounded-lg border px-3 py-2 text-sm"
+            : "m-4 rounded-lg border px-3 py-2 text-sm",
+          isLight
+            ? "border-red-300 bg-red-50 text-red-800"
+            : "border-red-500/30 bg-red-500/10 text-red-200",
+        )}
       >
         {resolveError || "AskSKY is unavailable."}
       </div>
@@ -674,6 +805,7 @@ function AskSkyResolveShell({
       embedKey={embedKey}
       compactHeader={compactHeader}
       embedFill={embedFill}
+      embedTheme={embedTheme}
     />
   );
 }
@@ -703,10 +835,20 @@ export interface AskSkyWidgetProps {
   embedKey: string;
   /** Full width + flex height for `/embed/asksky` iframes. */
   embedFill?: boolean;
+  /** Light/dark chrome for embed routes (`theme` query param). */
+  embedTheme?: AskSkyEmbedTheme;
 }
 
-export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey, embedFill }: AskSkyWidgetProps) {
+export function AskSkyWidget({
+  profileSlug,
+  agentToken,
+  variant,
+  embedKey,
+  embedFill,
+  embedTheme = "dark",
+}: AskSkyWidgetProps) {
   const [chatOpen, setChatOpen] = React.useState(false);
+  const isLight = embedTheme === "light";
 
   if (!profileSlug.trim() || !agentToken.trim()) {
     return (
@@ -730,6 +872,7 @@ export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey, embed
             profileSlug={profileSlug}
             agentToken={agentToken}
             embedKey={`${embedKey}:chatbot`}
+            embedTheme={embedTheme}
             onClose={() => setChatOpen(false)}
           />
         ) : null}
@@ -743,7 +886,12 @@ export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey, embed
         >
           <MessageCircle className="h-7 w-7" />
           {!chatOpen ? (
-            <span className="absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full border-2 border-slate-900 bg-green-400" />
+            <span
+              className={cn(
+                "absolute -right-1 -top-1 h-3 w-3 animate-pulse rounded-full border-2 bg-green-400",
+                isLight ? "border-white" : "border-slate-900",
+              )}
+            />
           ) : null}
         </Button>
       </div>
@@ -752,14 +900,22 @@ export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey, embed
 
   return (
     <Card
-      className={
+      className={cn(
+        "gap-0 overflow-hidden rounded-2xl py-0",
         embedFill
-          ? "flex min-h-0 w-full max-w-none flex-1 flex-col gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-0 shadow-2xl"
-          : "mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-0 shadow-2xl"
-      }
+          ? "flex min-h-0 w-full max-w-none flex-1 flex-col"
+          : "mx-auto min-w-0 w-full max-w-md shadow-2xl",
+        isLight ? "border border-slate-200 bg-white dark:border-slate-200 dark:bg-white" : "border border-slate-800 bg-slate-900",
+      )}
     >
       <CardContent className={`min-w-0 p-0 ${embedFill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
-        <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} embedFill={embedFill} />
+        <AskSkyResolveShell
+          profileSlug={profileSlug}
+          agentToken={agentToken}
+          embedKey={embedKey}
+          embedFill={embedFill}
+          embedTheme={embedTheme}
+        />
       </CardContent>
     </Card>
   );

@@ -141,6 +141,20 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /*
+   * AskSKY embed iframe (/embed/asksky): transparent canvas.
+   * Root body uses bg-background; next-themes enableColorScheme sets color-scheme on html (opaque UA canvas).
+   * Class is applied from app/layout.tsx via x-pathname.
+   */
+  html.embed-asksky-host {
+    color-scheme: normal !important;
+  }
+  html.embed-asksky-host,
+  html.embed-asksky-host body,
+  html.embed-asksky-host body #site-main {
+    background-color: transparent !important;
+    background-image: none !important;
+  }
   body {
     @apply bg-background text-foreground;
   }

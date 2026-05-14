@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Label } from "@workspace/ui/components/label";
+import { Switch } from "@workspace/ui/components/switch";
 import {
   Select,
   SelectContent,
@@ -22,7 +23,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { resolveAgentPublicIdentifier, type AgentResponseDto } from "@/lib/services/agents";
-import type { AskSkyVariant } from "@/components/asksky/asksky-widget";
+import type { AskSkyEmbedTheme, AskSkyVariant } from "@/components/asksky/asksky-widget";
 
 function siteOrigin(): string {
   if (typeof window !== "undefined" && window.location?.origin) {
@@ -31,7 +32,12 @@ function siteOrigin(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 }
 
-function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyVariant): string {
+function buildEmbedUrl(
+  profileSlug: string,
+  agentToken: string,
+  variant: AskSkyVariant,
+  theme: AskSkyEmbedTheme,
+): string {
   const origin = siteOrigin();
   if (!origin || !profileSlug.trim() || !agentToken.trim()) {
     return "";
@@ -40,6 +46,7 @@ function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyV
     profileSlug: profileSlug.trim(),
     agentToken: agentToken.trim(),
     variant,
+    theme,
   });
   return `${origin}/embed/asksky?${params.toString()}`;
 }
@@ -63,10 +70,12 @@ export function AskSkyStaticEmbedDialog({
   agent,
 }: AskSkyStaticEmbedDialogProps) {
   const [variant, setVariant] = React.useState<AskSkyVariant>("inline");
+  const [embedTheme, setEmbedTheme] = React.useState<AskSkyEmbedTheme>("dark");
 
   React.useEffect(() => {
     if (open) {
       setVariant("inline");
+      setEmbedTheme("dark");
     }
   }, [open, agent?.id]);
 
@@ -74,8 +83,9 @@ export function AskSkyStaticEmbedDialog({
   const slugOk = Boolean(profileSlug.trim());
   const tokenOk = Boolean(publicToken);
   const embedUrl = React.useMemo(
-    () => (slugOk && tokenOk && publicToken ? buildEmbedUrl(profileSlug, publicToken, variant) : ""),
-    [profileSlug, publicToken, slugOk, tokenOk, variant],
+    () =>
+      slugOk && tokenOk && publicToken ? buildEmbedUrl(profileSlug, publicToken, variant, embedTheme) : "",
+    [profileSlug, publicToken, slugOk, tokenOk, variant, embedTheme],
   );
   const iframeSnippet = React.useMemo(() => buildIframeSnippet(embedUrl), [embedUrl]);
 
@@ -100,7 +110,8 @@ export function AskSkyStaticEmbedDialog({
           <DialogDescription className="text-slate-400">
             Choose how AskSKY should appear, then copy the link or iframe snippet to use on other pages. The URL
             includes <span className="text-slate-300">profileSlug</span>, <span className="text-slate-300">agentToken</span>
-            , and <span className="text-slate-300">variant</span> as query parameters.
+            , <span className="text-slate-300">variant</span>, and <span className="text-slate-300">theme</span> as query
+            parameters.
           </DialogDescription>
         </DialogHeader>
 
@@ -122,24 +133,59 @@ export function AskSkyStaticEmbedDialog({
             </p>
           ) : null}
 
-          <div className="space-y-2">
-            <Label className="text-slate-200">Interface style</Label>
-            <Select
-              value={variant}
-              onValueChange={(v) => setVariant(v as AskSkyVariant)}
-              disabled={!slugOk || !tokenOk}
-            >
-              <SelectTrigger className="border-slate-700 bg-slate-900 text-white">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
-                <SelectItem value="inline">Embedded inline</SelectItem>
-                <SelectItem value="chatbot">Chatbot (floating button)</SelectItem>
-                <SelectItem value="voice">Voice line (coming soon)</SelectItem>
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-slate-500">
-              The embed page reads these options from the URL. Voice shows a placeholder until audio is available.
+          <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start sm:gap-6">
+              <div className="min-w-0 space-y-2 border-b border-slate-800 pb-4 sm:border-b-0 sm:border-r sm:border-slate-800 sm:pb-0 sm:pr-6">
+                <Label htmlFor="asksky-embed-variant" className="text-slate-200">
+                  Interface style
+                </Label>
+                <Select
+                  value={variant}
+                  onValueChange={(v) => setVariant(v as AskSkyVariant)}
+                  disabled={!slugOk || !tokenOk}
+                >
+                  <SelectTrigger
+                    id="asksky-embed-variant"
+                    className="h-11 w-full border-slate-700 bg-slate-900 text-white"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
+                    <SelectItem value="inline">Embedded inline</SelectItem>
+                    <SelectItem value="chatbot">Chatbot (floating button)</SelectItem>
+                    <SelectItem value="voice">Voice line (coming soon)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="min-w-0 space-y-2">
+                <Label htmlFor="asksky-embed-theme" className="text-slate-200">
+                  Theme
+                </Label>
+                <div className="flex h-11 w-full items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-3">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <span
+                      aria-hidden="true"
+                      className={`h-2 w-2 shrink-0 rounded-full ${embedTheme === "light" ? "bg-amber-400" : "bg-slate-500"}`}
+                    />
+                    <span className="truncate text-sm font-medium text-slate-200">
+                      {embedTheme === "light" ? "Light" : "Dark"}
+                    </span>
+                  </div>
+                  <Switch
+                    id="asksky-embed-theme"
+                    checked={embedTheme === "light"}
+                    onCheckedChange={(checked) => setEmbedTheme(checked ? "light" : "dark")}
+                    disabled={!slugOk || !tokenOk}
+                    className="shrink-0 data-[state=checked]:bg-amber-500 data-[state=unchecked]:bg-slate-700"
+                    aria-label="Embed theme: light or dark"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <p className="mt-4 border-t border-slate-800 pt-3 text-xs leading-relaxed text-slate-500">
+              Voice shows a placeholder until audio is available.
             </p>
           </div>
 

@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function EmbedAskSkyLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="box-border flex h-[100dvh] min-h-0 max-w-2xl flex-col mx-auto">
+    <div className="box-border mx-auto flex h-[100dvh] min-h-0 w-full max-w-2xl flex-col bg-transparent">
       {children}
     </div>
   );
