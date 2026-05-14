@@ -65,6 +65,10 @@ export interface KnowledgeSourceResponseDto {
   mimeType?: string | null;
   status: KnowledgeIngestionStatus;
   progress?: number | null;
+  /** Website crawl: pages fetched so far (when API provides it). */
+  pagesScraped?: number | null;
+  /** Website crawl: configured cap from API (matches submission maxPages). */
+  maxPages?: number | null;
   lastError?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -239,6 +243,9 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
   const errorMessage = (raw.errorMessage ?? raw.lastError) as string | undefined;
   const sourceType = mapApiTypeToSourceType(raw.type as string | undefined);
 
+  const pagesScrapedRaw = raw.pagesScraped ?? raw.pages_scraped;
+  const maxPagesRaw = raw.maxPages ?? raw.max_pages;
+
   return {
     id: String(raw.id ?? ""),
     profileId: normalizeOptionalId(raw.profileId as number | string | undefined),
@@ -252,6 +259,8 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
     mimeType: (raw.mimeType as string) ?? null,
     status: normalizeApiStatus(raw.status as string | undefined),
     progress: typeof raw.progress === "number" ? raw.progress : null,
+    pagesScraped: typeof pagesScrapedRaw === "number" && Number.isFinite(pagesScrapedRaw) ? pagesScrapedRaw : null,
+    maxPages: typeof maxPagesRaw === "number" && Number.isFinite(maxPagesRaw) && maxPagesRaw > 0 ? maxPagesRaw : null,
     lastError: errorMessage ?? null,
     createdAt: raw.createdAt as string | undefined,
     updatedAt: raw.updatedAt as string | undefined,

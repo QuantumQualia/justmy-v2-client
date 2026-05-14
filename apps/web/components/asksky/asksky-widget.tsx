@@ -15,6 +15,7 @@ import {
   type SkyResolveResponse,
 } from "@/lib/services/sky";
 import { useProfileStore } from "@/lib/store/profile-store";
+import { LinkifiedMessage } from "@/components/common/chatbot/linkified-message";
 import { cn } from "@workspace/ui/lib/utils";
 
 export type AskSkyVariant = "inline" | "voice" | "chatbot";
@@ -349,7 +350,19 @@ function AskSkyConversationView({
                     : "rounded-bl-sm bg-slate-800 text-slate-100"
               }`}
             >
-              <p className="whitespace-pre-wrap break-words text-sm">{m.content}</p>
+              <LinkifiedMessage
+                text={m.content}
+                className={cn(
+                  m.role === "user" ? "text-white" : isLight ? "text-slate-900" : "text-slate-100",
+                )}
+                linkClassName={cn(
+                  m.role === "user"
+                    ? "break-all font-medium text-blue-50 underline decoration-blue-200/70 underline-offset-2 hover:text-white"
+                    : isLight
+                      ? "break-all font-medium text-blue-600 underline decoration-blue-500/50 underline-offset-2 hover:text-blue-800"
+                      : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white",
+                )}
+              />
               {typeof m.at === "number" ? (
                 <span
                   className={`mt-1 block text-[10px] ${
@@ -410,7 +423,15 @@ function AskSkyConversationView({
                 isLight ? "border border-slate-200 bg-white text-slate-900 shadow-sm" : "bg-slate-800 text-slate-100",
               )}
             >
-              <p className="whitespace-pre-wrap break-words text-sm">{streamingText}</p>
+              <LinkifiedMessage
+                text={streamingText}
+                className={isLight ? "text-slate-900" : "text-slate-100"}
+                linkClassName={cn(
+                  isLight
+                    ? "break-all font-medium text-blue-600 underline decoration-blue-500/50 underline-offset-2 hover:text-blue-800"
+                    : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white",
+                )}
+              />
             </div>
           </div>
         ) : null}
