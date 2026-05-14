@@ -822,6 +822,7 @@ function KnowledgeSourcesCard({
               const progress = normalizeProgress(source.progress);
               const busy = reindexingSourceId === source.id || deletingSourceId === source.id;
               const { primaryLabel, secondaryLabel } = resolveKnowledgeSourceLabels(source);
+              const scrape = websiteScrapeProgress(source);
 
               return (
                 <div
@@ -850,71 +851,6 @@ function KnowledgeSourcesCard({
                         ) : null}
                         <span>Updated {formatDateTime(source.updatedAt ?? source.createdAt)}</span>
                       </div>
-
-                      {(() => {
-                        const scrape = websiteScrapeProgress(source);
-                        if (scrape) {
-                          return (
-                            <div
-                              className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5"
-                              role="status"
-                              aria-live="polite"
-                              aria-label={`Crawl progress: ${scrape.scraped} of ${scrape.max} pages, ${scrape.percent} percent`}
-                            >
-                              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-200">Crawl progress</span>
-                                <span className="text-xs tabular-nums text-slate-400">
-                                  <span className="font-medium text-slate-200">{scrape.percent}%</span>
-                                  <span className="text-slate-500"> · </span>
-                                  <span>
-                                    {scrape.scraped} / {scrape.max} pages
-                                  </span>
-                                </span>
-                              </div>
-                              <div
-                                className="h-3 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
-                                role="progressbar"
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={scrape.percent}
-                                aria-valuetext={`${scrape.percent} percent, ${scrape.scraped} of ${scrape.max} pages scraped`}
-                              >
-                                <div
-                                  className="h-full min-w-0 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-[width] duration-500 ease-out"
-                                  style={{ width: `${Math.max(scrape.percent, scrape.scraped > 0 ? 2 : 0)}%` }}
-                                />
-                              </div>
-                              <p className="mt-1.5 text-[11px] leading-snug text-slate-500">
-                                Scraped pages out of the max you set for this website.
-                              </p>
-                            </div>
-                          );
-                        }
-                        if (typeof progress === "number") {
-                          return (
-                            <div className="rounded-lg border border-slate-800 bg-slate-900/80 px-3 py-2.5">
-                              <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                                <span className="text-xs font-medium text-slate-200">Ingestion progress</span>
-                                <span className="text-xs font-medium tabular-nums text-slate-200">{progress}%</span>
-                              </div>
-                              <div
-                                className="h-3 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
-                                role="progressbar"
-                                aria-valuemin={0}
-                                aria-valuemax={100}
-                                aria-valuenow={progress}
-                                aria-valuetext={`${progress} percent complete`}
-                              >
-                                <div
-                                  className="h-full min-w-0 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-500 ease-out"
-                                  style={{ width: `${Math.max(progress, progress > 0 ? 2 : 0)}%` }}
-                                />
-                              </div>
-                            </div>
-                          );
-                        }
-                        return null;
-                      })()}
                     </div>
 
                     <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
@@ -950,6 +886,36 @@ function KnowledgeSourcesCard({
                       </Button>
                     </div>
                   </div>
+
+                  {scrape ? (
+                    <div
+                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={scrape.percent}
+                      aria-valuetext={`${scrape.scraped} of ${scrape.max} pages`}
+                    >
+                      <div
+                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-[width] duration-500 ease-out"
+                        style={{ width: `${Math.max(scrape.percent, scrape.scraped > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                  ) : typeof progress === "number" ? (
+                    <div
+                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progress}
+                      aria-valuetext={`${progress}%`}
+                    >
+                      <div
+                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-500 ease-out"
+                        style={{ width: `${Math.max(progress, progress > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
