@@ -8,6 +8,7 @@ import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile
 import { DEFAULT_PROFILE_KIND, profileKindToRegisterQueryParam } from "@/lib/os-types"
 
 import "@workspace/ui/globals.css"
+import { cn } from "@workspace/ui/lib/utils"
 import { Providers } from "@/components/providers"
 import { Navbar } from "@/components/common/navbar/navbar"
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
@@ -82,6 +83,7 @@ export default async function RootLayout({
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
   const hideSiteChrome = pathname.startsWith("/embed/")
+  const embedAskSky = pathname.startsWith("/embed/asksky")
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
@@ -101,9 +103,14 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className={embedAskSky ? "embed-asksky-host" : undefined}>
       <body
-        className={`${fontSans.variable} ${fontMono.variable} font-sans antialiased `}
+        className={cn(
+          fontSans.variable,
+          fontMono.variable,
+          "font-sans antialiased",
+          embedAskSky && "embed-asksky-host",
+        )}
       >
         <Providers>
           <a
@@ -123,7 +130,10 @@ export default async function RootLayout({
               <SearchResultsPanel />
             </>
           ) : null}
-          <div id="site-main" className={hideSiteChrome ? "min-h-screen min-w-0" : "min-h-0"}>
+          <div
+            id="site-main"
+            className={cn(hideSiteChrome ? "min-h-screen min-w-0" : "min-h-0", embedAskSky && "bg-transparent")}
+          >
             {children}
           </div>
         </Providers>
