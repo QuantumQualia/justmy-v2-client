@@ -65,7 +65,6 @@ export interface KnowledgeSourceResponseDto {
   mimeType?: string | null;
   status: KnowledgeIngestionStatus;
   progress?: number | null;
-  statusMessage?: string | null;
   lastError?: string | null;
   createdAt?: string;
   updatedAt?: string;
@@ -238,8 +237,6 @@ function normalizeApiStatus(status: string | undefined): KnowledgeIngestionStatu
 function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: KnowledgeScope): KnowledgeSourceResponseDto {
   const filename = (raw.filename ?? raw.fileName) as string | undefined;
   const errorMessage = (raw.errorMessage ?? raw.lastError) as string | undefined;
-  const pagesScraped = raw.pagesScraped as number | undefined;
-  const maxPages = raw.maxPages as number | undefined;
   const sourceType = mapApiTypeToSourceType(raw.type as string | undefined);
 
   return {
@@ -255,10 +252,6 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
     mimeType: (raw.mimeType as string) ?? null,
     status: normalizeApiStatus(raw.status as string | undefined),
     progress: typeof raw.progress === "number" ? raw.progress : null,
-    statusMessage:
-      typeof pagesScraped === "number" && typeof maxPages === "number"
-        ? `Pages scraped ${pagesScraped} / ${maxPages}`
-        : null,
     lastError: errorMessage ?? null,
     createdAt: raw.createdAt as string | undefined,
     updatedAt: raw.updatedAt as string | undefined,

@@ -24,12 +24,13 @@ function AskSkyEmbedInner() {
   );
 
   return (
-    <div className="min-h-[100dvh] min-w-0 bg-black p-3 sm:p-4">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
       <AskSkyWidget
         profileSlug={profileSlug}
         agentToken={agentToken}
         variant={variant}
         embedKey={embedKey}
+        embedFill
       />
     </div>
   );
@@ -37,14 +38,16 @@ function AskSkyEmbedInner() {
 
 export default function EmbedAskSkyPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[100dvh] items-center justify-center bg-black text-sm text-slate-400">
-          Loading…
-        </div>
-      }
-    >
-      <AskSkyEmbedInner />
-    </Suspense>
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+      <Suspense
+        fallback={
+          <div className="flex flex-1 min-h-0 items-center justify-center text-sm text-slate-400">
+            Loading…
+          </div>
+        }
+      >
+        <AskSkyEmbedInner />
+      </Suspense>
+    </div>
   );
 }

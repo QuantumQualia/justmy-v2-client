@@ -67,6 +67,16 @@ import { useProfileStore } from "@/lib/store";
 const INGESTING_STATUSES = new Set<KnowledgeIngestionStatus>(["pending", "queued", "processing"]);
 const KNOWLEDGE_PAGE_SIZE = 5;
 
+function canReindexKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boolean): boolean {
+  if (busy || INGESTING_STATUSES.has(source.status)) {
+    return false;
+  }
+  if (source.sourceType === "website") {
+    return true;
+  }
+  return source.sourceType === "document" && source.status === "failed";
+}
+
 type AgentDialogState = {
   open: boolean;
   mode: "create" | "edit";
@@ -820,11 +830,6 @@ function KnowledgeSourcesCard({
                           <p className="text-xs text-slate-400">{progress}% complete</p>
                         </div>
                       ) : null}
-
-                      {source.statusMessage ? (
-                        <p className="text-xs text-slate-400">{source.statusMessage}</p>
-                      ) : null}
-
                     </div>
 
                     <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
@@ -834,11 +839,7 @@ function KnowledgeSourcesCard({
                         size="sm"
                         className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
                         onClick={() => onReindex(source)}
-                        disabled={
-                          busy ||
-                          INGESTING_STATUSES.has(source.status) ||
-                          source.sourceType !== "website"
-                        }
+                        disabled={!canReindexKnowledgeSource(source, busy)}
                       >
                         {reindexingSourceId === source.id ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
