@@ -39,6 +39,10 @@ function isHandleRoute(pathname: string): boolean {
  * Check if a route is public
  */
 function isPublicRoute(pathname: string): boolean {
+  if (pathname.startsWith("/embed/")) {
+    return true;
+  }
+
   // Check explicit public routes
   if (publicRoutes.some((route) => pathname === route || pathname.startsWith(`${route}/`))) {
     return true;

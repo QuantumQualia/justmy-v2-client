@@ -35,7 +35,9 @@ import { QuickActionItem, type QuickActionItemConfig } from "@/components/common
 import { WelcomeMessage } from "@/components/common/welcome/welcome-message";
 import { DayInHistory } from "@/components/common/welcome/day-in-history";
 import { AdBanner } from "@/components/common/ad-banner";
+import { BlocksRenderer } from "@/components/cms/blocks-renderer";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
+import type { PageBlock } from "@/lib/services/cms";
 
 // --- MOCK DATA (Replace with API calls) ---
 const MY_PROFILES = [
@@ -46,6 +48,38 @@ const MY_PROFILES = [
 const LOCAL_CONTENT = [
   { id: 1, title: "City OS Announces New Features", type: "News", date: "2026-01-20" },
   { id: 2, title: "City OS Partners with Local Businesses", type: "News", date: "2026-01-19" },
+];
+
+const DASHBOARD_AGENT_PREVIEW_BLOCKS: PageBlock[] = [
+  {
+    id: "dashboard-agents-management-preview",
+    blockType: "agents-management-block",
+    layout: {
+      type: "container",
+      maxWidth: {
+        mobile: "100%",
+        tablet: "1100px",
+        desktop: "1280px",
+      },
+      padding: {
+        mobile: "0 16px",
+        tablet: "0 24px",
+        desktop: "0 24px",
+      },
+    },
+    styles: {
+      marginTop: {
+        mobile: "24px",
+        tablet: "32px",
+        desktop: "40px",
+      },
+      marginBottom: {
+        mobile: "32px",
+        tablet: "40px",
+        desktop: "48px",
+      },
+    },
+  },
 ];
 
 export default function DashboardLobby() {
@@ -100,6 +134,12 @@ export default function DashboardLobby() {
             hotlinks={[{ label: "Learn More", href: "/learn-more" }, { label: "Contact Us", href: "/contact-us" }, { label: "Follow Us", href: "/follow-us" }]}
           />
         </div>
+
+        <BlocksRenderer
+          blocks={DASHBOARD_AGENT_PREVIEW_BLOCKS}
+          className="w-full bg-transparent text-white"
+          emptyMessage="No dashboard blocks configured."
+        />
       </div>
     </div>
   );

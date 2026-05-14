@@ -81,6 +81,7 @@ export default async function RootLayout({
 
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
+  const hideSiteChrome = pathname.startsWith("/embed/")
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
@@ -111,14 +112,18 @@ export default async function RootLayout({
           >
             Skip to content
           </a>
-          <Navbar
-            initialIsAuthed={initialIsAuthed}
-            initialMycardPublicNav={initialMycardPublicNav}
-            initialMycardRegisterType={initialMycardRegisterType}
-            initialMycardProfileSlug={initialMycardProfileSlug}
-          />
-          <SearchResultsPanel />
-          <div id="site-main" className="min-h-0">
+          {!hideSiteChrome ? (
+            <>
+              <Navbar
+                initialIsAuthed={initialIsAuthed}
+                initialMycardPublicNav={initialMycardPublicNav}
+                initialMycardRegisterType={initialMycardRegisterType}
+                initialMycardProfileSlug={initialMycardProfileSlug}
+              />
+              <SearchResultsPanel />
+            </>
+          ) : null}
+          <div id="site-main" className={hideSiteChrome ? "min-h-screen min-w-0" : "min-h-0"}>
             {children}
           </div>
         </Providers>

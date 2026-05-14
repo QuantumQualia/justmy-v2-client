@@ -31,6 +31,8 @@ import { ReferAFriendBlock } from "./components/refer-a-friend-block";
 import { AppHubBlock } from "./components/app-hub-block";
 import { ContentHubViewBlock } from "./components/content-hub-view-block";
 import { SubProfilesBlock } from "./components/sub-profiles-block";
+import { AgentsManagementBlock } from "./components/agents-management-block";
+import { AskSkyBlock } from "./components/asksky-block";
 import { ProfileSpotlightBlock } from "./components/profile-spotlight-block";
 import { compileBlockStyles, compileContainerWrapper } from "./block-responsive-styles";
 import type { PageBlock } from "@/lib/services/cms";
@@ -90,6 +92,8 @@ export const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "refer-a-friend-block": ReferAFriendBlock,
   "app-hub-block": AppHubBlock,
   "content-hub-view-block": ContentHubViewBlock,
+  "agents-management-block": AgentsManagementBlock,
+  "asksky-block": AskSkyBlock,
   "sub-profiles-block": SubProfilesBlock,
   "profile-spotlight-block": ProfileSpotlightBlock,
 };
@@ -118,6 +122,8 @@ const componentBlocks = new Set([
   "refer-a-friend-block",
   "app-hub-block",
   "content-hub-view-block",
+  "agents-management-block",
+  "asksky-block",
   "sub-profiles-block",
   "profile-spotlight-block",
 ]);

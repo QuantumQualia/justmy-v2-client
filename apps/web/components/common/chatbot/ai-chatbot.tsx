@@ -185,12 +185,13 @@ export function AIChatbot() {
               placeholder="Type your message..."
               disabled={isLoading}
               rows={1}
-              className="flex-1 min-h-[40px] max-h-[120px] resize-none bg-slate-800 border-slate-700 text-white placeholder:text-slate-500 focus:border-blue-500 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500"
+              className="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-3xl border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus-visible:border-blue-500 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500"
             />
             <Button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 h-10 shrink-0"
+              className="h-10 w-10 shrink-0 rounded-full bg-blue-600 p-0 text-white hover:bg-blue-700"
+              aria-label="Send message"
             >
               <Send className="h-4 w-4" />
             </Button>

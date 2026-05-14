@@ -28,5 +28,7 @@ export { ReferAFriendBlockEditor } from "../page-blocks/refer-a-friend";
 export { AppHubBlockEditor } from "../page-blocks/app-hub";
 export { ContentHubViewBlockEditor } from "../page-blocks/content-hub-view";
 export { SubProfilesBlockEditor } from "../page-blocks/sub-profiles";
+export { AgentsManagementBlockEditor } from "../page-blocks/agents-management";
+export { AskSkyBlockEditor } from "../page-blocks/asksky";
 export { RawHtmlCssBlockEditor } from "../page-blocks/raw-html-css";
 
