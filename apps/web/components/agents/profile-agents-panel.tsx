@@ -7,6 +7,7 @@ import {
   Bot,
   FileText,
   Globe,
+  Link2,
   Loader2,
   Pencil,
   Plus,
@@ -44,6 +45,7 @@ import {
 import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
+import { AskSkyStaticEmbedDialog } from "@/components/agents/asksky-static-embed-dialog";
 import { DataTable } from "@/components/ui/data-table";
 import { agentQueryKeys } from "@/lib/query/agent-query-keys";
 import {
@@ -192,7 +194,7 @@ function StatCard({
   description: string;
 }) {
   return (
-    <Card className="rounded-br-none border-slate-800 bg-slate-900/60 py-0">
+    <Card className="min-w-0 max-w-full rounded-br-none border-slate-800 bg-slate-900/60 py-0">
       <CardHeader className="gap-1 border-b border-slate-800/80 py-4">
         <CardDescription className="text-slate-400">{title}</CardDescription>
         <CardTitle className="text-2xl text-white">{value}</CardTitle>
@@ -667,15 +669,15 @@ function KnowledgeSourcesCard({
       id={scope === "agent" ? "agent-knowledge-panel" : undefined}
       className={
         scope === "agent"
-          ? "scroll-mt-24 rounded-br-none border-slate-800 bg-slate-900/70 py-0"
-          : "rounded-br-none border-slate-800 bg-slate-900/70 py-0"
+          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0"
+          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0"
       }
     >
-      <CardHeader className="gap-3 border-b border-slate-800/80 py-5">
-        <div className="grid gap-3 lg:min-h-[152px] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
+      <CardHeader className="min-w-0 gap-3 border-b border-slate-800/80 px-4 py-5 sm:px-6">
+        <div className="grid min-w-0 gap-3 lg:min-h-[152px] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
           <div className="min-w-0 space-y-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <CardTitle className="text-white">{title}</CardTitle>
+            <div className="flex min-w-0 flex-wrap items-center gap-2">
+              <CardTitle className="min-w-0 break-words text-white">{title}</CardTitle>
               <Badge
                 variant="outline"
                 className={
@@ -687,7 +689,7 @@ function KnowledgeSourcesCard({
                 {scope === "shared" ? "Shared" : "Agent-specific"}
               </Badge>
             </div>
-            <CardDescription className="max-w-2xl text-slate-400">
+            <CardDescription className="max-w-full min-w-0 text-balance text-slate-400 sm:max-w-2xl">
               {description}
             </CardDescription>
             {scope === "agent" && selectedAgent ? (
@@ -752,7 +754,7 @@ function KnowledgeSourcesCard({
         </div>
       </CardHeader>
 
-      <CardContent className="space-y-3 py-5">
+      <CardContent className="min-w-0 space-y-3 px-4 py-5 sm:px-6">
         {error ? (
           <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
             {error}
@@ -782,11 +784,11 @@ function KnowledgeSourcesCard({
               return (
                 <div
                   key={source.id}
-                  className="rounded-xl border border-slate-800 bg-slate-950/60 p-4"
+                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-3 sm:p-4"
                 >
-                  <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
-                      <p className="truncate text-sm font-semibold text-slate-100">{primaryLabel}</p>
+                      <p className="break-words text-sm font-semibold text-slate-100 sm:truncate">{primaryLabel}</p>
                       <div className="flex flex-wrap items-center gap-2">
                         <Badge variant="outline" className="border-slate-700 text-slate-300">
                           {sourceTypeLabel(source.sourceType)}
@@ -825,12 +827,12 @@ function KnowledgeSourcesCard({
 
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+                    <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
                       <Button
                         type="button"
                         variant="outline"
                         size="sm"
-                        className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                        className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
                         onClick={() => onReindex(source)}
                         disabled={
                           busy ||
@@ -849,6 +851,7 @@ function KnowledgeSourcesCard({
                         type="button"
                         variant="destructive"
                         size="sm"
+                        className="w-full shrink-0 sm:w-auto"
                         onClick={() => onDelete(source)}
                         disabled={busy}
                       >
@@ -866,11 +869,11 @@ function KnowledgeSourcesCard({
             })}
 
             {totalPages > 1 ? (
-              <div className="flex flex-col gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-400">
+              <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                <p className="min-w-0 text-xs text-slate-400">
                   Showing {rangeStart}-{rangeEnd} of {total}
                 </p>
-                <div className="flex items-center gap-2 self-end sm:self-auto">
+                <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 self-stretch sm:self-auto">
                   <Button
                     type="button"
                     variant="outline"
@@ -912,6 +915,7 @@ export function ProfileAgentsPanel({
   profileName: profileNameProp,
 }: ProfileAgentsPanelProps = {}) {
   const profileNameFromStore = useProfileStore((state) => state.data.name);
+  const profileSlug = useProfileStore((state) => String(state.data.slug ?? "").trim());
   const profileName = profileNameProp ?? profileNameFromStore;
   const queryClient = useQueryClient();
 
@@ -931,6 +935,7 @@ export function ProfileAgentsPanel({
   const [agentKnowledgePage, setAgentKnowledgePage] = React.useState(1);
   const [deleteAgentTarget, setDeleteAgentTarget] = React.useState<AgentResponseDto | null>(null);
   const [deleteSourceTarget, setDeleteSourceTarget] = React.useState<KnowledgeSourceResponseDto | null>(null);
+  const [askSkyEmbedAgent, setAskSkyEmbedAgent] = React.useState<AgentResponseDto | null>(null);
 
   const agentsQuery = useQuery({
     queryKey: agentQueryKeys.agents(),
@@ -1225,11 +1230,6 @@ export function ProfileAgentsPanel({
         ),
       },
       {
-        id: "public-config",
-        header: "AskSKY embed",
-        cell: () => null,
-      },
-      {
         id: "knowledge",
         header: "Private knowledge",
         cell: ({ row }) => (
@@ -1276,6 +1276,22 @@ export function ProfileAgentsPanel({
               </Button>
               <Button
                 type="button"
+                variant="outline"
+                size="sm"
+                className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                disabled={!agent.isActive}
+                title={
+                  agent.isActive
+                    ? "Build a shareable AskSKY embed link"
+                    : "Activate this agent before generating an embed link"
+                }
+                onClick={() => setAskSkyEmbedAgent(agent)}
+              >
+                <Link2 className="h-4 w-4" />
+                Embed
+              </Button>
+              <Button
+                type="button"
                 variant="destructive"
                 size="sm"
                 onClick={() => setDeleteAgentTarget(agent)}
@@ -1301,7 +1317,7 @@ export function ProfileAgentsPanel({
         : null;
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6 overflow-x-hidden">
       <AgentFormDialog
         state={agentDialogState}
         onOpenChange={(open) => {
@@ -1317,6 +1333,17 @@ export function ProfileAgentsPanel({
           });
         }}
         submitting={saveAgentMutation.isPending}
+      />
+
+      <AskSkyStaticEmbedDialog
+        open={askSkyEmbedAgent != null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAskSkyEmbedAgent(null);
+          }
+        }}
+        profileSlug={profileSlug}
+        agent={askSkyEmbedAgent}
       />
 
       <KnowledgeSourceDialog
@@ -1392,14 +1419,14 @@ export function ProfileAgentsPanel({
         loadingConfirmText="Deleting..."
       />
 
-      <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+      <div className="min-w-0 space-y-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
             <Bot className="h-5 w-5" />
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <h2 className="text-2xl font-semibold text-white">Agents and knowledge base</h2>
-            <p className="text-sm text-slate-400">
+            <p className="text-sm text-balance text-slate-400">
               Manage multiple agents for {profileName || "this profile"}, set optional
               prompts, and track shared versus agent-specific ingestion.
             </p>
@@ -1407,7 +1434,7 @@ export function ProfileAgentsPanel({
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
           title="Agents"
           value={String(agents.length)}
@@ -1425,14 +1452,16 @@ export function ProfileAgentsPanel({
         />
       </div>
 
-      <Card className="rounded-br-none border-slate-800 bg-slate-900/70 py-0">
+      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0">
         <CardHeader className="border-b border-slate-800/80 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
               <CardTitle className="text-white">Agent management</CardTitle>
               <CardDescription className="max-w-2xl text-slate-400">
-                Create, edit, deactivate, or delete agents. Public identifiers shown here are
-                the values the AskSKY embed will need once the backend contract is finalized.
+                Create, edit, deactivate, or delete agents. Use <span className="text-slate-300">Embed</span> to build
+                a shareable AskSKY page URL (with <span className="text-slate-300">profileSlug</span>,{" "}
+                <span className="text-slate-300">agentToken</span>, and <span className="text-slate-300">variant</span>
+                ) for iframes or other sites. Public identifiers are what AskSKY needs to resolve the agent.
               </CardDescription>
             </div>
             <Button
@@ -1462,7 +1491,7 @@ export function ProfileAgentsPanel({
         </CardContent>
       </Card>
 
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-2">
         <KnowledgeSourcesCard
           title="Shared knowledge"
           description="These sources are available to every agent in the profile. Use them for common FAQs, brand facts, policy docs, and universal reference material."

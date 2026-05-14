@@ -40,6 +40,7 @@ import {
   ContentHubViewBlockEditor,
   SubProfilesBlockEditor,
   AgentsManagementBlockEditor,
+  AskSkyBlockEditor,
   RawHtmlCssBlockEditor,
 } from "./blocks";
 
@@ -268,6 +269,9 @@ export function PageBlockEditor({
 
       case "agents-management-block":
         return <AgentsManagementBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "asksky-block":
+        return <AskSkyBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "sub-profiles-block":
         return <SubProfilesBlockEditor block={block} onUpdate={onUpdate} />;

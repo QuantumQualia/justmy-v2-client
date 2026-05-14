@@ -25,6 +25,7 @@ import {
   LayoutGrid,
   Code2,
   Bot,
+  MessageCircle,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -238,6 +239,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Agents Management",
     icon: <Bot className="h-5 w-5" />,
     description: "Agents panel for the active profile with knowledge sources and ingestion controls",
+    category: "Apps",
+  },
+  {
+    value: "asksky-block",
+    label: "AskSKY!",
+    icon: <MessageCircle className="h-5 w-5" />,
+    description: "AskSKY! chat widget: inline, floating chatbot, or voice placeholder — profile slug + agent token",
     category: "Apps",
   },
   {

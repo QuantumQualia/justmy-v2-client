@@ -365,10 +365,16 @@ export function resolveAgentPublicIdentifier(agent: AgentResponseDto | null | un
 }
 
 export const agentsService = {
-  async listProfileAgents(): Promise<AgentResponseDto[]> {
+  /**
+   * Lists agents for a profile. When `forProfileSlug` is omitted, uses the session’s active profile.
+   * When set (e.g. CMS editor), sends `profileSlug` as a query param for backends that support scoping.
+   */
+  async listProfileAgents(forProfileSlug?: string): Promise<AgentResponseDto[]> {
     try {
+      const slug = typeof forProfileSlug === "string" ? forProfileSlug.trim() : "";
       const response = await apiRequest<AgentsEnvelope>(profileAgentPaths.currentAgents(), {
         method: "GET",
+        ...(slug ? { params: { profileSlug: slug } } : {}),
       });
 
       return extractAgents(response);
