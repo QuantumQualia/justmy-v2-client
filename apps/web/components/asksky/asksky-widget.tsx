@@ -83,48 +83,7 @@ function persistConversation(embedKey: string, conversationId: number, visitorTo
   }
 }
 
-function RetrievedDocsSummary({
-  docs,
-  embedTheme = "dark",
-}: {
-  docs: unknown[];
-  embedTheme?: AskSkyEmbedTheme;
-}) {
-  if (!docs.length) {
-    return null;
-  }
-  const isLight = embedTheme === "light";
-  return (
-    <details
-      className={cn(
-        "mt-2 rounded-lg border text-xs",
-        isLight
-          ? "border-slate-200 bg-slate-100 text-slate-600"
-          : "border-slate-700/80 bg-slate-900/60 text-slate-400",
-      )}
-    >
-      <summary
-        className={cn(
-          "cursor-pointer select-none px-2 py-1.5",
-          isLight ? "text-slate-700 hover:text-slate-900" : "text-slate-300 hover:text-slate-100",
-        )}
-      >
-        Sources ({docs.length})
-      </summary>
-      <ul className="max-h-40 list-disc space-y-1 overflow-y-auto px-5 pb-2">
-        {docs.map((doc, i) => (
-          <li key={i} className="break-words">
-            {typeof doc === "object" && doc !== null && "title" in doc && typeof (doc as { title?: string }).title === "string"
-              ? (doc as { title: string }).title
-              : JSON.stringify(doc)}
-          </li>
-        ))}
-      </ul>
-    </details>
-  );
-}
-
-type AskSkyChatMessage = Pick<SkyConversationMessage, "role" | "content" | "retrievedDocs"> & {
+type AskSkyChatMessage = Pick<SkyConversationMessage, "role" | "content"> & {
   refusal?: boolean;
   at?: number;
 };
@@ -206,7 +165,6 @@ function AskSkyConversationView({
           conv.messages.map((m) => ({
             role: m.role,
             content: m.content,
-            retrievedDocs: m.retrievedDocs,
           })),
         );
       } catch {
@@ -392,7 +350,6 @@ function AskSkyConversationView({
               }`}
             >
               <p className="whitespace-pre-wrap break-words text-sm">{m.content}</p>
-              {m.retrievedDocs?.length ? <RetrievedDocsSummary docs={m.retrievedDocs} embedTheme={embedTheme} /> : null}
               {typeof m.at === "number" ? (
                 <span
                   className={`mt-1 block text-[10px] ${
