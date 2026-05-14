@@ -118,8 +118,8 @@ function AskSkyConversationView({
   profileSlug: string;
   agentToken: string;
   embedKey: string;
-  /** `"panel"` = flex fill inside fixed-height shell (floating chatbot). */
-  conversationLayout?: "inline" | "panel";
+  /** `"panel"` | `"embed"` = flex fill inside a fixed-height shell (chatbot panel or iframe). */
+  conversationLayout?: "inline" | "panel" | "embed";
 }) {
   const profile = useProfileStore((s) => s.data);
   const [messages, setMessages] = React.useState<AskSkyChatMessage[]>([]);
@@ -191,13 +191,22 @@ function AskSkyConversationView({
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, streamingText]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     const el = textareaRef.current;
     if (!el) {
       return;
     }
-    el.style.height = "auto";
-    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    const syncHeight = () => {
+      el.style.height = "0px";
+      el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+    };
+
+    syncHeight();
+    const ro = new ResizeObserver(() => {
+      syncHeight();
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
   }, [input]);
 
   const send = async () => {
@@ -288,9 +297,11 @@ function AskSkyConversationView({
     }
   };
 
+  const fillsParent = conversationLayout === "panel" || conversationLayout === "embed";
+
   return (
     <div
-      className={`flex min-h-0 min-w-0 flex-col ${conversationLayout === "panel" ? "flex-1" : ""}`}
+      className={`flex min-h-0 min-w-0 flex-col ${fillsParent ? "flex-1" : ""}`}
     >
       {banner ? (
         <div className="mx-4 mb-3 shrink-0 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
@@ -301,13 +312,15 @@ function AskSkyConversationView({
       <div
         ref={scrollRef}
         className={`flex-1 space-y-4 overflow-y-auto p-4 ${chatScrollClasses} ${
-          conversationLayout === "panel"
-            ? "min-h-0"
-            : "max-h-[min(420px,55vh)] min-h-[360px]"
+          fillsParent ? "flex min-h-0 flex-col" : "max-h-[min(420px,55vh)] min-h-[360px]"
         }`}
       >
         {messages.length === 0 && !streamingText ? (
-          <div className="flex h-full min-h-[300px] flex-col items-center justify-center px-2 text-center">
+          <div
+            className={`flex flex-col items-center justify-center px-2 text-center ${
+              fillsParent ? "min-h-0 flex-1" : "h-full min-h-[300px]"
+            }`}
+          >
             <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-blue-600/20">
               <MessageCircle className="h-6 w-6 text-blue-400" />
             </div>
@@ -394,7 +407,7 @@ function AskSkyConversationView({
             placeholder="Type your message..."
             rows={1}
             disabled={phase === "streaming"}
-            className={`min-h-[44px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus-visible:border-blue-500 ${chatScrollClasses}`}
+            className={`min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl border-slate-700 bg-slate-800 px-4 py-2.5 text-white placeholder:text-slate-500 focus-visible:border-blue-500 ${chatScrollClasses}`}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -405,7 +418,7 @@ function AskSkyConversationView({
           <Button
             type="submit"
             disabled={phase === "streaming" || !input.trim()}
-            className="h-10 w-10 shrink-0 rounded-full bg-blue-600 p-0 text-white hover:bg-blue-700"
+            className="h-11 w-11 shrink-0 rounded-full bg-blue-600 p-0 text-white hover:bg-blue-700"
             aria-label="Send message"
           >
             {phase === "streaming" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
@@ -422,15 +435,17 @@ function AskSkyResolvedCard({
   agentToken,
   embedKey,
   compactHeader,
+  embedFill,
 }: {
   resolve: SkyResolveResponse;
   profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
+  embedFill?: boolean;
 }) {
   return (
-    <div className="flex flex-col">
+    <div className={embedFill ? "flex min-h-0 min-w-0 flex-1 flex-col" : "flex flex-col"}>
       {compactHeader ? (
         <div className="flex min-w-0 items-center gap-2 pb-3">
           {resolve.photo ? (
@@ -443,7 +458,9 @@ function AskSkyResolvedCard({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-white">{resolve.agentName}</h3>
+            <h3 className="truncate text-sm font-semibold text-white">
+              {resolve.agentName.trim() || resolve.name}
+            </h3>
             <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
           </div>
         </div>
@@ -459,13 +476,21 @@ function AskSkyResolvedCard({
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-semibold text-white">AskSKY!</h3>
+            <h3 className="truncate text-sm font-semibold text-white">
+              {resolve.agentName.trim() || resolve.name}
+            </h3>
             <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
           </div>
         </div>
       )}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <AskSkyConversationView resolve={resolve} profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} />
+        <AskSkyConversationView
+          resolve={resolve}
+          profileSlug={profileSlug}
+          agentToken={agentToken}
+          embedKey={embedKey}
+          conversationLayout={embedFill ? "embed" : "inline"}
+        />
       </div>
     </div>
   );
@@ -531,7 +556,9 @@ function AskSkyChatbotPanel({
                 </div>
               )}
               <div className="min-w-0">
-                <h3 className="truncate text-sm font-semibold text-white">{resolve.agentName}</h3>
+                <h3 className="truncate text-sm font-semibold text-white">
+                  {resolve.agentName.trim() || resolve.name}
+                </h3>
                 <p className="truncate text-xs text-slate-400">{resolve.tagline || resolve.name}</p>
               </div>
             </>
@@ -573,11 +600,13 @@ function AskSkyResolveShell({
   agentToken,
   embedKey,
   compactHeader,
+  embedFill,
 }: {
   profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
+  embedFill?: boolean;
 }) {
   const [resolve, setResolve] = React.useState<SkyResolveResponse | null>(null);
   const [resolveError, setResolveError] = React.useState<string | null>(null);
@@ -610,7 +639,13 @@ function AskSkyResolveShell({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center gap-2 px-6 py-16 text-sm text-slate-400">
+      <div
+        className={
+          embedFill
+            ? "flex flex-1 items-center justify-center gap-2 px-6 py-16 text-sm text-slate-400"
+            : "flex items-center justify-center gap-2 px-6 py-16 text-sm text-slate-400"
+        }
+      >
         <Loader2 className="h-5 w-5 animate-spin" />
         Connecting to AskSKY…
       </div>
@@ -619,7 +654,13 @@ function AskSkyResolveShell({
 
   if (resolveError || !resolve) {
     return (
-      <div className="m-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">
+      <div
+        className={
+          embedFill
+            ? "m-4 flex flex-1 items-center justify-center rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+            : "m-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200"
+        }
+      >
         {resolveError || "AskSKY is unavailable."}
       </div>
     );
@@ -632,6 +673,7 @@ function AskSkyResolveShell({
       agentToken={agentToken}
       embedKey={embedKey}
       compactHeader={compactHeader}
+      embedFill={embedFill}
     />
   );
 }
@@ -659,9 +701,11 @@ export interface AskSkyWidgetProps {
   agentToken: string;
   variant: AskSkyVariant;
   embedKey: string;
+  /** Full width + flex height for `/embed/asksky` iframes. */
+  embedFill?: boolean;
 }
 
-export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey }: AskSkyWidgetProps) {
+export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey, embedFill }: AskSkyWidgetProps) {
   const [chatOpen, setChatOpen] = React.useState(false);
 
   if (!profileSlug.trim() || !agentToken.trim()) {
@@ -707,9 +751,15 @@ export function AskSkyWidget({ profileSlug, agentToken, variant, embedKey }: Ask
   }
 
   return (
-    <Card className="mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-0 shadow-2xl">
-      <CardContent className="min-w-0 p-0">
-        <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} />
+    <Card
+      className={
+        embedFill
+          ? "flex min-h-0 w-full max-w-none flex-1 flex-col gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-0 shadow-2xl"
+          : "mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 py-0 shadow-2xl"
+      }
+    >
+      <CardContent className={`min-w-0 p-0 ${embedFill ? "flex min-h-0 flex-1 flex-col" : ""}`}>
+        <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} embedFill={embedFill} />
       </CardContent>
     </Card>
   );
