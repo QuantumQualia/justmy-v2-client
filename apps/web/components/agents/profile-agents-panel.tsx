@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Bot,
@@ -35,6 +35,7 @@ import {
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
+import { Progress } from "@workspace/ui/components/progress";
 import {
   Select,
   SelectContent,
@@ -63,9 +64,71 @@ import {
   type UploadDocumentKnowledgeSourceDto,
 } from "@/lib/services/agents";
 import { useProfileStore } from "@/lib/store";
+import { cn } from "@workspace/ui/lib/utils";
 
 const INGESTING_STATUSES = new Set<KnowledgeIngestionStatus>(["pending", "queued", "processing"]);
 const KNOWLEDGE_PAGE_SIZE = 5;
+/** Poll individual ingesting knowledge sources (GET by id) so progress bars stay current. */
+const KNOWLEDGE_INGESTION_POLL_MS = 5_000;
+
+type IngestingPollTarget = {
+  id: string;
+  scope: KnowledgeScope;
+  agentId: string | null;
+};
+
+function patchKnowledgeSourceInCache(
+  queryClient: QueryClient,
+  updatedSource: KnowledgeSourceResponseDto,
+): void {
+  queryClient.setQueriesData<KnowledgeSourcesPageDto>(
+    { queryKey: agentQueryKeys.knowledge() },
+    (old) => {
+      if (!old?.sources?.length) {
+        return old;
+      }
+      const idx = old.sources.findIndex((s) => s.id === updatedSource.id);
+      if (idx === -1) {
+        return old;
+      }
+      const nextSources = [...old.sources];
+      nextSources[idx] = { ...nextSources[idx], ...updatedSource };
+      return { ...old, sources: nextSources };
+    },
+  );
+}
+
+function collectIngestingPollTargets(
+  sources: KnowledgeSourceResponseDto[],
+  scope: KnowledgeScope,
+  fallbackAgentId: string | null,
+): IngestingPollTarget[] {
+  const targets: IngestingPollTarget[] = [];
+  for (const source of sources) {
+    if (!INGESTING_STATUSES.has(source.status)) {
+      continue;
+    }
+    targets.push({
+      id: source.id,
+      scope,
+      agentId: scope === "agent" ? source.agentId ?? fallbackAgentId : null,
+    });
+  }
+  return targets;
+}
+
+async function fetchKnowledgeSourceStatus(
+  target: IngestingPollTarget,
+): Promise<KnowledgeSourceResponseDto> {
+  if (target.scope === "agent") {
+    const agentId = target.agentId?.trim();
+    if (!agentId) {
+      throw new Error("Agent id is required to poll agent knowledge source.");
+    }
+    return agentsService.getAgentKnowledgeSource(agentId, target.id);
+  }
+  return agentsService.getKnowledgeSource(target.id);
+}
 
 function canReindexKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boolean): boolean {
   if (busy || INGESTING_STATUSES.has(source.status)) {
@@ -75,6 +138,13 @@ function canReindexKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boo
     return true;
   }
   return source.sourceType === "document" && source.status === "failed";
+}
+
+function resolvePagesScraped(source: KnowledgeSourceResponseDto): number | null {
+  if (typeof source.pagesScraped === "number" && Number.isFinite(source.pagesScraped)) {
+    return Math.max(0, Math.round(source.pagesScraped));
+  }
+  return null;
 }
 
 /** Website crawl progress while ingestion is in flight (uses API pagesScraped / maxPages). */
@@ -93,11 +163,55 @@ function websiteScrapeProgress(source: KnowledgeSourceResponseDto): {
   if (typeof max !== "number" || !Number.isFinite(max) || max <= 0) {
     return null;
   }
-  const rawScraped = source.pagesScraped;
-  const scraped =
-    typeof rawScraped === "number" && Number.isFinite(rawScraped) ? Math.max(0, rawScraped) : 0;
+  const scraped = resolvePagesScraped(source) ?? 0;
   const percent = Math.max(0, Math.min(100, Math.round((scraped / max) * 100)));
   return { percent, scraped, max };
+}
+
+function isCompletedKnowledgeStatus(status: KnowledgeIngestionStatus): boolean {
+  return status === "completed";
+}
+
+function knowledgeIngestionProgressValue(percent: number): number {
+  const clamped = Math.max(0, Math.min(100, percent));
+  return clamped > 0 ? Math.max(clamped, 2) : 0;
+}
+
+function KnowledgeIngestionProgress({
+  value,
+  variant,
+  "aria-valuetext": ariaValueText,
+}: {
+  value: number;
+  variant: "website" | "document";
+  "aria-valuetext"?: string;
+}) {
+  return (
+    <Progress
+      value={knowledgeIngestionProgressValue(value)}
+      aria-valuetext={ariaValueText}
+      className={cn(
+        "mt-3 h-2 w-full min-w-0 border border-slate-700/90 bg-slate-950 shadow-inner",
+        variant === "website"
+          ? "[&_[data-slot=progress-indicator]]:bg-gradient-to-r [&_[data-slot=progress-indicator]]:from-blue-600 [&_[data-slot=progress-indicator]]:to-sky-500"
+          : "[&_[data-slot=progress-indicator]]:bg-gradient-to-r [&_[data-slot=progress-indicator]]:from-emerald-600 [&_[data-slot=progress-indicator]]:to-emerald-400",
+      )}
+    />
+  );
+}
+
+/** Scraped page count for completed website or document knowledge sources. */
+function scrapedPagesDescription(source: KnowledgeSourceResponseDto): string | null {
+  if (!isCompletedKnowledgeStatus(source.status)) {
+    return null;
+  }
+
+  const scraped = resolvePagesScraped(source);
+  if (scraped === null) {
+    return null;
+  }
+
+  return `${scraped} page${scraped === 1 ? "" : "s"} scraped`;
 }
 
 type AgentDialogState = {
@@ -823,6 +937,7 @@ function KnowledgeSourcesCard({
               const busy = reindexingSourceId === source.id || deletingSourceId === source.id;
               const { primaryLabel, secondaryLabel } = resolveKnowledgeSourceLabels(source);
               const scrape = websiteScrapeProgress(source);
+              const scrapedPagesLabel = scrapedPagesDescription(source);
 
               return (
                 <div
@@ -848,6 +963,9 @@ function KnowledgeSourcesCard({
                       <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                         {source.agentName && scope === "shared" ? (
                           <span>{source.agentName}</span>
+                        ) : null}
+                        {scrapedPagesLabel ? (
+                          <span className="tabular-nums text-slate-400">{scrapedPagesLabel}</span>
                         ) : null}
                         <span>Updated {formatDateTime(source.updatedAt ?? source.createdAt)}</span>
                       </div>
@@ -888,33 +1006,17 @@ function KnowledgeSourcesCard({
                   </div>
 
                   {scrape ? (
-                    <div
-                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={scrape.percent}
-                      aria-valuetext={`${scrape.scraped} of ${scrape.max} pages`}
-                    >
-                      <div
-                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-[width] duration-500 ease-out"
-                        style={{ width: `${Math.max(scrape.percent, scrape.scraped > 0 ? 2 : 0)}%` }}
-                      />
-                    </div>
+                    <KnowledgeIngestionProgress
+                      variant="website"
+                      value={scrape.percent}
+                      aria-valuetext={scrapedPagesLabel ?? `${scrape.scraped} pages scraped`}
+                    />
                   ) : typeof progress === "number" ? (
-                    <div
-                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={progress}
+                    <KnowledgeIngestionProgress
+                      variant="document"
+                      value={progress}
                       aria-valuetext={`${progress}%`}
-                    >
-                      <div
-                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-500 ease-out"
-                        style={{ width: `${Math.max(progress, progress > 0 ? 2 : 0)}%` }}
-                      />
-                    </div>
+                    />
                   ) : null}
                 </div>
               );
@@ -1067,6 +1169,135 @@ export function ProfileAgentsPanel({
     }
   }, [agentKnowledgePage, agentSourcesTotal]);
 
+  const ingestingPollSignature = React.useMemo(() => {
+    const sharedTargets = collectIngestingPollTargets(sharedSources, "shared", null);
+    const agentTargets = collectIngestingPollTargets(
+      agentSpecificSources,
+      "agent",
+      selectedAgentId,
+    );
+    return [...sharedTargets, ...agentTargets]
+      .map((t) => `${t.scope}:${t.agentId ?? ""}:${t.id}`)
+      .sort()
+      .join("|");
+  }, [sharedSources, agentSpecificSources, selectedAgentId]);
+
+  const knowledgeListsRef = React.useRef({
+    sharedSources,
+    agentSpecificSources,
+    selectedAgentId,
+  });
+  knowledgeListsRef.current = { sharedSources, agentSpecificSources, selectedAgentId };
+
+  React.useEffect(() => {
+    if (!ingestingPollSignature) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const poll = async () => {
+      const { sharedSources: shared, agentSpecificSources: agent, selectedAgentId: agentId } =
+        knowledgeListsRef.current;
+      const targets = [
+        ...collectIngestingPollTargets(shared, "shared", null),
+        ...collectIngestingPollTargets(agent, "agent", agentId),
+      ];
+      if (targets.length === 0) {
+        return;
+      }
+
+      await Promise.all(
+        targets.map(async (target) => {
+          try {
+            const updated = await fetchKnowledgeSourceStatus(target);
+            if (!cancelled) {
+              patchKnowledgeSourceInCache(queryClient, updated);
+            }
+          } catch {
+            // ignore transient poll errors
+          }
+        }),
+      );
+    };
+
+    void poll();
+    const intervalId = window.setInterval(() => {
+      void poll();
+    }, KNOWLEDGE_INGESTION_POLL_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [ingestingPollSignature, queryClient]);
+
+  const scrapedCountEnrichSignature = React.useMemo(() => {
+    return [...sharedSources, ...agentSpecificSources]
+      .filter((s) => isCompletedKnowledgeStatus(s.status) && resolvePagesScraped(s) === null)
+      .map((s) => `${s.scope}:${s.scope === "agent" ? (s.agentId ?? selectedAgentId ?? "") : ""}:${s.id}`)
+      .sort()
+      .join("|");
+  }, [sharedSources, agentSpecificSources, selectedAgentId]);
+
+  const enrichedScrapedCountIdsRef = React.useRef(new Set<string>());
+
+  React.useEffect(() => {
+    enrichedScrapedCountIdsRef.current.clear();
+  }, [sharedKnowledgePage, agentKnowledgePage, selectedAgentId]);
+
+  React.useEffect(() => {
+    if (!scrapedCountEnrichSignature) {
+      return;
+    }
+
+    const candidates = [...sharedSources, ...agentSpecificSources].filter(
+      (s) =>
+        isCompletedKnowledgeStatus(s.status) &&
+        resolvePagesScraped(s) === null &&
+        !enrichedScrapedCountIdsRef.current.has(s.id),
+    );
+
+    if (!candidates.length) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void (async () => {
+      for (const source of candidates) {
+        if (cancelled) {
+          return;
+        }
+
+        enrichedScrapedCountIdsRef.current.add(source.id);
+
+        const agentId = source.scope === "agent" ? source.agentId ?? selectedAgentId : null;
+        if (source.scope === "agent" && !agentId) {
+          enrichedScrapedCountIdsRef.current.delete(source.id);
+          continue;
+        }
+
+        try {
+          const updated =
+            source.scope === "agent" && agentId
+              ? await agentsService.getAgentKnowledgeSource(agentId, source.id)
+              : await agentsService.getKnowledgeSource(source.id);
+
+          if (!cancelled && resolvePagesScraped(updated) !== null) {
+            patchKnowledgeSourceInCache(queryClient, updated);
+          }
+        } catch {
+          enrichedScrapedCountIdsRef.current.delete(source.id);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [scrapedCountEnrichSignature, queryClient, sharedSources, agentSpecificSources, selectedAgentId]);
+
   const invalidateProfileAgentData = React.useCallback(async () => {
     await Promise.all([
       queryClient.invalidateQueries({ queryKey: agentQueryKeys.agents() }),
@@ -1160,21 +1391,7 @@ export function ProfileAgentsPanel({
     },
     onSuccess: async (updatedSource) => {
       await queryClient.cancelQueries({ queryKey: agentQueryKeys.knowledge() });
-      queryClient.setQueriesData<KnowledgeSourcesPageDto>(
-        { queryKey: agentQueryKeys.knowledge() },
-        (old) => {
-          if (!old?.sources?.length) {
-            return old;
-          }
-          const idx = old.sources.findIndex((s) => s.id === updatedSource.id);
-          if (idx === -1) {
-            return old;
-          }
-          const nextSources = [...old.sources];
-          nextSources[idx] = { ...nextSources[idx], ...updatedSource };
-          return { ...old, sources: nextSources };
-        },
-      );
+      patchKnowledgeSourceInCache(queryClient, updatedSource);
       toast.success("Reindex started");
     },
     onError: (error) => {

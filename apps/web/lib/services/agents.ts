@@ -65,9 +65,9 @@ export interface KnowledgeSourceResponseDto {
   mimeType?: string | null;
   status: KnowledgeIngestionStatus;
   progress?: number | null;
-  /** Website crawl: pages fetched so far (when API provides it). */
+  /** Pages indexed (website crawl or document extraction) when API provides it. */
   pagesScraped?: number | null;
-  /** Website crawl: configured cap from API (matches submission maxPages). */
+  /** Website crawl cap from API (matches submission maxPages). */
   maxPages?: number | null;
   lastError?: string | null;
   createdAt?: string;
@@ -215,6 +215,39 @@ function mapApiTypeToSourceType(type: string | undefined): KnowledgeSourceType {
   return "website";
 }
 
+function parseOptionalCount(value: unknown): number | null {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return Math.max(0, Math.round(value));
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return null;
+    }
+    const parsed = Number(trimmed);
+    if (Number.isFinite(parsed)) {
+      return Math.max(0, Math.round(parsed));
+    }
+  }
+  return null;
+}
+
+function pickPagesScraped(raw: Record<string, unknown>): number | null {
+  return parseOptionalCount(
+    raw.pagesScraped ??
+      raw.pages_scraped ??
+      raw.scrapedPages ??
+      raw.scraped_pages ??
+      raw.pageCount ??
+      raw.page_count,
+  );
+}
+
+function pickMaxPages(raw: Record<string, unknown>): number | null {
+  const max = parseOptionalCount(raw.maxPages ?? raw.max_pages);
+  return max != null && max > 0 ? max : null;
+}
+
 function normalizeApiStatus(status: string | undefined): KnowledgeIngestionStatus {
   const key = String(status ?? "pending")
     .trim()
@@ -243,8 +276,8 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
   const errorMessage = (raw.errorMessage ?? raw.lastError) as string | undefined;
   const sourceType = mapApiTypeToSourceType(raw.type as string | undefined);
 
-  const pagesScrapedRaw = raw.pagesScraped ?? raw.pages_scraped;
-  const maxPagesRaw = raw.maxPages ?? raw.max_pages;
+  const pagesScraped = pickPagesScraped(raw);
+  const maxPages = pickMaxPages(raw);
 
   return {
     id: String(raw.id ?? ""),
@@ -259,12 +292,25 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
     mimeType: (raw.mimeType as string) ?? null,
     status: normalizeApiStatus(raw.status as string | undefined),
     progress: typeof raw.progress === "number" ? raw.progress : null,
-    pagesScraped: typeof pagesScrapedRaw === "number" && Number.isFinite(pagesScrapedRaw) ? pagesScrapedRaw : null,
-    maxPages: typeof maxPagesRaw === "number" && Number.isFinite(maxPagesRaw) && maxPagesRaw > 0 ? maxPagesRaw : null,
+    pagesScraped,
+    maxPages,
     lastError: errorMessage ?? null,
     createdAt: raw.createdAt as string | undefined,
     updatedAt: raw.updatedAt as string | undefined,
   };
+}
+
+function flattenKnowledgeSourceRow(row: Record<string, unknown>): Record<string, unknown> {
+  if (row.id !== undefined && row.id !== null) {
+    return row;
+  }
+  if (row.source && typeof row.source === "object" && !Array.isArray(row.source)) {
+    return row.source as Record<string, unknown>;
+  }
+  if (row.data && typeof row.data === "object" && !Array.isArray(row.data)) {
+    return row.data as Record<string, unknown>;
+  }
+  return row;
 }
 
 function mapKnowledgeSourcesPage(payload: KnowledgeSourcesPageEnvelope, scope: KnowledgeScope): KnowledgeSourceResponseDto[] {
@@ -273,7 +319,9 @@ function mapKnowledgeSourcesPage(payload: KnowledgeSourcesPageEnvelope, scope: K
     : Array.isArray(payload.data)
       ? payload.data
       : [];
-  return rows.map((row) => normalizeKnowledgeSourceFromApi(row as Record<string, unknown>, scope));
+  return rows.map((row) =>
+    normalizeKnowledgeSourceFromApi(flattenKnowledgeSourceRow(row as Record<string, unknown>), scope),
+  );
 }
 
 async function fetchKnowledgeSourcesPageForPath(
@@ -477,10 +525,10 @@ export const agentsService = {
 
   async getKnowledgeSource(sourceId: string): Promise<KnowledgeSourceResponseDto> {
     try {
-      const response = await apiRequest<Record<string, unknown>>(knowledgePaths.profileSource(sourceId), {
+      const response = await apiRequest<KnowledgeSourceEnvelope>(knowledgePaths.profileSource(sourceId), {
         method: "GET",
       });
-      return normalizeKnowledgeSourceFromApi(response, "shared");
+      return extractKnowledgeSource(response, { scope: "shared" });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
@@ -491,10 +539,10 @@ export const agentsService = {
 
   async getAgentKnowledgeSource(agentId: string, sourceId: string): Promise<KnowledgeSourceResponseDto> {
     try {
-      const response = await apiRequest<Record<string, unknown>>(knowledgePaths.agentSource(agentId, sourceId), {
+      const response = await apiRequest<KnowledgeSourceEnvelope>(knowledgePaths.agentSource(agentId, sourceId), {
         method: "GET",
       });
-      return normalizeKnowledgeSourceFromApi(response, "agent");
+      return extractKnowledgeSource(response, { scope: "agent", agentId });
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
