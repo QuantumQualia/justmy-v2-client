@@ -198,6 +198,12 @@ function AskSkyConversationView({
     return () => ro.disconnect();
   }, [input]);
 
+  const focusMessageInput = React.useCallback(() => {
+    requestAnimationFrame(() => {
+      textareaRef.current?.focus();
+    });
+  }, []);
+
   const send = async () => {
     const trimmed = input.trim();
     if (!trimmed || phase === "streaming") {
@@ -205,6 +211,7 @@ function AskSkyConversationView({
     }
     setInput("");
     setBanner(null);
+    focusMessageInput();
     setMessages((prev) => [...prev, { role: "user", content: trimmed, at: Date.now() }]);
     setPhase("streaming");
     setStreamingText("");
@@ -283,6 +290,7 @@ function AskSkyConversationView({
       revealEndRef.current = 0;
       setStreamingText("");
       setPhase("idle");
+      focusMessageInput();
     }
   };
 
@@ -387,8 +395,8 @@ function AskSkyConversationView({
                 )}
               >
                 {profile?.photo ? (
-                  <Image
-                    src={profile.photo}
+                  <img
+                    src={profile?.photo}
                     alt={profile?.name || "You"}
                     width={32}
                     height={32}
@@ -447,6 +455,7 @@ function AskSkyConversationView({
         onSubmit={(e) => {
           e.preventDefault();
           void send();
+          focusMessageInput();
         }}
       >
         <div className="flex items-end gap-2">
@@ -456,8 +465,9 @@ function AskSkyConversationView({
             onChange={(e) => setInput(e.target.value)}
             placeholder="Type your message..."
             rows={1}
-            disabled={phase === "streaming"}
+            aria-disabled={phase === "streaming"}
             className={cn(
+              phase === "streaming" ? "opacity-80" : "",
               "min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl px-4 py-2.5 shadow-sm transition-colors",
               scrollBarCls,
               isLight
@@ -468,6 +478,7 @@ function AskSkyConversationView({
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 void send();
+                focusMessageInput();
               }
             }}
           />
