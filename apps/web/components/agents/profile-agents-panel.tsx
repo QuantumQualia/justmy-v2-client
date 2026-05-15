@@ -77,6 +77,29 @@ function canReindexKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boo
   return source.sourceType === "document" && source.status === "failed";
 }
 
+/** Website crawl progress while ingestion is in flight (uses API pagesScraped / maxPages). */
+function websiteScrapeProgress(source: KnowledgeSourceResponseDto): {
+  percent: number;
+  scraped: number;
+  max: number;
+} | null {
+  if (source.sourceType !== "website") {
+    return null;
+  }
+  if (!INGESTING_STATUSES.has(source.status)) {
+    return null;
+  }
+  const max = source.maxPages;
+  if (typeof max !== "number" || !Number.isFinite(max) || max <= 0) {
+    return null;
+  }
+  const rawScraped = source.pagesScraped;
+  const scraped =
+    typeof rawScraped === "number" && Number.isFinite(rawScraped) ? Math.max(0, rawScraped) : 0;
+  const percent = Math.max(0, Math.min(100, Math.round((scraped / max) * 100)));
+  return { percent, scraped, max };
+}
+
 type AgentDialogState = {
   open: boolean;
   mode: "create" | "edit";
@@ -96,6 +119,8 @@ type KnowledgeSubmissionPayload = {
   agentId: string | null;
   url: string;
   file: File | null;
+  /** Website crawl limit; ignored for document uploads. */
+  maxPages?: number;
 };
 
 function formatDateTime(value?: string): string {
@@ -395,20 +420,18 @@ function AgentFormDialog({
 
 function KnowledgeSourceDialog({
   state,
-  agents,
   submitting,
   onOpenChange,
   onSubmit,
 }: {
   state: KnowledgeDialogState;
-  agents: AgentResponseDto[];
   submitting: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (payload: KnowledgeSubmissionPayload) => Promise<void>;
 }) {
   const [url, setUrl] = React.useState("");
+  const [maxPagesStr, setMaxPagesStr] = React.useState("50");
   const [file, setFile] = React.useState<File | null>(null);
-  const [agentId, setAgentId] = React.useState<string>("");
   const [error, setError] = React.useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement | null>(null);
   const documentRequiredError = "Choose a document to upload.";
@@ -419,8 +442,8 @@ function KnowledgeSourceDialog({
     }
 
     setUrl("");
+    setMaxPagesStr("50");
     setFile(null);
-    setAgentId(state.agentId ?? "");
     setError(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
@@ -430,8 +453,10 @@ function KnowledgeSourceDialog({
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (state.scope === "agent" && !agentId) {
-      setError("Select an agent for this source.");
+    let validatedWebsiteMaxPages: number | null = null;
+
+    if (state.scope === "agent" && !state.agentId) {
+      setError("Choose an agent with the dropdown in the agent-specific knowledge panel first.");
       return;
     }
 
@@ -448,6 +473,14 @@ function KnowledgeSourceDialog({
         setError("Enter a valid website URL.");
         return;
       }
+
+      const trimmedMax = maxPagesStr.trim();
+      const parsedMax = Number(trimmedMax);
+      if (!Number.isFinite(parsedMax) || !Number.isInteger(parsedMax) || parsedMax < 1) {
+        setError("Max pages must be a whole number of at least 1.");
+        return;
+      }
+      validatedWebsiteMaxPages = parsedMax;
     }
 
     if (state.sourceType === "document" && !file) {
@@ -462,12 +495,17 @@ function KnowledgeSourceDialog({
 
     setError(null);
 
+    const payloadAgentId = state.scope === "agent" ? state.agentId : null;
+
     await onSubmit({
       scope: state.scope,
       sourceType: state.sourceType,
-      agentId: agentId || null,
+      agentId: payloadAgentId,
       url,
       file,
+      ...(state.sourceType === "website" && validatedWebsiteMaxPages !== null
+        ? { maxPages: validatedWebsiteMaxPages }
+        : {}),
     });
   };
 
@@ -510,29 +548,6 @@ function KnowledgeSourceDialog({
             </div>
           ) : null}
 
-          {state.scope === "agent" ? (
-            <div className="space-y-2">
-              <Label htmlFor="knowledge-agent" className="text-slate-200">
-                Agent
-              </Label>
-              <Select value={agentId} onValueChange={setAgentId} disabled={submitting}>
-                <SelectTrigger
-                  id="knowledge-agent"
-                  className="border-slate-700 bg-slate-900 text-white"
-                >
-                  <SelectValue placeholder="Select an agent" />
-                </SelectTrigger>
-                <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
-                  {agents.map((agent) => (
-                    <SelectItem key={agent.id} value={agent.id}>
-                      {agent.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ) : null}
-
           {state.sourceType === "website" ? (
             <div className="space-y-2">
               <Label htmlFor="knowledge-url" className="text-slate-200">
@@ -547,6 +562,23 @@ function KnowledgeSourceDialog({
                 className="border-slate-700 bg-slate-900 text-white"
                 disabled={submitting}
               />
+              <div className="space-y-2">
+                <Label htmlFor="knowledge-max-pages" className="text-slate-200">
+                  Max pages
+                </Label>
+                <Input
+                  id="knowledge-max-pages"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
+                  value={maxPagesStr}
+                  onChange={(event) => setMaxPagesStr(event.target.value)}
+                  placeholder="50"
+                  className="border-slate-700 bg-slate-900 text-white"
+                  disabled={submitting}
+                />
+              </div>
             </div>
           ) : (
             <div className="space-y-2">
@@ -790,6 +822,7 @@ function KnowledgeSourcesCard({
               const progress = normalizeProgress(source.progress);
               const busy = reindexingSourceId === source.id || deletingSourceId === source.id;
               const { primaryLabel, secondaryLabel } = resolveKnowledgeSourceLabels(source);
+              const scrape = websiteScrapeProgress(source);
 
               return (
                 <div
@@ -818,18 +851,6 @@ function KnowledgeSourcesCard({
                         ) : null}
                         <span>Updated {formatDateTime(source.updatedAt ?? source.createdAt)}</span>
                       </div>
-
-                      {typeof progress === "number" ? (
-                        <div className="space-y-1">
-                          <div className="h-2 overflow-hidden rounded-full bg-slate-800">
-                            <div
-                              className="h-full rounded-full bg-emerald-500 transition-[width]"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                          <p className="text-xs text-slate-400">{progress}% complete</p>
-                        </div>
-                      ) : null}
                     </div>
 
                     <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
@@ -865,6 +886,36 @@ function KnowledgeSourcesCard({
                       </Button>
                     </div>
                   </div>
+
+                  {scrape ? (
+                    <div
+                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={scrape.percent}
+                      aria-valuetext={`${scrape.scraped} of ${scrape.max} pages`}
+                    >
+                      <div
+                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-[width] duration-500 ease-out"
+                        style={{ width: `${Math.max(scrape.percent, scrape.scraped > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                  ) : typeof progress === "number" ? (
+                    <div
+                      className="mt-3 h-3 w-full min-w-0 overflow-hidden rounded-full border border-slate-700/90 bg-slate-950 shadow-inner"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={progress}
+                      aria-valuetext={`${progress}%`}
+                    >
+                      <div
+                        className="h-full min-w-0 rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-[width] duration-500 ease-out"
+                        style={{ width: `${Math.max(progress, progress > 0 ? 2 : 0)}%` }}
+                      />
+                    </div>
+                  ) : null}
                 </div>
               );
             })}
@@ -936,6 +987,8 @@ export function ProfileAgentsPanel({
   const [agentKnowledgePage, setAgentKnowledgePage] = React.useState(1);
   const [deleteAgentTarget, setDeleteAgentTarget] = React.useState<AgentResponseDto | null>(null);
   const [deleteSourceTarget, setDeleteSourceTarget] = React.useState<KnowledgeSourceResponseDto | null>(null);
+  const [reindexSourceTarget, setReindexSourceTarget] =
+    React.useState<KnowledgeSourceResponseDto | null>(null);
   const [askSkyEmbedAgent, setAskSkyEmbedAgent] = React.useState<AgentResponseDto | null>(null);
 
   const agentsQuery = useQuery({
@@ -1072,7 +1125,11 @@ export function ProfileAgentsPanel({
     onSuccess: async () => {
       await invalidateProfileAgentData();
       setKnowledgeDialogState((current) => ({ ...current, open: false }));
-      toast.success("Website source submitted");
+      toast.success("Website source submitted", {
+        description:
+          "Feel free to navigate away—we’ll keep crawling and indexing in the background. You can return here anytime to check status.",
+        duration: 10_000,
+      });
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to submit website source");
@@ -1086,7 +1143,11 @@ export function ProfileAgentsPanel({
     onSuccess: async () => {
       await invalidateProfileAgentData();
       setKnowledgeDialogState((current) => ({ ...current, open: false }));
-      toast.success("Document source uploaded");
+      toast.success("Document uploaded", {
+        description:
+          "Your file finished uploading. Feel free to navigate away. We'll keep processing and indexing in the background. You can return here anytime to check status.",
+        duration: 10_000,
+      });
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to upload document source");
@@ -1098,6 +1159,7 @@ export function ProfileAgentsPanel({
       return agentsService.reindexKnowledgeSource(source);
     },
     onSuccess: async (updatedSource) => {
+      await queryClient.cancelQueries({ queryKey: agentQueryKeys.knowledge() });
       queryClient.setQueriesData<KnowledgeSourcesPageDto>(
         { queryKey: agentQueryKeys.knowledge() },
         (old) => {
@@ -1177,7 +1239,7 @@ export function ProfileAgentsPanel({
           scope: payload.scope,
           agentId: payload.agentId,
           url: payload.url.trim(),
-          maxPages: 50,
+          maxPages: payload.maxPages ?? 50,
         });
         return;
       }
@@ -1349,7 +1411,6 @@ export function ProfileAgentsPanel({
 
       <KnowledgeSourceDialog
         state={knowledgeDialogState}
-        agents={agents}
         submitting={
           createWebsiteSourceMutation.isPending || uploadDocumentSourceMutation.isPending
         }
@@ -1418,6 +1479,39 @@ export function ProfileAgentsPanel({
         }
         confirmText="Delete source"
         loadingConfirmText="Deleting..."
+      />
+
+      <ConfirmDeletionModal
+        open={reindexSourceTarget != null}
+        onOpenChange={(open) => {
+          if (!reindexSourceMutation.isPending && !open) {
+            setReindexSourceTarget(null);
+          }
+        }}
+        onConfirm={async () => {
+          if (!reindexSourceTarget) {
+            return;
+          }
+
+          await reindexSourceMutation.mutateAsync(reindexSourceTarget);
+        }}
+        loading={reindexSourceMutation.isPending}
+        title="Reindex knowledge source?"
+        description={
+          <span>
+            This will start a new crawl for{" "}
+            <span className="font-medium text-white">
+              {reindexSourceTarget?.title ||
+                reindexSourceTarget?.fileName ||
+                reindexSourceTarget?.url ||
+                "this source"}
+            </span>
+            . This may refresh existing indexed content depending on backend rules.
+          </span>
+        }
+        confirmText="Reindex"
+        loadingConfirmText="Starting..."
+        danger={false}
       />
 
       <div className="min-w-0 space-y-2">
@@ -1506,7 +1600,7 @@ export function ProfileAgentsPanel({
           error={knowledgeError}
           onAddWebsite={() => openKnowledgeDialog("shared", "website")}
           onUploadDocument={() => openKnowledgeDialog("shared", "document")}
-          onReindex={(source) => reindexSourceMutation.mutate(source)}
+          onReindex={(source) => setReindexSourceTarget(source)}
           onDelete={(source) => setDeleteSourceTarget(source)}
           onPageChange={setSharedKnowledgePage}
           selectedAgentId={null}
@@ -1533,7 +1627,7 @@ export function ProfileAgentsPanel({
           error={knowledgeError}
           onAddWebsite={() => openKnowledgeDialog("agent", "website")}
           onUploadDocument={() => openKnowledgeDialog("agent", "document")}
-          onReindex={(source) => reindexSourceMutation.mutate(source)}
+          onReindex={(source) => setReindexSourceTarget(source)}
           onDelete={(source) => setDeleteSourceTarget(source)}
           onPageChange={setAgentKnowledgePage}
           selectedAgentId={selectedAgentId}

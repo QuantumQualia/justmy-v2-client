@@ -6,6 +6,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
 import { useProfileStore } from "@/lib/store/profile-store";
+import { LinkifiedMessage } from "@/components/common/chatbot/linkified-message";
 import Image from "next/image";
 
 export function AIChatbot() {
@@ -112,7 +113,17 @@ export function AIChatbot() {
                       : "bg-slate-800 text-slate-100 rounded-bl-sm"
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  <LinkifiedMessage
+                    text={message.content}
+                    className={
+                      message.role === "user" ? "text-white" : "text-slate-100"
+                    }
+                    linkClassName={
+                      message.role === "user"
+                        ? "break-all font-medium text-blue-50 underline decoration-blue-200/70 underline-offset-2 hover:text-white"
+                        : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
+                    }
+                  />
                   <span
                     className={`text-[10px] mt-1 block ${
                       message.role === "user"
