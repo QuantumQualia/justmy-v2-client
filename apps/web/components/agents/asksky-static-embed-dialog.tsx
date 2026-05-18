@@ -46,7 +46,7 @@ function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyV
 
 function buildIframeSnippet(url: string): string {
   if (!url) return "";
-  return `<iframe\n  src="${url}"\n  title="AskSKY"\n  style="border:0;border-radius:12px;width:100%;height:100%;min-height:640px"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
+  return `<iframe\n  src="${url}"\n  title="AskSKY"\n  style="border:0;width:100%;height:100%;min-height:640px"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
 }
 
 export interface AskSkyStaticEmbedDialogProps {

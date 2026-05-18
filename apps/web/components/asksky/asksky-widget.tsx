@@ -834,7 +834,7 @@ export function AskSkyWidget({
 
   if (embedFill) {
     return (
-      <div className="asksky-glass asksky-glass-panel flex min-h-0 w-full max-w-none flex-1 flex-col gap-0 overflow-hidden rounded-2xl py-0">
+      <div className="asksky-glass asksky-glass-panel flex min-h-0 w-full max-w-none flex-1 flex-col gap-0 overflow-hidden py-0">
         <AskSkyResolveShell
           profileSlug={profileSlug}
           agentToken={agentToken}
