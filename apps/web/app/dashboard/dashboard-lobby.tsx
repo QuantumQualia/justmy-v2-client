@@ -113,7 +113,7 @@ export default function DashboardLobby() {
       <div className="pt-20">
         {/* <WelcomeMessage />
         <DayInHistory /> */}
-        <div className="w-full max-w-3xl mx-auto px-4 mb-6">
+        {/* <div className="w-full max-w-3xl mx-auto px-4 mb-6">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             {QUICK_ACTIONS.filter((a) => a.variant === "panel").map((item, i) => (
               <QuickActionItem key={`${item.label}-${i}`} item={item} />
@@ -133,7 +133,7 @@ export default function DashboardLobby() {
             profileSlug="justmymemphis"
             hotlinks={[{ label: "Learn More", href: "/learn-more" }, { label: "Contact Us", href: "/contact-us" }, { label: "Follow Us", href: "/follow-us" }]}
           />
-        </div>
+        </div> */}
 
         <BlocksRenderer
           blocks={DASHBOARD_AGENT_PREVIEW_BLOCKS}

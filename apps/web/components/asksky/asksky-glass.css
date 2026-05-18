@@ -12,6 +12,7 @@
 
 .asksky-glass-panel {
   overflow: hidden;
+  border-radius: 1rem 1rem 0 1rem;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.06) inset;
 }
@@ -30,6 +31,7 @@
   backdrop-filter: blur(30px) saturate(160%);
   -webkit-backdrop-filter: blur(30px) saturate(160%);
   border-top: 1px solid rgba(255, 255, 255, 0.12);
+  border-bottom-right-radius: 0;
   color: #fff;
 }
 
@@ -77,7 +79,7 @@
   backdrop-filter: blur(12px) saturate(140%);
   -webkit-backdrop-filter: blur(12px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem 1rem 1rem 0rem;
+  border-radius: 1rem 1rem 0 1rem;
   color: #f1f5f9;
 }
 
@@ -90,7 +92,7 @@
 .asksky-glass-input {
   background: rgba(30, 41, 59, 0.95) !important;
   border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-radius: 1.5rem !important;
+  border-radius: 1.5rem 1.5rem 0 1.5rem !important;
   color: #fff !important;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
 }
@@ -127,14 +129,14 @@
   background: rgba(120, 53, 15, 0.75);
   border: 1px solid rgba(251, 191, 36, 0.4);
   color: #fef3c7;
-  border-radius: 0.75rem;
+  border-radius: 0.75rem 0.75rem 0 0.75rem;
 }
 
 .asksky-glass-error {
   background: rgba(127, 29, 29, 0.75);
   border: 1px solid rgba(248, 113, 113, 0.4);
   color: #fecaca;
-  border-radius: 0.75rem;
+  border-radius: 0.75rem 0.75rem 0 0.75rem;
 }
 
 .asksky-glass-launcher {
@@ -158,6 +160,90 @@
 .asksky-glass-close:hover {
   background: rgba(255, 255, 255, 0.12);
   color: #fff;
+}
+
+/* Embedded inline iframe — minimal chat (no header, grey bubbles, pill input) */
+.asksky-embed-inline {
+  border-radius: 1.75rem 1.75rem 0 1.75rem;
+  overflow: hidden;
+  background: rgba(27, 35, 58, 0.80);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  color: #f8fafc;
+}
+
+.asksky-embed-messages {
+  background: transparent;
+  color: #fafafa;
+}
+
+.asksky-embed-empty-icon {
+  border: 1px solid rgba(161, 161, 170, 0.35);
+  background: rgba(82, 82, 91, 0.55);
+}
+
+.asksky-embed-empty-title {
+  color: #fafafa;
+}
+
+.asksky-embed-bubble-assistant {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 1.25rem 0;
+  background: rgba(82, 82, 91, 0.8);
+  color: #fafafa;
+  padding: 0.625rem 1rem;
+}
+
+.asksky-embed-bubble-user {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 0 1.25rem;
+  background: rgba(63, 63, 70, 0.8);
+  color: #d4d4d8;
+  padding: 0.625rem 1rem;
+}
+
+.asksky-embed-composer {
+  background: transparent;
+  border: none;
+  border-bottom-right-radius: 0;
+  padding: 0.625rem 0.875rem 0.875rem;
+}
+
+.asksky-embed-input {
+  background: rgba(63, 63, 70, 0.95) !important;
+  border: none !important;
+  border-radius: 21px 21px 0 21px !important;
+  color: #e4e4e7 !important;
+  box-shadow: none !important;
+  min-height: 2.75rem !important;
+}
+
+.dark .asksky-embed-input,
+.asksky-embed-input.dark\:bg-input\/30 {
+  background: rgba(63, 63, 70, 0.95) !important;
+}
+
+.asksky-embed-input::placeholder {
+  color: rgba(161, 161, 170, 0.95);
+}
+
+.asksky-embed-input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.45) !important;
+}
+
+.asksky-embed-send {
+  background: rgba(82, 82, 91, 0.95) !important;
+  color: #e4e4e7 !important;
+}
+
+.asksky-embed-send:hover:not(:disabled) {
+  background: rgba(113, 113, 122, 0.95) !important;
+  color: #fafafa !important;
+}
+
+.asksky-embed-send:disabled {
+  opacity: 0.45;
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {

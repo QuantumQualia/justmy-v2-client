@@ -46,7 +46,7 @@ function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyV
 
 function buildIframeSnippet(url: string): string {
   if (!url) return "";
-  return `<iframe\n  src="${url}"\n  title="AskSKY"\n  style="border:0;width:100%;height:100%;min-height:640px"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
+  return `<iframe\n  src="${url}"\n  title="AskSKY"\n  style="border:0;width:100%;height:100%;min-height:min(calc(100dvh - 150px), 640px)"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
 }
 
 export interface AskSkyStaticEmbedDialogProps {
@@ -140,15 +140,17 @@ export function AskSkyStaticEmbedDialog({
                 </SelectTrigger>
                 <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
                   <SelectItem value="inline">Embedded inline</SelectItem>
-                  <SelectItem value="chatbot">Chatbot (floating button)</SelectItem>
-                  <SelectItem value="voice">Voice line (coming soon)</SelectItem>
+                  {/* Temporarily hidden — uncomment to offer more embed styles */}
+                  {/* <SelectItem value="chatbot">Chatbot (floating button)</SelectItem> */}
+                  {/* <SelectItem value="voice">Voice line (coming soon)</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
 
-            <p className="mt-4 border-t border-slate-800 pt-3 text-xs leading-relaxed text-slate-500">
+            {/* Temporarily hidden — uncomment when voice variant is enabled */}
+            {/* <p className="mt-4 border-t border-slate-800 pt-3 text-xs leading-relaxed text-slate-500">
               Voice shows a placeholder until audio is available.
-            </p>
+            </p> */}
           </div>
 
           <div className="space-y-2">

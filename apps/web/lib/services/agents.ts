@@ -27,6 +27,7 @@ export interface AgentResponseDto {
   name: string;
   agentToken?: string | null;
   customPromptText?: string | null;
+  greetingMessage?: string | null;
   isActive: boolean;
   isPublic?: boolean;
   publicIdentifier?: string | null;
@@ -41,6 +42,7 @@ export interface AgentResponseDto {
 export interface CreateAgentDto {
   name: string;
   customPromptText?: string | null;
+  greetingMessage?: string | null;
   isActive?: boolean;
   isPublic?: boolean;
 }
@@ -48,6 +50,7 @@ export interface CreateAgentDto {
 export interface UpdateAgentDto {
   name?: string;
   customPromptText?: string | null;
+  greetingMessage?: string | null;
   isActive?: boolean;
   isPublic?: boolean;
 }

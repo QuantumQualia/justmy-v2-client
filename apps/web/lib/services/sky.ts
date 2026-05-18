@@ -10,6 +10,7 @@ export interface SkyResolveResponse {
   banner?: string;
   agentName: string;
   agentToken: string;
+  greetingMessage?: string | null;
   hasKnowledgeBase: boolean;
 }
 
