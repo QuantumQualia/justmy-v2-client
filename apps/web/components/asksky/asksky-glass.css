@@ -210,17 +210,11 @@
 }
 
 .asksky-embed-input {
-  background: rgba(63, 63, 70, 0.95) !important;
   border: none !important;
   border-radius: 21px 21px 0 21px !important;
   color: #e4e4e7 !important;
   box-shadow: none !important;
   min-height: 2.75rem !important;
-}
-
-.dark .asksky-embed-input,
-.asksky-embed-input.dark\:bg-input\/30 {
-  background: rgba(63, 63, 70, 0.95) !important;
 }
 
 .asksky-embed-input::placeholder {
