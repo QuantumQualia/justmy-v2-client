@@ -1,0 +1,177 @@
+/**
+ * AskSKY glass — dark-tinted frosted chrome so text stays readable on light
+ * and dark host pages. Header/footer use navy (#121a31 family); body is lighter glass.
+ */
+
+.asksky-glass {
+  background: rgba(27, 35, 58, 0.25);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  color: #f8fafc;
+}
+
+.asksky-glass-panel {
+  border-radius: 1rem;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+}
+
+/* Navy chrome — matches brand embed reference */
+.asksky-glass-header {
+  background: rgba(27, 35, 58, 0.72);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.asksky-glass-footer {
+  background: rgba(27, 35, 58, 0.72);
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.asksky-glass-body {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(24px) saturate(150%);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  color: #f1f5f9;
+}
+
+.asksky-glass-scroll {
+  color: #f1f5f9;
+}
+
+.asksky-glass-scroll-gutter {
+  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+}
+
+.asksky-glass-scroll-gutter::-webkit-scrollbar {
+  width: 6px;
+}
+
+.asksky-glass-scroll-gutter::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.asksky-glass-scroll-gutter::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
+}
+
+.asksky-glass-scroll-gutter::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.65);
+}
+
+.asksky-glass-bubble-user {
+  background: rgba(37, 99, 235, 0.92);
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  border-radius: 1rem 1rem 0rem 1rem;
+  color: #fff;
+}
+
+.asksky-glass-bubble-assistant {
+  background: rgba(30, 41, 59, 0.88);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1rem 1rem 1rem 0rem;
+  color: #f1f5f9;
+}
+
+.asksky-glass-avatar {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(51, 65, 85, 0.9);
+  color: #e2e8f0;
+}
+
+.asksky-glass-input {
+  background: rgba(30, 41, 59, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 1.5rem !important;
+  color: #fff !important;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+}
+
+.dark .asksky-glass-input,
+.asksky-glass-input.dark\:bg-input\/30 {
+  background: rgba(30, 41, 59, 0.95) !important;
+}
+
+.asksky-glass-input::placeholder {
+  color: rgba(148, 163, 184, 0.9);
+}
+
+.asksky-glass-input:focus-visible {
+  outline: none;
+  border-color: rgba(96, 165, 250, 0.55) !important;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+}
+
+.asksky-glass-empty-icon {
+  border: 1px solid rgba(96, 165, 250, 0.35);
+  background: rgba(37, 99, 235, 0.25);
+}
+
+.asksky-glass-empty-title {
+  color: #f8fafc;
+}
+
+.asksky-glass-muted {
+  color: rgba(203, 213, 225, 0.95);
+}
+
+.asksky-glass-banner {
+  background: rgba(120, 53, 15, 0.75);
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  color: #fef3c7;
+  border-radius: 0.75rem;
+}
+
+.asksky-glass-error {
+  background: rgba(127, 29, 29, 0.75);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: #fecaca;
+  border-radius: 0.75rem;
+}
+
+.asksky-glass-launcher {
+  background: rgba(37, 99, 235, 0.92);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow:
+    0 12px 28px -8px rgba(37, 99, 235, 0.5),
+    0 8px 24px -6px rgba(0, 0, 0, 0.35);
+}
+
+.asksky-glass-launcher:hover {
+  background: rgba(29, 78, 216, 0.95);
+}
+
+.asksky-glass-close {
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.asksky-glass-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .asksky-glass {
+    background: rgba(15, 23, 42, 0.95);
+  }
+
+  .asksky-glass-header,
+  .asksky-glass-footer {
+    background: rgba(18, 26, 49, 0.88);
+  }
+
+  .asksky-glass-body {
+    background: rgba(15, 23, 42, 0.9);
+  }
+}
