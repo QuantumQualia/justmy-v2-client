@@ -68,6 +68,7 @@ import { cn } from "@workspace/ui/lib/utils";
 
 const INGESTING_STATUSES = new Set<KnowledgeIngestionStatus>(["pending", "queued", "processing"]);
 const KNOWLEDGE_PAGE_SIZE = 5;
+const AGENTS_PAGE_SIZE = 10;
 /** Poll individual ingesting knowledge sources (GET by id) so progress bars stay current. */
 const KNOWLEDGE_INGESTION_POLL_MS = 5_000;
 
@@ -365,6 +366,7 @@ function AgentFormDialog({
   submitting: boolean;
 }) {
   const [name, setName] = React.useState("");
+  const [greetingMessage, setGreetingMessage] = React.useState("");
   const [customPromptText, setCustomPromptText] = React.useState("");
   const [isActive, setIsActive] = React.useState(true);
   const [isPublic, setIsPublic] = React.useState(true);
@@ -376,6 +378,7 @@ function AgentFormDialog({
     }
 
     setName(state.agent?.name ?? "");
+    setGreetingMessage(state.agent?.greetingMessage ?? "");
     setCustomPromptText(state.agent?.customPromptText ?? "");
     setIsActive(state.agent?.isActive ?? true);
     setIsPublic(state.agent?.isPublic ?? true);
@@ -397,6 +400,7 @@ function AgentFormDialog({
 
     await onSubmit({
       name: trimmedName,
+      greetingMessage: greetingMessage.trim() || null,
       customPromptText: customPromptText.trim() || null,
       isActive,
       isPublic,
@@ -428,7 +432,7 @@ function AgentFormDialog({
         <DialogHeader>
           <DialogTitle>{state.mode === "create" ? "Create agent" : "Edit agent"}</DialogTitle>
           <DialogDescription className="text-slate-400">
-            Set the agent name, activation state, and an optional custom prompt for this profile.
+            Set the agent name, activation state, and optional greeting or custom prompt for this profile.
           </DialogDescription>
         </DialogHeader>
 
@@ -478,6 +482,20 @@ function AgentFormDialog({
                 />
               </div>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="agent-greeting-message" className="text-slate-200">
+              Greeting message <span className="text-slate-500">(optional)</span>
+            </Label>
+            <Textarea
+              id="agent-greeting-message"
+              value={greetingMessage}
+              onChange={(event) => setGreetingMessage(event.target.value)}
+              placeholder="Shown when visitors open AskSKY before they send a message."
+              className="min-h-24 border-slate-700 bg-slate-900 text-white"
+              disabled={submitting}
+            />
           </div>
 
           <div className="space-y-2">
@@ -1085,6 +1103,7 @@ export function ProfileAgentsPanel({
     agentId: null,
   });
   const [selectedAgentId, setSelectedAgentId] = React.useState<string | null>(null);
+  const [agentsPage, setAgentsPage] = React.useState(1);
   const [sharedKnowledgePage, setSharedKnowledgePage] = React.useState(1);
   const [agentKnowledgePage, setAgentKnowledgePage] = React.useState(1);
   const [deleteAgentTarget, setDeleteAgentTarget] = React.useState<AgentResponseDto | null>(null);
@@ -1128,7 +1147,12 @@ export function ProfileAgentsPanel({
     enabled: Boolean(selectedAgentId),
   });
 
-  const agents = agentsQuery.data ?? [];
+  const allAgents = agentsQuery.data ?? [];
+  const agentsTotal = allAgents.length;
+  const agents = React.useMemo(() => {
+    const start = (agentsPage - 1) * AGENTS_PAGE_SIZE;
+    return allAgents.slice(start, start + AGENTS_PAGE_SIZE);
+  }, [allAgents, agentsPage]);
   const sharedPageData = sharedKnowledgeQuery.data;
   const agentPageData = agentKnowledgeQuery.data;
   const sharedSources = sharedPageData?.sources ?? [];
@@ -1137,19 +1161,28 @@ export function ProfileAgentsPanel({
   const agentSourcesTotal = agentPageData?.total ?? 0;
 
   React.useEffect(() => {
-    if (!agents.length) {
+    if (!allAgents.length) {
       setSelectedAgentId(null);
       return;
     }
 
-    const stillExists = selectedAgentId
-      ? agents.some((agent) => agent.id === selectedAgentId)
-      : false;
-
-    if (!stillExists) {
-      setSelectedAgentId(agents[0]?.id ?? null);
+    if (!selectedAgentId) {
+      setSelectedAgentId(allAgents[0]?.id ?? null);
+      return;
     }
-  }, [agents, selectedAgentId]);
+
+    const stillExists = allAgents.some((agent) => agent.id === selectedAgentId);
+    if (!stillExists) {
+      setSelectedAgentId(allAgents[0]?.id ?? null);
+    }
+  }, [allAgents, selectedAgentId]);
+
+  React.useEffect(() => {
+    const maxAgentsPage = Math.max(1, Math.ceil(agentsTotal / AGENTS_PAGE_SIZE));
+    if (agentsPage > maxAgentsPage) {
+      setAgentsPage(maxAgentsPage);
+    }
+  }, [agentsPage, agentsTotal]);
 
   React.useEffect(() => {
     setAgentKnowledgePage(1);
@@ -1414,9 +1447,13 @@ export function ProfileAgentsPanel({
   });
 
   const selectedAgent = React.useMemo(
-    () => agents.find((agent) => agent.id === selectedAgentId) ?? null,
-    [agents, selectedAgentId],
+    () => allAgents.find((agent) => agent.id === selectedAgentId) ?? null,
+    [allAgents, selectedAgentId],
   );
+
+  const agentsTotalPages = Math.max(1, Math.ceil(agentsTotal / AGENTS_PAGE_SIZE));
+  const agentsRangeStart = agentsTotal === 0 ? 0 : (agentsPage - 1) * AGENTS_PAGE_SIZE + 1;
+  const agentsRangeEnd = agentsTotal === 0 ? 0 : agentsRangeStart + agents.length - 1;
 
   const pendingIngestionCount = React.useMemo(() => {
     const combined = [...sharedSources, ...agentSpecificSources];
@@ -1749,8 +1786,11 @@ export function ProfileAgentsPanel({
       <div className="grid min-w-0 grid-cols-1 gap-4 md:grid-cols-3">
         <StatCard
           title="Agents"
-          value={String(agents.length)}
-          description={countLabel(agents.filter((agent) => agent.isActive).length, "active agent")}
+          value={String(agentsTotal)}
+          description={countLabel(
+            allAgents.filter((agent) => agent.isActive).length,
+            "active agent",
+          )}
         />
         <StatCard
           title="Shared sources"
@@ -1792,7 +1832,7 @@ export function ProfileAgentsPanel({
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="py-5">
+        <CardContent className="space-y-4 py-5">
           <DataTable
             columns={agentColumns}
             data={agents}
@@ -1800,6 +1840,38 @@ export function ProfileAgentsPanel({
             error={agentsError}
             emptyMessage="No agents yet. Create the first one to start configuring multi-agent behavior."
           />
+          {agentsTotalPages > 1 ? (
+            <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+              <p className="min-w-0 text-xs text-slate-400">
+                Showing {agentsRangeStart}-{agentsRangeEnd} of {agentsTotal}
+              </p>
+              <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 self-stretch sm:self-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                  onClick={() => setAgentsPage((current) => Math.max(1, current - 1))}
+                  disabled={agentsQuery.isPending || agentsPage <= 1}
+                >
+                  Previous
+                </Button>
+                <span className="min-w-20 text-center text-xs text-slate-400">
+                  Page {agentsPage} of {agentsTotalPages}
+                </span>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                  onClick={() => setAgentsPage((current) => current + 1)}
+                  disabled={agentsQuery.isPending || agentsPage >= agentsTotalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
 
@@ -1849,7 +1921,7 @@ export function ProfileAgentsPanel({
           onPageChange={setAgentKnowledgePage}
           selectedAgentId={selectedAgentId}
           onSelectedAgentChange={setSelectedAgentId}
-          availableAgents={agents}
+          availableAgents={allAgents}
           reindexingSourceId={
             reindexSourceMutation.isPending && reindexSourceMutation.variables
               ? reindexSourceMutation.variables.id
