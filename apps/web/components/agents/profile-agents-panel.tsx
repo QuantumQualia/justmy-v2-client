@@ -492,7 +492,7 @@ function AgentFormDialog({
               id="agent-greeting-message"
               value={greetingMessage}
               onChange={(event) => setGreetingMessage(event.target.value)}
-              placeholder="Shown when visitors open AskSKY before they send a message."
+              placeholder="Shown when visitors open AskSKY! before they send a message."
               className="min-h-24 border-slate-700 bg-slate-900 text-white"
               disabled={submitting}
             />
@@ -1599,7 +1599,7 @@ export function ProfileAgentsPanel({
                 disabled={!agent.isActive}
                 title={
                   agent.isActive
-                    ? "Build a shareable AskSKY embed link"
+                    ? "Build a shareable AskSKY! embed link"
                     : "Activate this agent before generating an embed link"
                 }
                 onClick={() => setAskSkyEmbedAgent(agent)}
@@ -1811,9 +1811,9 @@ export function ProfileAgentsPanel({
               <CardTitle className="text-white">Agent management</CardTitle>
               <CardDescription className="max-w-2xl text-slate-400">
                 Create, edit, deactivate, or delete agents. Use <span className="text-slate-300">Embed</span> to build
-                a shareable AskSKY page URL (with <span className="text-slate-300">profileSlug</span>,{" "}
+                a shareable AskSKY! page URL (with <span className="text-slate-300">profileSlug</span>,{" "}
                 <span className="text-slate-300">agentToken</span>, and <span className="text-slate-300">variant</span>
-                ) for iframes or other sites. Public identifiers are what AskSKY needs to resolve the agent.
+                ) for iframes or other sites. Public identifiers are what AskSKY! needs to resolve the agent.
               </CardDescription>
             </div>
             <Button

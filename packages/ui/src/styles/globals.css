@@ -142,7 +142,7 @@
     @apply border-border outline-ring/50;
   }
   /*
-   * AskSKY embed iframe (/embed/asksky): transparent canvas.
+   * AskSKY! embed iframe (/embed/asksky): transparent canvas.
    * Root body uses bg-background; next-themes enableColorScheme sets color-scheme on html (opaque UA canvas).
    * Class is applied from app/layout.tsx via x-pathname.
    */

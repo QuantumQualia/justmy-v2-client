@@ -46,7 +46,7 @@ function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyV
 
 function buildIframeSnippet(url: string): string {
   if (!url) return "";
-  return `<iframe\n  src="${url}"\n  title="AskSKY"\n  style="border:0;width:100%;height:100%;min-height:min(calc(100dvh - 150px), 640px)"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
+  return `<iframe\n  src="${url}"\n  title="AskSKY!"\n  style="border:0;width:100%;height:100%;min-height:min(calc(100dvh - 150px), 640px);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%)"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
 }
 
 export interface AskSkyStaticEmbedDialogProps {
@@ -95,10 +95,10 @@ export function AskSkyStaticEmbedDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-white">
             <Link2 className="h-5 w-5 text-emerald-400" />
-            AskSKY static embed
+            AskSKY! static embed
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Choose how AskSKY should appear, then copy the link or iframe snippet to use on other pages. The URL
+            Choose how AskSKY! should appear, then copy the link or iframe snippet to use on other pages. The URL
             includes <span className="text-slate-300">profileSlug</span>, <span className="text-slate-300">agentToken</span>
             , and <span className="text-slate-300">variant</span> as query parameters.
           </DialogDescription>

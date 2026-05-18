@@ -73,7 +73,7 @@ export async function skyResolve(params: {
     throw new ApiClientError(
       (typeof data.message === "string" && data.message) ||
         (typeof data.error === "string" && data.error) ||
-        "Failed to resolve AskSKY profile and agent.",
+        "Failed to resolve AskSKY! profile and agent.",
       response.status,
     );
   }
@@ -205,7 +205,7 @@ export async function streamSkyMessage(
 
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    let message = `AskSKY request failed (${response.status})`;
+    let message = `AskSKY! request failed (${response.status})`;
     try {
       const j = JSON.parse(text) as { message?: string; error?: string };
       message = j.message || j.error || message;
@@ -220,8 +220,8 @@ export async function streamSkyMessage(
 
   const reader = response.body?.getReader();
   if (!reader) {
-    handlers.onError?.("No response body from AskSKY.");
-    throw new ApiClientError("No response body from AskSKY.");
+    handlers.onError?.("No response body from AskSKY!.");
+    throw new ApiClientError("No response body from AskSKY!.");
   }
 
   const decoder = new TextDecoder();

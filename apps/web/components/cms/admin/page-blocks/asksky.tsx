@@ -395,7 +395,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
       <Card className="border-slate-700 bg-slate-800/50 text-slate-200">
         <CardContent className="space-y-4 p-4 pt-4">
           <p className="text-sm text-slate-400">
-            AskSKY resolves the profile and agent, then streams answers over SSE.{" "}
+            AskSKY! resolves the profile and agent, then streams answers over SSE.{" "}
             <span className="font-medium text-slate-300">Profile</span> and{" "}
             <span className="font-medium text-slate-300">agent</span> are required for this block to work on published
             pages.
@@ -564,7 +564,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
             </Select>
             {selectedAgentIsInactive ? (
               <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-                This agent is inactive. AskSKY will not work for visitors until you activate the agent in Agent
+                This agent is inactive. AskSKY! will not work for visitors until you activate the agent in Agent
                 management.
               </div>
             ) : null}

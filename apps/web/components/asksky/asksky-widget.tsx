@@ -695,7 +695,7 @@ function AskSkyChatbotPanel({
         }
       } catch (e) {
         if (!cancelled) {
-          setResolveError(e instanceof Error ? e.message : "Could not resolve AskSKY.");
+          setResolveError(e instanceof Error ? e.message : "Could not resolve AskSKY!.");
         }
       } finally {
         if (!cancelled) {
@@ -800,7 +800,7 @@ function AskSkyResolveShell({
         }
       } catch (e) {
         if (!cancelled) {
-          setResolveError(e instanceof Error ? e.message : "Could not resolve AskSKY.");
+          setResolveError(e instanceof Error ? e.message : "Could not resolve AskSKY!.");
         }
       } finally {
         if (!cancelled) {
@@ -824,7 +824,7 @@ function AskSkyResolveShell({
         )}
       >
         <Loader2 className="h-5 w-5 animate-spin" />
-        Connecting to AskSKY…
+        Connecting to AskSKY!…
       </div>
     );
   }
@@ -839,7 +839,7 @@ function AskSkyResolveShell({
           "border-red-500/30 bg-red-500/10 text-red-200",
         )}
       >
-        {resolveError || "AskSKY is unavailable."}
+        {resolveError || "AskSKY! is unavailable."}
       </div>
     );
   }
@@ -868,7 +868,7 @@ function AskSkyVoicePlaceholder() {
         <CardDescription className="text-slate-400">Coming soon</CardDescription>
       </CardHeader>
       <CardContent className="text-sm text-slate-500">
-        Voice-style AskSKY will let visitors speak naturally with your agent. Audio capture and playback are not
+        Voice-style AskSKY! will let visitors speak naturally with your agent. Audio capture and playback are not
         available in this build.
       </CardContent>
     </Card>
@@ -897,7 +897,7 @@ export function AskSkyWidget({
     return (
       <Card className="mx-auto min-w-0 w-full max-w-2xl border-amber-500/30 bg-amber-500/5">
         <CardContent className="py-4 text-sm text-amber-200">
-          Configure profile slug and agent token for this AskSKY block.
+          Configure profile slug and agent token for this AskSKY! block.
         </CardContent>
       </Card>
     );
@@ -924,7 +924,7 @@ export function AskSkyWidget({
           className="asksky-glass-launcher pointer-events-auto relative h-14 w-14 rounded-full p-0 text-white transition-all"
           onClick={() => setChatOpen((o) => !o)}
           aria-expanded={chatOpen}
-          aria-label={chatOpen ? "Close AskSKY" : "Open AskSKY"}
+          aria-label={chatOpen ? "Close AskSKY!" : "Open AskSKY!"}
         >
           <MessageCircle className="h-7 w-7" />
           {!chatOpen ? (

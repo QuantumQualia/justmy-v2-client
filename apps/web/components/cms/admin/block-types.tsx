@@ -243,9 +243,9 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
   },
   {
     value: "asksky-block",
-    label: "AskSKY!",
+    label: "AskSKY!!",
     icon: <MessageCircle className="h-5 w-5" />,
-    description: "AskSKY! chat widget: inline, floating chatbot, or voice placeholder — profile slug + agent token",
+    description: "AskSKY!! chat widget: inline, floating chatbot, or voice placeholder — profile slug + agent token",
     category: "Apps",
   },
   {
