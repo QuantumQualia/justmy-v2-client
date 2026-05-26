@@ -44,11 +44,6 @@ function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyV
   return `${origin}/embed/asksky?${params.toString()}`;
 }
 
-function buildIframeSnippet(url: string): string {
-  if (!url) return "";
-  return `<iframe\n  src="${url}"\n  title="AskSKY!"\n  style="border:0;width:100%;height:100%;min-height:min(calc(100dvh - 150px), 640px);backdrop-filter:blur(30px) saturate(160%);-webkit-backdrop-filter:blur(30px) saturate(160%);border-radius: 1.75rem 1.75rem 0;"\n  loading="lazy"\n  allow="clipboard-write"\n></iframe>`;
-}
-
 function escapeHtmlAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
@@ -102,7 +97,6 @@ export function AskSkyStaticEmbedDialog({
     () => (slugOk && tokenOk && publicToken ? buildEmbedUrl(profileSlug, publicToken, variant) : ""),
     [profileSlug, publicToken, slugOk, tokenOk, variant],
   );
-  const iframeSnippet = React.useMemo(() => buildIframeSnippet(embedUrl), [embedUrl]);
   const scriptSnippet = React.useMemo(() => {
     const origin = siteOrigin();
     return slugOk && tokenOk && publicToken
@@ -129,7 +123,7 @@ export function AskSkyStaticEmbedDialog({
             AskSKY! static embed
           </DialogTitle>
           <DialogDescription className="text-slate-400">
-            Choose how AskSKY! should appear, then copy the page URL, iframe snippet, or script snippet. The URL uses{" "}
+            Choose how AskSKY! should appear, then copy the preview URL or the script snippet. The preview URL uses{" "}
             <span className="text-slate-300">profileSlug</span>, <span className="text-slate-300">agentToken</span>, and{" "}
             <span className="text-slate-300">variant</span> as query parameters; the script embed uses the same values as{" "}
             <span className="text-slate-300">data-*</span> attributes.
@@ -187,7 +181,7 @@ export function AskSkyStaticEmbedDialog({
 
           <div className="space-y-2">
             <Label htmlFor="asksky-embed-url" className="text-slate-200">
-              Page URL
+              Preview URL
             </Label>
             <Textarea
               id="asksky-embed-url"
@@ -203,10 +197,10 @@ export function AskSkyStaticEmbedDialog({
                 size="sm"
                 className="border-slate-600 bg-slate-900 text-slate-100"
                 disabled={!embedUrl}
-                onClick={() => copy(embedUrl, "URL")}
+                onClick={() => copy(embedUrl, "Preview URL")}
               >
                 <Copy className="mr-2 h-4 w-4" />
-                Copy URL
+                Copy preview URL
               </Button>
               {embedUrl ? (
                 <Button
@@ -238,7 +232,7 @@ export function AskSkyStaticEmbedDialog({
 
           <div className="space-y-2">
             <Label htmlFor="asksky-embed-script" className="text-slate-200">
-              Script embed (no iframe)
+              Script embed
             </Label>
             <Textarea
               id="asksky-embed-script"
@@ -249,9 +243,9 @@ export function AskSkyStaticEmbedDialog({
             />
             <p className="text-xs leading-relaxed text-slate-500">
               Partners must allow this origin in <span className="text-slate-400">script-src</span> (and typically{" "}
-              <span className="text-slate-400">connect-src</span> to the same host for the AskSKY API proxy). Inline
-              style uses at least <span className="text-slate-400">min-height: min(calc(100dvh - 150px), 640px)</span>{" "}
-              like the iframe snippet.
+              <span className="text-slate-400">connect-src</span> to the same host for the AskSKY API proxy). The inline
+              variant uses at least <span className="text-slate-400">min-height: min(calc(100dvh - 150px), 640px)</span>{" "}
+              on the embed host so the chat has room to grow.
             </p>
             <Button
               type="button"
@@ -263,30 +257,6 @@ export function AskSkyStaticEmbedDialog({
             >
               <Copy className="mr-2 h-4 w-4" />
               Copy script code
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="asksky-embed-iframe" className="text-slate-200">
-              Iframe embed code
-            </Label>
-            <Textarea
-              id="asksky-embed-iframe"
-              readOnly
-              rows={6}
-              value={iframeSnippet || "—"}
-              className="resize-none border-slate-700 bg-black/40 font-mono text-xs text-slate-200"
-            />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="border-slate-600 bg-slate-900 text-slate-100"
-              disabled={!iframeSnippet}
-              onClick={() => copy(iframeSnippet, "Embed code")}
-            >
-              <Copy className="mr-2 h-4 w-4" />
-              Copy iframe code
             </Button>
           </div>
         </div>

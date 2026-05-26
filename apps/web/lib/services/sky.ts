@@ -54,53 +54,105 @@ async function skyHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
+function skyResolveKey(params: { profileSlug: string; agentToken: string }): string {
+  return `${params.profileSlug.trim()}\u0000${params.agentToken.trim()}`;
+}
+
+function skyGetConversationInflightKey(conversationId: number, visitorToken: string): string {
+  return `${conversationId}\u0000${visitorToken.trim()}`;
+}
+
+const skyResolveInflight = new Map<string, Promise<SkyResolveResponse>>();
+/** Successful resolve for this tab session — e.g. chatbot reopen without refetch. */
+const skyResolveResult = new Map<string, SkyResolveResponse>();
+
 export async function skyResolve(params: {
   profileSlug: string;
   agentToken: string;
 }): Promise<SkyResolveResponse> {
+  const key = skyResolveKey(params);
+  const hit = skyResolveResult.get(key);
+  if (hit) {
+    return hit;
+  }
+  const inflight = skyResolveInflight.get(key);
+  if (inflight) {
+    return inflight;
+  }
+
   const url = buildApiUrl("sky/resolve");
   const search = new URLSearchParams({
     profileSlug: params.profileSlug.trim(),
     agentToken: params.agentToken.trim(),
   });
-  const headers = await skyHeaders();
-  const response = await fetch(`${url}?${search.toString()}`, {
-    method: "GET",
-    headers: { ...headers, Accept: "application/json" },
-  });
-  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!response.ok) {
-    throw new ApiClientError(
-      (typeof data.message === "string" && data.message) ||
-        (typeof data.error === "string" && data.error) ||
-        "Failed to resolve AskSKY! profile and agent.",
-      response.status,
-    );
-  }
-  return data as unknown as SkyResolveResponse;
+
+  const pending = (async (): Promise<SkyResolveResponse> => {
+    try {
+      const headers = await skyHeaders();
+      const response = await fetch(`${url}?${search.toString()}`, {
+        method: "GET",
+        headers: { ...headers, Accept: "application/json" },
+      });
+      const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!response.ok) {
+        throw new ApiClientError(
+          (typeof data.message === "string" && data.message) ||
+            (typeof data.error === "string" && data.error) ||
+            "Failed to resolve AskSKY! profile and agent.",
+          response.status,
+        );
+      }
+      const resolved = data as unknown as SkyResolveResponse;
+      skyResolveResult.set(key, resolved);
+      return resolved;
+    } finally {
+      skyResolveInflight.delete(key);
+    }
+  })();
+
+  skyResolveInflight.set(key, pending);
+  return pending;
 }
+
+const skyGetConversationInflight = new Map<string, Promise<SkyConversationResponse>>();
 
 export async function skyGetConversation(
   conversationId: number,
   visitorToken: string,
 ): Promise<SkyConversationResponse> {
+  const ck = skyGetConversationInflightKey(conversationId, visitorToken);
+  const existing = skyGetConversationInflight.get(ck);
+  if (existing) {
+    return existing;
+  }
+
   const url = buildApiUrl(`sky/conversations/${conversationId}`);
   const search = new URLSearchParams({ token: visitorToken });
-  const headers = await skyHeaders();
-  const response = await fetch(`${url}?${search.toString()}`, {
-    method: "GET",
-    headers: { ...headers, Accept: "application/json" },
-  });
-  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
-  if (!response.ok) {
-    throw new ApiClientError(
-      (typeof data.message === "string" && data.message) ||
-        (typeof data.error === "string" && data.error) ||
-        "Failed to load conversation.",
-      response.status,
-    );
-  }
-  return data as unknown as SkyConversationResponse;
+
+  const pending = (async (): Promise<SkyConversationResponse> => {
+    try {
+      const headers = await skyHeaders();
+      const response = await fetch(`${url}?${search.toString()}`, {
+        method: "GET",
+        headers: { ...headers, Accept: "application/json" },
+      });
+      const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!response.ok) {
+        throw new ApiClientError(
+          (typeof data.message === "string" && data.message) ||
+            (typeof data.error === "string" && data.error) ||
+            "Failed to load conversation.",
+          response.status,
+        );
+      }
+      return data as unknown as SkyConversationResponse;
+    } finally {
+      skyGetConversationInflight.delete(ck);
+    }
+  })();
+
+  skyGetConversationInflight.set(ck, pending);
+  return pending;
 }
 
 function parseSseDataLine(

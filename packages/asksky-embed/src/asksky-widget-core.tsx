@@ -109,6 +109,19 @@ function initialGreetingMessages(resolve: SkyResolveResponse): AskSkyChatMessage
   return [{ role: "assistant", content: text }];
 }
 
+/** Always show the agent greeting first; strip a duplicate opening line from persisted history. */
+function mergeGreetingFirst(resolve: SkyResolveResponse, history: AskSkyChatMessage[]): AskSkyChatMessage[] {
+  const greeting = initialGreetingMessages(resolve);
+  if (greeting.length === 0) {
+    return history;
+  }
+  const g0 = greeting[0]!;
+  if (history[0]?.role === "assistant" && history[0]?.content === g0.content) {
+    return [...greeting, ...history.slice(1)];
+  }
+  return [...greeting, ...history];
+}
+
 const chatScrollClasses =
   "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
 
@@ -140,6 +153,9 @@ function AskSkyConversationView({
   const assistantBufferRef = React.useRef("");
   const revealEndRef = React.useRef(0);
   const revealIntervalRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  /** Latest resolve for async paths without re-subscribing the hydration effect when the object reference changes. */
+  const resolveLatest = React.useRef(resolve);
+  resolveLatest.current = resolve;
 
   const stopWordReveal = React.useCallback(() => {
     if (revealIntervalRef.current != null) {
@@ -168,6 +184,7 @@ function AskSkyConversationView({
     return () => stopWordReveal();
   }, [stopWordReveal]);
 
+  // Hydration: `resolve` is read via `resolveLatest` so reference churn / StrictMode does not double-fetch `getConversation`.
   React.useEffect(() => {
     let cancelled = false;
 
@@ -177,7 +194,7 @@ function AskSkyConversationView({
 
     const saved = loadPersisted(embedKey);
     if (!saved) {
-      setMessages(initialGreetingMessages(resolve));
+      setMessages(initialGreetingMessages(resolveLatest.current));
       return () => {
         cancelled = true;
       };
@@ -191,16 +208,11 @@ function AskSkyConversationView({
         if (cancelled) {
           return;
         }
-        if (conv.messages.length > 0) {
-          setMessages(
-            conv.messages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-          );
-        } else {
-          setMessages(initialGreetingMessages(resolve));
-        }
+        const history = conv.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+        setMessages(mergeGreetingFirst(resolveLatest.current, history));
       } catch {
         if (cancelled) {
           return;
@@ -208,14 +220,14 @@ function AskSkyConversationView({
         sessionStorage.removeItem(storageKey(embedKey));
         setConversationId(null);
         setVisitorToken(null);
-        setMessages(initialGreetingMessages(resolve));
+        setMessages(initialGreetingMessages(resolveLatest.current));
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [embedKey, resolve, sky]);
+  }, [embedKey, sky]);
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -693,7 +705,7 @@ function AskSkyChatbotPanel({
   /** Same chrome + conversation layout as inline embed (`embedFill` + glass inline messages). */
   return (
     <div className="asksky-embed-inline pointer-events-auto flex h-[min(600px,85dvh)] w-[min(100vw-2rem,24rem)] max-w-[calc(100vw-2rem)] flex-col overflow-hidden shadow-2xl sm:w-[24rem]">
-      <div className="flex shrink-0 justify-end px-2 pt-2">
+      {/* <div className="flex shrink-0 justify-end px-2 pt-2">
         <Button
           type="button"
           variant="ghost"
@@ -704,7 +716,7 @@ function AskSkyChatbotPanel({
         >
           <X className="h-4 w-4" />
         </Button>
-      </div>
+      </div> */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} embedFill />
       </div>
@@ -836,6 +848,8 @@ function AskSkyWidgetInner({
   embedFill,
 }: Omit<AskSkyWidgetCoreProps, "sky" | "visitorUserBubble">) {
   const [chatOpen, setChatOpen] = React.useState(false);
+  /** After first open, keep the panel mounted while closed so conversation state + `getConversation` are not re-run. */
+  const [chatShellMounted, setChatShellMounted] = React.useState(false);
 
   if (!profileSlug.trim() || !agentToken.trim()) {
     return (
@@ -854,18 +868,31 @@ function AskSkyWidgetInner({
   if (variant === "chatbot") {
     return (
       <div className="pointer-events-none fixed bottom-4 right-4 z-[2147483646] flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
-        {chatOpen ? (
-          <AskSkyChatbotPanel
-            profileSlug={profileSlug}
-            agentToken={agentToken}
-            embedKey={`${embedKey}:chatbot`}
-            onClose={() => setChatOpen(false)}
-          />
+        {chatOpen || chatShellMounted ? (
+          <div
+            className={cn("pointer-events-auto", !chatOpen && "hidden")}
+            aria-hidden={!chatOpen}
+          >
+            <AskSkyChatbotPanel
+              key={`${profileSlug}:${agentToken}`}
+              profileSlug={profileSlug}
+              agentToken={agentToken}
+              embedKey={`${embedKey}:chatbot`}
+              onClose={() => setChatOpen(false)}
+            />
+          </div>
         ) : null}
         <button
           type="button"
           className="asksky-chatbot-launcher pointer-events-auto relative pl-2.5 pr-3.5"
-          onClick={() => setChatOpen((o) => !o)}
+          onClick={() => {
+            setChatOpen((wasOpen) => {
+              if (!wasOpen) {
+                setChatShellMounted(true);
+              }
+              return !wasOpen;
+            });
+          }}
           aria-expanded={chatOpen}
           aria-label={chatOpen ? "Close AskSKY!" : "Open AskSKY!"}
         >
