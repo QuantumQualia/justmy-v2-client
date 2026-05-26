@@ -1,15 +1,7 @@
-@import "tailwindcss";
-@source "../../../apps/**/*.{ts,tsx}";
-@source "../../../components/**/*.{ts,tsx}";
-@source "../../../packages/asksky-embed/src/**/*.{ts,tsx}";
-@source "../**/*.{ts,tsx}";
-
-@import "tw-animate-css";
-
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(0.964 0.006 75); /* warm off-white #F2F0EB */
+  --background: oklch(0.964 0.006 75);
   --foreground: oklch(0.22 0.01 60);
   --card: oklch(1 0 0 / 0.75);
   --card-foreground: oklch(0.22 0.01 60);
@@ -20,12 +12,11 @@
   --secondary: oklch(0.94 0.008 75);
   --secondary-foreground: oklch(0.22 0.01 60);
   --muted: oklch(0.92 0.008 75);
-  --muted-foreground: oklch(0.50 0.01 60);
-  --accent: oklch(0.63 0.12 47); /* warm amber/orange accent */
+  --muted-foreground: oklch(0.5 0.01 60);
+  --accent: oklch(0.63 0.12 47);
   --accent-foreground: oklch(1 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: oklch(0.577 0.245 27.325);
-  /* Positive / go — emerald CTA (hue ~160 aligns with dark theme below) */
   --success: oklch(0.47 0.13 160);
   --success-foreground: oklch(0.99 0.01 160);
   --border: oklch(0.88 0.008 75 / 0.6);
@@ -45,12 +36,9 @@
   --sidebar-accent-foreground: oklch(0.22 0.01 60);
   --sidebar-border: oklch(0.88 0.008 75);
   --sidebar-ring: oklch(0.63 0.12 47 / 0.4);
-
-  /* Sample-specific glass + CTA tokens (used with inline styles) */
   --glass-bg: oklch(1 0 0 / 0.65);
   --glass-border: oklch(1 0 0 / 0.5);
   --overlay-bg: oklch(0.15 0.01 60 / 0.55);
-  /* Sample hotlink / action button background (translucent white) */
   --hotlink-bg: oklch(1 0 0 / 0.8);
   --cta-bg: oklch(0.22 0.01 60);
   --cta-accent: oklch(0.73 0.14 200);
@@ -73,10 +61,6 @@
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  /*
-   * Success on dark: saturated emerald + light foreground so CTAs read “active”, not disabled.
-   * (Dark ink on a dim green reads as grayed-out; white on brighter green matches status dots / CTAs.)
-   */
   --success: oklch(0.63 0.158 159);
   --success-foreground: oklch(0.985 0.006 159);
   --border: oklch(0.269 0 0);
@@ -142,42 +126,9 @@
   * {
     @apply border-border outline-ring/50;
   }
-  /*
-   * AskSKY! embed iframe (/embed/asksky): transparent canvas.
-   * Root body uses bg-background; next-themes enableColorScheme sets color-scheme on html (opaque UA canvas).
-   * Class is applied from app/layout.tsx via x-pathname.
-   */
-  html.embed-asksky-host {
-    color-scheme: normal !important;
-  }
-  html.embed-asksky-host,
-  html.embed-asksky-host body,
-  html.embed-asksky-host body #site-main {
-    background-color: transparent !important;
-    background-image: none !important;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-  body.mycard-live-light-body {
-    background: oklch(0.964 0.006 75);
-    color: oklch(0.22 0.01 60);
-    color-scheme: light;
-  }
 }
 
 @layer utilities {
-  /* Sample JustMy proprietary corner geometry */
-  .justmy-corners {
-    border-radius: 16px 16px 0px 16px;
-  }
-  .justmy-corners-lg {
-    border-radius: 20px 20px 0px 20px;
-  }
-  .justmy-corners-xl {
-    border-radius: 24px 24px 0px 24px;
-  }
-
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -185,70 +136,4 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
-  .touch-manipulation {
-    touch-action: manipulation;
-  }
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 8px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(30, 41, 59, 0.5);
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: rgba(59, 130, 246, 0.5);
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.7);
-  }
-  .custom-scrollbar {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(59, 130, 246, 0.5) rgba(30, 41, 59, 0.5);
-  }
-
-  /* Horizontal scrollbar for dark sections (e.g. hourly tactical scroll) */
-  .scrollbar-horizontal-dark {
-    scrollbar-width: thin;
-    /* thumb, track */
-    scrollbar-color: rgba(148, 163, 184, 0.9) rgba(15, 23, 42, 0.85);
-  }
-  .scrollbar-horizontal-dark::-webkit-scrollbar {
-    height: 6px;
-  }
-  .scrollbar-horizontal-dark::-webkit-scrollbar-track {
-    background: linear-gradient(
-      to right,
-      rgba(15, 23, 42, 0),
-      rgba(148, 163, 184, 0.18),
-      rgba(15, 23, 42, 0)
-    );
-    border-radius: 9999px;
-  }
-  .scrollbar-horizontal-dark::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.9);
-    border-radius: 9999px;
-    box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.8);
-  }
-  .scrollbar-horizontal-dark::-webkit-scrollbar-thumb:hover {
-    background: #e5e7eb;
-  }
-  .swiper-button-prev-social::after,
-  .swiper-button-next-social::after {
-    content: '';
-    display: none;
-  }
-}
-
-/* Daily Drop – Events swiper pagination: visible on dark background */
-.events-pagination .swiper-pagination-bullet {
-  background: rgba(255, 255, 255, 0.4) !important;
-  width: 0.5rem;
-  height: 0.5rem;
-  opacity: 1;
-  transition: background 0.2s, transform 0.2s;
-}
-.events-pagination .swiper-pagination-bullet-active {
-  background: #fff !important;
-  transform: scale(1.25);
 }

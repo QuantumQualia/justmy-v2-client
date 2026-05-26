@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@source "./**/*.{ts,tsx}";
+@source "../../ui/src/**/*.{ts,tsx}";
+
+@import "tw-animate-css";
+@import "./asksky-glass.css";
+@import "./embed-base.css";
+
+/* Root inside shadow DOM — height comes from #asksky-embed-host flex chain; avoid min-height:0 here (breaks fill + scroll). */
+.asksky-shadow-app {
+  box-sizing: border-box;
+  min-width: 0;
+}

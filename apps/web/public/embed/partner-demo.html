@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AskSKY! script embed demo (same host)</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 1rem;
+        max-width: 48rem;
+      }
+      code {
+        background: #eee;
+        padding: 0.1rem 0.25rem;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AskSKY! direct embed — same-origin demo</h1>
+    <p>
+      Serve this site over HTTP(S), then open
+      <code>/embed/partner-demo.html</code>. Replace
+      <code>PROFILE_SLUG</code> and <code>AGENT_TOKEN</code> in the markup below
+      (or edit this file in <code>public/embed/</code>).
+    </p>
+    <p>
+      For a true cross-origin test, copy the script snippet to any other origin;
+      the browser will call your site’s <code>/api/embed/sky/*</code> endpoints
+      with CORS.
+    </p>
+  </body>
+</html>
