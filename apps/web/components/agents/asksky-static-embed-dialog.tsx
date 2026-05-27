@@ -60,13 +60,8 @@ function buildScriptSnippet(
   const cacheBust =
     (typeof process !== "undefined" && process.env.NEXT_PUBLIC_ASKSKY_EMBED_SCRIPT_VERSION?.trim()) || "1";
   const src = `${origin}/embed/asksky.js?v=${encodeURIComponent(cacheBust)}`;
-  return `<script
-  src="${escapeHtmlAttr(src)}"
-  data-profile-slug="${escapeHtmlAttr(profileSlug.trim())}"
-  data-agent-token="${escapeHtmlAttr(agentToken.trim())}"
-  data-variant="${variant}"
-  async
-></script>`;
+  
+  return `<script src="${escapeHtmlAttr(src)}" data-profile-slug="${escapeHtmlAttr(profileSlug.trim())}" data-agent-token="${escapeHtmlAttr(agentToken.trim())}" data-variant="${variant}" async ></script>`;
 }
 
 export interface AskSkyStaticEmbedDialogProps {
