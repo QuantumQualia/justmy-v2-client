@@ -7,7 +7,7 @@
 1. **Same host:** open `https://<your-site>/embed/partner-demo.html` after substituting slug and token in the HTML (or use the in-app “Script embed” snippet from AskSKY static embed).
 2. **Cross-origin:** paste the script snippet on a page served from another domain; ensure CSP allows `script-src` and `connect-src` for your JustMy origin.
 3. **Variants:** set `data-variant` to `inline`, `chatbot`, or `voice` (voice shows the placeholder card).
-4. **Inline height:** wrap the `<script>` in a container with a defined height and column flex so the widget fills it; messages scroll inside. Defaults: `min-height: 360px`, `max-height: min(640px, calc(100dvh - 120px))`. Override with `data-min-height="320px"` and/or `data-max-height="min(80dvh, 600px)"` (alphanumeric/CSS-unit characters only, max 80 chars each).
+4. **Inline height:** wrap the `<script>` in a container with a defined height and column flex so the widget fills it; messages scroll inside. Defaults: `min-height: 360px`, `max-height: 100dvh`. Override with `data-min-height="320px"` and/or `data-max-height="min(80dvh, 600px)"` (alphanumeric/CSS-unit characters only, max 80 chars each).
 5. **Session:** confirm a conversation survives reload in the same tab (`sessionStorage`).
 
 Rebuild after UI changes:

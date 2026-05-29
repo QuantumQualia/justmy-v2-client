@@ -60,10 +60,7 @@ function mountAskSkyFromScript(): void {
      * `max-height` caps the shell so the message list scrolls instead of growing the page.
      */
     const minHeightCss = parseCssLength(script.dataset.minHeight, "360px");
-    const maxHeightCss = parseCssLength(
-      script.dataset.maxHeight,
-      "min(640px, calc(100dvh - 120px))",
-    );
+    const maxHeightCss = parseCssLength(script.dataset.maxHeight, "100dvh");
     host.style.cssText = [
       "display:flex",
       "flex:1 1 auto",
