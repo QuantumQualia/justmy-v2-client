@@ -362,7 +362,7 @@ function AskSkyConversationView({
 
   return (
     <div
-      className={`flex min-h-0 min-w-0 flex-col ${fillsParent ? "flex-1" : ""}`}
+      className={cn("flex min-h-0 min-w-0 flex-col", fillsParent && "flex-1 overflow-hidden")}
     >
       {banner ? (
         <div
@@ -630,7 +630,11 @@ function AskSkyResolvedCard({
   glassChrome?: boolean;
 }) {
   return (
-    <div className={embedFill ? "flex min-h-0 min-w-0 flex-1 flex-col" : "flex flex-col"}>
+    <div
+      className={
+        embedFill ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : "flex flex-col"
+      }
+    >
       {glassChrome ? null : compactHeader ? (
         <div className="flex min-w-0 items-center gap-2 pb-3">
           {resolve.photo ? (
@@ -908,7 +912,7 @@ function AskSkyWidgetInner({
 
   if (embedFill) {
     return (
-      <div className="asksky-embed-inline flex min-h-0 w-full max-w-none flex-1 flex-col gap-0 overflow-hidden py-0">
+      <div className="asksky-embed-inline flex h-full min-h-0 max-h-full w-full max-w-none flex-1 flex-col gap-0 overflow-hidden py-0">
         <AskSkyResolveShell
           profileSlug={profileSlug}
           agentToken={agentToken}
