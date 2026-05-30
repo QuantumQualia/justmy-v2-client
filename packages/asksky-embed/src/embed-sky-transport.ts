@@ -1,4 +1,7 @@
 import { ApiClientError } from "./api-client-error";
+import { formatSkyApiErrorPayload } from "./sky-error-format";
+import { buildSkyMessageRequestBody } from "./sky-message-body";
+import { parseSkySseDataLine } from "./sky-sse-parse";
 import type {
   AskSkySkyTransport,
   SkyConversationResponse,
@@ -17,80 +20,6 @@ function skyResolveCacheKey(params: { profileSlug: string; agentToken: string })
 
 function skyGetConversationInflightKey(conversationId: number, visitorToken: string): string {
   return `${conversationId}\u0000${visitorToken.trim()}`;
-}
-
-function parseSseDataLine(
-  payload: string,
-  handlers: SkyStreamHandlers,
-  streamAccum: { current: string },
-): void {
-  const trimmed = payload.trim();
-  if (!trimmed || trimmed === "[DONE]") {
-    return;
-  }
-
-  let parsed: Record<string, unknown>;
-  try {
-    parsed = JSON.parse(trimmed) as Record<string, unknown>;
-  } catch {
-    handlers.onTextDelta?.(trimmed);
-    streamAccum.current += trimmed;
-    return;
-  }
-
-  const refusal =
-    parsed.refusal === true || parsed.refused === true || parsed.answerRefused === true;
-
-  if (typeof parsed.error === "string") {
-    handlers.onError?.(parsed.error);
-    return;
-  }
-
-  let delta =
-    (typeof parsed.delta === "string" && parsed.delta) ||
-    (typeof parsed.text === "string" && parsed.text) ||
-    (typeof parsed.content === "string" && parsed.content) ||
-    (typeof parsed.token === "string" && parsed.token) ||
-    "";
-
-  if (refusal && !delta) {
-    const fallback =
-      (typeof parsed.answer === "string" && parsed.answer) ||
-      (typeof parsed.message === "string" && parsed.message) ||
-      (typeof parsed.refusalMessage === "string" && parsed.refusalMessage) ||
-      "";
-    if (fallback) {
-      const accTrim = streamAccum.current.trimEnd();
-      const fbTrim = fallback.trimEnd();
-      if (accTrim !== fbTrim) {
-        delta = fallback;
-      }
-    }
-  }
-
-  if (delta) {
-    handlers.onTextDelta?.(delta);
-    streamAccum.current += delta;
-  }
-
-  if (refusal) {
-    handlers.onRefusal?.();
-  }
-
-  const conversationId =
-    typeof parsed.conversationId === "number"
-      ? parsed.conversationId
-      : typeof parsed.conversation_id === "number"
-        ? parsed.conversation_id
-        : undefined;
-  const visitorToken =
-    (typeof parsed.visitorToken === "string" && parsed.visitorToken) ||
-    (typeof parsed.visitor_token === "string" && parsed.visitor_token) ||
-    undefined;
-
-  if (conversationId != null || visitorToken) {
-    handlers.onMeta?.({ conversationId, visitorToken });
-  }
 }
 
 export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport {
@@ -128,9 +57,7 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
           const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
           if (!response.ok) {
             throw new ApiClientError(
-              (typeof data.message === "string" && data.message) ||
-                (typeof data.error === "string" && data.error) ||
-                "Failed to resolve AskSKY! profile and agent.",
+              formatSkyApiErrorPayload(data, "Failed to resolve AskSKY! profile and agent."),
               response.status,
             );
           }
@@ -166,9 +93,7 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
           const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
           if (!response.ok) {
             throw new ApiClientError(
-              (typeof data.message === "string" && data.message) ||
-                (typeof data.error === "string" && data.error) ||
-                "Failed to load conversation.",
+              formatSkyApiErrorPayload(data, "Failed to load conversation."),
               response.status,
             );
           }
@@ -189,23 +114,17 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
           Accept: "text/event-stream",
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          profileSlug: body.profileSlug,
-          agentToken: body.agentToken,
-          message: body.message,
-          conversationId: body.conversationId ?? 0,
-          visitorToken: body.visitorToken ?? "",
-        }),
+        body: JSON.stringify(buildSkyMessageRequestBody(body)),
       });
 
       if (!response.ok) {
         const text = await response.text().catch(() => "");
-        let message = `AskSKY! request failed (${response.status})`;
+        const fallback = `AskSKY! request failed (${response.status})`;
+        let message = fallback;
         try {
-          const j = JSON.parse(text) as { message?: string; error?: string };
-          message = j.message || j.error || message;
+          message = formatSkyApiErrorPayload(JSON.parse(text) as unknown, fallback);
         } catch {
-          if (text) {
+          if (text.trim()) {
             message = text.slice(0, 200);
           }
         }
@@ -239,7 +158,7 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
           const lines = rawEvent.split("\n");
           for (const line of lines) {
             if (line.startsWith("data:")) {
-              parseSseDataLine(line.slice(5), handlers, streamAccum);
+              parseSkySseDataLine(line.slice(5), handlers, streamAccum);
             }
           }
         }
@@ -249,7 +168,7 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
       if (tail) {
         for (const line of tail.split("\n")) {
           if (line.startsWith("data:")) {
-            parseSseDataLine(line.slice(5), handlers, streamAccum);
+            parseSkySseDataLine(line.slice(5), handlers, streamAccum);
           }
         }
       }

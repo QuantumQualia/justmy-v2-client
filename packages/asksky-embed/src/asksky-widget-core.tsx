@@ -3,8 +3,8 @@ import { Bot, Loader2, MessageCircle, Mic, Send, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Textarea } from "@workspace/ui/components/textarea";
-import { ApiClientError } from "./api-client-error";
 import type { AskSkySkyTransport, SkyConversationMessage, SkyResolveResponse } from "./sky-types";
+import { formatAskSkyUserFacingError } from "./sky-user-errors";
 import { LinkifiedMessage } from "./linkified-message";
 import { useIsMobile } from "./use-is-mobile";
 import { cn } from "@workspace/ui/lib/utils";
@@ -157,6 +157,9 @@ function AskSkyConversationView({
   const resolveLatest = React.useRef(resolve);
   resolveLatest.current = resolve;
 
+  /** API: when false, chat input should be disabled (knowledge base not configured). */
+  const knowledgeReady = resolve.hasKnowledgeBase !== false;
+
   const stopWordReveal = React.useCallback(() => {
     if (revealIntervalRef.current != null) {
       clearInterval(revealIntervalRef.current);
@@ -187,6 +190,7 @@ function AskSkyConversationView({
   // Hydration: `resolve` is read via `resolveLatest` so reference churn / StrictMode does not double-fetch `getConversation`.
   React.useEffect(() => {
     let cancelled = false;
+    setBanner(null);
 
     setMessages([]);
     setConversationId(null);
@@ -213,7 +217,7 @@ function AskSkyConversationView({
           content: m.content,
         }));
         setMessages(mergeGreetingFirst(resolveLatest.current, history));
-      } catch {
+      } catch (e) {
         if (cancelled) {
           return;
         }
@@ -221,6 +225,7 @@ function AskSkyConversationView({
         setConversationId(null);
         setVisitorToken(null);
         setMessages(initialGreetingMessages(resolveLatest.current));
+        setBanner(formatAskSkyUserFacingError(e));
       }
     })();
 
@@ -267,7 +272,7 @@ function AskSkyConversationView({
 
   const send = async () => {
     const trimmed = input.trim();
-    if (!trimmed || phase === "streaming") {
+    if (!trimmed || phase === "streaming" || !knowledgeReady) {
       return;
     }
     setInput("");
@@ -289,8 +294,8 @@ function AskSkyConversationView({
           profileSlug,
           agentToken,
           message: trimmed,
-          conversationId: conversationId ?? 0,
-          visitorToken: visitorToken ?? "",
+          ...(conversationId != null && conversationId > 0 ? { conversationId } : {}),
+          ...(visitorToken?.trim() ? { visitorToken: visitorToken.trim() } : {}),
         },
         {
           onTextDelta: (d) => {
@@ -342,8 +347,7 @@ function AskSkyConversationView({
         setMessages((prev) => [...prev, { role: "assistant", content: assistant, at: Date.now() }]);
       }
     } catch (e) {
-      const msg = e instanceof ApiClientError ? e.message : "Something went wrong. Please try again.";
-      setBanner(msg);
+      setBanner(formatAskSkyUserFacingError(e));
       setMessages((prev) => prev.slice(0, -1));
     } finally {
       stopWordReveal();
@@ -376,6 +380,21 @@ function AskSkyConversationView({
           )}
         >
           {banner}
+        </div>
+      ) : null}
+      {!knowledgeReady ? (
+        <div
+          className={cn(
+            "mx-4 mb-3 shrink-0 px-3 py-2 text-sm",
+            isEmbedInline
+              ? "mx-3 rounded-xl rounded-br-none border border-slate-600/50 bg-slate-800/80 text-slate-200"
+              : isGlassChrome
+                ? "asksky-glass-banner border-slate-600/40"
+                : "rounded-lg rounded-br-none border border-slate-600/50 bg-slate-800/60 text-slate-200",
+          )}
+        >
+          Chat is not available yet — the knowledge base for this agent is not set up. You can still read the greeting
+          above; contact the business for other ways to reach them.
         </div>
       ) : null}
 
@@ -573,11 +592,12 @@ function AskSkyConversationView({
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Type your message..."
+            placeholder={knowledgeReady ? "Type your message..." : "Chat unavailable until knowledge base is configured"}
             rows={1}
-            aria-disabled={phase === "streaming"}
+            disabled={!knowledgeReady}
+            aria-disabled={phase === "streaming" || !knowledgeReady}
             className={cn(
-              phase === "streaming" ? "opacity-80" : "",
+              phase === "streaming" || !knowledgeReady ? "opacity-80" : "",
               isEmbedInline
                 ? "asksky-embed-input min-h-[42px] max-h-[120px] min-w-0 flex-1 resize-none px-4 py-2.5 transition-colors scrollbar-hide"
                 : isGlassChrome
@@ -595,7 +615,7 @@ function AskSkyConversationView({
           />
           <Button
             type="submit"
-            disabled={phase === "streaming" || !input.trim()}
+            disabled={phase === "streaming" || !input.trim() || !knowledgeReady}
             className={cn(
               "h-11 w-11 shrink-0 rounded-full p-0",
               isEmbedInline
@@ -758,7 +778,7 @@ function AskSkyResolveShell({
         }
       } catch (e) {
         if (!cancelled) {
-          setResolveError(e instanceof Error ? e.message : "Could not resolve AskSKY!.");
+          setResolveError(formatAskSkyUserFacingError(e));
         }
       } finally {
         if (!cancelled) {
