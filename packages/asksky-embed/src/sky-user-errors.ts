@@ -21,7 +21,8 @@ function getHttpStatusAndMessage(e: unknown): { status: number; message: string 
 export function formatAskSkyUserFacingError(e: unknown): string {
   const http = getHttpStatusAndMessage(e);
   if (http) {
-    const server = http.message.trim();
+    // const server = http.message.trim();
+    const server = '';
     const { status } = http;
 
     if (status === 404) {
