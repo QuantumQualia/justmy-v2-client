@@ -26,6 +26,7 @@ import {
   Code2,
   Bot,
   MessageCircle,
+  FileText,
 } from "lucide-react";
 
 export interface BlockTypeConfig {
@@ -239,6 +240,14 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Agents Management",
     icon: <Bot className="h-5 w-5" />,
     description: "Agents panel for the active profile with knowledge sources and ingestion controls",
+    category: "Apps",
+  },
+  {
+    value: "myform-management-block",
+    label: "myFORM Management",
+    icon: <FileText className="h-5 w-5" />,
+    description:
+      "Full myFORM manager on this page URL (list, new, edit; submissions dialog via ?myform=submissions&formId=)",
     category: "Apps",
   },
   {

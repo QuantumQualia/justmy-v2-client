@@ -1,10 +1,12 @@
 import { ApiClientError } from "./api-client-error";
 import { formatSkyApiErrorPayload } from "./sky-error-format";
 import { buildSkyMessageRequestBody } from "./sky-message-body";
-import { parseSkySseDataLine } from "./sky-sse-parse";
+import { parseSkySseRawEvent } from "./sky-sse-parse";
 import type {
   AskSkySkyTransport,
   SkyConversationResponse,
+  SkyLeadCaptureRequest,
+  SkyLeadCaptureResponse,
   SkyMessageRequest,
   SkyResolveResponse,
   SkyStreamHandlers,
@@ -107,6 +109,28 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
       return pending;
     },
 
+    async skyPostLeadCapture(
+      conversationId: number,
+      body: SkyLeadCaptureRequest,
+    ): Promise<SkyLeadCaptureResponse> {
+      const response = await fetch(`${base}/conversations/${conversationId}/lead-capture`, {
+        method: "POST",
+        headers: { Accept: "application/json", "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!response.ok) {
+        throw new ApiClientError(
+          formatSkyApiErrorPayload(data, "Failed to record lead in conversation."),
+          response.status,
+        );
+      }
+      const messageId = data.messageId;
+      return {
+        messageId: typeof messageId === "number" ? messageId : Number(messageId),
+      };
+    },
+
     async streamSkyMessage(body: SkyMessageRequest, handlers: SkyStreamHandlers): Promise<void> {
       const response = await fetch(`${base}/messages`, {
         method: "POST",
@@ -155,22 +179,13 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
           buffer = buffer.slice(boundary + 2);
           boundary = buffer.indexOf("\n\n");
 
-          const lines = rawEvent.split("\n");
-          for (const line of lines) {
-            if (line.startsWith("data:")) {
-              parseSkySseDataLine(line.slice(5), handlers, streamAccum);
-            }
-          }
+          parseSkySseRawEvent(rawEvent, handlers, streamAccum);
         }
       }
 
       const tail = buffer.trim();
       if (tail) {
-        for (const line of tail.split("\n")) {
-          if (line.startsWith("data:")) {
-            parseSkySseDataLine(line.slice(5), handlers, streamAccum);
-          }
-        }
+        parseSkySseRawEvent(tail, handlers, streamAccum);
       }
     },
   };

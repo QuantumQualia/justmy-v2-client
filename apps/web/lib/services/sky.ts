@@ -1,54 +1,28 @@
 import { buildApiUrl } from "@/lib/config";
 import { ApiClientError } from "@/lib/api-client";
 import { tokenStorage } from "@/lib/storage/token-storage";
+import type {
+  SkyConversationResponse,
+  SkyLeadCaptureRequest,
+  SkyLeadCaptureResponse,
+  SkyMessageRequest,
+  SkyResolveResponse,
+  SkyStreamHandlers,
+} from "@workspace/asksky-embed";
 import {
   buildSkyMessageRequestBody,
   formatSkyApiErrorPayload,
-  parseSkySseDataLine,
+  parseSkySseRawEvent,
 } from "@workspace/asksky-embed";
 
-export interface SkyResolveResponse {
-  name: string;
-  slug: string;
-  tagline?: string;
-  photo?: string;
-  banner?: string;
-  agentName: string;
-  agentToken: string;
-  greetingMessage?: string | null;
-  hasKnowledgeBase: boolean;
-}
-
-export interface SkyMessageRequest {
-  profileSlug: string;
-  agentToken: string;
-  message: string;
-  conversationId?: number | null;
-  visitorToken?: string | null;
-}
-
-export interface SkyConversationMessage {
-  id: number;
-  role: string;
-  content: string;
-  model?: string;
-  retrievedDocs?: unknown[];
-  createdAt?: string;
-}
-
-export interface SkyConversationResponse {
-  conversationId: number;
-  agentName: string;
-  agentToken: string;
-  messages: SkyConversationMessage[];
-}
-
-export type SkyStreamHandlers = {
-  onTextDelta?: (delta: string) => void;
-  onMeta?: (meta: { conversationId?: number; visitorToken?: string }) => void;
-  onRefusal?: () => void;
-  onError?: (message: string) => void;
-};
+export type {
+  SkyConversationMessage,
+  SkyConversationResponse,
+  SkyLeadCaptureRequest,
+  SkyLeadCaptureResponse,
+  SkyMessageRequest,
+  SkyResolveResponse,
+} from "@workspace/asksky-embed";
 
 async function skyHeaders(): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
@@ -156,6 +130,34 @@ export async function skyGetConversation(
   return pending;
 }
 
+export async function skyPostLeadCapture(
+  conversationId: number,
+  body: SkyLeadCaptureRequest,
+): Promise<SkyLeadCaptureResponse> {
+  const headers = await skyHeaders();
+  const url = buildApiUrl(`sky/conversations/${conversationId}/lead-capture`);
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      ...headers,
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!response.ok) {
+    throw new ApiClientError(
+      formatSkyApiErrorPayload(data, "Failed to record lead in conversation."),
+      response.status,
+    );
+  }
+  const messageId = data.messageId;
+  return {
+    messageId: typeof messageId === "number" ? messageId : Number(messageId),
+  };
+}
+
 /**
  * POST /sky/messages — streamed SSE body (no JSON response).
  */
@@ -213,21 +215,12 @@ export async function streamSkyMessage(
       buffer = buffer.slice(boundary + 2);
       boundary = buffer.indexOf("\n\n");
 
-      const lines = rawEvent.split("\n");
-      for (const line of lines) {
-        if (line.startsWith("data:")) {
-          parseSkySseDataLine(line.slice(5), handlers, streamAccum);
-        }
-      }
+          parseSkySseRawEvent(rawEvent, handlers, streamAccum);
     }
   }
 
   const tail = buffer.trim();
   if (tail) {
-    for (const line of tail.split("\n")) {
-      if (line.startsWith("data:")) {
-        parseSkySseDataLine(line.slice(5), handlers, streamAccum);
-      }
-    }
+    parseSkySseRawEvent(tail, handlers, streamAccum);
   }
 }

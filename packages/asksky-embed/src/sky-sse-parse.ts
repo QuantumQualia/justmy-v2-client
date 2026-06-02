@@ -1,4 +1,4 @@
-import type { SkyStreamHandlers } from "./sky-types";
+import type { SkySseDonePayload, SkySseMetaPayload, SkyStreamHandlers } from "./sky-types";
 
 function isLikelySseErrorEventPayload(parsed: Record<string, unknown>, refusal: boolean): boolean {
   if (refusal) {
@@ -32,6 +32,8 @@ function isLikelySseErrorEventPayload(parsed: Record<string, unknown>, refusal: 
   const hasDoneShape =
     typeof parsed.answer === "string" ||
     Array.isArray(parsed.retrievedDocs) ||
+    typeof parsed.requestingContactDetails === "boolean" ||
+    typeof parsed.visitorContactCaptured === "boolean" ||
     parsed.refused === true ||
     parsed.refusal === true ||
     parsed.answerRefused === true;
@@ -41,11 +43,85 @@ function isLikelySseErrorEventPayload(parsed: Record<string, unknown>, refusal: 
   return true;
 }
 
-/** Parse one SSE `data:` line (JSON or raw text) for AskSKY streams. */
+function normalizeMeta(parsed: Record<string, unknown>): SkySseMetaPayload | null {
+  const conversationId =
+    typeof parsed.conversationId === "number"
+      ? parsed.conversationId
+      : typeof parsed.conversation_id === "number"
+        ? parsed.conversation_id
+        : undefined;
+  if (conversationId == null) {
+    return null;
+  }
+  const visitorToken =
+    (typeof parsed.visitorToken === "string" ? parsed.visitorToken : null) ??
+    (typeof parsed.visitor_token === "string" ? parsed.visitor_token : null);
+
+  return {
+    conversationId,
+    agentId: typeof parsed.agentId === "number" ? parsed.agentId : undefined,
+    agentToken: typeof parsed.agentToken === "string" ? parsed.agentToken : undefined,
+    visitorToken,
+    userMessageId: typeof parsed.userMessageId === "number" ? parsed.userMessageId : undefined,
+    assistantMessageId:
+      typeof parsed.assistantMessageId === "number" ? parsed.assistantMessageId : undefined,
+    refused: parsed.refused === true || parsed.refusal === true,
+    visitorContactCaptured:
+      typeof parsed.visitorContactCaptured === "boolean" ? parsed.visitorContactCaptured : undefined,
+    requestingContactDetails:
+      typeof parsed.requestingContactDetails === "boolean" ? parsed.requestingContactDetails : undefined,
+  };
+}
+
+function normalizeDone(parsed: Record<string, unknown>): SkySseDonePayload | null {
+  const conversationId =
+    typeof parsed.conversationId === "number"
+      ? parsed.conversationId
+      : typeof parsed.conversation_id === "number"
+        ? parsed.conversation_id
+        : undefined;
+  if (conversationId == null) {
+    return null;
+  }
+  const answer = typeof parsed.answer === "string" ? parsed.answer : "";
+  const refused = parsed.refused === true || parsed.refusal === true || parsed.answerRefused === true;
+  const retrievedDocs = Array.isArray(parsed.retrievedDocs) ? parsed.retrievedDocs : [];
+  return {
+    conversationId,
+    agentId: typeof parsed.agentId === "number" ? parsed.agentId : undefined,
+    assistantMessageId:
+      typeof parsed.assistantMessageId === "number" ? parsed.assistantMessageId : undefined,
+    answer,
+    refused,
+    retrievedDocs,
+    visitorContactCaptured: parsed.visitorContactCaptured === true,
+    requestingContactDetails: parsed.requestingContactDetails === true,
+  };
+}
+
+/** Legacy SSE without `event:` lines — `done` JSON includes answer + flags. */
+function looksLikeDonePayload(parsed: Record<string, unknown>): boolean {
+  if (typeof parsed.answer !== "string") {
+    return false;
+  }
+  if (typeof parsed.requestingContactDetails === "boolean" && typeof parsed.visitorContactCaptured === "boolean") {
+    return true;
+  }
+  if (Array.isArray(parsed.retrievedDocs)) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Parse one SSE `data:` line for AskSKY streams.
+ * @param sseEvent — from preceding `event:` line (`meta`, `done`, `delta`, `error`, …). When omitted, heuristics apply.
+ */
 export function parseSkySseDataLine(
   payload: string,
   handlers: SkyStreamHandlers,
   streamAccum: { current: string },
+  sseEvent?: string,
 ): void {
   const trimmed = payload.trim();
   if (!trimmed || trimmed === "[DONE]") {
@@ -56,21 +132,64 @@ export function parseSkySseDataLine(
   try {
     parsed = JSON.parse(trimmed) as Record<string, unknown>;
   } catch {
-    handlers.onTextDelta?.(trimmed);
-    streamAccum.current += trimmed;
+    if (sseEvent !== "done" && sseEvent !== "meta") {
+      handlers.onTextDelta?.(trimmed);
+      streamAccum.current += trimmed;
+    }
+    return;
+  }
+
+  const ev = (sseEvent ?? "").trim().toLowerCase();
+
+  if (ev === "error" || typeof parsed.error === "string") {
+    const msg =
+      typeof parsed.message === "string" && parsed.message.trim()
+        ? parsed.message.trim()
+        : typeof parsed.error === "string"
+          ? parsed.error
+          : "Request failed.";
+    handlers.onError?.(msg);
     return;
   }
 
   const refusal =
     parsed.refusal === true || parsed.refused === true || parsed.answerRefused === true;
 
-  if (typeof parsed.error === "string") {
-    handlers.onError?.(parsed.error);
+  if (isLikelySseErrorEventPayload(parsed, refusal)) {
+    handlers.onError?.((parsed.message as string).trim());
     return;
   }
 
-  if (isLikelySseErrorEventPayload(parsed, refusal)) {
-    handlers.onError?.((parsed.message as string).trim());
+  if (ev === "meta") {
+    const meta = normalizeMeta(parsed);
+    if (meta) {
+      handlers.onMeta?.(meta);
+    }
+    if (refusal) {
+      handlers.onRefusal?.();
+    }
+    return;
+  }
+
+  if (ev === "done") {
+    const done = normalizeDone(parsed);
+    if (done) {
+      handlers.onDone?.(done);
+      if (done.refused) {
+        handlers.onRefusal?.();
+      }
+    }
+    return;
+  }
+
+  if (looksLikeDonePayload(parsed)) {
+    const done = normalizeDone(parsed);
+    if (done) {
+      handlers.onDone?.(done);
+      if (done.refused) {
+        handlers.onRefusal?.();
+      }
+    }
     return;
   }
 
@@ -105,18 +224,24 @@ export function parseSkySseDataLine(
     handlers.onRefusal?.();
   }
 
-  const conversationId =
-    typeof parsed.conversationId === "number"
-      ? parsed.conversationId
-      : typeof parsed.conversation_id === "number"
-        ? parsed.conversation_id
-        : undefined;
-  const visitorToken =
-    (typeof parsed.visitorToken === "string" && parsed.visitorToken) ||
-    (typeof parsed.visitor_token === "string" && parsed.visitor_token) ||
-    undefined;
+  const meta = normalizeMeta(parsed);
+  if (meta && (meta.visitorToken != null || meta.userMessageId != null || meta.assistantMessageId != null)) {
+    handlers.onMeta?.(meta);
+  }
+}
 
-  if (conversationId != null || visitorToken) {
-    handlers.onMeta?.({ conversationId, visitorToken });
+/** Parse a full SSE event block (`event:` + `data:` lines). */
+export function parseSkySseRawEvent(
+  rawEvent: string,
+  handlers: SkyStreamHandlers,
+  streamAccum: { current: string },
+): void {
+  let eventName: string | undefined;
+  for (const line of rawEvent.split("\n")) {
+    if (line.startsWith("event:")) {
+      eventName = line.slice(6).trim();
+    } else if (line.startsWith("data:")) {
+      parseSkySseDataLine(line.slice(5), handlers, streamAccum, eventName);
+    }
   }
 }

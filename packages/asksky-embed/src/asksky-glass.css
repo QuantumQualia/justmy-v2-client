@@ -319,3 +319,43 @@
     background: rgba(15, 23, 42, 0.9);
   }
 }
+
+/* Assistant “typing” indicator while waiting for streamed tokens */
+@keyframes asksky-typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.asksky-typing-dot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: asksky-typing-dot 1s ease-in-out infinite;
+}
+
+.asksky-typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.asksky-typing-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.asksky-typing-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.asksky-typing-dot-sm {
+  width: 0.3rem;
+  height: 0.3rem;
+}

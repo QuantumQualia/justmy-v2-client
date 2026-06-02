@@ -199,7 +199,7 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
 
         {/* Input + neon cursor */}
         <div className="relative flex-1 flex items-center gap-2 min-w-0">
-          <div className="relative flex-1 min-w-[120px]">
+          <div className="relative flex-1 min-w-0">
             <Input
               type="text"
               value={localQuery}
@@ -217,7 +217,7 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
                     : "Search profiles, markets, content…"
               }
               className={cn(
-                "h-7 md:h-9 border-0 bg-transparent px-0 text-xs md:text-sm text-slate-100",
+                "h-7 md:h-9 border-0 px-0 text-xs md:text-sm text-slate-100 dark:bg-transparent",
                 "placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0",
                 businessSearchMode && showGhostPhrase && "placeholder:text-slate-400/60"
               )}

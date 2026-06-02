@@ -110,6 +110,7 @@ function mountAskSkyFromScript(): void {
         embedFill={embedFill}
         sky={sky}
         visitorUserBubble={null}
+        embedAppOrigin={origin}
       />
     </StrictMode>,
   );

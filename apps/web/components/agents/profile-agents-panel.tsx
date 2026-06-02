@@ -46,6 +46,7 @@ import {
 import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
+import { AgentLeadsDialog } from "@/components/agents/agent-leads-dialog";
 import { AskSkyStaticEmbedDialog } from "@/components/agents/asksky-static-embed-dialog";
 import { DataTable } from "@/components/ui/data-table";
 import { agentQueryKeys } from "@/lib/query/agent-query-keys";
@@ -63,6 +64,7 @@ import {
   type UpdateAgentDto,
   type UploadDocumentKnowledgeSourceDto,
 } from "@/lib/services/agents";
+import { formsService } from "@/lib/services/forms";
 import { useProfileStore } from "@/lib/store";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -359,17 +361,22 @@ function AgentFormDialog({
   onOpenChange,
   onSubmit,
   submitting,
+  publishedForms,
+  formsLoading,
 }: {
   state: AgentDialogState;
   onOpenChange: (open: boolean) => void;
   onSubmit: (values: CreateAgentDto | UpdateAgentDto) => Promise<void>;
   submitting: boolean;
+  publishedForms: { id: number; name: string }[];
+  formsLoading: boolean;
 }) {
   const [name, setName] = React.useState("");
   const [greetingMessage, setGreetingMessage] = React.useState("");
   const [customPromptText, setCustomPromptText] = React.useState("");
   const [isActive, setIsActive] = React.useState(true);
   const [isPublic, setIsPublic] = React.useState(true);
+  const [contactFormKey, setContactFormKey] = React.useState<string>("__none__");
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -382,6 +389,8 @@ function AgentFormDialog({
     setCustomPromptText(state.agent?.customPromptText ?? "");
     setIsActive(state.agent?.isActive ?? true);
     setIsPublic(state.agent?.isPublic ?? true);
+    const cf = state.agent?.contactFormId;
+    setContactFormKey(typeof cf === "number" && Number.isFinite(cf) ? String(cf) : "__none__");
     setError(null);
   }, [state]);
 
@@ -398,12 +407,15 @@ function AgentFormDialog({
 
     setError(null);
 
+    const contactFormId = contactFormKey === "__none__" ? null : Number(contactFormKey);
+
     await onSubmit({
       name: trimmedName,
       greetingMessage: greetingMessage.trim() || null,
       customPromptText: customPromptText.trim() || null,
       isActive,
       isPublic,
+      contactFormId,
     });
   };
 
@@ -510,6 +522,38 @@ function AgentFormDialog({
               className="min-h-40 border-slate-700 bg-slate-900 text-white"
               disabled={submitting}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="agent-contact-form" className="text-slate-200">
+              AskSKY contact form <span className="text-slate-500">(optional)</span>
+            </Label>
+            <Select
+              value={contactFormKey}
+              onValueChange={setContactFormKey}
+              disabled={submitting || formsLoading}
+            >
+              <SelectTrigger
+                id="agent-contact-form"
+                className="border-slate-700 bg-slate-900 text-white"
+              >
+                <SelectValue
+                  placeholder={formsLoading ? "Loading forms…" : "No form"}
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__none__">None</SelectItem>
+                {publishedForms.map((f) => (
+                  <SelectItem key={f.id} value={String(f.id)}>
+                    {f.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-slate-500">
+              Only published myFORM definitions can be linked. Visitors see it inside AskSKY as an optional lead
+              capture card.
+            </p>
           </div>
 
           {publicIdentifier ? (
@@ -1111,11 +1155,41 @@ export function ProfileAgentsPanel({
   const [reindexSourceTarget, setReindexSourceTarget] =
     React.useState<KnowledgeSourceResponseDto | null>(null);
   const [askSkyEmbedAgent, setAskSkyEmbedAgent] = React.useState<AgentResponseDto | null>(null);
+  const [askSkyLeadsAgent, setAskSkyLeadsAgent] = React.useState<AgentResponseDto | null>(null);
 
   const agentsQuery = useQuery({
     queryKey: agentQueryKeys.agents(),
     queryFn: () => agentsService.listProfileAgents(),
   });
+
+  const formsQuery = useQuery({
+    queryKey: ["profile-forms", "agents-picker", 100, 0],
+    queryFn: () => formsService.listProfileForms({ take: 100, skip: 0 }),
+  });
+
+  const publishedForms = React.useMemo(
+    () =>
+      (formsQuery.data?.forms ?? [])
+        .filter((f) => f.status === "published")
+        .map((f) => ({ id: f.id, name: f.name })),
+    [formsQuery.data],
+  );
+
+  const leadsFormName = React.useMemo(() => {
+    if (!askSkyLeadsAgent || typeof askSkyLeadsAgent.contactFormId !== "number") {
+      return null;
+    }
+    return (formsQuery.data?.forms ?? []).find((f) => f.id === askSkyLeadsAgent.contactFormId)?.name ?? null;
+  }, [askSkyLeadsAgent, formsQuery.data]);
+
+  const leadsFormSchema = React.useMemo((): Record<string, unknown> | null => {
+    if (!askSkyLeadsAgent || typeof askSkyLeadsAgent.contactFormId !== "number") {
+      return null;
+    }
+    const f = (formsQuery.data?.forms ?? []).find((x) => x.id === askSkyLeadsAgent.contactFormId);
+    const sch = f?.schema;
+    return sch && typeof sch === "object" && !Array.isArray(sch) ? sch : null;
+  }, [askSkyLeadsAgent, formsQuery.data]);
 
   const sharedKnowledgeQuery = useQuery({
     queryKey: agentQueryKeys.knowledgeShared(sharedKnowledgePage, KNOWLEDGE_PAGE_SIZE),
@@ -1596,6 +1670,22 @@ export function ProfileAgentsPanel({
                 variant="outline"
                 size="sm"
                 className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                disabled={typeof agent.contactFormId !== "number"}
+                title={
+                  typeof agent.contactFormId === "number"
+                    ? "View submissions for this agent’s linked form"
+                    : "Link a published myFORM in Edit to track AskSKY leads"
+                }
+                onClick={() => setAskSkyLeadsAgent(agent)}
+              >
+                <FileText className="h-4 w-4" />
+                Leads
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
                 disabled={!agent.isActive}
                 title={
                   agent.isActive
@@ -1650,6 +1740,20 @@ export function ProfileAgentsPanel({
           });
         }}
         submitting={saveAgentMutation.isPending}
+        publishedForms={publishedForms}
+        formsLoading={formsQuery.isPending}
+      />
+
+      <AgentLeadsDialog
+        open={askSkyLeadsAgent != null}
+        agent={askSkyLeadsAgent}
+        formName={leadsFormName}
+        linkedFormSchema={leadsFormSchema}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAskSkyLeadsAgent(null);
+          }
+        }}
       />
 
       <AskSkyStaticEmbedDialog

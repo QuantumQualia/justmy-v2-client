@@ -26,6 +26,8 @@ export interface AgentResponseDto {
   profileId?: number | string;
   name: string;
   agentToken?: string | null;
+  /** Linked myFORM (published) for AskSKY lead capture; from profiles/agents API. */
+  contactFormId?: number | null;
   customPromptText?: string | null;
   greetingMessage?: string | null;
   isActive: boolean;
@@ -45,6 +47,7 @@ export interface CreateAgentDto {
   greetingMessage?: string | null;
   isActive?: boolean;
   isPublic?: boolean;
+  contactFormId?: number | null;
 }
 
 export interface UpdateAgentDto {
@@ -53,6 +56,7 @@ export interface UpdateAgentDto {
   greetingMessage?: string | null;
   isActive?: boolean;
   isPublic?: boolean;
+  contactFormId?: number | null;
 }
 
 export interface KnowledgeSourceResponseDto {
@@ -384,6 +388,12 @@ function normalizeAgent(agent: AgentResponseDto): AgentResponseDto {
     id: String(agent.id),
     profileId: normalizeOptionalId(agent.profileId),
     agentToken: typeof agent.agentToken === "string" ? agent.agentToken : null,
+    contactFormId:
+      typeof (agent as { contactFormId?: unknown }).contactFormId === "number"
+        ? ((agent as { contactFormId: number }).contactFormId as number)
+        : (agent as { contactFormId?: unknown }).contactFormId === null
+          ? null
+          : undefined,
     publicIdentifier,
     sharedKnowledgeSourceCount,
     privateKnowledgeSourceCount,

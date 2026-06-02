@@ -1,13 +1,21 @@
 import * as React from "react";
-import { Bot, Loader2, MessageCircle, Mic, Send, X } from "lucide-react";
+import { Bot, Loader2, MessageCircle, Mic, Send } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Textarea } from "@workspace/ui/components/textarea";
-import type { AskSkySkyTransport, SkyConversationMessage, SkyResolveResponse } from "./sky-types";
+import type {
+  AskSkySkyTransport,
+  SkyConversationMessage,
+  SkyResolveContactForm,
+  SkyResolveResponse,
+  SkySseDonePayload,
+} from "./sky-types";
 import { formatAskSkyUserFacingError } from "./sky-user-errors";
 import { LinkifiedMessage } from "./linkified-message";
 import { useIsMobile } from "./use-is-mobile";
 import { cn } from "@workspace/ui/lib/utils";
+import { AskSkyEmbedPublicForm } from "./asksky-embed-public-form";
+import { toSkyLeadCaptureFields, type AskSkyPersistLeadCaptureArgs } from "./format-lead-answers-summary";
 import "./asksky-glass.css";
 
 export type AskSkyVariant = "inline" | "voice" | "chatbot";
@@ -68,7 +76,20 @@ function loadPersisted(embedKey: string): { conversationId: number; visitorToken
     return null;
   }
   try {
-    const raw = sessionStorage.getItem(storageKey(embedKey));
+    const primaryKey = storageKey(embedKey);
+    let raw = sessionStorage.getItem(primaryKey);
+    if (!raw) {
+      const legacyKey = storageKey(`${embedKey}:chatbot`);
+      raw = sessionStorage.getItem(legacyKey);
+      if (raw) {
+        try {
+          sessionStorage.setItem(primaryKey, raw);
+          sessionStorage.removeItem(legacyKey);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
     if (!raw) {
       return null;
     }
@@ -98,8 +119,24 @@ function persistConversation(embedKey: string, conversationId: number, visitorTo
 
 type AskSkyChatMessage = Pick<SkyConversationMessage, "role" | "content"> & {
   refusal?: boolean;
+  /** After SSE `requestingContactDetails`, show linked contact form inline (below this assistant message). */
+  showContactForm?: boolean;
+  model?: string | null;
   at?: number;
 };
+
+/** Optional slot for myFORM lead capture (implemented in the host app, e.g. Next.js `DynamicForm`). */
+export type AskSkyRenderContactLeadCapture = (ctx: {
+  contactForm: SkyResolveContactForm;
+  profileSlug: string;
+  agentToken: string;
+  visualVariant: "embed-inline" | "glass" | "default";
+  /**
+   * After myFORM submit succeeds, persist answers on the server (`POST .../lead-capture`) and refresh
+   * the transcript. Omitted when there is no conversation yet.
+   */
+  persistLeadInConversation?: (args: AskSkyPersistLeadCaptureArgs) => Promise<void>;
+}) => React.ReactNode;
 
 function initialGreetingMessages(resolve: SkyResolveResponse): AskSkyChatMessage[] {
   const text = resolve.greetingMessage?.trim();
@@ -125,12 +162,38 @@ function mergeGreetingFirst(resolve: SkyResolveResponse, history: AskSkyChatMess
 const chatScrollClasses =
   "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
 
+function AskSkyTypingIndicator({
+  isEmbedInline,
+  isGlassChrome,
+}: {
+  isEmbedInline: boolean;
+  isGlassChrome: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-1.5 py-1",
+        isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-300" : "text-slate-400",
+      )}
+      role="status"
+      aria-live="polite"
+      aria-label="Assistant is replying"
+    >
+      <span className="asksky-typing-dot" />
+      <span className="asksky-typing-dot" />
+      <span className="asksky-typing-dot" />
+    </div>
+  );
+}
+
 function AskSkyConversationView({
   resolve,
   profileSlug,
   agentToken,
   embedKey,
   conversationLayout = "inline",
+  renderContactLeadCapture,
+  embedAppOrigin,
 }: {
   resolve: SkyResolveResponse;
   profileSlug: string;
@@ -138,6 +201,12 @@ function AskSkyConversationView({
   embedKey: string;
   /** `"panel"` | `"embed"` = flex fill inside a fixed-height shell (chatbot panel or iframe). */
   conversationLayout?: "inline" | "panel" | "embed";
+  renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
+  /**
+   * When `renderContactLeadCapture` is omitted (e.g. script shadow embed), refusal-time contact capture
+   * loads `/embed/myform` from this origin in an iframe.
+   */
+  embedAppOrigin?: string;
 }) {
   const isMobile = useIsMobile();
   const { sky, visitorUserBubble: profile } = useAskSkyRuntime();
@@ -145,6 +214,8 @@ function AskSkyConversationView({
   const [input, setInput] = React.useState("");
   const [conversationId, setConversationId] = React.useState<number | null>(null);
   const [visitorToken, setVisitorToken] = React.useState<string | null>(null);
+  /** From `GET /sky/conversations` or latest SSE `done` — hides lead form when contact already captured. */
+  const [visitorContactCaptured, setVisitorContactCaptured] = React.useState(false);
   const [streamingText, setStreamingText] = React.useState("");
   const [phase, setPhase] = React.useState<"idle" | "streaming">("idle");
   const [banner, setBanner] = React.useState<string | null>(null);
@@ -156,6 +227,11 @@ function AskSkyConversationView({
   /** Latest resolve for async paths without re-subscribing the hydration effect when the object reference changes. */
   const resolveLatest = React.useRef(resolve);
   resolveLatest.current = resolve;
+
+  const conversationIdRef = React.useRef<number | null>(conversationId);
+  conversationIdRef.current = conversationId;
+  const visitorTokenRef = React.useRef<string | null>(visitorToken);
+  visitorTokenRef.current = visitorToken;
 
   /** API: when false, chat input should be disabled (knowledge base not configured). */
   const knowledgeReady = resolve.hasKnowledgeBase !== false;
@@ -195,6 +271,7 @@ function AskSkyConversationView({
     setMessages([]);
     setConversationId(null);
     setVisitorToken(null);
+    setVisitorContactCaptured(false);
 
     const saved = loadPersisted(embedKey);
     if (!saved) {
@@ -215,7 +292,9 @@ function AskSkyConversationView({
         const history = conv.messages.map((m) => ({
           role: m.role,
           content: m.content,
+          ...(m.model != null && m.model !== "" ? { model: m.model } : {}),
         }));
+        setVisitorContactCaptured(Boolean(conv.visitorContactCaptured));
         setMessages(mergeGreetingFirst(resolveLatest.current, history));
       } catch (e) {
         if (cancelled) {
@@ -224,6 +303,7 @@ function AskSkyConversationView({
         sessionStorage.removeItem(storageKey(embedKey));
         setConversationId(null);
         setVisitorToken(null);
+        setVisitorContactCaptured(false);
         setMessages(initialGreetingMessages(resolveLatest.current));
         setBanner(formatAskSkyUserFacingError(e));
       }
@@ -236,7 +316,7 @@ function AskSkyConversationView({
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, streamingText]);
+  }, [messages, streamingText, phase]);
 
   React.useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -270,6 +350,37 @@ function AskSkyConversationView({
     });
   }, [isMobile]);
 
+  const persistLeadInConversation = React.useCallback(
+    async (args: AskSkyPersistLeadCaptureArgs) => {
+      const cid = conversationIdRef.current;
+      const vt = visitorTokenRef.current?.trim();
+      if (cid == null || cid <= 0 || !vt) {
+        setBanner("Could not link your details to this chat. Send another message and try the form again.");
+        return;
+      }
+      try {
+        await sky.skyPostLeadCapture(cid, {
+          profileSlug,
+          agentToken,
+          visitorToken: vt,
+          ...(args.formTitle?.trim() ? { formTitle: args.formTitle.trim() } : {}),
+          fields: toSkyLeadCaptureFields(args.answers, args.schema),
+        });
+        const conv = await sky.skyGetConversation(cid, vt);
+        setVisitorContactCaptured(Boolean(conv.visitorContactCaptured));
+        const history = conv.messages.map((m) => ({
+          role: m.role,
+          content: m.content,
+          ...(m.model != null && m.model !== "" ? { model: m.model } : {}),
+        }));
+        setMessages(mergeGreetingFirst(resolveLatest.current, history));
+      } catch (e) {
+        setBanner(formatAskSkyUserFacingError(e));
+      }
+    },
+    [agentToken, profileSlug, sky],
+  );
+
   const send = async () => {
     const trimmed = input.trim();
     if (!trimmed || phase === "streaming" || !knowledgeReady) {
@@ -286,7 +397,12 @@ function AskSkyConversationView({
     stopWordReveal();
 
     let assistant = "";
-    let refused = false;
+    let refusedKb = false;
+    let lastDone: SkySseDonePayload | undefined;
+    const lastMeta: {
+      requestingContactDetails?: boolean;
+      visitorContactCaptured?: boolean;
+    } = {};
 
     try {
       await sky.streamSkyMessage(
@@ -305,17 +421,36 @@ function AskSkyConversationView({
           },
           onMeta: (meta) => {
             if (typeof meta.conversationId === "number") {
+              conversationIdRef.current = meta.conversationId;
               setConversationId(meta.conversationId);
             }
             if (meta.visitorToken) {
+              visitorTokenRef.current = meta.visitorToken;
               setVisitorToken(meta.visitorToken);
             }
             if (typeof meta.conversationId === "number" && meta.visitorToken) {
               persistConversation(embedKey, meta.conversationId, meta.visitorToken);
             }
+            if (typeof meta.requestingContactDetails === "boolean") {
+              lastMeta.requestingContactDetails = meta.requestingContactDetails;
+            }
+            if (typeof meta.visitorContactCaptured === "boolean") {
+              lastMeta.visitorContactCaptured = meta.visitorContactCaptured;
+              setVisitorContactCaptured(meta.visitorContactCaptured);
+            }
+            if (meta.refused) {
+              refusedKb = true;
+            }
+          },
+          onDone: (done) => {
+            lastDone = done;
+            setVisitorContactCaptured(done.visitorContactCaptured);
+            if (done.refused) {
+              refusedKb = true;
+            }
           },
           onRefusal: () => {
-            refused = true;
+            refusedKb = true;
           },
           onError: (msg) => {
             setBanner(msg);
@@ -328,24 +463,41 @@ function AskSkyConversationView({
       revealEndRef.current = 0;
       setStreamingText("");
 
-      if (refused || !assistant.trim()) {
-        const content =
-          assistant.trim() ||
-          (refused
-            ? "We could not answer that request. Try asking in a different way."
-            : "No answer was returned. Please try again.");
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content,
-            refusal: refused,
-            at: Date.now(),
-          },
-        ]);
-      } else {
-        setMessages((prev) => [...prev, { role: "assistant", content: assistant, at: Date.now() }]);
+      const assistantOut = assistant.trim() || lastDone?.answer?.trim() || "";
+      let content = assistantOut;
+      if (!content) {
+        content = refusedKb
+          ? "We could not answer that request. Try asking in a different way."
+          : "No answer was returned. Please try again.";
       }
+
+      const requesting =
+        lastDone != null ? lastDone.requestingContactDetails : lastMeta.requestingContactDetails === true;
+      const capturedBeforeForm =
+        lastDone != null ? lastDone.visitorContactCaptured : lastMeta.visitorContactCaptured === true;
+      const hasLeadSlot =
+        Boolean(resolve.contactForm) &&
+        (Boolean(renderContactLeadCapture) || Boolean(embedAppOrigin?.trim()));
+      const cid = conversationIdRef.current;
+      const vt = visitorTokenRef.current?.trim();
+      const canShowContact =
+        requesting &&
+        !capturedBeforeForm &&
+        hasLeadSlot &&
+        cid != null &&
+        cid > 0 &&
+        Boolean(vt);
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content,
+          refusal: refusedKb,
+          showContactForm: canShowContact,
+          at: Date.now(),
+        },
+      ]);
     } catch (e) {
       setBanner(formatAskSkyUserFacingError(e));
       setMessages((prev) => prev.slice(0, -1));
@@ -363,6 +515,57 @@ function AskSkyConversationView({
   const isGlassPanel = conversationLayout === "panel";
   const fillsParent = isEmbedInline || isGlassPanel;
   const isGlassChrome = isGlassPanel;
+  const leadVisualVariant = isEmbedInline ? "embed-inline" : isGlassChrome ? "glass" : "default";
+
+  const renderContactInThread = React.useCallback(
+    (m: AskSkyChatMessage) => {
+      if (!m.showContactForm || !resolve.contactForm || visitorContactCaptured) {
+        return null;
+      }
+      return (
+        <div className="flex w-full min-w-0 justify-center px-1 mt-2">
+          <div className="w-full min-w-0 max-w-[450px]">
+            {renderContactLeadCapture ? (
+              renderContactLeadCapture({
+                contactForm: resolve.contactForm,
+                profileSlug,
+                agentToken,
+                visualVariant: leadVisualVariant,
+                persistLeadInConversation,
+              })
+            ) : embedAppOrigin?.trim() ? (
+              <AskSkyEmbedPublicForm
+                origin={embedAppOrigin}
+                slug={resolve.contactForm.slug}
+                embedChrome={isEmbedInline}
+                formTitle={resolve.contactForm.title}
+                persistLeadInConversation={persistLeadInConversation}
+              />
+            ) : null}
+          </div>
+        </div>
+      );
+    },
+    [
+      agentToken,
+      embedAppOrigin,
+      isEmbedInline,
+      leadVisualVariant,
+      persistLeadInConversation,
+      profileSlug,
+      renderContactLeadCapture,
+      resolve.contactForm,
+      visitorContactCaptured,
+    ],
+  );
+
+  React.useLayoutEffect(() => {
+    const last = messages[messages.length - 1];
+    if (!last?.showContactForm) {
+      return;
+    }
+    scrollRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [messages]);
 
   return (
     <div
@@ -450,94 +653,142 @@ function AskSkyConversationView({
             </h4>
           </div>
         ) : null}
-        {messages.map((m, i) => (
-          <div
-            key={i}
-            className={`flex ${isEmbedInline ? "" : "gap-2"} ${m.role === "user" ? "justify-end" : "justify-start"}`}
-          >
-            {!isEmbedInline && m.role === "assistant" ? (
-              resolve.photo ? (
-                <AgentAvatarThumb src={resolve.photo} alt="" />
-              ) : (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
-                  <Bot className="h-4 w-4 text-white" />
+        {messages.map((m, i) => {
+          if (m.role === "assistant" && m.showContactForm) {
+            return (
+              <div key={i} className="flex w-full min-w-0 flex-col gap-2">
+                <div className={`flex ${isEmbedInline ? "" : "gap-2"} justify-start`}>
+                  {!isEmbedInline ? (
+                    resolve.photo ? (
+                      <AgentAvatarThumb src={resolve.photo} alt="" />
+                    ) : (
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
+                        <Bot className="h-4 w-4 text-white" />
+                      </div>
+                    )
+                  ) : null}
+                  <div
+                    className={cn(
+                      isEmbedInline
+                        ? "asksky-embed-bubble-assistant"
+                        : cn(
+                            "max-w-[75%] px-4 py-2 text-slate-100",
+                            isGlassChrome
+                              ? "asksky-glass-bubble-assistant"
+                              : "rounded-2xl rounded-br-none bg-slate-800",
+                          ),
+                    )}
+                  >
+                    <LinkifiedMessage
+                      text={m.content}
+                      className={isEmbedInline ? "text-zinc-50" : "text-slate-100"}
+                      linkClassName={
+                        isEmbedInline
+                          ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
+                          : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
+                      }
+                    />
+                    {!isEmbedInline && typeof m.at === "number" ? (
+                      <span className="mt-1 block text-[10px] text-slate-400">
+                        {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </span>
+                    ) : null}
+                  </div>
                 </div>
-              )
-            ) : null}
+                {renderContactInThread(m)}
+              </div>
+            );
+          }
+
+          return (
             <div
-              className={cn(
-                isEmbedInline
-                  ? m.role === "user"
-                    ? "asksky-embed-bubble-user"
-                    : "asksky-embed-bubble-assistant"
-                  : cn(
-                      "max-w-[75%] px-4 py-2",
-                      m.role === "user"
-                        ? isGlassChrome
-                          ? "asksky-glass-bubble-user text-white"
-                          : "rounded-2xl rounded-br-none bg-blue-600 text-white"
-                        : isGlassChrome
-                          ? "asksky-glass-bubble-assistant text-slate-100"
-                          : "rounded-2xl rounded-br-none bg-slate-800 text-slate-100",
-                    ),
-              )}
+              key={i}
+              className={`flex ${isEmbedInline ? "" : "gap-2"} ${m.role === "user" ? "justify-end" : "justify-start"}`}
             >
-              <LinkifiedMessage
-                text={m.content}
-                className={
-                  isEmbedInline
-                    ? m.role === "user"
-                      ? "text-zinc-300"
-                      : "text-zinc-50"
-                    : m.role === "user"
-                      ? "text-white"
-                      : "text-slate-100"
-                }
-                linkClassName={
-                  isEmbedInline
-                    ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
-                    : m.role === "user"
-                      ? "break-all font-medium text-blue-50 underline decoration-blue-200/70 underline-offset-2 hover:text-white"
-                      : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
-                }
-              />
-              {!isEmbedInline && typeof m.at === "number" ? (
-                <span
-                  className={`mt-1 block text-[10px] ${
-                    m.role === "user" ? "text-blue-100" : "text-slate-400"
-                  }`}
-                >
-                  {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                </span>
+              {!isEmbedInline && m.role === "assistant" ? (
+                resolve.photo ? (
+                  <AgentAvatarThumb src={resolve.photo} alt="" />
+                ) : (
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
+                    <Bot className="h-4 w-4 text-white" />
+                  </div>
+                )
               ) : null}
-            </div>
-            {!isEmbedInline && m.role === "user" ? (
               <div
                 className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
-                  isGlassChrome
-                    ? "asksky-glass-avatar text-slate-200"
-                    : "border border-slate-600 bg-slate-700 text-slate-200",
+                  isEmbedInline
+                    ? m.role === "user"
+                      ? "asksky-embed-bubble-user"
+                      : "asksky-embed-bubble-assistant"
+                    : cn(
+                        "max-w-[75%] px-4 py-2",
+                        m.role === "user"
+                          ? isGlassChrome
+                            ? "asksky-glass-bubble-user text-white"
+                            : "rounded-2xl rounded-br-none bg-blue-600 text-white"
+                          : isGlassChrome
+                            ? "asksky-glass-bubble-assistant text-slate-100"
+                            : "rounded-2xl rounded-br-none bg-slate-800 text-slate-100",
+                      ),
                 )}
               >
-                {profile?.photo ? (
-                  <img
-                    src={profile?.photo}
-                    alt={profile?.name || "You"}
-                    width={32}
-                    height={32}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <span className="text-xs font-semibold text-slate-200">
-                    {((profile?.name || "U")[0] || "U").toUpperCase()}
+                <LinkifiedMessage
+                  text={m.content}
+                  className={
+                    isEmbedInline
+                      ? m.role === "user"
+                        ? "text-zinc-300"
+                        : "text-zinc-50"
+                      : m.role === "user"
+                        ? "text-white"
+                        : "text-slate-100"
+                  }
+                  linkClassName={
+                    isEmbedInline
+                      ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
+                      : m.role === "user"
+                        ? "break-all font-medium text-blue-50 underline decoration-blue-200/70 underline-offset-2 hover:text-white"
+                        : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
+                  }
+                />
+                {!isEmbedInline && typeof m.at === "number" ? (
+                  <span
+                    className={`mt-1 block text-[10px] ${
+                      m.role === "user" ? "text-blue-100" : "text-slate-400"
+                    }`}
+                  >
+                    {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
-                )}
+                ) : null}
               </div>
-            ) : null}
-          </div>
-        ))}
-        {streamingText ? (
+              {!isEmbedInline && m.role === "user" ? (
+                <div
+                  className={cn(
+                    "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
+                    isGlassChrome
+                      ? "asksky-glass-avatar text-slate-200"
+                      : "border border-slate-600 bg-slate-700 text-slate-200",
+                  )}
+                >
+                  {profile?.photo ? (
+                    <img
+                      src={profile?.photo}
+                      alt={profile?.name || "You"}
+                      width={32}
+                      height={32}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-xs font-semibold text-slate-200">
+                      {((profile?.name || "U")[0] || "U").toUpperCase()}
+                    </span>
+                  )}
+                </div>
+              ) : null}
+            </div>
+          );
+        })}
+        {phase === "streaming" ? (
           <div className={`flex ${isEmbedInline ? "justify-start" : "gap-2 justify-start"}`}>
             {!isEmbedInline ? (
               resolve.photo ? (
@@ -558,15 +809,32 @@ function AskSkyConversationView({
                     ),
               )}
             >
-              <LinkifiedMessage
-                text={streamingText}
-                className={isEmbedInline ? "text-zinc-50" : "text-slate-100"}
-                linkClassName={
-                  isEmbedInline
-                    ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
-                    : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
-                }
-              />
+              {streamingText.trim() ? (
+                <span className="inline-flex flex-wrap items-end gap-x-1.5">
+                  <LinkifiedMessage
+                    text={streamingText}
+                    className={isEmbedInline ? "min-w-0 text-zinc-50" : "min-w-0 text-slate-100"}
+                    linkClassName={
+                      isEmbedInline
+                        ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
+                        : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
+                    }
+                  />
+                  <span
+                    className={cn(
+                      "inline-flex shrink-0 items-center gap-0.5 pb-0.5",
+                      isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-300" : "text-slate-400",
+                    )}
+                    aria-hidden
+                  >
+                    <span className="asksky-typing-dot asksky-typing-dot-sm" />
+                    <span className="asksky-typing-dot asksky-typing-dot-sm" />
+                    <span className="asksky-typing-dot asksky-typing-dot-sm" />
+                  </span>
+                </span>
+              ) : (
+                <AskSkyTypingIndicator isEmbedInline={isEmbedInline} isGlassChrome={isGlassChrome} />
+              )}
             </div>
           </div>
         ) : null}
@@ -640,6 +908,8 @@ function AskSkyResolvedCard({
   compactHeader,
   embedFill,
   glassChrome,
+  renderContactLeadCapture,
+  embedAppOrigin,
 }: {
   resolve: SkyResolveResponse;
   profileSlug: string;
@@ -648,6 +918,8 @@ function AskSkyResolvedCard({
   compactHeader?: boolean;
   embedFill?: boolean;
   glassChrome?: boolean;
+  renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
+  embedAppOrigin?: string;
 }) {
   return (
     <div
@@ -709,6 +981,8 @@ function AskSkyResolvedCard({
           agentToken={agentToken}
           embedKey={embedKey}
           conversationLayout={embedFill ? "embed" : "inline"}
+          renderContactLeadCapture={renderContactLeadCapture}
+          embedAppOrigin={embedAppOrigin}
         />
       </div>
     </div>
@@ -719,12 +993,14 @@ function AskSkyChatbotPanel({
   profileSlug,
   agentToken,
   embedKey,
-  onClose,
+  renderContactLeadCapture,
+  embedAppOrigin,
 }: {
   profileSlug: string;
   agentToken: string;
   embedKey: string;
-  onClose: () => void;
+  renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
+  embedAppOrigin?: string;
 }) {
   /** Same chrome + conversation layout as inline embed (`embedFill` + glass inline messages). */
   return (
@@ -742,7 +1018,14 @@ function AskSkyChatbotPanel({
         </Button>
       </div> */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} embedFill />
+        <AskSkyResolveShell
+          profileSlug={profileSlug}
+          agentToken={agentToken}
+          embedKey={embedKey}
+          embedFill
+          renderContactLeadCapture={renderContactLeadCapture}
+          embedAppOrigin={embedAppOrigin}
+        />
       </div>
     </div>
   );
@@ -754,12 +1037,16 @@ function AskSkyResolveShell({
   embedKey,
   compactHeader,
   embedFill,
+  renderContactLeadCapture,
+  embedAppOrigin,
 }: {
   profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
   embedFill?: boolean;
+  renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
+  embedAppOrigin?: string;
 }) {
   const { sky } = useAskSkyRuntime();
   const [resolve, setResolve] = React.useState<SkyResolveResponse | null>(null);
@@ -831,6 +1118,8 @@ function AskSkyResolveShell({
       compactHeader={compactHeader}
       embedFill={embedFill}
       glassChrome={Boolean(embedFill)}
+      renderContactLeadCapture={renderContactLeadCapture}
+      embedAppOrigin={embedAppOrigin}
     />
   );
 }
@@ -862,6 +1151,13 @@ export interface AskSkyWidgetCoreProps {
   embedFill?: boolean;
   sky: AskSkySkyTransport;
   visitorUserBubble?: VisitorBubble;
+  /** Optional myFORM lead capture UI when `sky/resolve` returns `contactForm`. */
+  renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
+  /**
+   * App origin for script/shadow embeds without `renderContactLeadCapture`. Refusal contact form uses
+   * `GET/POST /api/embed/forms` on this origin (same React tree as the chat, not an iframe).
+   */
+  embedAppOrigin?: string;
 }
 
 function AskSkyWidgetInner({
@@ -870,6 +1166,8 @@ function AskSkyWidgetInner({
   variant,
   embedKey,
   embedFill,
+  renderContactLeadCapture,
+  embedAppOrigin,
 }: Omit<AskSkyWidgetCoreProps, "sky" | "visitorUserBubble">) {
   const [chatOpen, setChatOpen] = React.useState(false);
   /** After first open, keep the panel mounted while closed so conversation state + `getConversation` are not re-run. */
@@ -901,8 +1199,9 @@ function AskSkyWidgetInner({
               key={`${profileSlug}:${agentToken}`}
               profileSlug={profileSlug}
               agentToken={agentToken}
-              embedKey={`${embedKey}:chatbot`}
-              onClose={() => setChatOpen(false)}
+              embedKey={embedKey}
+              renderContactLeadCapture={renderContactLeadCapture}
+              embedAppOrigin={embedAppOrigin}
             />
           </div>
         ) : null}
@@ -938,6 +1237,8 @@ function AskSkyWidgetInner({
           agentToken={agentToken}
           embedKey={embedKey}
           embedFill
+          renderContactLeadCapture={renderContactLeadCapture}
+          embedAppOrigin={embedAppOrigin}
         />
       </div>
     );
@@ -946,7 +1247,13 @@ function AskSkyWidgetInner({
   return (
     <Card className="mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden rounded-2xl rounded-br-none border border-slate-800 bg-slate-900 py-0 shadow-2xl">
       <CardContent className="min-w-0 p-0">
-        <AskSkyResolveShell profileSlug={profileSlug} agentToken={agentToken} embedKey={embedKey} />
+        <AskSkyResolveShell
+          profileSlug={profileSlug}
+          agentToken={agentToken}
+          embedKey={embedKey}
+          renderContactLeadCapture={renderContactLeadCapture}
+          embedAppOrigin={embedAppOrigin}
+        />
       </CardContent>
     </Card>
   );

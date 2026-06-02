@@ -1,12 +1,14 @@
 "use client";
 
+import type { AskSkyWidgetCoreProps } from "@workspace/asksky-embed";
 import {
   AskSkyWidgetCore,
   type AskSkyVariant,
-  type AskSkyWidgetCoreProps,
 } from "@workspace/asksky-embed";
 import { appAskSkyTransport } from "@/lib/asksky-app-sky-transport";
 import { useProfileStore } from "@/lib/store/profile-store";
+import * as React from "react";
+import { createAskSkyContactLeadCaptureRenderer } from "@/components/forms/asksky-contact-lead-capture";
 
 export type { AskSkyVariant };
 
@@ -18,7 +20,14 @@ export function AskSkyWidget(props: AskSkyWidgetProps) {
     ? { photo: profile.photo ?? undefined, name: profile.name ?? undefined }
     : null;
 
+  const renderContactLeadCapture = React.useMemo(() => createAskSkyContactLeadCaptureRenderer(), []);
+
   return (
-    <AskSkyWidgetCore {...props} sky={appAskSkyTransport} visitorUserBubble={visitorUserBubble} />
+    <AskSkyWidgetCore
+      {...props}
+      sky={appAskSkyTransport}
+      visitorUserBubble={visitorUserBubble}
+      renderContactLeadCapture={renderContactLeadCapture}
+    />
   );
 }
