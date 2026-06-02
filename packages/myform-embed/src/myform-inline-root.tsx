@@ -1,81 +1,19 @@
-"use client";
-
 import * as React from "react";
-import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { DynamicForm } from "@/components/forms/dynamic-form";
-import type { FormSource } from "@/lib/services/forms";
-import {
-  MYFORM_EMBED_RESIZE_MESSAGE_TYPE,
-  type MyFormEmbedResizeMessage,
-} from "@/lib/myform-embed-resize-protocol";
+import { DynamicForm } from "./dynamic-form";
 import { cn } from "@workspace/ui/lib/utils";
 
-function apiBase(): string {
-  if (typeof window === "undefined") {
-    return "";
-  }
-  return `${window.location.origin}/api/embed/forms`;
+function apiBase(origin: string): string {
+  return `${origin.replace(/\/$/, "")}/api/embed/forms`;
 }
 
-/** Reports measured height to parent so `myform.js` can size the iframe (no fixed `data-height`). */
-function MyFormEmbedResizeBridge({ children }: { children: React.ReactNode }) {
-  const ref = React.useRef<HTMLDivElement>(null);
-  const rafRef = React.useRef<number | null>(null);
-
-  const report = React.useCallback(() => {
-    if (typeof window === "undefined" || window.parent === window) {
-      return;
-    }
-    const el = ref.current;
-    if (!el) {
-      return;
-    }
-    if (rafRef.current != null) {
-      cancelAnimationFrame(rafRef.current);
-    }
-    rafRef.current = requestAnimationFrame(() => {
-      rafRef.current = null;
-      const h = Math.ceil(el.getBoundingClientRect().height);
-      const clamped = Math.min(12000, Math.max(80, h));
-      const payload: MyFormEmbedResizeMessage = {
-        type: MYFORM_EMBED_RESIZE_MESSAGE_TYPE,
-        height: clamped,
-      };
-      window.parent.postMessage(payload, "*");
-    });
-  }, []);
-
-  React.useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) {
-      return;
-    }
-    report();
-    const ro = new ResizeObserver(() => report());
-    ro.observe(el);
-    window.addEventListener("resize", report);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener("resize", report);
-      if (rafRef.current != null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, [report]);
-
-  return (
-    <div ref={ref} className="flex w-full min-w-0 flex-col">
-      {children}
-    </div>
-  );
-}
-
-function MyFormEmbedBody() {
-  const searchParams = useSearchParams();
-  const slug = searchParams.get("slug")?.trim() ?? "";
-  const source = (searchParams.get("source")?.trim() || "embed") as FormSource;
+export function MyFormInlineRoot({
+  apiOrigin,
+  slug,
+}: {
+  apiOrigin: string;
+  slug: string;
+}) {
   const [schema, setSchema] = React.useState<{
     name: string;
     slug: string;
@@ -89,9 +27,9 @@ function MyFormEmbedBody() {
 
   React.useEffect(() => {
     let cancelled = false;
-    if (!slug) {
+    if (!slug.trim()) {
       setSchema(null);
-      setLoadError("Missing slug query parameter.");
+      setLoadError("Missing form slug.");
       return;
     }
     setLoadError(null);
@@ -100,7 +38,7 @@ function MyFormEmbedBody() {
     setDone(null);
     void (async () => {
       try {
-        const res = await fetch(`${apiBase()}/${encodeURIComponent(slug)}`, {
+        const res = await fetch(`${apiBase(apiOrigin)}/${encodeURIComponent(slug.trim())}`, {
           headers: { Accept: "application/json" },
         });
         const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
@@ -126,16 +64,14 @@ function MyFormEmbedBody() {
     return () => {
       cancelled = true;
     };
-  }, [slug]);
+  }, [apiOrigin, slug]);
 
   const shell = "asksky-embed-inline asksky-glass-panel flex w-full min-w-0 flex-col";
 
-  if (!slug) {
+  if (!slug.trim()) {
     return (
       <div className={cn(shell, "p-4")}>
-        <p className="asksky-glass-muted text-sm">
-          Add <code className="text-slate-200">?slug=…</code> to this URL.
-        </p>
+        <p className="asksky-glass-muted text-sm">Missing data-form-slug on the script tag.</p>
       </div>
     );
   }
@@ -191,10 +127,10 @@ function MyFormEmbedBody() {
             setSubmitting(true);
             setSubmitError(null);
             try {
-              const res = await fetch(`${apiBase()}/${encodeURIComponent(schema.slug)}/submit`, {
+              const res = await fetch(`${apiBase(apiOrigin)}/${encodeURIComponent(schema.slug)}/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json", Accept: "application/json" },
-                body: JSON.stringify({ answers, source }),
+                body: JSON.stringify({ answers, source: "embed" }),
               });
               const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
               if (!res.ok) {
@@ -210,29 +146,6 @@ function MyFormEmbedBody() {
           }}
         />
       </div>
-    </div>
-  );
-}
-
-export default function EmbedMyFormPage() {
-  return (
-    <div className="flex w-full min-w-0 flex-col bg-transparent">
-      <Suspense
-        fallback={
-          <MyFormEmbedResizeBridge>
-            <div className="asksky-embed-inline asksky-glass-panel flex w-full min-w-0 flex-col items-center justify-center p-6">
-              <div className="flex items-center gap-2 text-sm asksky-glass-muted">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Loading…
-              </div>
-            </div>
-          </MyFormEmbedResizeBridge>
-        }
-      >
-        <MyFormEmbedResizeBridge>
-          <MyFormEmbedBody />
-        </MyFormEmbedResizeBridge>
-      </Suspense>
     </div>
   );
 }

@@ -7,6 +7,7 @@ import {
   ClipboardList,
   Inbox,
   Layers,
+  Link2,
   Loader2,
   Pencil,
   Plus,
@@ -27,6 +28,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { Input } from "@workspace/ui/components/input";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
+import { MyFormEmbedDialog } from "@/components/forms/myform-embed-dialog";
 import { MyFormSubmissionsDialog } from "@/components/forms/myform-submissions-dialog";
 import { formsService, type FormDefinitionDto } from "@/lib/services/forms";
 import { myFormEditHref, myFormNewHref } from "@/components/forms/myform-routes";
@@ -86,6 +88,7 @@ export function MyFormManagementPanel({
 }: MyFormManagementPanelProps) {
   const queryClient = useQueryClient();
   const [deleteTarget, setDeleteTarget] = React.useState<FormDefinitionDto | null>(null);
+  const [embedTarget, setEmbedTarget] = React.useState<FormDefinitionDto | null>(null);
   const [submissionsTarget, setSubmissionsTarget] = React.useState<FormDefinitionDto | null>(null);
   const [listQDraft, setListQDraft] = React.useState("");
   const [listQApplied, setListQApplied] = React.useState("");
@@ -205,8 +208,9 @@ export function MyFormManagementPanel({
             ) : null}
           </div>
           <CardDescription className="text-sm leading-relaxed text-slate-400">
-            Edit, publish, or delete forms here, or open submissions from the inbox. Search matches form name and
-            slug.
+            Edit, publish, or delete forms here, or open submissions from the inbox. Use{" "}
+            <span className="text-slate-300">Embed</span> on a form to copy the third-party script snippet. Search
+            matches form name and slug.
           </CardDescription>
           <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
             <div className="relative min-w-0 flex-1 sm:max-w-md">
@@ -357,6 +361,17 @@ export function MyFormManagementPanel({
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-1.5 sm:gap-2">
                         <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="h-8 w-8 shrink-0 rounded-full border-slate-600/80 bg-slate-900/60 p-0 hover:bg-slate-800 sm:h-9 sm:w-auto sm:px-3"
+                          aria-label={`Embed ${f.name}`}
+                          onClick={() => setEmbedTarget(f)}
+                        >
+                          <Link2 className="h-3.5 w-3.5" />
+                          <span className="hidden sm:inline">Embed</span>
+                        </Button>
+                        <Button
                           asChild
                           variant="outline"
                           size="sm"
@@ -384,36 +399,6 @@ export function MyFormManagementPanel({
                         </Button>
                         <Button
                           type="button"
-                          variant="success"
-                          size="sm"
-                          disabled={
-                            f.status === "published" ||
-                            (publishMutation.isPending && publishMutation.variables === f.id)
-                          }
-                          className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center p-0 sm:h-9 sm:min-w-[5.5rem] sm:w-auto sm:px-3"
-                          aria-label={
-                            publishMutation.isPending && publishMutation.variables === f.id
-                              ? "Publishing…"
-                              : f.status === "published"
-                                ? "Already published"
-                                : `Publish ${f.name}`
-                          }
-                          onClick={() => publishMutation.mutate(f.id)}
-                        >
-                          {publishMutation.isPending && publishMutation.variables === f.id ? (
-                            <>
-                              <Loader2 className="h-3.5 w-3.5 animate-spin sm:mr-1 sm:h-3.5 sm:w-3.5" />
-                              <span className="hidden sm:inline">Publishing…</span>
-                            </>
-                          ) : (
-                            <>
-                              <Send className="h-3.5 w-3.5 sm:mr-1 sm:h-3.5 sm:w-3.5" />
-                              <span className="hidden sm:inline">Publish</span>
-                            </>
-                          )}
-                        </Button>
-                        <Button
-                          type="button"
                           variant="ghost"
                           size="sm"
                           className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center gap-0 p-0 text-slate-400 hover:bg-red-950/40 hover:text-red-400 sm:h-9 sm:w-auto sm:gap-1 sm:px-3"
@@ -438,6 +423,16 @@ export function MyFormManagementPanel({
           )}
         </CardContent>
       </Card>
+
+      <MyFormEmbedDialog
+        open={embedTarget != null}
+        onOpenChange={(o) => {
+          if (!o) {
+            setEmbedTarget(null);
+          }
+        }}
+        form={embedTarget}
+      />
 
       <MyFormSubmissionsDialog
         open={submissionsTarget != null}

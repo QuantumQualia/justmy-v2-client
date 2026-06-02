@@ -34,6 +34,7 @@
     "@tanstack/react-query": "^5.95.2",
     "@tanstack/react-table": "^8.21.3",
     "@workspace/asksky-embed": "workspace:*",
+    "@workspace/myform-embed": "workspace:*",
     "@workspace/ui": "workspace:*",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",

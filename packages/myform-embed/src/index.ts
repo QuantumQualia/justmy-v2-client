@@ -1,8 +1,6 @@
-"use client";
-
 export {
   DynamicForm,
   type DynamicFormField,
   type DynamicFormFieldType,
   type DynamicFormProps,
-} from "@workspace/myform-embed";
+} from "./dynamic-form";

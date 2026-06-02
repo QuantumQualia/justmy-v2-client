@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>AskSKY! script embed demo (same host)</title>
+    <title>Embed script demos — AskSKY! &amp; myFORM (same host)</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -18,7 +18,7 @@
     </style>
   </head>
   <body>
-    <h1>AskSKY! direct embed — same-origin demo</h1>
+    <h1>Embed script demos — same-origin</h1>
     <p>
       Serve this site over HTTP(S), then open
       <code>/embed/partner-demo.html</code>. Replace
@@ -30,6 +30,7 @@
       the browser will call your site’s <code>/api/embed/sky/*</code> endpoints
       with CORS.
     </p>
+    <h2>AskSKY!</h2>
     <div
       style="
         height: 500px;
@@ -44,6 +45,30 @@
         data-profile-slug="memphisjuneteenth"
         data-agent-token="ce74ea55-f506-4d18-8362-82b13fffa923"
         data-variant="chatbot"
+        async
+      ></script>
+    </div>
+
+    <h2 style="margin-top: 2rem">myFORM embed (frosted / AskSKY-style)</h2>
+    <p>
+      Replace <code>FORM_SLUG</code> with a published form slug. The widget mounts inline after the script tag.
+    </p>
+    <div
+      style="
+        min-height: 420px;
+        padding: 1.5rem;
+        background: linear-gradient(
+          135deg,
+          #dbeafe 0%,
+          #fce7f3 50%,
+          #fef3c7 100%
+        );
+        border-radius: 12px;
+      "
+    >
+      <script
+        src="http://localhost:3000/embed/myform.js?v=1"
+        data-form-slug="c3c99a4b-bcfe-457e-a6d9-c66fd56f5ac8"
         async
       ></script>
     </div>

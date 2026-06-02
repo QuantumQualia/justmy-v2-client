@@ -1,12 +1,11 @@
 {
-  "name": "@workspace/asksky-embed",
+  "name": "@workspace/myform-embed",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "sideEffects": ["*.css"],
   "exports": {
-    ".": "./src/index.ts",
-    "./glass.css": "./src/asksky-glass.css"
+    ".": "./src/index.ts"
   },
   "scripts": {
     "build": "vite build && node ./scripts/copy-to-public.mjs",

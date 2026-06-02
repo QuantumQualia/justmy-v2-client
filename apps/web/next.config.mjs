@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  transpilePackages: ["@workspace/ui", "@workspace/asksky-embed"],
+  transpilePackages: ["@workspace/ui", "@workspace/asksky-embed", "@workspace/myform-embed"],
   images: {
     remotePatterns: [
       {

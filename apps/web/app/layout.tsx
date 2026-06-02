@@ -84,6 +84,8 @@ export default async function RootLayout({
   const pathname = headerList.get("x-pathname") ?? ""
   const hideSiteChrome = pathname.startsWith("/embed/")
   const embedAskSky = pathname.startsWith("/embed/asksky")
+  const embedMyForm = pathname.startsWith("/embed/myform")
+  const embedTransparentHost = embedAskSky || embedMyForm
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
@@ -103,13 +105,18 @@ export default async function RootLayout({
   }
 
   return (
-    <html lang="en" suppressHydrationWarning className={embedAskSky ? "embed-asksky-host" : undefined}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={cn(embedAskSky && "embed-asksky-host", embedMyForm && "embed-myform-host")}
+    >
       <body
         className={cn(
           fontSans.variable,
           fontMono.variable,
           "font-sans antialiased",
           embedAskSky && "embed-asksky-host",
+          embedMyForm && "embed-myform-host",
         )}
       >
         <Providers>
@@ -132,7 +139,10 @@ export default async function RootLayout({
           ) : null}
           <div
             id="site-main"
-            className={cn(hideSiteChrome ? "min-h-screen min-w-0" : "min-h-0", embedAskSky && "bg-transparent")}
+            className={cn(
+              hideSiteChrome ? cn("min-w-0", embedMyForm ? "min-h-0" : "min-h-screen") : "min-h-0",
+              embedTransparentHost && "bg-transparent",
+            )}
           >
             {children}
           </div>
