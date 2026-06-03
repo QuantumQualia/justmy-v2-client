@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient, type QueryClient } from "@tansta
 import type { ColumnDef } from "@tanstack/react-table";
 import {
   Bot,
+  Download,
   FileText,
   Globe,
   Link2,
@@ -137,10 +138,61 @@ function canReindexKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boo
   if (busy || INGESTING_STATUSES.has(source.status)) {
     return false;
   }
-  if (source.sourceType === "website") {
-    return true;
+  return source.sourceType === "website";
+}
+
+function canDownloadDocumentKnowledgeSource(source: KnowledgeSourceResponseDto, busy: boolean): boolean {
+  if (source.sourceType !== "document") {
+    return false;
   }
-  return source.sourceType === "document" && source.status === "failed";
+  
+  if (busy || INGESTING_STATUSES.has(source.status)) {
+    return false;
+  }
+  return Boolean(source.s3Key?.trim());
+}
+
+function suggestedKnowledgeDocumentFileName(source: KnowledgeSourceResponseDto): string {
+  const raw = (source.fileName || source.title || "document").trim();
+  const base = raw.replace(/^.*[/\\]/, "").trim() || "document";
+  if (/\.[a-z0-9]{2,8}$/i.test(base)) {
+    return base;
+  }
+  const mime = source.mimeType?.toLowerCase() ?? "";
+  if (mime.includes("pdf")) {
+    return `${base}.pdf`;
+  }
+  if (mime.includes("wordprocessingml") || mime.includes("msword")) {
+    return `${base}.docx`;
+  }
+  if (mime.includes("text/plain")) {
+    return `${base}.txt`;
+  }
+  return `${base}.pdf`;
+}
+
+/**
+ * Fetches a remote URL (e.g. S3 presigned) and saves it via a blob URL so the browser uses the File Save flow
+ * instead of navigating / inline PDF view.
+ */
+async function downloadFileFromHttpUrl(url: string, downloadFileName: string): Promise<void> {
+  const response = await fetch(url, { mode: "cors", credentials: "omit" });
+  if (!response.ok) {
+    throw new Error(`Download failed (${response.status})`);
+  }
+  const blob = await response.blob();
+  const objectUrl = URL.createObjectURL(blob);
+  try {
+    const anchor = document.createElement("a");
+    anchor.href = objectUrl;
+    anchor.download = downloadFileName;
+    anchor.rel = "noopener";
+    document.body.appendChild(anchor);
+    anchor.click();
+    anchor.remove();
+  } finally {
+    URL.revokeObjectURL(objectUrl);
+  }
 }
 
 function resolvePagesScraped(source: KnowledgeSourceResponseDto): number | null {
@@ -849,12 +901,14 @@ function KnowledgeSourcesCard({
   onAddWebsite,
   onUploadDocument,
   onReindex,
+  onDownloadDocument,
   onDelete,
   onPageChange,
   selectedAgentId,
   onSelectedAgentChange,
   availableAgents,
   reindexingSourceId,
+  downloadingSourceId,
   deletingSourceId,
 }: {
   title: string;
@@ -870,12 +924,14 @@ function KnowledgeSourcesCard({
   onAddWebsite: () => void;
   onUploadDocument: () => void;
   onReindex: (source: KnowledgeSourceResponseDto) => void;
+  onDownloadDocument: (source: KnowledgeSourceResponseDto) => void;
   onDelete: (source: KnowledgeSourceResponseDto) => void;
   onPageChange: (page: number) => void;
   selectedAgentId: string | null;
   onSelectedAgentChange: (agentId: string) => void;
   availableAgents: AgentResponseDto[];
   reindexingSourceId: string | null;
+  downloadingSourceId: string | null;
   deletingSourceId: string | null;
 }) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
@@ -996,7 +1052,10 @@ function KnowledgeSourcesCard({
           <div className="space-y-3">
             {sources.map((source) => {
               const progress = normalizeProgress(source.progress);
-              const busy = reindexingSourceId === source.id || deletingSourceId === source.id;
+              const busy =
+                reindexingSourceId === source.id ||
+                downloadingSourceId === source.id ||
+                deletingSourceId === source.id;
               const { primaryLabel, secondaryLabel } = resolveKnowledgeSourceLabels(source);
               const scrape = websiteScrapeProgress(source);
               const scrapedPagesLabel = scrapedPagesDescription(source);
@@ -1034,21 +1093,39 @@ function KnowledgeSourcesCard({
                     </div>
 
                     <div className="flex w-full min-w-0 max-w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center xl:w-auto xl:justify-end">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
-                        onClick={() => onReindex(source)}
-                        disabled={!canReindexKnowledgeSource(source, busy)}
-                      >
-                        {reindexingSourceId === source.id ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4" />
-                        )}
-                        Reindex
-                      </Button>
+                      {source.sourceType === "document" ? (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
+                          onClick={() => onDownloadDocument(source)}
+                          disabled={!canDownloadDocumentKnowledgeSource(source, busy)}
+                        >
+                          {downloadingSourceId === source.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Download className="h-4 w-4" />
+                          )}
+                          Download
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
+                          onClick={() => onReindex(source)}
+                          disabled={!canReindexKnowledgeSource(source, busy)}
+                        >
+                          {reindexingSourceId === source.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          Reindex
+                        </Button>
+                      )}
                       <Button
                         type="button"
                         variant="destructive"
@@ -1503,6 +1580,28 @@ export function ProfileAgentsPanel({
     },
     onError: (error) => {
       toast.error(error instanceof Error ? error.message : "Failed to reindex source");
+    },
+  });
+
+  const downloadKnowledgeSourceMutation = useMutation({
+    mutationFn: async (source: KnowledgeSourceResponseDto) => {
+      const downloadUrl = await agentsService.getDocumentKnowledgeSourcePresignedDownloadUrl(source);
+      if (typeof window === "undefined") {
+        return;
+      }
+      try {
+        await downloadFileFromHttpUrl(downloadUrl, suggestedKnowledgeDocumentFileName(source));
+        toast.success("Download started");
+      } catch {
+        window.open(downloadUrl, "_blank", "noopener,noreferrer");
+        toast.message("Opened in a new tab", {
+          description:
+            "Direct download was blocked (often CORS on the file URL). Use your browser's Save option from the viewer if needed.",
+        });
+      }
+    },
+    onError: (error) => {
+      toast.error(error instanceof Error ? error.message : "Failed to get download link");
     },
   });
 
@@ -1994,6 +2093,7 @@ export function ProfileAgentsPanel({
           onAddWebsite={() => openKnowledgeDialog("shared", "website")}
           onUploadDocument={() => openKnowledgeDialog("shared", "document")}
           onReindex={(source) => setReindexSourceTarget(source)}
+          onDownloadDocument={(source) => downloadKnowledgeSourceMutation.mutate(source)}
           onDelete={(source) => setDeleteSourceTarget(source)}
           onPageChange={setSharedKnowledgePage}
           selectedAgentId={null}
@@ -2002,6 +2102,11 @@ export function ProfileAgentsPanel({
           reindexingSourceId={
             reindexSourceMutation.isPending && reindexSourceMutation.variables
               ? reindexSourceMutation.variables.id
+              : null
+          }
+          downloadingSourceId={
+            downloadKnowledgeSourceMutation.isPending && downloadKnowledgeSourceMutation.variables
+              ? downloadKnowledgeSourceMutation.variables.id
               : null
           }
           deletingSourceId={deleteSourceMutation.variables?.id ?? null}
@@ -2021,6 +2126,7 @@ export function ProfileAgentsPanel({
           onAddWebsite={() => openKnowledgeDialog("agent", "website")}
           onUploadDocument={() => openKnowledgeDialog("agent", "document")}
           onReindex={(source) => setReindexSourceTarget(source)}
+          onDownloadDocument={(source) => downloadKnowledgeSourceMutation.mutate(source)}
           onDelete={(source) => setDeleteSourceTarget(source)}
           onPageChange={setAgentKnowledgePage}
           selectedAgentId={selectedAgentId}
@@ -2029,6 +2135,11 @@ export function ProfileAgentsPanel({
           reindexingSourceId={
             reindexSourceMutation.isPending && reindexSourceMutation.variables
               ? reindexSourceMutation.variables.id
+              : null
+          }
+          downloadingSourceId={
+            downloadKnowledgeSourceMutation.isPending && downloadKnowledgeSourceMutation.variables
+              ? downloadKnowledgeSourceMutation.variables.id
               : null
           }
           deletingSourceId={deleteSourceMutation.variables?.id ?? null}

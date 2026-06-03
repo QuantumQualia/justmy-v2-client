@@ -69,6 +69,8 @@ export interface KnowledgeSourceResponseDto {
   title?: string | null;
   url?: string | null;
   fileName?: string | null;
+  /** S3 (or equivalent) object key for the uploaded file; used with `files/presigned-url`. */
+  s3Key?: string | null;
   mimeType?: string | null;
   status: KnowledgeIngestionStatus;
   progress?: number | null;
@@ -255,6 +257,31 @@ function pickMaxPages(raw: Record<string, unknown>): number | null {
   return max != null && max > 0 ? max : null;
 }
 
+function pickKnowledgeSourceFileKey(raw: Record<string, unknown>): string | null {
+  const candidates: unknown[] = [
+    raw.fileKey,
+    raw.file_key,
+    raw.storageKey,
+    raw.storage_key,
+    raw.s3Key,
+    raw.s3_key,
+    raw.objectKey,
+    raw.object_key,
+    raw.sourceFileKey,
+    raw.source_file_key,
+    raw.key,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (trimmed) {
+        return trimmed;
+      }
+    }
+  }
+  return null;
+}
+
 function normalizeApiStatus(status: string | undefined): KnowledgeIngestionStatus {
   const key = String(status ?? "pending")
     .trim()
@@ -285,6 +312,7 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
 
   const pagesScraped = pickPagesScraped(raw);
   const maxPages = pickMaxPages(raw);
+  const s3Key = pickKnowledgeSourceFileKey(raw);
 
   return {
     id: String(raw.id ?? ""),
@@ -296,6 +324,7 @@ function normalizeKnowledgeSourceFromApi(raw: Record<string, unknown>, scope: Kn
     title: typeof raw.title === "string" ? raw.title.trim() || null : null,
     url: (raw.url as string) ?? null,
     fileName: filename ?? null,
+    s3Key: s3Key ?? null,
     mimeType: (raw.mimeType as string) ?? null,
     status: normalizeApiStatus(raw.status as string | undefined),
     progress: typeof raw.progress === "number" ? raw.progress : null,
@@ -640,6 +669,35 @@ export const agentsService = {
         throw error;
       }
       throw new ApiClientError("Failed to reindex knowledge source.");
+    }
+  },
+
+  /**
+   * Resolves a temporary HTTPS URL for the uploaded document via `GET files/presigned-url?key=...`.
+   */
+  async getDocumentKnowledgeSourcePresignedDownloadUrl(source: KnowledgeSourceResponseDto): Promise<string> {
+    if (source.sourceType !== "document") {
+      throw new ApiClientError("Only document knowledge sources can be downloaded.");
+    }
+    const key = source.s3Key?.trim();
+    if (!key) {
+      throw new ApiClientError("This document has no storage key yet; try again after upload completes.");
+    }
+    try {
+      const payload = await apiRequest<{ url?: string }>("files/presigned-url", {
+        method: "GET",
+        params: { key },
+      });
+      const url = payload.url?.trim();
+      if (!url) {
+        throw new ApiClientError("Download link was empty.");
+      }
+      return url;
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to get download link.");
     }
   },
 
