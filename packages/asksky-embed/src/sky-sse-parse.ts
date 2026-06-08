@@ -43,6 +43,18 @@ function isLikelySseErrorEventPayload(parsed: Record<string, unknown>, refusal: 
   return true;
 }
 
+function pickSuggestedQuestions(parsed: Record<string, unknown>): string[] | undefined {
+  const raw = parsed.suggestedQuestions;
+  if (!Array.isArray(raw)) {
+    return undefined;
+  }
+  const list = raw
+    .filter((x): x is string => typeof x === "string")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+  return list.length > 0 ? list : undefined;
+}
+
 function normalizeMeta(parsed: Record<string, unknown>): SkySseMetaPayload | null {
   const conversationId =
     typeof parsed.conversationId === "number"
@@ -57,6 +69,7 @@ function normalizeMeta(parsed: Record<string, unknown>): SkySseMetaPayload | nul
     (typeof parsed.visitorToken === "string" ? parsed.visitorToken : null) ??
     (typeof parsed.visitor_token === "string" ? parsed.visitor_token : null);
 
+  const suggestedQuestions = pickSuggestedQuestions(parsed);
   return {
     conversationId,
     agentId: typeof parsed.agentId === "number" ? parsed.agentId : undefined,
@@ -70,6 +83,7 @@ function normalizeMeta(parsed: Record<string, unknown>): SkySseMetaPayload | nul
       typeof parsed.visitorContactCaptured === "boolean" ? parsed.visitorContactCaptured : undefined,
     requestingContactDetails:
       typeof parsed.requestingContactDetails === "boolean" ? parsed.requestingContactDetails : undefined,
+    ...(suggestedQuestions != null ? { suggestedQuestions } : {}),
   };
 }
 
@@ -86,6 +100,7 @@ function normalizeDone(parsed: Record<string, unknown>): SkySseDonePayload | nul
   const answer = typeof parsed.answer === "string" ? parsed.answer : "";
   const refused = parsed.refused === true || parsed.refusal === true || parsed.answerRefused === true;
   const retrievedDocs = Array.isArray(parsed.retrievedDocs) ? parsed.retrievedDocs : [];
+  const suggestedQuestions = pickSuggestedQuestions(parsed);
   return {
     conversationId,
     agentId: typeof parsed.agentId === "number" ? parsed.agentId : undefined,
@@ -96,6 +111,7 @@ function normalizeDone(parsed: Record<string, unknown>): SkySseDonePayload | nul
     retrievedDocs,
     visitorContactCaptured: parsed.visitorContactCaptured === true,
     requestingContactDetails: parsed.requestingContactDetails === true,
+    ...(suggestedQuestions != null ? { suggestedQuestions } : {}),
   };
 }
 
@@ -108,6 +124,9 @@ function looksLikeDonePayload(parsed: Record<string, unknown>): boolean {
     return true;
   }
   if (Array.isArray(parsed.retrievedDocs)) {
+    return true;
+  }
+  if (Array.isArray(parsed.suggestedQuestions)) {
     return true;
   }
   return false;

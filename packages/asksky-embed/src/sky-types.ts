@@ -15,6 +15,11 @@ export interface SkyResolveResponse {
   agentToken: string;
   greetingMessage?: string | null;
   hasKnowledgeBase: boolean;
+  /**
+   * Up to ~3 example questions from the agent’s knowledge (empty when no KB).
+   * Older APIs may omit this field — treat as [].
+   */
+  suggestedQuestions?: string[];
   /** Published contact form for this agent, or null if none. */
   contactForm?: SkyResolveContactForm | null;
 }
@@ -56,6 +61,8 @@ export type SkySseMetaPayload = {
   refused?: boolean;
   visitorContactCaptured?: boolean;
   requestingContactDetails?: boolean;
+  /** Present when non-empty; same semantics as `GET /sky/resolve` `suggestedQuestions`. */
+  suggestedQuestions?: string[];
 };
 
 /** Final SSE `done` event per turn. */
@@ -68,6 +75,8 @@ export type SkySseDonePayload = {
   retrievedDocs: unknown[];
   visitorContactCaptured: boolean;
   requestingContactDetails: boolean;
+  /** Same list as `meta` for that turn when non-empty. */
+  suggestedQuestions?: string[];
 };
 
 export interface SkyLeadCaptureRequest {
