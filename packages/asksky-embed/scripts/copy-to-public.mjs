@@ -8,5 +8,4 @@ const distFile = join(pkgRoot, "dist", "asksky.js");
 const outDir = join(pkgRoot, "..", "..", "apps", "web", "public", "embed");
 mkdirSync(outDir, { recursive: true });
 cpSync(distFile, join(outDir, "asksky.js"), { force: true });
-// eslint-disable-next-line no-console
 console.log("asksky-embed: copied dist/asksky.js -> apps/web/public/embed/asksky.js");

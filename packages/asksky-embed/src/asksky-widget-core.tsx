@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Bot, Loader2, MessageCircle, Mic, Send } from "lucide-react";
+import { Bot, ChevronDown, ChevronUp, Loader2, MessageCircle, Mic, Send } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -159,6 +159,17 @@ function mergeGreetingFirst(resolve: SkyResolveResponse, history: AskSkyChatMess
   return [...greeting, ...history];
 }
 
+function suggestedQuestionsFromResolve(resolve: SkyResolveResponse): string[] {
+  const sq = resolve.suggestedQuestions;
+  if (!Array.isArray(sq)) {
+    return [];
+  }
+  return sq
+    .filter((x): x is string => typeof x === "string")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
+}
+
 const chatScrollClasses =
   "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
 
@@ -219,6 +230,10 @@ function AskSkyConversationView({
   const [streamingText, setStreamingText] = React.useState("");
   const [phase, setPhase] = React.useState<"idle" | "streaming">("idle");
   const [banner, setBanner] = React.useState<string | null>(null);
+  const [suggestedQuestions, setSuggestedQuestions] = React.useState<string[]>(() =>
+    suggestedQuestionsFromResolve(resolve),
+  );
+  const [suggestionsOpen, setSuggestionsOpen] = React.useState(true);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const assistantBufferRef = React.useRef("");
@@ -272,6 +287,8 @@ function AskSkyConversationView({
     setConversationId(null);
     setVisitorToken(null);
     setVisitorContactCaptured(false);
+    setSuggestedQuestions(suggestedQuestionsFromResolve(resolveLatest.current));
+    setSuggestionsOpen(true);
 
     const saved = loadPersisted(embedKey);
     if (!saved) {
@@ -381,8 +398,8 @@ function AskSkyConversationView({
     [agentToken, profileSlug, sky],
   );
 
-  const send = async () => {
-    const trimmed = input.trim();
+  const sendMessage = async (raw: string) => {
+    const trimmed = raw.trim();
     if (!trimmed || phase === "streaming" || !knowledgeReady) {
       return;
     }
@@ -441,12 +458,18 @@ function AskSkyConversationView({
             if (meta.refused) {
               refusedKb = true;
             }
+            if (meta.suggestedQuestions && meta.suggestedQuestions.length > 0) {
+              setSuggestedQuestions(meta.suggestedQuestions);
+            }
           },
           onDone: (done) => {
             lastDone = done;
             setVisitorContactCaptured(done.visitorContactCaptured);
             if (done.refused) {
               refusedKb = true;
+            }
+            if (done.suggestedQuestions && done.suggestedQuestions.length > 0) {
+              setSuggestedQuestions(done.suggestedQuestions);
             }
           },
           onRefusal: () => {
@@ -509,6 +532,10 @@ function AskSkyConversationView({
       setPhase("idle");
       focusMessageInput();
     }
+  };
+
+  const send = async () => {
+    await sendMessage(input);
   };
 
   const isEmbedInline = conversationLayout === "embed";
@@ -855,6 +882,100 @@ function AskSkyConversationView({
           focusMessageInput();
         }}
       >
+        {knowledgeReady && suggestedQuestions.length > 0 && phase === "idle" ? (
+          <div
+            role="region"
+            aria-label="Try asking"
+            className={cn(
+              "min-w-0",
+              suggestionsOpen ? "mb-3" : "mb-2",
+              isEmbedInline ? "-mx-3.5 px-3.5" : "-mx-4 px-4",
+            )}
+          >
+            <div className="flex min-h-8 min-w-0 items-center gap-2.5">
+              <div className="flex min-h-8 min-w-0 flex-1 items-center gap-2.5">
+                <div
+                  className={cn(
+                    "h-px min-h-px min-w-0 flex-1 rounded-full",
+                    isEmbedInline
+                      ? "bg-white/40"
+                      : isGlassChrome
+                        ? "bg-white/38"
+                        : "bg-slate-400/65",
+                  )}
+                  aria-hidden
+                />
+                <span
+                  className={cn(
+                    "shrink-0 whitespace-nowrap text-[11px] font-medium leading-none tracking-normal",
+                    isEmbedInline
+                      ? "text-zinc-100"
+                      : isGlassChrome
+                        ? "text-slate-50"
+                        : "text-slate-50",
+                  )}
+                >
+                  Try asking
+                </span>
+                <div
+                  className={cn(
+                    "h-px min-h-px min-w-0 flex-1 rounded-full",
+                    isEmbedInline
+                      ? "bg-white/40"
+                      : isGlassChrome
+                        ? "bg-white/38"
+                        : "bg-slate-400/65",
+                  )}
+                  aria-hidden
+                />
+              </div>
+              <button
+                type="button"
+                className={cn(
+                  "flex h-6 w-6 shrink-0 self-center items-center justify-center rounded-full border outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-0",
+                  isEmbedInline
+                    ? "border-zinc-500/55 bg-zinc-800/75 text-zinc-200 hover:bg-zinc-700/90 focus-visible:ring-zinc-400/50"
+                    : isGlassChrome
+                      ? "border-white/18 bg-slate-900/55 text-slate-100 hover:bg-slate-800/75 focus-visible:ring-white/30"
+                      : "border-slate-500/70 bg-slate-800/80 text-slate-100 hover:bg-slate-700 focus-visible:ring-slate-400/45",
+                )}
+                aria-expanded={suggestionsOpen}
+                aria-controls="asksky-suggested-questions"
+                aria-label={suggestionsOpen ? "Hide suggested questions" : "Show suggested questions"}
+                onClick={() => setSuggestionsOpen((o) => !o)}
+              >
+                {suggestionsOpen ? (
+                  <ChevronDown className="h-3 w-3 shrink-0" aria-hidden />
+                ) : (
+                  <ChevronUp className="h-3 w-3 shrink-0" aria-hidden />
+                )}
+              </button>
+            </div>
+            <div
+              id="asksky-suggested-questions"
+              className="flex flex-wrap gap-2"
+              hidden={!suggestionsOpen}
+            >
+              {suggestedQuestions.map((q, i) => (
+                <button
+                  key={`${i}-${q.slice(0, 48)}`}
+                  type="button"
+                  className={cn(
+                    "max-w-full rounded-full border px-3 py-1.5 text-left text-xs font-medium leading-snug text-white transition-colors",
+                    isEmbedInline
+                      ? "border-zinc-500/50 bg-zinc-800/85 hover:border-zinc-400/60 hover:bg-zinc-700/90"
+                      : isGlassChrome
+                        ? "border-white/14 bg-slate-900/65 hover:border-white/22 hover:bg-slate-800/80"
+                        : "border-slate-500/60 bg-slate-800/90 hover:border-slate-400/70 hover:bg-slate-700/95",
+                  )}
+                  onClick={() => void sendMessage(q)}
+                >
+                  <span className="line-clamp-2">{q}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
         <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
