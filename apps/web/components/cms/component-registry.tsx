@@ -20,6 +20,7 @@ import { SevenDayStrategyBlock } from "./components/seven-day-strategy-block";
 import { RadarPanelBlock } from "./components/radar-panel-block";
 import { TopNewsBriefingBlock } from "./components/top-news-briefing-block";
 import { MarketEventsBlock } from "./components/market-events-block";
+import { CityOsEventsBlock } from "./components/cityos-events-block";
 import { LocalDealsBlock } from "./components/local-deals-block";
 import { PlaceholderPanelBlock } from "./components/placeholder-panel-block";
 import { InlineEditViewBlock } from "./components/mycard/inline-edit-view-block";
@@ -83,6 +84,7 @@ export const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "radar-panel-block": RadarPanelBlock,
   "top-news-briefing-block": TopNewsBriefingBlock,
   "market-events-block": MarketEventsBlock,
+  "cityos-events-block": CityOsEventsBlock,
   "local-deals-block": LocalDealsBlock,
   "placeholder-panel-block": PlaceholderPanelBlock,
   "inline-edit-view-block": InlineEditViewBlock,
@@ -118,6 +120,7 @@ const componentBlocks = new Set([
   "radar-panel-block",
   "top-news-briefing-block",
   "market-events-block",
+  "cityos-events-block",
   "local-deals-block",
   "placeholder-panel-block",
   "navbar-block",

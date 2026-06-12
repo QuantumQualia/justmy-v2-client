@@ -31,11 +31,11 @@ import {
   Sparkles,
   Loader2,
 } from "lucide-react";
+import { FaLinkedin } from "react-icons/fa6";
 import {
   SiFacebook,
   SiInstagram,
   SiX,
-  SiLinkedin,
   SiYoutube,
   SiVimeo,
   SiYelp,
@@ -585,7 +585,7 @@ export default function InlineEdit({
       case "x":
         return <SiX size={iconSize} />;
       case "linkedin":
-        return <SiLinkedin size={iconSize} />;
+        return <FaLinkedin size={iconSize} />;
       case "youtube":
         return <SiYoutube size={iconSize} />;
       case "vimeo":

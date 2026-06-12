@@ -1,0 +1,10 @@
+@import url("https://fonts.cdnfonts.com/css/fonarto");
+@import "tailwindcss";
+
+@source "./**/*.{ts,tsx}";
+
+.cityos-shadow-app {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+}

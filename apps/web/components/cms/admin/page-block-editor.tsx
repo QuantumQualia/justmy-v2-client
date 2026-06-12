@@ -32,6 +32,7 @@ import {
   RadarPanelBlockEditor,
   TopNewsBriefingBlockEditor,
   MarketEventsBlockEditor,
+  CityOsEventsBlockEditor,
   LocalDealsBlockEditor,
   PlaceholderPanelBlockEditor,
   NavbarBlockEditor,
@@ -249,6 +250,9 @@ export function PageBlockEditor({
 
       case "market-events-block":
         return <MarketEventsBlockEditor block={block} onUpdate={onUpdate} />;
+
+      case "cityos-events-block":
+        return <CityOsEventsBlockEditor block={block} onUpdate={onUpdate} />;
 
       case "local-deals-block":
         return <LocalDealsBlockEditor block={block} onUpdate={onUpdate} />;

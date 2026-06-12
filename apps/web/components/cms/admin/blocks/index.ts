@@ -21,6 +21,7 @@ export { SevenDayStrategyBlockEditor } from "../page-blocks/seven-day-strategy";
 export { RadarPanelBlockEditor } from "../page-blocks/radar-panel";
 export { TopNewsBriefingBlockEditor } from "../page-blocks/top-news-briefing";
 export { MarketEventsBlockEditor } from "../page-blocks/market-events";
+export { CityOsEventsBlockEditor } from "../page-blocks/cityos-events";
 export { LocalDealsBlockEditor } from "../page-blocks/local-deals";
 export { PlaceholderPanelBlockEditor } from "../page-blocks/placeholder-panel";
 export { NavbarBlockEditor } from "../page-blocks/navbar";

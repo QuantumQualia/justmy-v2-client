@@ -11,11 +11,11 @@ import {
   Globe,
   X,
 } from "lucide-react";
+import { FaLinkedin } from "react-icons/fa6";
 import {
   SiFacebook,
   SiInstagram,
   SiX,
-  SiLinkedin,
   SiYoutube,
   SiVimeo,
   SiYelp,
@@ -71,7 +71,7 @@ const getSocialIcon = (type: SocialLink["type"], size: "sm" | "md" = "md") => {
     case "x":
       return <SiX size={iconSize} />;
     case "linkedin":
-      return <SiLinkedin size={iconSize} />;
+      return <FaLinkedin size={iconSize} />;
     case "youtube":
       return <SiYoutube size={iconSize} />;
     case "vimeo":

@@ -16,6 +16,7 @@ import {
   CloudSun,
   Newspaper,
   CalendarRange,
+  Cloud,
   Tag,
   Box,
   UserPlus,
@@ -191,6 +192,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     label: "Market Events",
     icon: <CalendarRange className="h-5 w-5" />,
     description: "Daily Drop events carousel (The Stage)",
+    category: "Daily Drop",
+  },
+  {
+    value: "cityos-events-block",
+    label: "CityOS Events",
+    icon: <Cloud className="h-5 w-5" />,
+    description: "Ticketmaster on-sale tag cloud: one iframe for all newsstands (parent hostname), or domain in CMS on JustMy pages",
     category: "Daily Drop",
   },
   {

@@ -1,13 +1,8 @@
 "use client";
 
 import React from "react";
-import {
-  SiFacebook,
-  SiLinkedin,
-  SiX,
-  SiPinterest,
-  SiReddit,
-} from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa6";
+import { SiFacebook, SiX, SiPinterest, SiReddit } from "react-icons/si";
 import { Mail, X as CloseIcon } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 
@@ -130,7 +125,7 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
               rel="noopener noreferrer"
               className="h-11 w-11 rounded-full bg-[#0A66C2] text-white flex items-center justify-center shadow-md hover:brightness-110 cursor-pointer"
             >
-              <SiLinkedin className="h-5 w-5" />
+              <FaLinkedin className="h-5 w-5" />
             </a>
             <a
               href={xUrl}

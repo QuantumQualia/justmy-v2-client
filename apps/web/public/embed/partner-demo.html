@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Embed script demos — AskSKY! &amp; myFORM (same host)</title>
+    <title>Embed demos — AskSKY!, myFORM &amp; CityOS events (same host)</title>
     <style>
       body {
         font-family: system-ui, sans-serif;
@@ -18,12 +18,12 @@
     </style>
   </head>
   <body>
-    <h1>Embed script demos — same-origin</h1>
+    <h1>Embed demos — same-origin</h1>
     <p>
       Serve this site over HTTP(S), then open
-      <code>/embed/partner-demo.html</code>. Replace
-      <code>PROFILE_SLUG</code> and <code>AGENT_TOKEN</code> in the markup below
-      (or edit this file in <code>public/embed/</code>).
+      <code>/embed/partner-demo.html</code>. Replace placeholders in the markup
+      below (AskSKY / myFORM / CityOS <code>domain</code>) or edit this file in
+      <code>public/embed/</code>.
     </p>
     <p>
       For a true cross-origin test, copy the script snippet to any other origin;
@@ -70,6 +70,33 @@
       <script
         src="http://localhost:3000/embed/myform.js?v=1"
         data-form-slug="c3c99a4b-bcfe-457e-a6d9-c66fd56f5ac8"
+        async
+      ></script>
+    </div>
+
+    <h2 style="margin-top: 2rem">CityOS events (script embed)</h2>
+    <p>
+      Served from <code>/embed/cityos.js</code> (Vite IIFE + shadow DOM). The
+      widget calls <code>/api/embed/cityos-events</code> on the script’s origin.
+      By default the market domain is taken from <code>window.location</code>
+      (the page hosting the script). Set <code>data-domain</code> when that host
+      is not the market site. Optional <code>data-events-limit</code> (1–100).
+      On <code>localhost</code>, add <code>data-domain</code> so the API can resolve a real market.
+    </p>
+    <div
+      style="
+        width: 85vw;
+        min-width: 52rem;
+        min-height: 420px;
+        border-radius: 4rem;
+        border-bottom-right-radius: 0;
+        overflow: hidden;
+      "
+    >
+      <script
+        src="http://localhost:3000/embed/cityos.js?v=1"
+        data-domain="justmymemphis.com"
+        data-events-limit="30"
         async
       ></script>
     </div>
