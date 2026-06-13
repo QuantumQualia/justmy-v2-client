@@ -20,12 +20,17 @@ export interface CityOsEventsResponseDto {
   totalCount: number;
 }
 
+/** Default when callers omit `eventsLimit` (word cloud target density). */
+export const CITYOS_EVENTS_DEFAULT_LIMIT = 30;
+
 function buildEmbedQuery(domain: string, eventsLimit?: number): string {
   const q = new URLSearchParams();
   q.set("domain", domain.trim());
-  if (eventsLimit != null && Number.isFinite(eventsLimit)) {
-    q.set("eventsLimit", String(Math.min(100, Math.max(1, Math.floor(eventsLimit)))));
-  }
+  const lim =
+    eventsLimit != null && Number.isFinite(eventsLimit)
+      ? Math.floor(eventsLimit)
+      : CITYOS_EVENTS_DEFAULT_LIMIT;
+  q.set("eventsLimit", String(Math.min(100, Math.max(1, lim))));
   return q.toString();
 }
 

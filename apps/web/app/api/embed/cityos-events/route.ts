@@ -1,6 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { CITYOS_EVENTS_DEFAULT_LIMIT } from "@/lib/api/cityos-events";
 import { buildApiUrl } from "@/lib/config";
 import { EMBED_SKY_CORS_HEADERS } from "@/lib/embed-sky-cors";
 
@@ -26,6 +27,8 @@ export async function GET(request: NextRequest) {
     if (Number.isFinite(n)) {
       search.set("eventsLimit", String(Math.min(100, Math.max(1, n))));
     }
+  } else {
+    search.set("eventsLimit", String(CITYOS_EVENTS_DEFAULT_LIMIT));
   }
 
   const backendUrl = buildApiUrl("my-api/cityos-events");

@@ -3,6 +3,8 @@
 import {
   DefaultWordRenderer,
   WordCloud,
+  type FinalWordData,
+  type TooltipRendererData,
   type Word,
   type WordRendererData,
 } from "@isoterik/react-word-cloud";
@@ -27,7 +29,16 @@ type CityOsWord = Word & {
   isHeadline?: boolean;
   ticketUrl?: string;
   fillHex?: string;
+  /** Full event title when `text` is truncated for layout. */
+  fullTitle?: string;
+  /** Source row for tooltips (not used by d3 layout). */
+  event?: CityOsEventDto;
 };
+
+const CLOUD_TITLE_MAX_CHARS = 25;
+const HEADLINE_WORD_PADDING = 4;
+/** Tight padding so d3-cloud can place more event labels (high values drop words). */
+const EVENT_WORD_PADDING = 2;
 
 const PALETTE_DARK = ["#f8fafc", "#67e8f9", "#fcd34d", "#34d399"] as const;
 const HEADLINE_DARK = "#34d399";
@@ -36,7 +47,7 @@ const PALETTE_LIGHT = ["#0f172a", "#047857", "#0369a1", "#b45309"] as const;
 const HEADLINE_LIGHT = "#047857";
 
 const CLOUD_FONT =
-  'Fonarto, ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
+  'Fonarto, fonarto-regular, ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif';
 
 /** Stable 32-bit hash (SSR-safe). */
 function styleSeed(title: string, i: number): number {
@@ -48,7 +59,8 @@ function styleSeed(title: string, i: number): number {
 }
 
 const EVENT_SIZE_DOMAIN: [number, number] = [22, 99];
-const EVENT_FONT_RANGE: [number, number] = [11, 36];
+/** Slightly tighter max so more labels fit. */
+const EVENT_FONT_RANGE: [number, number] = [11, 34];
 
 function eventFontSize(value: number): number {
   const [d0, d1] = EVENT_SIZE_DOMAIN;
@@ -81,6 +93,108 @@ function headlineFontSize(containerWidth: number, text: string, minAboveEvents: 
   return Math.round(Math.min(56, Math.max(minAboveEvents, byLength)));
 }
 
+function cloudDisplayTitle(raw: string): { display: string; fullTitle?: string } {
+  const t = raw.trim();
+  if (t.length <= CLOUD_TITLE_MAX_CHARS) return { display: t };
+  const cut = t.slice(0, CLOUD_TITLE_MAX_CHARS - 3).trimEnd();
+  return { display: `${cut}…`, fullTitle: t };
+}
+
+function formatCityOsEventStart(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso.trim() || "—";
+  return d.toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+function createCityOsRenderTooltip(variant: "light" | "dark") {
+  const bg = variant === "light" ? "rgba(255,255,255,0.98)" : "rgba(15,23,42,0.97)";
+  const fg = variant === "light" ? "#0f172a" : "#f1f5f9";
+  const muted = variant === "light" ? "#64748b" : "#94a3b8";
+  const border = variant === "light" ? "1px solid #e2e8f0" : "1px solid #334155";
+
+  const box: React.CSSProperties = {
+    position: "fixed",
+    left: 0,
+    top: 0,
+    transform: "translate(12px, 12px)",
+    pointerEvents: "none",
+    zIndex: 99999,
+    maxWidth: 320,
+    padding: "10px 12px",
+    borderRadius: 8,
+    background: bg,
+    color: fg,
+    border,
+    boxShadow: "0 12px 40px rgba(0,0,0,0.28)",
+    fontFamily: 'ui-sans-serif, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
+    fontSize: 13,
+    lineHeight: 1.45,
+    whiteSpace: "pre-wrap",
+  };
+
+  return function cityOsRenderTooltip(data: TooltipRendererData) {
+    const evPos = data.event;
+    const w = data.word as (FinalWordData & CityOsWord) | undefined;
+    if (!evPos || !w) return null;
+    if (w.isHeadline) return null;
+
+    const lx = evPos.clientX;
+    const ly = evPos.clientY;
+
+    const ev = w.event;
+    if (!ev) {
+      return (
+        <div style={{ ...box, left: lx, top: ly }}>
+          <div style={{ fontWeight: 700 }}>{(w.fullTitle || w.text).trim()}</div>
+          <div style={{ color: muted, marginTop: 6, fontSize: 12 }}>Details unavailable.</div>
+        </div>
+      );
+    }
+
+    const fullTitle = (ev.title || w.fullTitle || w.text).trim();
+    const venue = (ev.venue ?? "").trim();
+    const postal = (ev.venuePostalCode ?? "").trim();
+    const startLine = formatCityOsEventStart(ev.startAt);
+    const img = (ev.imageUrl ?? "").trim();
+
+    return (
+      <div style={{ ...box, left: lx, top: ly }}>
+        <div style={{ fontWeight: 700, marginBottom: 6 }}>{fullTitle}</div>
+        {img ? (
+          <img
+            src={img}
+            alt=""
+            style={{
+              display: "block",
+              width: "100%",
+              maxHeight: 96,
+              marginBottom: 8,
+              objectFit: "cover",
+              borderRadius: 6,
+            }}
+          />
+        ) : null}
+        {venue ? (
+          <div>
+            {venue}
+            {postal ? ` · ${postal}` : ""}
+          </div>
+        ) : null}
+        <div style={{ marginTop: 4 }}>
+          {startLine}
+        </div>
+      </div>
+    );
+  };
+}
+
 /** `words[0]` = section title — largest `value` / `fontSize` so it dominates the cloud. */
 function buildWords(
   events: CityOsEventDto[],
@@ -102,11 +216,14 @@ function buildWords(
   const eventWords: CityOsWord[] = events.map((ev, i) => {
     const seed = styleSeed(ev.title, i);
     const w = 22 + (seed % 78);
+    const { display, fullTitle } = cloudDisplayTitle(ev.title);
     return {
-      text: ev.title,
+      text: display,
+      fullTitle,
       value: w,
       ticketUrl: typeof ev.ticketUrl === "string" ? ev.ticketUrl : "",
       fillHex: palette[seed % palette.length]!,
+      event: ev,
     };
   });
 
@@ -120,25 +237,46 @@ function createCityRenderWord(variant: "light" | "dark") {
     const clickable = !w.isHeadline && url.length > 0;
     const headlineStroke =
       variant === "light" ? "rgba(226, 232, 240, 0.95)" : "rgba(10, 22, 40, 0.85)";
+
+    if (w.isHeadline) {
+      return (
+        <DefaultWordRenderer
+          ref={ref}
+          data={{
+            ...data,
+            onWordClick: undefined,
+            onWordMouseOver: undefined,
+            onWordMouseOut: undefined,
+          }}
+          textStyle={{
+            paintOrder: "stroke fill",
+            stroke: headlineStroke,
+            strokeWidth: variant === "light" ? 1.75 : 2,
+          }}
+        />
+      );
+    }
+
     return (
-      <DefaultWordRenderer
+      <text
         ref={ref}
-        data={{
-          ...data,
-          onWordClick: clickable ? data.onWordClick : undefined,
-          onWordMouseOver: clickable ? data.onWordMouseOver : undefined,
-          onWordMouseOut: clickable ? data.onWordMouseOut : undefined,
+        textAnchor="middle"
+        transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+        style={{
+          fontFamily: w.font,
+          fontStyle: w.style,
+          fontWeight: w.weight,
+          fontSize: `${w.size}px`,
+          fill: w.fill,
+          transition: w.transition,
+          cursor: clickable ? "pointer" : "text",
         }}
-        textStyle={
-          w.isHeadline
-            ? {
-                paintOrder: "stroke fill",
-                stroke: headlineStroke,
-                strokeWidth: variant === "light" ? 1.75 : 2,
-              }
-            : undefined
-        }
-      />
+        onClick={clickable ? (e) => w.onWordClick?.(data as Word, w.index, e) : undefined}
+        onMouseOver={(e) => w.onWordMouseOver?.(data as Word, w.index, e)}
+        onMouseOut={(e) => w.onWordMouseOut?.(data as Word, w.index, e)}
+      >
+        {w.text}
+      </text>
     );
   };
 }
@@ -196,7 +334,10 @@ export function CityOsEventsTagCloud({
 
   const fontWeight = React.useCallback((word: Word) => ((word as CityOsWord).isHeadline ? 900 : 700), []);
 
-  const padding = React.useCallback((word: Word) => ((word as CityOsWord).isHeadline ? 5 : 2), []);
+  const padding = React.useCallback((word: Word) => {
+    const cw = word as CityOsWord;
+    return cw.isHeadline ? HEADLINE_WORD_PADDING : EVENT_WORD_PADDING;
+  }, []);
 
   const paletteFallback = variant === "light" ? PALETTE_LIGHT[0]! : PALETTE_DARK[0]!;
   const fill = React.useCallback(
@@ -217,19 +358,22 @@ export function CityOsEventsTagCloud({
 
   const renderWord = React.useMemo(() => createCityRenderWord(variant), [variant]);
 
+  const renderTooltip = React.useMemo(() => createCityOsRenderTooltip(variant), [variant]);
+
   const cloud = (
     <WordCloud
       words={words}
       width={dims.w}
       height={dims.h}
-      enableTooltip={false}
+      enableTooltip
+      renderTooltip={renderTooltip}
       font={CLOUD_FONT}
       fontStyle="normal"
       fontWeight={fontWeight}
       fontSize={fontSize}
       padding={padding}
       rotate={() => 0}
-      spiral="rectangular"
+      spiral="archimedean"
       timeInterval={Number.POSITIVE_INFINITY}
       fill={fill}
       transition="none"
@@ -280,7 +424,7 @@ export function CityOsEventsTagCloud({
       {glow}
       <div
         ref={wrapRef}
-        className="relative mx-auto h-[min(44vh,420px)] w-full min-h-[280px] md:min-h-[320px]"
+        className="relative mx-auto h-[min(45vh,450px)] w-full min-h-[300px] md:min-h-[360px]"
         aria-label="Event titles"
       >
         {cloud}

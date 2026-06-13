@@ -22,7 +22,7 @@
 
 1. Same-origin: open `/embed/partner-demo.html` with `src` pointing at your dev origin; confirm the word cloud loads.
 2. **`data-domain`:** use when the embedding hostname is not the market site (e.g. widget on a partner host while the market is **`marketsite.com`**), or for tests. Omit on a normal newsstand URL so **`window.location`** is used.
-3. **`data-events-limit`:** optional; defaults to API default when omitted.
+3. **Event count:** the API defaults to **30** events when `eventsLimit` is omitted (iframe query, CMS fetch, or script without `data-events-limit`). Override with **`data-events-limit`** (1–100) or CMS block limit.
 4. **Cross-origin:** CSP must allow `script-src` and `connect-src` to your JustMy app origin.
 
 ### CityOS events (iframe)

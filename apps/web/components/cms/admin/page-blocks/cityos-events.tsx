@@ -22,7 +22,7 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
   const limit =
     typeof limitRaw === "number" && Number.isFinite(limitRaw)
       ? limitRaw
-      : Number.parseInt(String(limitRaw ?? "25"), 10) || 25;
+      : Number.parseInt(String(limitRaw ?? "30"), 10) || 30;
 
   const [copied, setCopied] = React.useState<false | "iframe" | "script">(false);
 
@@ -84,10 +84,10 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
               min={1}
               max={100}
               className="border-slate-600 bg-slate-900 text-slate-100"
-              value={Number.isFinite(limit) ? limit : 25}
+              value={Number.isFinite(limit) ? limit : 30}
               onChange={(e) => {
                 const n = Number.parseInt(e.target.value, 10);
-                updateField("cityOsEventsLimit", Number.isFinite(n) ? Math.min(100, Math.max(1, n)) : 25);
+                updateField("cityOsEventsLimit", Number.isFinite(n) ? Math.min(100, Math.max(1, n)) : 30);
               }}
             />
           </div>
