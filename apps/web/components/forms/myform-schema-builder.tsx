@@ -24,6 +24,7 @@ import {
   CheckSquare,
   ChevronDown,
   CircleDot,
+  Bell,
   Eye,
   GripVertical,
   Hash,
@@ -45,8 +46,12 @@ import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { cn } from "@workspace/ui/lib/utils";
 import {
+  adminEmailsToLines,
   createDefaultField,
+  linesToAdminEmails,
+  mergeSchemaWithAdminEmails,
   mergeSchemaWithFields,
+  parseAdminEmails,
   parseBuilderFields,
   type MyFormBuilderField,
   type MyFormBuilderFieldType,
@@ -372,7 +377,11 @@ export interface MyFormSchemaBuilderProps {
 
 export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className }: MyFormSchemaBuilderProps) {
   const fields = React.useMemo(() => parseBuilderFields(schema), [schema]);
+  const adminEmails = React.useMemo(() => parseAdminEmails(schema), [schema]);
+  const adminEmailsKey = adminEmails.join("\n");
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [adminEmailsDraft, setAdminEmailsDraft] = React.useState("");
+  const adminEmailsDraftRef = React.useRef("");
 
   React.useEffect(() => {
     if (fields.length === 0) {
@@ -383,6 +392,23 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
       setSelectedId(fields[0]!.id);
     }
   }, [fields, selectedId]);
+
+  React.useLayoutEffect(() => {
+    adminEmailsDraftRef.current = adminEmailsDraft;
+  }, [adminEmailsDraft]);
+
+  React.useEffect(() => {
+    setAdminEmailsDraft(adminEmailsKey);
+  }, [adminEmailsKey]);
+
+  const commitAdminEmails = React.useCallback(
+    (text: string) => {
+      const parsed = linesToAdminEmails(text);
+      onSchemaChange(mergeSchemaWithAdminEmails(schema, parsed));
+      setAdminEmailsDraft(adminEmailsToLines(parsed));
+    },
+    [onSchemaChange, schema],
+  );
 
   const commit = React.useCallback(
     (next: MyFormBuilderField[]) => {
@@ -615,6 +641,35 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
 
       {/* Toolbox — add + properties */}
       <aside className="order-2 flex flex-col gap-4 xl:sticky xl:top-4">
+        <div className={panelClass}>
+          <div className="flex items-center gap-2 border-b border-slate-700/40 pb-3">
+            <Bell className="h-4 w-4 text-amber-400/90" />
+            <div>
+              <p className="text-sm font-semibold text-white">Submission notifications</p>
+              <p className="text-[11px] text-slate-500">Email admins when someone submits this form</p>
+            </div>
+          </div>
+          <div className="mt-4 space-y-1.5">
+            <Label htmlFor="myform-admin-emails" className="text-xs font-medium text-slate-400">
+              Admin emails
+            </Label>
+            <Textarea
+              id="myform-admin-emails"
+              value={adminEmailsDraft}
+              onChange={(e) => setAdminEmailsDraft(e.target.value)}
+              onBlur={() => commitAdminEmails(adminEmailsDraftRef.current)}
+              placeholder={"one per line, e.g.\nadmin@example.com\nleads@example.com"}
+              className="min-h-[88px] rounded-xl border-slate-700/60 bg-slate-950/50 font-mono text-xs leading-relaxed text-white placeholder:text-slate-600"
+              spellCheck={false}
+            />
+            <p className="text-[10px] leading-snug text-slate-600">
+              {adminEmails.length === 0
+                ? "Leave empty to skip email notifications."
+                : `${adminEmails.length} recipient${adminEmails.length === 1 ? "" : "s"} will be notified.`}
+            </p>
+          </div>
+        </div>
+
         <div className={panelClass}>
           <div className="flex items-center gap-2 border-b border-slate-700/40 pb-3">
             <List className="h-4 w-4 text-emerald-400/90" />

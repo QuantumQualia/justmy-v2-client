@@ -11,6 +11,57 @@ export interface MyFormBuilderField {
   options?: { value: string; label: string }[];
 }
 
+const SIMPLE_EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+/** Emails that receive a notification when someone submits this form. */
+export function parseAdminEmails(schema: Record<string, unknown> | null | undefined): string[] {
+  const raw = schema?.adminEmails;
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of raw) {
+    if (typeof item !== "string") {
+      continue;
+    }
+    const email = item.trim().toLowerCase();
+    if (!email || !SIMPLE_EMAIL_RE.test(email) || seen.has(email)) {
+      continue;
+    }
+    seen.add(email);
+    out.push(email);
+  }
+  return out;
+}
+
+export function mergeSchemaWithAdminEmails(
+  previous: Record<string, unknown>,
+  emails: string[],
+): Record<string, unknown> {
+  const adminEmails = parseAdminEmails({ adminEmails: emails });
+  const next = { ...previous };
+  if (adminEmails.length === 0) {
+    delete next.adminEmails;
+  } else {
+    next.adminEmails = adminEmails;
+  }
+  return next;
+}
+
+export function adminEmailsToLines(emails: string[]): string {
+  return emails.join("\n");
+}
+
+/** One email per line; commas and semicolons also split entries. */
+export function linesToAdminEmails(text: string): string[] {
+  const parts = text
+    .split(/[\n,;]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parseAdminEmails({ adminEmails: parts });
+}
+
 const SUPPORTED_TYPES = new Set<string>([
   "header",
   "text",
