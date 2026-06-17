@@ -16,6 +16,7 @@ export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const redirect = searchParams.get("redirect") || "/dashboard";
+  const resetSuccess = searchParams.get("reset") === "success";
 
   useEffect(() => {
     async function checkAuth() {
@@ -75,6 +76,11 @@ export default function LoginForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {resetSuccess && (
+            <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm">
+              Your password has been reset. Please sign in with your new password.
+            </div>
+          )}
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
               {error}
@@ -93,7 +99,15 @@ export default function LoginForm() {
           </div>
 
           <div className="space-y-2">
-            <Label>Password</Label>
+            <div className="flex items-center justify-between">
+              <Label>Password</Label>
+              <Link
+                href="/forgot-password"
+                className="text-xs text-emerald-500 hover:text-emerald-400 font-medium"
+              >
+                Forgot password?
+              </Link>
+            </div>
             <Input
               type="password"
               required

@@ -10,6 +10,8 @@ const publicRoutes = [
   "/",
   "/login",
   "/register",
+  "/forgot-password",
+  "/reset-password",
   "/stripe-callback", // Stripe callback doesn't require auth (handles it internally)
 ];
 

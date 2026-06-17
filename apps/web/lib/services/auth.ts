@@ -287,6 +287,7 @@ export const authService = {
       return await apiRequest<{ message: string }>("auth/password/reset", {
         method: "POST",
         body: JSON.stringify(data),
+        skipAuth: true,
       });
     } catch (error) {
       if (error instanceof ApiClientError) {
@@ -304,6 +305,7 @@ export const authService = {
       return await apiRequest<{ message: string }>("auth/password/confirm", {
         method: "POST",
         body: JSON.stringify(data),
+        skipAuth: true,
       });
     } catch (error) {
       if (error instanceof ApiClientError) {
