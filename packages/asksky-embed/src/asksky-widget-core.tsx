@@ -235,6 +235,7 @@ function AskSkyConversationView({
   );
   const [suggestionsOpen, setSuggestionsOpen] = React.useState(true);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const contactFormAnchorRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const assistantBufferRef = React.useRef("");
   const revealEndRef = React.useRef(0);
@@ -331,9 +332,19 @@ function AskSkyConversationView({
     };
   }, [embedKey, sky]);
 
+  const scrollThreadToBottom = React.useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) {
+      return;
+    }
+    requestAnimationFrame(() => {
+      el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    });
+  }, []);
+
   React.useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, streamingText, phase]);
+    scrollThreadToBottom();
+  }, [messages, streamingText, phase, scrollThreadToBottom]);
 
   React.useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -586,13 +597,23 @@ function AskSkyConversationView({
     ],
   );
 
-  React.useLayoutEffect(() => {
+  // Contact form schema loads async — re-scroll when the inline form grows after first paint.
+  React.useEffect(() => {
     const last = messages[messages.length - 1];
-    if (!last?.showContactForm) {
+    if (!last?.showContactForm || visitorContactCaptured) {
       return;
     }
-    scrollRef.current?.lastElementChild?.scrollIntoView({ behavior: "smooth", block: "end" });
-  }, [messages]);
+    scrollThreadToBottom();
+    const anchor = contactFormAnchorRef.current;
+    if (!anchor) {
+      return;
+    }
+    const ro = new ResizeObserver(() => {
+      scrollThreadToBottom();
+    });
+    ro.observe(anchor);
+    return () => ro.disconnect();
+  }, [messages, visitorContactCaptured, scrollThreadToBottom]);
 
   return (
     <div
@@ -682,8 +703,13 @@ function AskSkyConversationView({
         ) : null}
         {messages.map((m, i) => {
           if (m.role === "assistant" && m.showContactForm) {
+            const isLastContactFormMessage = i === messages.length - 1;
             return (
-              <div key={i} className="flex w-full min-w-0 flex-col gap-2">
+              <div
+                key={i}
+                ref={isLastContactFormMessage ? contactFormAnchorRef : undefined}
+                className="flex w-full min-w-0 flex-col gap-2"
+              >
                 <div className={`flex ${isEmbedInline ? "" : "gap-2"} justify-start`}>
                   {!isEmbedInline ? (
                     resolve.photo ? (
