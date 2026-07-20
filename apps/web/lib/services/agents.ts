@@ -34,6 +34,10 @@ export interface AgentResponseDto {
   isPublic?: boolean;
   publicIdentifier?: string | null;
   publicConfig?: AgentPublicConfigDto | null;
+  /** Opt-in curated live web search when KB has no match. Default false. */
+  liveSearchEnabled?: boolean;
+  /** Hostname allowlist for live search (e.g. `justmy.com`). */
+  liveSearchDomains?: string[];
   knowledgeSourceCount?: number;
   sharedKnowledgeSourceCount?: number;
   privateKnowledgeSourceCount?: number;
@@ -48,6 +52,8 @@ export interface CreateAgentDto {
   isActive?: boolean;
   isPublic?: boolean;
   contactFormId?: number | null;
+  liveSearchEnabled?: boolean;
+  liveSearchDomains?: string[];
 }
 
 export interface UpdateAgentDto {
@@ -57,6 +63,85 @@ export interface UpdateAgentDto {
   isActive?: boolean;
   isPublic?: boolean;
   contactFormId?: number | null;
+  liveSearchEnabled?: boolean;
+  liveSearchDomains?: string[];
+}
+
+/** Max domains accepted by the live-search allowlist editor / API. */
+export const LIVE_SEARCH_DOMAINS_MAX = 50;
+
+/**
+ * Normalize pasted URLs or host strings to a hostname.
+ * Returns null for empty values, wildcards, or unparseable input.
+ */
+export function normalizeLiveSearchDomain(raw: string): string | null {
+  const trimmed = raw.trim().toLowerCase();
+  if (!trimmed) {
+    return null;
+  }
+  if (trimmed.includes("*")) {
+    return null;
+  }
+
+  let host = trimmed;
+  try {
+    if (/^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed)) {
+      host = new URL(trimmed).hostname;
+    } else if (trimmed.includes("/") || trimmed.includes("?") || trimmed.includes("#")) {
+      host = new URL(`https://${trimmed}`).hostname;
+    } else if (trimmed.includes("@")) {
+      return null;
+    } else {
+      host = trimmed.replace(/:\d+$/, "");
+    }
+  } catch {
+    return null;
+  }
+
+  host = host.replace(/\.$/, "").replace(/^www\./, "");
+  if (!host || host.includes("*") || host.includes(" ")) {
+    return null;
+  }
+  // Require at least one dot (e.g. justmy.com) or localhost for local testing.
+  if (host !== "localhost" && !host.includes(".")) {
+    return null;
+  }
+  return host;
+}
+
+/** Split paste / multi-value input and normalize to unique hostnames (capped). */
+export function normalizeLiveSearchDomains(
+  values: string[],
+  max = LIVE_SEARCH_DOMAINS_MAX,
+): { domains: string[]; rejected: string[] } {
+  const domains: string[] = [];
+  const rejected: string[] = [];
+  const seen = new Set<string>();
+
+  for (const value of values) {
+    for (const part of value.split(/[\s,;]+/)) {
+      const piece = part.trim();
+      if (!piece) {
+        continue;
+      }
+      const host = normalizeLiveSearchDomain(piece);
+      if (!host) {
+        rejected.push(piece);
+        continue;
+      }
+      if (seen.has(host)) {
+        continue;
+      }
+      if (domains.length >= max) {
+        rejected.push(piece);
+        continue;
+      }
+      seen.add(host);
+      domains.push(host);
+    }
+  }
+
+  return { domains, rejected };
 }
 
 export interface KnowledgeSourceResponseDto {
@@ -412,6 +497,11 @@ function normalizeAgent(agent: AgentResponseDto): AgentResponseDto {
         ? agent.agentToken.trim()
         : null;
 
+  const liveSearchDomainsRaw = Array.isArray(agent.liveSearchDomains) ? agent.liveSearchDomains : [];
+  const { domains: liveSearchDomains } = normalizeLiveSearchDomains(
+    liveSearchDomainsRaw.filter((d): d is string => typeof d === "string"),
+  );
+
   return {
     ...agent,
     id: String(agent.id),
@@ -423,6 +513,8 @@ function normalizeAgent(agent: AgentResponseDto): AgentResponseDto {
         : (agent as { contactFormId?: unknown }).contactFormId === null
           ? null
           : undefined,
+    liveSearchEnabled: agent.liveSearchEnabled === true,
+    liveSearchDomains,
     publicIdentifier,
     sharedKnowledgeSourceCount,
     privateKnowledgeSourceCount,

@@ -8,9 +8,11 @@ import type {
   SkyConversationMessage,
   SkyResolveContactForm,
   SkyResolveResponse,
+  SkyRetrievedDoc,
   SkySseDonePayload,
 } from "./sky-types";
 import { formatAskSkyUserFacingError } from "./sky-user-errors";
+import { citationLinksFromRetrievedDocs, parseSkyRetrievedDocs } from "./sky-retrieved-docs";
 import { LinkifiedMessage } from "./linkified-message";
 import { useIsMobile } from "./use-is-mobile";
 import { cn } from "@workspace/ui/lib/utils";
@@ -122,8 +124,107 @@ type AskSkyChatMessage = Pick<SkyConversationMessage, "role" | "content"> & {
   /** After SSE `requestingContactDetails`, show linked contact form inline (below this assistant message). */
   showContactForm?: boolean;
   model?: string | null;
+  retrievedDocs?: SkyRetrievedDoc[];
   at?: number;
 };
+
+function mapHistoryMessage(m: SkyConversationMessage): AskSkyChatMessage {
+  const docs = parseSkyRetrievedDocs(m.retrievedDocs);
+  const model = m.model != null && m.model !== "" ? m.model : null;
+  return {
+    role: m.role,
+    content: m.content,
+    ...(model ? { model } : {}),
+    ...(docs.length > 0 ? { retrievedDocs: docs } : {}),
+    ...(model === "no-match" ? { refusal: true } : {}),
+  };
+}
+
+function AskSkyMessageCitations({
+  docs,
+  isEmbedInline,
+  isGlassChrome,
+}: {
+  docs: SkyRetrievedDoc[] | undefined;
+  isEmbedInline: boolean;
+  isGlassChrome: boolean;
+}) {
+  const links = citationLinksFromRetrievedDocs(docs);
+  if (links.length === 0) {
+    return null;
+  }
+  const preferLiveLabel = links.some((l) => l.live);
+  return (
+    <div
+      className={cn(
+        "mt-2 border-t pt-2",
+        isEmbedInline
+          ? "border-zinc-600/50"
+          : isGlassChrome
+            ? "border-white/10"
+            : "border-slate-600/60",
+      )}
+    >
+      <p
+        className={cn(
+          "mb-1 text-[10px] font-medium uppercase tracking-wide",
+          isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-400" : "text-slate-400",
+        )}
+      >
+        {preferLiveLabel ? "Sources" : "References"}
+      </p>
+      <ul className="space-y-1">
+        {links.map((link) => (
+          <li key={link.url} className="min-w-0">
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "block truncate text-xs underline underline-offset-2",
+                isEmbedInline
+                  ? "text-zinc-300 decoration-zinc-500/70 hover:text-white"
+                  : isGlassChrome
+                    ? "text-sky-300/90 decoration-sky-400/50 hover:text-sky-200"
+                    : "text-blue-300 decoration-blue-400/60 hover:text-white",
+              )}
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function AskSkyLiveSearchBadge({
+  model,
+  isEmbedInline,
+  isGlassChrome,
+}: {
+  model?: string | null;
+  isEmbedInline: boolean;
+  isGlassChrome: boolean;
+}) {
+  if (model !== "openai-live-search") {
+    return null;
+  }
+  return (
+    <span
+      className={cn(
+        "mt-1.5 inline-flex rounded px-1.5 py-0.5 text-[10px] font-medium",
+        isEmbedInline
+          ? "bg-zinc-700/80 text-zinc-300"
+          : isGlassChrome
+            ? "bg-white/10 text-slate-300"
+            : "bg-slate-700/80 text-slate-300",
+      )}
+    >
+      From recent sources
+    </span>
+  );
+}
 
 /** Optional slot for myFORM lead capture (implemented in the host app, e.g. Next.js `DynamicForm`). */
 export type AskSkyRenderContactLeadCapture = (ctx: {
@@ -307,11 +408,7 @@ function AskSkyConversationView({
         if (cancelled) {
           return;
         }
-        const history = conv.messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-          ...(m.model != null && m.model !== "" ? { model: m.model } : {}),
-        }));
+        const history = conv.messages.map(mapHistoryMessage);
         setVisitorContactCaptured(Boolean(conv.visitorContactCaptured));
         setMessages(mergeGreetingFirst(resolveLatest.current, history));
       } catch (e) {
@@ -396,11 +493,7 @@ function AskSkyConversationView({
         });
         const conv = await sky.skyGetConversation(cid, vt);
         setVisitorContactCaptured(Boolean(conv.visitorContactCaptured));
-        const history = conv.messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-          ...(m.model != null && m.model !== "" ? { model: m.model } : {}),
-        }));
+        const history = conv.messages.map(mapHistoryMessage);
         setMessages(mergeGreetingFirst(resolveLatest.current, history));
       } catch (e) {
         setBanner(formatAskSkyUserFacingError(e));
@@ -522,6 +615,11 @@ function AskSkyConversationView({
         cid > 0 &&
         Boolean(vt);
 
+      const docs =
+        !refusedKb && lastDone != null ? parseSkyRetrievedDocs(lastDone.retrievedDocs) : [];
+      const liveModel =
+        docs.some((d) => d.sourceKind === "live") ? ("openai-live-search" as const) : undefined;
+
       setMessages((prev) => [
         ...prev,
         {
@@ -529,6 +627,8 @@ function AskSkyConversationView({
           content,
           refusal: refusedKb,
           showContactForm: canShowContact,
+          ...(docs.length > 0 ? { retrievedDocs: docs } : {}),
+          ...(liveModel ? { model: liveModel } : {}),
           at: Date.now(),
         },
       ]);
@@ -741,6 +841,16 @@ function AskSkyConversationView({
                           : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
                       }
                     />
+                    <AskSkyLiveSearchBadge
+                      model={m.model}
+                      isEmbedInline={isEmbedInline}
+                      isGlassChrome={isGlassChrome}
+                    />
+                    <AskSkyMessageCitations
+                      docs={m.retrievedDocs}
+                      isEmbedInline={isEmbedInline}
+                      isGlassChrome={isGlassChrome}
+                    />
                     {!isEmbedInline && typeof m.at === "number" ? (
                       <span className="mt-1 block text-[10px] text-slate-400">
                         {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
@@ -804,6 +914,20 @@ function AskSkyConversationView({
                         : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
                   }
                 />
+                {m.role === "assistant" ? (
+                  <>
+                    <AskSkyLiveSearchBadge
+                      model={m.model}
+                      isEmbedInline={isEmbedInline}
+                      isGlassChrome={isGlassChrome}
+                    />
+                    <AskSkyMessageCitations
+                      docs={m.retrievedDocs}
+                      isEmbedInline={isEmbedInline}
+                      isGlassChrome={isGlassChrome}
+                    />
+                  </>
+                ) : null}
                 {!isEmbedInline && typeof m.at === "number" ? (
                   <span
                     className={`mt-1 block text-[10px] ${

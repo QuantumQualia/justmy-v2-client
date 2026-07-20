@@ -14,6 +14,8 @@ export type {
   SkyMessageRequest,
   SkyResolveContactForm,
   SkyResolveResponse,
+  SkyRetrievedDoc,
+  SkyRetrievedDocSourceKind,
   SkySseDonePayload,
   SkySseMetaPayload,
   SkyStreamHandlers,
@@ -21,6 +23,11 @@ export type {
 export { createEmbedSkyTransport } from "./embed-sky-transport";
 export { formatSkyApiErrorPayload } from "./sky-error-format";
 export { buildSkyMessageRequestBody } from "./sky-message-body";
+export {
+  citationLinksFromRetrievedDocs,
+  parseSkyRetrievedDocs,
+  type SkyCitationLink,
+} from "./sky-retrieved-docs";
 export { parseSkySseDataLine, parseSkySseRawEvent } from "./sky-sse-parse";
 export { formatAskSkyUserFacingError } from "./sky-user-errors";
 export {

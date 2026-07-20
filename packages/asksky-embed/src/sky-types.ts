@@ -16,6 +16,11 @@ export interface SkyResolveResponse {
   greetingMessage?: string | null;
   hasKnowledgeBase: boolean;
   /**
+   * True only when the agent has live search enabled and a non-empty domain allowlist.
+   * Domains themselves are admin-only and are not returned on resolve.
+   */
+  liveSearchEnabled?: boolean;
+  /**
    * Up to ~3 example questions from the agent’s knowledge (empty when no KB).
    * Older APIs may omit this field — treat as [].
    */
@@ -23,6 +28,24 @@ export interface SkyResolveResponse {
   /** Published contact form for this agent, or null if none. */
   contactForm?: SkyResolveContactForm | null;
 }
+
+/** Citation / retrieval metadata on SSE `done` and conversation history. */
+export type SkyRetrievedDocSourceKind = "website" | "document" | "unknown" | "live";
+
+export type SkyRetrievedDoc = {
+  index: number;
+  agentId: number | null;
+  /** Null for live-search citations. */
+  knowledgeSourceId: number | null;
+  pageId: number | null;
+  pageNumber: number | null;
+  sourceKind: SkyRetrievedDocSourceKind;
+  title: string | null;
+  url: string | null;
+  snippet: string;
+  score: number;
+  chunkIndex: number;
+};
 
 export interface SkyMessageRequest {
   profileSlug: string;
@@ -36,8 +59,9 @@ export interface SkyConversationMessage {
   id: number;
   role: string;
   content: string;
+  /** May be `"openai-live-search"` | `"no-match"` | `"openai"` | … */
   model?: string | null;
-  retrievedDocs?: unknown[] | null;
+  retrievedDocs?: SkyRetrievedDoc[] | unknown[] | null;
   createdAt?: string;
 }
 
@@ -72,7 +96,7 @@ export type SkySseDonePayload = {
   assistantMessageId?: number;
   answer: string;
   refused: boolean;
-  retrievedDocs: unknown[];
+  retrievedDocs: SkyRetrievedDoc[] | unknown[];
   visitorContactCaptured: boolean;
   requestingContactDetails: boolean;
   /** Same list as `meta` for that turn when non-empty. */

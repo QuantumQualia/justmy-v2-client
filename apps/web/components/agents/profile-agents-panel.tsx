@@ -50,9 +50,12 @@ import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal
 import { AgentLeadsDialog } from "@/components/agents/agent-leads-dialog";
 import { AskSkyStaticEmbedDialog } from "@/components/agents/asksky-static-embed-dialog";
 import { DataTable } from "@/components/ui/data-table";
+import { TagInput } from "@/components/ui/tag-input";
 import { agentQueryKeys } from "@/lib/query/agent-query-keys";
 import {
   agentsService,
+  LIVE_SEARCH_DOMAINS_MAX,
+  normalizeLiveSearchDomains,
   resolveAgentPublicIdentifier,
   type AgentResponseDto,
   type CreateAgentDto,
@@ -429,6 +432,8 @@ function AgentFormDialog({
   const [isActive, setIsActive] = React.useState(true);
   const [isPublic, setIsPublic] = React.useState(true);
   const [contactFormKey, setContactFormKey] = React.useState<string>("__none__");
+  const [liveSearchEnabled, setLiveSearchEnabled] = React.useState(false);
+  const [liveSearchDomains, setLiveSearchDomains] = React.useState<string[]>([]);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -443,10 +448,28 @@ function AgentFormDialog({
     setIsPublic(state.agent?.isPublic ?? true);
     const cf = state.agent?.contactFormId;
     setContactFormKey(typeof cf === "number" && Number.isFinite(cf) ? String(cf) : "__none__");
+    setLiveSearchEnabled(state.agent?.liveSearchEnabled === true);
+    setLiveSearchDomains(
+      Array.isArray(state.agent?.liveSearchDomains) ? [...state.agent.liveSearchDomains] : [],
+    );
     setError(null);
   }, [state]);
 
   const publicIdentifier = resolveAgentPublicIdentifier(state.agent);
+
+  const handleLiveSearchDomainsChange = (tags: string[]) => {
+    const { domains, rejected } = normalizeLiveSearchDomains(tags, LIVE_SEARCH_DOMAINS_MAX);
+    setLiveSearchDomains(domains);
+    if (rejected.length > 0) {
+      setError(
+        `Skipped invalid domains (no wildcards; hostnames only, max ${LIVE_SEARCH_DOMAINS_MAX}): ${rejected
+          .slice(0, 3)
+          .join(", ")}${rejected.length > 3 ? "…" : ""}`,
+      );
+    } else {
+      setError(null);
+    }
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -457,18 +480,41 @@ function AgentFormDialog({
       return;
     }
 
+    const { domains: normalizedDomains, rejected } = normalizeLiveSearchDomains(
+      liveSearchDomains,
+      LIVE_SEARCH_DOMAINS_MAX,
+    );
+    if (rejected.length > 0) {
+      setError(
+        `Remove invalid domains before saving: ${rejected.slice(0, 3).join(", ")}${
+          rejected.length > 3 ? "…" : ""
+        }`,
+      );
+      return;
+    }
+    if (liveSearchEnabled && normalizedDomains.length === 0) {
+      setError("Add at least one domain when live web search is enabled.");
+      return;
+    }
+
     setError(null);
 
     const contactFormId = contactFormKey === "__none__" ? null : Number(contactFormKey);
 
-    await onSubmit({
-      name: trimmedName,
-      greetingMessage: greetingMessage.trim() || null,
-      customPromptText: customPromptText.trim() || null,
-      isActive,
-      isPublic,
-      contactFormId,
-    });
+    try {
+      await onSubmit({
+        name: trimmedName,
+        greetingMessage: greetingMessage.trim() || null,
+        customPromptText: customPromptText.trim() || null,
+        isActive,
+        isPublic,
+        contactFormId,
+        liveSearchEnabled,
+        liveSearchDomains: normalizedDomains,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to save agent.");
+    }
   };
 
   return (
@@ -481,7 +527,7 @@ function AgentFormDialog({
       }}
     >
       <DialogContent
-        className="border-slate-800 bg-slate-950 text-white sm:max-w-2xl"
+        className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-950 text-white sm:max-w-2xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -606,6 +652,51 @@ function AgentFormDialog({
               Only published myFORM definitions can be linked. Visitors see it inside AskSKY as an optional lead
               capture card.
             </p>
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="agent-live-search" className="text-slate-200">
+                  Enable live web search when knowledge base has no answer
+                </Label>
+                <p className="text-xs text-slate-500">
+                  Sky will only search these sites when your uploaded knowledge has no match. Off by default.
+                </p>
+              </div>
+              <Switch
+                id="agent-live-search"
+                checked={liveSearchEnabled}
+                onCheckedChange={setLiveSearchEnabled}
+                disabled={submitting}
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-700"
+              />
+            </div>
+
+            <div className={cn("space-y-2", !liveSearchEnabled && "opacity-60")}>
+              <TagInput
+                id="agent-live-search-domains"
+                label={`Allowed domains${liveSearchEnabled ? " (required)" : ""}`}
+                value={liveSearchDomains}
+                onChange={handleLiveSearchDomainsChange}
+                placeholder="justmy.com, electionshelbytn.gov"
+                disabled={submitting}
+                splitPaste
+                inputClassName="border-slate-700 bg-slate-900"
+              />
+              <p className="text-xs text-slate-500">
+                Paste URLs or hostnames (max {LIVE_SEARCH_DOMAINS_MAX}). Wildcards like{" "}
+                <span className="font-mono">*.com</span> are rejected. Examples:{" "}
+                <span className="font-mono">justmy.com</span>,{" "}
+                <span className="font-mono">justmymemphis.com</span>,{" "}
+                <span className="font-mono">electionshelbytn.gov</span>.
+              </p>
+              {liveSearchDomains.length > 0 ? (
+                <p className="text-xs text-slate-400">
+                  {liveSearchDomains.length} / {LIVE_SEARCH_DOMAINS_MAX} domains
+                </p>
+              ) : null}
+            </div>
           </div>
 
           {publicIdentifier ? (
@@ -1699,6 +1790,15 @@ export function ProfileAgentsPanel({
                   ? "Custom prompt configured"
                   : "Using default prompt behavior"}
               </p>
+              {agent.liveSearchEnabled ? (
+                <Badge
+                  variant="outline"
+                  className="border-sky-500/30 bg-sky-500/10 text-sky-300"
+                >
+                  Live search · {agent.liveSearchDomains?.length ?? 0} domain
+                  {(agent.liveSearchDomains?.length ?? 0) === 1 ? "" : "s"}
+                </Badge>
+              ) : null}
             </div>
           );
         },

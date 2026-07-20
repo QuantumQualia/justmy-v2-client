@@ -22,6 +22,7 @@ export type {
   SkyLeadCaptureResponse,
   SkyMessageRequest,
   SkyResolveResponse,
+  SkyRetrievedDoc,
 } from "@workspace/asksky-embed";
 
 async function skyHeaders(): Promise<Record<string, string>> {

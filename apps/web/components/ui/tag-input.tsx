@@ -17,6 +17,8 @@ export interface TagInputProps {
   className?: string;
   inputClassName?: string;
   disabled?: boolean;
+  /** When true, paste of comma/newline/space-separated values adds multiple tags. */
+  splitPaste?: boolean;
 }
 
 /**
@@ -32,6 +34,7 @@ export function TagInput({
   className,
   inputClassName,
   disabled,
+  splitPaste = false,
 }: TagInputProps) {
   const [inputValue, setInputValue] = React.useState("");
 
@@ -71,6 +74,32 @@ export function TagInput({
     } else {
       setInputValue(v);
     }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    if (!splitPaste || disabled) {
+      return;
+    }
+    const text = e.clipboardData.getData("text");
+    if (!text || !/[\s,;]/.test(text)) {
+      return;
+    }
+    e.preventDefault();
+    const parts = text
+      .split(/[\s,;]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (parts.length === 0) {
+      return;
+    }
+    const next = [...value];
+    for (const part of parts) {
+      if (!next.includes(part)) {
+        next.push(part);
+      }
+    }
+    onChange(next);
+    setInputValue("");
   };
 
   return (
@@ -119,6 +148,7 @@ export function TagInput({
           value={inputValue}
           onChange={handleInputChange}
           onKeyDown={handleKeyDown}
+          onPaste={handlePaste}
           placeholder={value.length === 0 ? placeholder : ""}
           disabled={disabled}
           className={cn(

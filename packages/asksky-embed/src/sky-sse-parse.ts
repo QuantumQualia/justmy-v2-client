@@ -1,4 +1,5 @@
 import type { SkySseDonePayload, SkySseMetaPayload, SkyStreamHandlers } from "./sky-types";
+import { parseSkyRetrievedDocs } from "./sky-retrieved-docs";
 
 function isLikelySseErrorEventPayload(parsed: Record<string, unknown>, refusal: boolean): boolean {
   if (refusal) {
@@ -99,7 +100,7 @@ function normalizeDone(parsed: Record<string, unknown>): SkySseDonePayload | nul
   }
   const answer = typeof parsed.answer === "string" ? parsed.answer : "";
   const refused = parsed.refused === true || parsed.refusal === true || parsed.answerRefused === true;
-  const retrievedDocs = Array.isArray(parsed.retrievedDocs) ? parsed.retrievedDocs : [];
+  const retrievedDocs = parseSkyRetrievedDocs(parsed.retrievedDocs);
   const suggestedQuestions = pickSuggestedQuestions(parsed);
   return {
     conversationId,
