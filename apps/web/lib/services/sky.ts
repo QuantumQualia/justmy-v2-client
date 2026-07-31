@@ -49,15 +49,29 @@ const skyResolveResult = new Map<string, SkyResolveResponse>();
 export async function skyResolve(params: {
   profileSlug: string;
   agentToken: string;
+  conversationId?: number | null;
+  visitorToken?: string | null;
 }): Promise<SkyResolveResponse> {
+  const conversationId =
+    typeof params.conversationId === "number" && params.conversationId > 0
+      ? params.conversationId
+      : null;
+  const visitorToken =
+    typeof params.visitorToken === "string" && params.visitorToken.trim()
+      ? params.visitorToken.trim()
+      : null;
+  const threadScoped = conversationId != null && visitorToken != null;
+
   const key = skyResolveKey(params);
-  const hit = skyResolveResult.get(key);
-  if (hit) {
-    return hit;
-  }
-  const inflight = skyResolveInflight.get(key);
-  if (inflight) {
-    return inflight;
+  if (!threadScoped) {
+    const hit = skyResolveResult.get(key);
+    if (hit) {
+      return hit;
+    }
+    const inflight = skyResolveInflight.get(key);
+    if (inflight) {
+      return inflight;
+    }
   }
 
   const url = buildApiUrl("sky/resolve");
@@ -65,6 +79,10 @@ export async function skyResolve(params: {
     profileSlug: params.profileSlug.trim(),
     agentToken: params.agentToken.trim(),
   });
+  if (threadScoped) {
+    search.set("conversationId", String(conversationId));
+    search.set("visitorToken", visitorToken);
+  }
 
   const pending = (async (): Promise<SkyResolveResponse> => {
     try {
@@ -81,14 +99,20 @@ export async function skyResolve(params: {
         );
       }
       const resolved = data as unknown as SkyResolveResponse;
-      skyResolveResult.set(key, resolved);
+      if (!threadScoped) {
+        skyResolveResult.set(key, resolved);
+      }
       return resolved;
     } finally {
-      skyResolveInflight.delete(key);
+      if (!threadScoped) {
+        skyResolveInflight.delete(key);
+      }
     }
   })();
 
-  skyResolveInflight.set(key, pending);
+  if (!threadScoped) {
+    skyResolveInflight.set(key, pending);
+  }
   return pending;
 }
 

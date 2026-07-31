@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Bot, ChevronDown, ChevronUp, Loader2, MessageCircle, Mic, Send } from "lucide-react";
+import { Bot, ChevronDown, ChevronUp, Loader2, MessageCircle, Mic, RefreshCw, Send, Vote } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -17,7 +17,13 @@ import { LinkifiedMessage } from "./linkified-message";
 import { useIsMobile } from "./use-is-mobile";
 import { cn } from "@workspace/ui/lib/utils";
 import { AskSkyEmbedPublicForm } from "./asksky-embed-public-form";
+import { AskSkyShareTrayPanel } from "./asksky-share-tray";
 import { toSkyLeadCaptureFields, type AskSkyPersistLeadCaptureArgs } from "./format-lead-answers-summary";
+import {
+  ASK_SKY_DEFAULT_CLOSING_MESSAGE,
+  buildShareTrayLinks,
+  isShareTrayActive,
+} from "./share-tray-links";
 import "./asksky-glass.css";
 
 export type AskSkyVariant = "inline" | "voice" | "chatbot";
@@ -335,6 +341,11 @@ function AskSkyConversationView({
     suggestedQuestionsFromResolve(resolve),
   );
   const [suggestionsOpen, setSuggestionsOpen] = React.useState(true);
+  /** Ready CTA opened the closing message + share tray (shareTray-enabled agents only). */
+  const [shareTrayOpen, setShareTrayOpen] = React.useState(false);
+  /** Background refresh of suggested questions after Ask Another (does not block the UI). */
+  const [suggestionsRefreshing, setSuggestionsRefreshing] = React.useState(false);
+  const askAnotherRequestIdRef = React.useRef(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const contactFormAnchorRef = React.useRef<HTMLDivElement>(null);
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
@@ -391,6 +402,9 @@ function AskSkyConversationView({
     setVisitorContactCaptured(false);
     setSuggestedQuestions(suggestedQuestionsFromResolve(resolveLatest.current));
     setSuggestionsOpen(true);
+    setShareTrayOpen(false);
+    setSuggestionsRefreshing(false);
+    askAnotherRequestIdRef.current += 1;
 
     const saved = loadPersisted(embedKey);
     if (!saved) {
@@ -441,7 +455,7 @@ function AskSkyConversationView({
 
   React.useEffect(() => {
     scrollThreadToBottom();
-  }, [messages, streamingText, phase, scrollThreadToBottom]);
+  }, [messages, streamingText, phase, shareTrayOpen, scrollThreadToBottom]);
 
   React.useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -507,6 +521,7 @@ function AskSkyConversationView({
     if (!trimmed || phase === "streaming" || !knowledgeReady) {
       return;
     }
+    setShareTrayOpen(false);
     setInput("");
     setBanner(null);
     focusMessageInput();
@@ -516,6 +531,8 @@ function AskSkyConversationView({
     assistantBufferRef.current = "";
     revealEndRef.current = 0;
     stopWordReveal();
+    askAnotherRequestIdRef.current += 1;
+    setSuggestionsRefreshing(false);
 
     let assistant = "";
     let refusedKb = false;
@@ -649,11 +666,109 @@ function AskSkyConversationView({
     await sendMessage(input);
   };
 
+  const shareTrayConfig = isShareTrayActive(resolve.shareTray) ? resolve.shareTray : null;
+  const hasCompletedExchange =
+    phase === "idle" &&
+    knowledgeReady &&
+    messages.some((m) => m.role === "user") &&
+    messages[messages.length - 1]?.role === "assistant";
+
+  const handleAskAnother = () => {
+    if (phase === "streaming") {
+      return;
+    }
+
+    const cid = conversationIdRef.current;
+    const vt = visitorTokenRef.current?.trim() ?? null;
+    const requestId = askAnotherRequestIdRef.current + 1;
+    askAnotherRequestIdRef.current = requestId;
+
+    // Instant UX: clear the thread and return to greeting immediately.
+    setShareTrayOpen(false);
+    setBanner(null);
+    try {
+      sessionStorage.removeItem(storageKey(embedKey));
+    } catch {
+      /* ignore */
+    }
+    conversationIdRef.current = null;
+    visitorTokenRef.current = null;
+    setConversationId(null);
+    setVisitorToken(null);
+    setVisitorContactCaptured(false);
+    setMessages(initialGreetingMessages(resolveLatest.current));
+    setSuggestionsOpen(true);
+    setInput("");
+    focusMessageInput();
+
+    // Keep current chips for now; refresh in the background from the prior thread.
+    if (cid == null || cid <= 0 || !vt) {
+      setSuggestionsRefreshing(false);
+      return;
+    }
+
+    setSuggestionsRefreshing(true);
+    void (async () => {
+      try {
+        const refreshed = await sky.skyResolve({
+          profileSlug,
+          agentToken,
+          conversationId: cid,
+          visitorToken: vt,
+        });
+        if (askAnotherRequestIdRef.current !== requestId) {
+          return;
+        }
+        const sq = suggestedQuestionsFromResolve(refreshed);
+        if (sq.length > 0) {
+          setSuggestedQuestions(sq);
+          setSuggestionsOpen(true);
+        }
+      } catch {
+        /* keep chips from the previous turn */
+      } finally {
+        if (askAnotherRequestIdRef.current === requestId) {
+          setSuggestionsRefreshing(false);
+        }
+      }
+    })();
+  };
+
+  const handleReadyToShare = () => {
+    if (!shareTrayConfig) {
+      return;
+    }
+    setShareTrayOpen(true);
+  };
+
+  const shareTrayLinks = shareTrayConfig ? buildShareTrayLinks(shareTrayConfig) : [];
+  const readyLabel = shareTrayConfig?.readyLabel.trim() ?? "";
+  const closingMessage =
+    shareTrayConfig?.closingMessage?.trim() || ASK_SKY_DEFAULT_CLOSING_MESSAGE;
+
   const isEmbedInline = conversationLayout === "embed";
   const isGlassPanel = conversationLayout === "panel";
   const fillsParent = isEmbedInline || isGlassPanel;
   const isGlassChrome = isGlassPanel;
   const leadVisualVariant = isEmbedInline ? "embed-inline" : isGlassChrome ? "glass" : "default";
+
+  const askAnotherCtaClass = cn(
+    "inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors",
+    isEmbedInline
+      ? "border border-white/18 bg-zinc-800/80 text-zinc-50 hover:bg-zinc-700/90"
+      : isGlassChrome
+        ? "border border-white/16 bg-slate-900/65 text-slate-50 hover:bg-slate-800/80"
+        : "border border-slate-500/70 bg-slate-800/95 text-slate-50 hover:bg-slate-700",
+  );
+
+  const readyCtaClass = cn(
+    "inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors",
+    isEmbedInline
+      ? "border border-emerald-400/50 bg-emerald-500/25 text-emerald-50 hover:bg-emerald-500/40"
+      : isGlassChrome
+        ? "border border-emerald-400/45 bg-emerald-500/25 text-emerald-50 hover:bg-emerald-500/35"
+        : "border border-emerald-400/50 bg-emerald-600/30 text-emerald-50 hover:bg-emerald-600/45",
+  );
 
   const renderContactInThread = React.useCallback(
     (m: AskSkyChatMessage) => {
@@ -1032,7 +1147,45 @@ function AskSkyConversationView({
           focusMessageInput();
         }}
       >
-        {knowledgeReady && suggestedQuestions.length > 0 && phase === "idle" ? (
+        {hasCompletedExchange ? (
+          <div
+            className={cn(
+              "min-w-0 space-y-4",
+              isEmbedInline ? "-mx-3.5 mb-3 px-3.5" : "-mx-4 mb-3 px-4",
+            )}
+          >
+            {shareTrayOpen && shareTrayConfig ? (
+              <AskSkyShareTrayPanel
+                closingMessage={closingMessage}
+                links={shareTrayLinks}
+                isEmbedInline={isEmbedInline}
+                isGlassChrome={isGlassChrome}
+                onClose={() => setShareTrayOpen(false)}
+              />
+            ) : null}
+
+            {shareTrayOpen || !shareTrayConfig ? (
+              <button type="button" className={cn(askAnotherCtaClass, shareTrayOpen && "mt-0.5")} onClick={handleAskAnother}>
+                <RefreshCw className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                Ask Another Question
+              </button>
+            ) : (
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button type="button" className={askAnotherCtaClass} onClick={handleAskAnother}>
+                  <RefreshCw className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                  Ask Another Question
+                </button>
+                <button type="button" className={readyCtaClass} onClick={handleReadyToShare}>
+                  <Vote className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+                  {readyLabel}
+                </button>
+              </div>
+            )}
+          </div>
+        ) : null}
+        {knowledgeReady &&
+        (suggestedQuestions.length > 0 || suggestionsRefreshing) &&
+        phase === "idle" ? (
           <div
             role="region"
             aria-label="Try asking"
@@ -1057,7 +1210,7 @@ function AskSkyConversationView({
                 />
                 <span
                   className={cn(
-                    "shrink-0 whitespace-nowrap text-[11px] font-medium leading-none tracking-normal",
+                    "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-medium leading-none tracking-normal",
                     isEmbedInline
                       ? "text-zinc-100"
                       : isGlassChrome
@@ -1065,7 +1218,10 @@ function AskSkyConversationView({
                         : "text-slate-50",
                   )}
                 >
-                  Try asking
+                  {suggestionsRefreshing ? (
+                    <Loader2 className="h-3 w-3 animate-spin opacity-80" aria-hidden />
+                  ) : null}
+                  {suggestionsRefreshing ? "Finding new questions" : "Try asking"}
                 </span>
                 <div
                   className={cn(
@@ -1104,7 +1260,7 @@ function AskSkyConversationView({
             <div
               id="asksky-suggested-questions"
               className="flex flex-wrap gap-2"
-              hidden={!suggestionsOpen}
+              hidden={!suggestionsOpen || suggestionsRefreshing}
             >
               {suggestedQuestions.map((q, i) => (
                 <button
@@ -1124,6 +1280,18 @@ function AskSkyConversationView({
                 </button>
               ))}
             </div>
+            {suggestionsRefreshing && suggestionsOpen ? (
+              <p
+                className={cn(
+                  "mt-2 text-center text-[11px] leading-snug",
+                  isEmbedInline ? "text-zinc-400" : "text-slate-400",
+                )}
+                role="status"
+                aria-live="polite"
+              >
+                Pulling fresh follow-ups from your last chat…
+              </p>
+            ) : null}
           </div>
         ) : null}
         <div className="flex items-end gap-2">
@@ -1329,8 +1497,18 @@ function AskSkyResolveShell({
     void (async () => {
       setLoading(true);
       setResolveError(null);
+      const saved = loadPersisted(embedKey);
       try {
-        const data = await sky.skyResolve({ profileSlug, agentToken });
+        const data = await sky.skyResolve({
+          profileSlug,
+          agentToken,
+          ...(saved
+            ? {
+                conversationId: saved.conversationId,
+                visitorToken: saved.visitorToken,
+              }
+            : {}),
+        });
         if (!cancelled) {
           setResolve(data);
         }
@@ -1347,7 +1525,7 @@ function AskSkyResolveShell({
     return () => {
       cancelled = true;
     };
-  }, [profileSlug, agentToken, sky]);
+  }, [profileSlug, agentToken, embedKey, sky]);
 
   if (loading) {
     return (

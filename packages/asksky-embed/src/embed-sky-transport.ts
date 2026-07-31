@@ -34,21 +34,42 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
   const conversationInflight = new Map<string, Promise<SkyConversationResponse>>();
 
   return {
-    async skyResolve(params: { profileSlug: string; agentToken: string }): Promise<SkyResolveResponse> {
+    async skyResolve(params: {
+      profileSlug: string;
+      agentToken: string;
+      conversationId?: number | null;
+      visitorToken?: string | null;
+    }): Promise<SkyResolveResponse> {
+      const conversationId =
+        typeof params.conversationId === "number" && params.conversationId > 0
+          ? params.conversationId
+          : null;
+      const visitorToken =
+        typeof params.visitorToken === "string" && params.visitorToken.trim()
+          ? params.visitorToken.trim()
+          : null;
+      const threadScoped = conversationId != null && visitorToken != null;
+
       const key = skyResolveCacheKey(params);
-      const hit = resolveResult.get(key);
-      if (hit) {
-        return hit;
-      }
-      const existing = resolveInflight.get(key);
-      if (existing) {
-        return existing;
+      if (!threadScoped) {
+        const hit = resolveResult.get(key);
+        if (hit) {
+          return hit;
+        }
+        const existing = resolveInflight.get(key);
+        if (existing) {
+          return existing;
+        }
       }
 
       const search = new URLSearchParams({
         profileSlug: params.profileSlug.trim(),
         agentToken: params.agentToken.trim(),
       });
+      if (threadScoped) {
+        search.set("conversationId", String(conversationId));
+        search.set("visitorToken", visitorToken);
+      }
 
       const pending = (async (): Promise<SkyResolveResponse> => {
         try {
@@ -64,14 +85,20 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
             );
           }
           const resolved = data as unknown as SkyResolveResponse;
-          resolveResult.set(key, resolved);
+          if (!threadScoped) {
+            resolveResult.set(key, resolved);
+          }
           return resolved;
         } finally {
-          resolveInflight.delete(key);
+          if (!threadScoped) {
+            resolveInflight.delete(key);
+          }
         }
       })();
 
-      resolveInflight.set(key, pending);
+      if (!threadScoped) {
+        resolveInflight.set(key, pending);
+      }
       return pending;
     },
 

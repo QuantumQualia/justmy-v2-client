@@ -46,6 +46,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
 import { AgentLeadsDialog } from "@/components/agents/agent-leads-dialog";
 import { AskSkyStaticEmbedDialog } from "@/components/agents/asksky-static-embed-dialog";
@@ -54,10 +55,17 @@ import { TagInput } from "@/components/ui/tag-input";
 import { agentQueryKeys } from "@/lib/query/agent-query-keys";
 import {
   agentsService,
+  buildShareTrayPayload,
   LIVE_SEARCH_DOMAINS_MAX,
   normalizeLiveSearchDomains,
+  normalizeShareTray,
   resolveAgentPublicIdentifier,
+  SHARE_TRAY_CHANNELS,
+  SHARE_TRAY_CLOSING_MESSAGE_MAX,
+  SHARE_TRAY_READY_LABEL_MAX,
+  SHARE_TRAY_SHARE_TEXT_MAX,
   type AgentResponseDto,
+  type AgentShareTrayChannel,
   type CreateAgentDto,
   type CreateWebsiteKnowledgeSourceDto,
   type KnowledgeIngestionStatus,
@@ -434,6 +442,14 @@ function AgentFormDialog({
   const [contactFormKey, setContactFormKey] = React.useState<string>("__none__");
   const [liveSearchEnabled, setLiveSearchEnabled] = React.useState(false);
   const [liveSearchDomains, setLiveSearchDomains] = React.useState<string[]>([]);
+  const [shareTrayEnabled, setShareTrayEnabled] = React.useState(false);
+  const [shareTrayReadyLabel, setShareTrayReadyLabel] = React.useState("");
+  const [shareTrayClosingMessage, setShareTrayClosingMessage] = React.useState("");
+  const [shareTrayShareUrl, setShareTrayShareUrl] = React.useState("");
+  const [shareTrayShareText, setShareTrayShareText] = React.useState("");
+  const [shareTrayChannels, setShareTrayChannels] = React.useState<AgentShareTrayChannel[]>([
+    ...SHARE_TRAY_CHANNELS,
+  ]);
   const [error, setError] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -452,10 +468,28 @@ function AgentFormDialog({
     setLiveSearchDomains(
       Array.isArray(state.agent?.liveSearchDomains) ? [...state.agent.liveSearchDomains] : [],
     );
+    const tray = normalizeShareTray(state.agent?.shareTray);
+    setShareTrayEnabled(tray?.enabled === true);
+    setShareTrayReadyLabel(tray?.readyLabel ?? "");
+    setShareTrayClosingMessage(tray?.closingMessage ?? "");
+    setShareTrayShareUrl(tray?.shareUrl ?? "");
+    setShareTrayShareText(tray?.shareText ?? "");
+    setShareTrayChannels(
+      tray?.channels && tray.channels.length > 0 ? [...tray.channels] : [...SHARE_TRAY_CHANNELS],
+    );
     setError(null);
   }, [state]);
 
   const publicIdentifier = resolveAgentPublicIdentifier(state.agent);
+
+  const toggleShareTrayChannel = (channel: AgentShareTrayChannel, checked: boolean) => {
+    setShareTrayChannels((prev) => {
+      if (checked) {
+        return prev.includes(channel) ? prev : [...prev, channel];
+      }
+      return prev.filter((c) => c !== channel);
+    });
+  };
 
   const handleLiveSearchDomainsChange = (tags: string[]) => {
     const { domains, rejected } = normalizeLiveSearchDomains(tags, LIVE_SEARCH_DOMAINS_MAX);
@@ -497,6 +531,21 @@ function AgentFormDialog({
       return;
     }
 
+    let shareTrayPayload: ReturnType<typeof buildShareTrayPayload>;
+    try {
+      shareTrayPayload = buildShareTrayPayload({
+        enabled: shareTrayEnabled,
+        readyLabel: shareTrayReadyLabel,
+        closingMessage: shareTrayClosingMessage,
+        shareUrl: shareTrayShareUrl,
+        shareText: shareTrayShareText,
+        channels: shareTrayChannels,
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Invalid share tray settings.");
+      return;
+    }
+
     setError(null);
 
     const contactFormId = contactFormKey === "__none__" ? null : Number(contactFormKey);
@@ -511,6 +560,7 @@ function AgentFormDialog({
         contactFormId,
         liveSearchEnabled,
         liveSearchDomains: normalizedDomains,
+        shareTray: shareTrayPayload,
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to save agent.");
@@ -696,6 +746,121 @@ function AgentFormDialog({
                   {liveSearchDomains.length} / {LIVE_SEARCH_DOMAINS_MAX} domains
                 </p>
               ) : null}
+            </div>
+          </div>
+
+          <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="agent-share-tray" className="text-slate-200">
+                  Post-answer share tray
+                </Label>
+                <p className="text-xs text-slate-500">
+                  After each answer, AskSKY always shows &quot;Ask Another Question&quot;. When this is on, it
+                  also shows a Ready CTA that opens a share tray (SMS, WhatsApp, Facebook, X).
+                </p>
+              </div>
+              <Switch
+                id="agent-share-tray"
+                checked={shareTrayEnabled}
+                onCheckedChange={setShareTrayEnabled}
+                disabled={submitting}
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-700"
+              />
+            </div>
+
+            <div className={cn("space-y-3", !shareTrayEnabled && "opacity-60")}>
+              <div className="space-y-2">
+                <Label htmlFor="agent-share-ready-label" className="text-slate-200">
+                  Ready button label{shareTrayEnabled ? " (required)" : ""}
+                </Label>
+                <Input
+                  id="agent-share-ready-label"
+                  value={shareTrayReadyLabel}
+                  onChange={(event) => setShareTrayReadyLabel(event.target.value)}
+                  placeholder="I'm Ready to Vote!"
+                  maxLength={SHARE_TRAY_READY_LABEL_MAX}
+                  className="border-slate-700 bg-slate-900 text-white"
+                  disabled={submitting || !shareTrayEnabled}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="agent-share-closing" className="text-slate-200">
+                  Closing message <span className="text-slate-500">(optional)</span>
+                </Label>
+                <Textarea
+                  id="agent-share-closing"
+                  value={shareTrayClosingMessage}
+                  onChange={(event) => setShareTrayClosingMessage(event.target.value)}
+                  placeholder="Awesome! Knowledge is power—now let's use it to move Shelby County forward…"
+                  maxLength={SHARE_TRAY_CLOSING_MESSAGE_MAX}
+                  className="min-h-20 border-slate-700 bg-slate-900 text-white"
+                  disabled={submitting || !shareTrayEnabled}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="agent-share-url" className="text-slate-200">
+                  Share URL{shareTrayEnabled ? " (required)" : ""}
+                </Label>
+                <Input
+                  id="agent-share-url"
+                  value={shareTrayShareUrl}
+                  onChange={(event) => setShareTrayShareUrl(event.target.value)}
+                  placeholder="https://justmymemphis.com/election2026"
+                  className="border-slate-700 bg-slate-900 text-white"
+                  disabled={submitting || !shareTrayEnabled}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="agent-share-text" className="text-slate-200">
+                  Share text{shareTrayEnabled ? " (required)" : ""}
+                </Label>
+                <Textarea
+                  id="agent-share-text"
+                  value={shareTrayShareText}
+                  onChange={(event) => setShareTrayShareText(event.target.value)}
+                  placeholder="I just used AskSKY! to map out my voter card…"
+                  maxLength={SHARE_TRAY_SHARE_TEXT_MAX}
+                  className="min-h-24 border-slate-700 bg-slate-900 text-white"
+                  disabled={submitting || !shareTrayEnabled}
+                />
+                <p className="text-xs text-slate-500">
+                  Prefills SMS / WhatsApp / X. The share URL is appended automatically if it is not already in
+                  the text.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm text-slate-200">Channels</p>
+                <div className="flex flex-wrap gap-4">
+                  {SHARE_TRAY_CHANNELS.map((channel) => {
+                    const id = `agent-share-channel-${channel}`;
+                    const checked = shareTrayChannels.includes(channel);
+                    const label =
+                      channel === "sms"
+                        ? "SMS"
+                        : channel === "whatsapp"
+                          ? "WhatsApp"
+                          : channel === "facebook"
+                            ? "Facebook"
+                            : "X";
+                    return (
+                      <label key={channel} htmlFor={id} className="flex items-center gap-2 text-sm text-slate-300">
+                        <Checkbox
+                          id={id}
+                          checked={checked}
+                          disabled={submitting || !shareTrayEnabled}
+                          onCheckedChange={(value) => toggleShareTrayChannel(channel, value === true)}
+                        />
+                        {label}
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1797,6 +1962,14 @@ export function ProfileAgentsPanel({
                 >
                   Live search · {agent.liveSearchDomains?.length ?? 0} domain
                   {(agent.liveSearchDomains?.length ?? 0) === 1 ? "" : "s"}
+                </Badge>
+              ) : null}
+              {agent.shareTray?.enabled ? (
+                <Badge
+                  variant="outline"
+                  className="border-violet-500/30 bg-violet-500/10 text-violet-300"
+                >
+                  Share tray
                 </Badge>
               ) : null}
             </div>

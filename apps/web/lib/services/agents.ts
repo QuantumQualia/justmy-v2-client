@@ -21,6 +21,24 @@ export interface AgentPublicConfigDto {
   [key: string]: unknown;
 }
 
+export const SHARE_TRAY_CHANNELS = ["sms", "whatsapp", "facebook", "x"] as const;
+export type AgentShareTrayChannel = (typeof SHARE_TRAY_CHANNELS)[number];
+
+export const SHARE_TRAY_READY_LABEL_MAX = 80;
+export const SHARE_TRAY_CLOSING_MESSAGE_MAX = 500;
+export const SHARE_TRAY_SHARE_TEXT_MAX = 1000;
+
+/** Optional post-answer Ready CTA + share tray on a ProfileAgent. */
+export interface AgentShareTrayDto {
+  enabled: boolean;
+  /** Required when `enabled` is true. */
+  readyLabel?: string | null;
+  closingMessage?: string | null;
+  shareUrl?: string | null;
+  shareText?: string | null;
+  channels?: AgentShareTrayChannel[];
+}
+
 export interface AgentResponseDto {
   id: string;
   profileId?: number | string;
@@ -38,6 +56,8 @@ export interface AgentResponseDto {
   liveSearchEnabled?: boolean;
   /** Hostname allowlist for live search (e.g. `justmy.com`). */
   liveSearchDomains?: string[];
+  /** Opt-in Ready CTA + share tray; null when disabled / unset. */
+  shareTray?: AgentShareTrayDto | null;
   knowledgeSourceCount?: number;
   sharedKnowledgeSourceCount?: number;
   privateKnowledgeSourceCount?: number;
@@ -54,6 +74,7 @@ export interface CreateAgentDto {
   contactFormId?: number | null;
   liveSearchEnabled?: boolean;
   liveSearchDomains?: string[];
+  shareTray?: AgentShareTrayDto | null;
 }
 
 export interface UpdateAgentDto {
@@ -65,10 +86,104 @@ export interface UpdateAgentDto {
   contactFormId?: number | null;
   liveSearchEnabled?: boolean;
   liveSearchDomains?: string[];
+  shareTray?: AgentShareTrayDto | null;
 }
 
 /** Max domains accepted by the live-search allowlist editor / API. */
 export const LIVE_SEARCH_DOMAINS_MAX = 50;
+
+function isShareTrayChannel(value: unknown): value is AgentShareTrayChannel {
+  return typeof value === "string" && (SHARE_TRAY_CHANNELS as readonly string[]).includes(value);
+}
+
+/** Normalize API / form share tray; returns null when absent or disabled without payload. */
+export function normalizeShareTray(raw: unknown): AgentShareTrayDto | null {
+  if (raw == null || typeof raw !== "object" || Array.isArray(raw)) {
+    return null;
+  }
+  const obj = raw as Record<string, unknown>;
+  const enabled = obj.enabled === true;
+  const readyLabel =
+    typeof obj.readyLabel === "string" ? obj.readyLabel.trim().slice(0, SHARE_TRAY_READY_LABEL_MAX) : "";
+  const closingMessage =
+    typeof obj.closingMessage === "string"
+      ? obj.closingMessage.trim().slice(0, SHARE_TRAY_CLOSING_MESSAGE_MAX)
+      : "";
+  const shareUrl = typeof obj.shareUrl === "string" ? obj.shareUrl.trim() : "";
+  const shareText =
+    typeof obj.shareText === "string" ? obj.shareText.trim().slice(0, SHARE_TRAY_SHARE_TEXT_MAX) : "";
+  const channelsRaw = Array.isArray(obj.channels) ? obj.channels.filter(isShareTrayChannel) : [];
+  const channels =
+    channelsRaw.length > 0 ? Array.from(new Set(channelsRaw)) : [...SHARE_TRAY_CHANNELS];
+
+  if (!enabled || !readyLabel || !shareUrl || !shareText) {
+    return null;
+  }
+
+  return {
+    enabled: true,
+    readyLabel,
+    closingMessage: closingMessage || null,
+    shareUrl,
+    shareText,
+    channels,
+  };
+}
+
+/**
+ * Build a create/update payload for share tray.
+ * Returns null when disabled (clears config on the server).
+ * Throws Error with a user-facing message when enabled but invalid.
+ */
+export function buildShareTrayPayload(input: {
+  enabled: boolean;
+  readyLabel: string;
+  closingMessage: string;
+  shareUrl: string;
+  shareText: string;
+  channels: AgentShareTrayChannel[];
+}): AgentShareTrayDto | null {
+  if (!input.enabled) {
+    return null;
+  }
+
+  const readyLabel = input.readyLabel.trim().slice(0, SHARE_TRAY_READY_LABEL_MAX);
+  const closingMessage = input.closingMessage.trim().slice(0, SHARE_TRAY_CLOSING_MESSAGE_MAX);
+  const shareUrl = input.shareUrl.trim();
+  const shareText = input.shareText.trim().slice(0, SHARE_TRAY_SHARE_TEXT_MAX);
+  const channels =
+    input.channels.length > 0
+      ? Array.from(new Set(input.channels.filter(isShareTrayChannel)))
+      : [...SHARE_TRAY_CHANNELS];
+
+  if (!readyLabel) {
+    throw new Error("Ready button label is required when the share tray is enabled.");
+  }
+  if (!shareUrl) {
+    throw new Error("Share URL is required when the share tray is enabled.");
+  }
+  let parsed: URL;
+  try {
+    parsed = new URL(shareUrl);
+  } catch {
+    throw new Error("Share URL must be a valid http(s) URL.");
+  }
+  if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+    throw new Error("Share URL must be a valid http(s) URL.");
+  }
+  if (!shareText) {
+    throw new Error("Share text is required when the share tray is enabled.");
+  }
+
+  return {
+    enabled: true,
+    readyLabel,
+    closingMessage: closingMessage || null,
+    shareUrl,
+    shareText,
+    channels,
+  };
+}
 
 /**
  * Normalize pasted URLs or host strings to a hostname.
@@ -515,6 +630,7 @@ function normalizeAgent(agent: AgentResponseDto): AgentResponseDto {
           : undefined,
     liveSearchEnabled: agent.liveSearchEnabled === true,
     liveSearchDomains,
+    shareTray: normalizeShareTray((agent as { shareTray?: unknown }).shareTray),
     publicIdentifier,
     sharedKnowledgeSourceCount,
     privateKnowledgeSourceCount,

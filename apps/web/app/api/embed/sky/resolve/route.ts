@@ -20,6 +20,12 @@ export async function GET(request: NextRequest) {
 
   const backendUrl = buildApiUrl("sky/resolve");
   const search = new URLSearchParams({ profileSlug, agentToken });
+  const conversationId = request.nextUrl.searchParams.get("conversationId")?.trim() ?? "";
+  const visitorToken = request.nextUrl.searchParams.get("visitorToken")?.trim() ?? "";
+  if (conversationId && visitorToken) {
+    search.set("conversationId", conversationId);
+    search.set("visitorToken", visitorToken);
+  }
   const res = await fetch(`${backendUrl}?${search.toString()}`, {
     method: "GET",
     headers: { Accept: "application/json" },

@@ -5,6 +5,26 @@ export interface SkyResolveContactForm {
   slug: string;
 }
 
+/** Share channel for the optional post-answer share tray (`GET /sky/resolve` `shareTray`). */
+export type SkyShareTrayChannel = "sms" | "whatsapp" | "facebook" | "x";
+
+/**
+ * Optional per-agent post-answer share tray. Shown only when `enabled` and
+ * `shareUrl` + `shareText` are non-empty. Ask Another Question is always on and
+ * is not part of this config.
+ */
+export interface SkyShareTrayConfig {
+  enabled: boolean;
+  /** Ready CTA label (required when share tray is enabled). */
+  readyLabel: string;
+  /** Closing line shown above the share tray after Ready. */
+  closingMessage?: string;
+  shareUrl: string;
+  shareText: string;
+  /** Subset of channels; omit or empty ⇒ all four. */
+  channels?: SkyShareTrayChannel[];
+}
+
 export interface SkyResolveResponse {
   name: string;
   slug: string;
@@ -27,6 +47,8 @@ export interface SkyResolveResponse {
   suggestedQuestions?: string[];
   /** Published contact form for this agent, or null if none. */
   contactForm?: SkyResolveContactForm | null;
+  /** Opt-in Ready CTA + viral share tray; omit/null when disabled. */
+  shareTray?: SkyShareTrayConfig | null;
 }
 
 /** Citation / retrieval metadata on SSE `done` and conversation history. */
@@ -127,7 +149,13 @@ export type SkyStreamHandlers = {
 };
 
 export interface AskSkySkyTransport {
-  skyResolve: (params: { profileSlug: string; agentToken: string }) => Promise<SkyResolveResponse>;
+  skyResolve: (params: {
+    profileSlug: string;
+    agentToken: string;
+    /** When both set, suggestions regenerate from the thread’s prior visitor questions. */
+    conversationId?: number | null;
+    visitorToken?: string | null;
+  }) => Promise<SkyResolveResponse>;
   skyGetConversation: (conversationId: number, visitorToken: string) => Promise<SkyConversationResponse>;
   streamSkyMessage: (body: SkyMessageRequest, handlers: SkyStreamHandlers) => Promise<void>;
   skyPostLeadCapture: (

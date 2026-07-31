@@ -16,11 +16,20 @@ export type {
   SkyResolveResponse,
   SkyRetrievedDoc,
   SkyRetrievedDocSourceKind,
+  SkyShareTrayChannel,
+  SkyShareTrayConfig,
   SkySseDonePayload,
   SkySseMetaPayload,
   SkyStreamHandlers,
 } from "./sky-types";
 export { createEmbedSkyTransport } from "./embed-sky-transport";
+export {
+  ASK_SKY_DEFAULT_CLOSING_MESSAGE,
+  buildShareBody,
+  buildShareTrayLinks,
+  isShareTrayActive,
+  openShareTrayLink,
+} from "./share-tray-links";
 export { formatSkyApiErrorPayload } from "./sky-error-format";
 export { buildSkyMessageRequestBody } from "./sky-message-body";
 export {
