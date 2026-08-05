@@ -82,7 +82,8 @@ export default async function RootLayout({
 
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
-  const hideSiteChrome = pathname.startsWith("/embed/")
+  const hideSiteChrome =
+    pathname.startsWith("/embed/") || pathname === "/news" || pathname.startsWith("/news/")
   const embedAskSky = pathname.startsWith("/embed/asksky")
   const embedMyForm = pathname.startsWith("/embed/myform")
   const embedTransparentHost = embedAskSky || embedMyForm
@@ -90,7 +91,7 @@ export default async function RootLayout({
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
   let initialMycardProfileSlug = ""
-  if (isLikelyHandlePath(pathname)) {
+  if (!hideSiteChrome && isLikelyHandlePath(pathname)) {
     const handle = firstPathSegment(pathname)
     if (handle) {
       const profile = await fetchPublicProfileByHandle(handle)

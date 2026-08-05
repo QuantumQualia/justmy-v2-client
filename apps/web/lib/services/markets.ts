@@ -154,6 +154,28 @@ export const marketsService = {
   },
 
   /**
+   * Find markets covering a zipcode (public zip → market lookup).
+   * GET markets/zipcode/:zipcode → MarketResponseDto[]
+   */
+  async findByZipcode(zipcode: string): Promise<MarketResponseDto[]> {
+    try {
+      const cleaned = zipcode.trim();
+      return await apiRequest<MarketResponseDto[]>(
+        `markets/zipcode/${encodeURIComponent(cleaned)}`,
+        {
+          method: "GET",
+          skipAuth: true,
+        },
+      );
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to look up market for zipcode.");
+    }
+  },
+
+  /**
    * Get a single market by ID
    */
   async getMarketById(

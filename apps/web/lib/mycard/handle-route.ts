@@ -2,7 +2,11 @@
  * Single-segment app routes that are not public profile/CMS handles.
  * Keep in sync with `middleware.ts` protectedSingleSegmentRoutes.
  */
-export const PROTECTED_SINGLE_SEGMENT_ROUTES = ["/admin", "/dashboard"] as const;
+export const PROTECTED_SINGLE_SEGMENT_ROUTES = [
+  "/admin",
+  "/dashboard",
+  "/news",
+] as const;
 
 /**
  * True for paths like `/jane` (one segment, not a protected app route). Used for

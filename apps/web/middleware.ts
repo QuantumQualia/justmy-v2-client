@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+import { isNewsHost } from "@/lib/hosts";
 import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
 
 /**
@@ -22,7 +23,7 @@ const publicRoutes = [
 function isHandleRoute(pathname: string): boolean {
   // Remove leading slash and check if it's a single segment
   const segments = pathname.split("/").filter(Boolean);
-  
+
   // Must be exactly one segment (e.g., /john, not /john/something)
   if (segments.length !== 1) {
     return false;
@@ -31,7 +32,7 @@ function isHandleRoute(pathname: string): boolean {
   // Check if it matches any protected single-segment route
   // (e.g., /admin, /dashboard should not be treated as handles)
   const isProtected = PROTECTED_SINGLE_SEGMENT_ROUTES.includes(
-    pathname as (typeof PROTECTED_SINGLE_SEGMENT_ROUTES)[number]
+    pathname as (typeof PROTECTED_SINGLE_SEGMENT_ROUTES)[number],
   );
 
   return !isProtected;
@@ -42,6 +43,10 @@ function isHandleRoute(pathname: string): boolean {
  */
 function isPublicRoute(pathname: string): boolean {
   if (pathname.startsWith("/embed/")) {
+    return true;
+  }
+
+  if (pathname === "/news" || pathname.startsWith("/news/")) {
     return true;
   }
 
@@ -65,18 +70,66 @@ function getAuthToken(request: NextRequest): string | null {
   return request.cookies.get("auth_access_token")?.value || null;
 }
 
-/**
- * Authentication Middleware
- * Protects routes except public/auth routes
- */
 /** Pass pathname into Server Components via `headers().get("x-pathname")`. */
-function nextWithPathname(request: NextRequest) {
+function nextWithPathname(request: NextRequest, pathname = request.nextUrl.pathname) {
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set("x-pathname", request.nextUrl.pathname);
+  requestHeaders.set("x-pathname", pathname);
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
+function rewriteWithPathname(request: NextRequest, internalPath: string) {
+  const url = request.nextUrl.clone();
+  url.pathname = internalPath;
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set("x-pathname", internalPath);
+  requestHeaders.set("x-news-host", "1");
+  return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+}
+
+/**
+ * news.justmy.com: only `/` (landing) and `/{marketSlug}` (fallback).
+ * Everything else redirects home. Internal App Router paths live under `/news`.
+ */
+function handleNewsHost(request: NextRequest): NextResponse {
+  const { pathname } = request.nextUrl;
+
+  // Canonicalize accidental /news URLs on the news host to public paths
+  if (pathname === "/news" || pathname === "/news/") {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+  if (pathname.startsWith("/news/")) {
+    const rest = pathname.slice("/news/".length);
+    const slug = rest.split("/").filter(Boolean)[0];
+    if (slug) {
+      return NextResponse.redirect(new URL(`/${slug}`, request.url));
+    }
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  if (pathname === "/" || pathname === "") {
+    return rewriteWithPathname(request, "/news");
+  }
+
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length === 1 && segments[0]) {
+    return rewriteWithPathname(request, `/news/${segments[0]}`);
+  }
+
+  return NextResponse.redirect(new URL("/", request.url));
+}
+
+/**
+ * Authentication Middleware
+ * Protects routes except public/auth routes.
+ * News host is gated separately and never uses main-app auth redirects.
+ */
 export function middleware(request: NextRequest) {
+  const host = request.headers.get("host");
+
+  if (isNewsHost(host)) {
+    return handleNewsHost(request);
+  }
+
   const { pathname } = request.nextUrl;
 
   // Allow public routes
@@ -120,4 +173,3 @@ export const config = {
     "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
-
