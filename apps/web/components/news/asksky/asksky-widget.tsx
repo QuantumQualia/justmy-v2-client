@@ -106,8 +106,8 @@ export function AskSkyWidget({
 
   return (
     <section
-      className={`relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 ${
-        hasConversation ? "sm:max-w-5xl lg:max-w-6xl" : "max-w-3xl"
+      className={`relative mx-auto flex w-full min-w-0 flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 ${
+        hasConversation ? "max-w-5xl lg:max-w-6xl" : "max-w-3xl"
       }`}
     >
       <div className="relative z-10 -mb-8 flex h-16 w-16 items-center justify-center sm:-mb-10 sm:h-20 sm:w-20">
