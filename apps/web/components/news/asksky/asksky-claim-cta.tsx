@@ -21,7 +21,7 @@ export function AskSkyClaimCta({
 
   return (
     <section className="mx-auto w-full max-w-5xl px-3 pb-10 sm:px-6 sm:pb-14 lg:max-w-6xl">
-      <div className="relative overflow-hidden rounded-[1.75rem] bg-[#0c0c10] px-6 py-12 text-center shadow-[0_28px_60px_-28px_rgba(15,23,42,0.55)] sm:rounded-[2rem] sm:px-10 sm:py-16">
+      <div className="relative overflow-hidden rounded-[1.75rem] rounded-br-none bg-[#0c0c10] px-6 py-12 text-center shadow-[0_28px_60px_-28px_rgba(15,23,42,0.55)] sm:rounded-[2rem] sm:rounded-br-none sm:px-10 sm:py-16">
         <div
           aria-hidden
           className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-teal-500/25 blur-3xl"

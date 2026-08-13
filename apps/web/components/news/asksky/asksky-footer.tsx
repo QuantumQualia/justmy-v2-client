@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 
 import type { NewsMarketContext } from "./types";
@@ -41,16 +42,13 @@ export function AskSkyFooter({
           href="/#"
           className="inline-flex shrink-0 items-center gap-2.5 self-start transition hover:opacity-80 lg:self-auto"
         >
-          <span className="relative flex h-8 w-8 items-center justify-center rounded-full bg-linear-to-br from-violet-500 via-indigo-500 to-sky-400 shadow-[0_0_18px_rgba(139,92,246,0.4)]">
-            <svg
-              viewBox="0 0 24 24"
-              className="relative h-3.5 w-3.5 text-white"
-              fill="currentColor"
-              aria-hidden
-            >
-              <path d="M12 2l1.2 6.3L19 12l-5.8 3.7L12 22l-1.2-6.3L5 12l5.8-3.7L12 2z" />
-            </svg>
-          </span>
+          <Image
+            src="/images/logo.png"
+            alt=""
+            width={32}
+            height={32}
+            className="h-8 w-8 rounded-lg object-contain shadow-sm shadow-violet-500/25"
+          />
           <span className="text-sm font-bold tracking-tight text-slate-900">
             AskSKY!
           </span>
@@ -72,7 +70,7 @@ export function AskSkyFooter({
         </nav>
 
         <p className="shrink-0 text-[13px] text-slate-500 lg:text-right">
-          © {new Date().getFullYear()} JustMy Civic Systems. {place}.
+          © {new Date().getFullYear()} JustMy Communications Corp. {place}.
         </p>
       </div>
     </footer>

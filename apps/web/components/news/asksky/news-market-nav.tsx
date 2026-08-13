@@ -6,9 +6,9 @@ import {
   Loader2,
   Pause,
   Play,
-  Sparkles,
   Wallet,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -239,9 +239,14 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
               className="flex shrink-0 items-center gap-2"
               aria-label="JustMy News home"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white shadow-sm shadow-violet-500/30">
-                <Sparkles className="h-3.5 w-3.5" aria-hidden />
-              </span>
+              <Image
+                src="/images/logo.png"
+                alt=""
+                width={32}
+                height={32}
+                className="h-8 w-8 rounded-lg object-contain shadow-sm shadow-violet-500/20"
+                priority
+              />
               <span className="hidden text-[15px] font-bold tracking-tight text-slate-900 lg:inline">
                 JustMy
               </span>

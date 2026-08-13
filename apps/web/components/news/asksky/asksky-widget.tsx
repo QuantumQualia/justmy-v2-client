@@ -1,6 +1,7 @@
 "use client";
 
 import { MessageCircle } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 import { AskSkyConversation } from "@/components/news/asksky/asksky-results";
@@ -106,29 +107,21 @@ export function AskSkyWidget({
 
   return (
     <section
-      className={`relative mx-auto flex w-full min-w-0 flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 ${
-        hasConversation ? "max-w-5xl lg:max-w-6xl" : "max-w-3xl"
-      }`}
+      className={`relative mx-auto flex w-full min-w-0 flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 max-w-6xl`}
     >
       <div className="relative z-10 -mb-8 flex h-16 w-16 items-center justify-center sm:-mb-10 sm:h-20 sm:w-20">
         <div
           aria-hidden
-          className="absolute inset-0 rounded-full bg-violet-400/30 blur-xl"
+          className="absolute inset-0 rounded-2xl bg-violet-400/25 blur-xl"
         />
-        <div className="relative flex h-14 w-14 items-center justify-center rounded-full bg-linear-to-br from-violet-500 via-indigo-500 to-sky-400 shadow-[0_0_36px_rgba(139,92,246,0.55)] sm:h-16 sm:w-16">
-          <span
-            aria-hidden
-            className="absolute inset-0 animate-pulse rounded-full bg-white/15"
-          />
-          <svg
-            viewBox="0 0 24 24"
-            className="relative h-6 w-6 text-white drop-shadow-md sm:h-7 sm:w-7"
-            fill="currentColor"
-            aria-hidden
-          >
-            <path d="M12 2l1.2 6.3L19 12l-5.8 3.7L12 22l-1.2-6.3L5 12l5.8-3.7L12 2z" />
-          </svg>
-        </div>
+        <Image
+          src="/images/logo.png"
+          alt="AskSKY!"
+          width={64}
+          height={64}
+          className="relative h-14 w-14 rounded-2xl object-contain shadow-[0_0_36px_rgba(139,92,246,0.45)] sm:h-16 sm:w-16"
+          priority
+        />
       </div>
 
       <div
