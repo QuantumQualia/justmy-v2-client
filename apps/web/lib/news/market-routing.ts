@@ -40,24 +40,3 @@ export function pickPrimaryMarket(
   const pool = active.length > 0 ? active : primaries;
   return pool[0] ?? null;
 }
-
-export function hasMarketSite(site?: string | null): boolean {
-  return Boolean(site?.trim());
-}
-
-/** Normalize hostname or URL to an absolute https URL. */
-export function normalizeMarketSiteUrl(site: string): string {
-  const trimmed = site.trim();
-  if (!trimmed) return "";
-  if (/^https?:\/\//i.test(trimmed)) return trimmed;
-  return `https://${trimmed}`;
-}
-
-/** Display label from market slug (e.g. memphis → Memphis). */
-export function marketSlugToTitle(slug: string): string {
-  return slug
-    .split(/[-_]+/)
-    .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
-}

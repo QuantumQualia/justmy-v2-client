@@ -50,6 +50,8 @@ export interface MarketResponseDto {
   status: MarketStatus;
   zipCount?: number; // Computed field - count of associated zipcodes
   legacyId?: number;
+  /** When true, Sky FM 60s daily audio briefing is available for this market. */
+  dailyAudioBriefingEnabled?: boolean;
   createdAt: Date;
   updatedAt: Date;
   zipcodes?: MarketZipcodeResponseDto[];

@@ -87,43 +87,39 @@ function rewriteWithPathname(request: NextRequest, internalPath: string) {
 }
 
 /**
- * news.justmy.com: only `/` (landing) and `/{marketSlug}` (fallback).
- * Everything else redirects home. Internal App Router paths live under `/news`.
+ * news.justmy.com: `/` and `/news` serve the dual-mode news page.
+ * Legacy `/{slug}` and `/news/{slug}` redirect to `/`.
  */
 function handleNewsHost(request: NextRequest): NextResponse {
   const { pathname } = request.nextUrl;
-
-  // Canonicalize accidental /news URLs on the news host to public paths
-  if (pathname === "/news" || pathname === "/news/") {
-    return NextResponse.redirect(new URL("/", request.url));
-  }
-  if (pathname.startsWith("/news/")) {
-    const rest = pathname.slice("/news/".length);
-    const slug = rest.split("/").filter(Boolean)[0];
-    if (slug) {
-      return NextResponse.redirect(new URL(`/${slug}`, request.url));
-    }
-    return NextResponse.redirect(new URL("/", request.url));
-  }
 
   if (pathname === "/" || pathname === "") {
     return rewriteWithPathname(request, "/news");
   }
 
+  if (pathname === "/news" || pathname === "/news/") {
+    return nextWithPathname(request, "/news");
+  }
+
+  // Legacy slug paths → home (zip preference lives in storage, not the URL)
+  if (pathname.startsWith("/news/")) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
   const segments = pathname.split("/").filter(Boolean);
   if (segments.length === 1 && segments[0]) {
-    return rewriteWithPathname(request, `/news/${segments[0]}`);
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
   return NextResponse.redirect(new URL("/", request.url));
 }
 
 /**
- * Authentication Middleware
+ * Authentication Proxy
  * Protects routes except public/auth routes.
  * News host is gated separately and never uses main-app auth redirects.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host");
 
   if (isNewsHost(host)) {
@@ -158,7 +154,7 @@ export function middleware(request: NextRequest) {
 }
 
 /**
- * Configure which routes the middleware should run on
+ * Configure which routes the proxy should run on
  */
 export const config = {
   matcher: [

@@ -1,6 +1,6 @@
 /**
  * Single-segment app routes that are not public profile/CMS handles.
- * Keep in sync with `middleware.ts` protectedSingleSegmentRoutes.
+ * Keep in sync with `proxy.ts` protectedSingleSegmentRoutes.
  */
 export const PROTECTED_SINGLE_SEGMENT_ROUTES = [
   "/admin",

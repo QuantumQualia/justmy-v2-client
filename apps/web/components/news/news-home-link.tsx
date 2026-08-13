@@ -1,9 +1,7 @@
-"use client";
-
 import Link from "next/link";
-import { useEffect, useState } from "react";
 
-import { isNewsHost } from "@/lib/hosts";
+/** `/news` resolves on both the main host and the news host. */
+export const NEWS_HOME_HREF = "/news";
 
 export function NewsHomeLink({
   className,
@@ -12,14 +10,8 @@ export function NewsHomeLink({
   className?: string;
   children?: React.ReactNode;
 }) {
-  const [href, setHref] = useState("/news");
-
-  useEffect(() => {
-    setHref(isNewsHost(window.location.host) ? "/" : "/news");
-  }, []);
-
   return (
-    <Link href={href} className={className}>
+    <Link href={NEWS_HOME_HREF} className={className}>
       {children}
     </Link>
   );

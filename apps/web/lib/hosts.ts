@@ -2,7 +2,8 @@
  * Host detection for multi-domain surfaces on the same Next.js deploy.
  *
  * Main product: founders.justmy.com / justmy.com (unchanged routing).
- * News router: news.justmy.com — zip landing + market fallback only.
+ * News router: news.justmy.com — `/` and `/news` serve the dual-mode
+ * zip entry / market page (zip preference in storage, not the URL).
  *
  * Env (comma-separated hostnames, no protocol):
  *   NEXT_PUBLIC_NEWS_HOSTS=news.justmy.com

@@ -1,21 +1,16 @@
 "use client";
 
 import { AlertCircle, ArrowRight, Loader2, MapPin } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { marketDtoToContext } from "@/components/news/asksky/market-context";
 import { ApiClientError } from "@/lib/api-client";
-import { isNewsHost } from "@/lib/hosts";
-import { fetchMarketsByZip } from "@/lib/news/fetch-markets-by-zip";
-import {
-  hasMarketSite,
-  isValidUsZip,
-  normalizeMarketSiteUrl,
-  pickPrimaryMarket,
-} from "@/lib/news/market-routing";
+import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
+import { useNewsZipStore } from "@/lib/store/news-zip-store";
 
 export function NewsZipForm() {
-  const router = useRouter();
+  const setMarket = useNewsZipStore((s) => s.setMarket);
   const [zip, setZip] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -24,43 +19,23 @@ export function NewsZipForm() {
     e.preventDefault();
     setError(null);
 
-    const cleaned = zip.trim();
-    if (!isValidUsZip(cleaned)) {
-      setError("Enter a valid US ZIP code (e.g. 38103).");
-      return;
-    }
-
     setLoading(true);
     try {
-      const markets = await fetchMarketsByZip(cleaned);
-      const primary = pickPrimaryMarket(markets);
-
-      if (!primary) {
-        const onNewsHost =
-          typeof window !== "undefined" && isNewsHost(window.location.host);
-        const path = onNewsHost ? `/${cleaned}` : `/news/${cleaned}`;
-        router.push(path);
+      const market = await resolveMarketForZip(zip);
+      if (!market) {
+        const message = "No market found for this zip code.";
+        setError(message);
+        toast.error(message);
         return;
       }
-
-      if (hasMarketSite(primary.site)) {
-        const url = normalizeMarketSiteUrl(primary.site!);
-        window.location.assign(url);
-        return;
-      }
-
-      const onNewsHost =
-        typeof window !== "undefined" && isNewsHost(window.location.host);
-      const path = onNewsHost
-        ? `/${primary.slug}`
-        : `/news/${primary.slug}`;
-      router.push(path);
+      setMarket(marketDtoToContext(market, zip));
     } catch (err) {
       const message =
         err instanceof ApiClientError
           ? err.message
           : "Something went wrong looking up your market.";
       setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }

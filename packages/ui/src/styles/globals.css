@@ -168,6 +168,45 @@
     color: oklch(0.22 0.01 60);
     color-scheme: light;
   }
+
+  /*
+   * /news is a light surface while the app default theme is dark.
+   * Force light color-scheme so the viewport scrollbar matches the page.
+   */
+  html.news-light-html,
+  html.news-light-html.dark {
+    color-scheme: light !important;
+  }
+  body.news-light-body {
+    color-scheme: light;
+  }
+  html.news-light-html {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(196 181 253) rgb(248 250 252); /* violet-300 / slate-50 */
+  }
+  html.news-light-html::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  html.news-light-html::-webkit-scrollbar-track {
+    background: rgb(248 250 252);
+  }
+  html.news-light-html::-webkit-scrollbar-thumb {
+    background: rgb(196 181 253);
+    border-radius: 9999px;
+    border: 2px solid rgb(248 250 252);
+  }
+  html.news-light-html::-webkit-scrollbar-thumb:hover {
+    background: rgb(167 139 250); /* violet-400 */
+  }
+
+  /* AskSKY MAP tab — larger zoom controls */
+  .asksky-business-map .leaflet-control-zoom a {
+    width: 36px !important;
+    height: 36px !important;
+    line-height: 36px !important;
+    font-size: 20px !important;
+  }
 }
 
 @layer utilities {
