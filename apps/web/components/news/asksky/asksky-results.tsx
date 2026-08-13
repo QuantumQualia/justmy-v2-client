@@ -133,10 +133,10 @@ export function AskSkyConversation({
   }
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col border-t border-slate-100">
+    <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col border-t border-slate-100">
       <div
         ref={scrollRef}
-        className="min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-3 py-3 sm:space-y-6 sm:px-6 sm:py-4 lg:px-8 [scrollbar-width:thin] [scrollbar-color:rgb(196_181_253)_rgb(248_250_252)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-violet-200 [&::-webkit-scrollbar-thumb]:hover:bg-violet-300"
+        className="min-h-0 min-w-0 flex-1 space-y-5 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-3 sm:space-y-6 sm:px-6 sm:py-4 lg:px-8 [scrollbar-width:thin] [scrollbar-color:rgb(196_181_253)_rgb(248_250_252)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-violet-200 [&::-webkit-scrollbar-thumb]:hover:bg-violet-300"
       >
         {turns.map((turn, index) => {
           const isLatest = index === turns.length - 1;
@@ -165,7 +165,7 @@ export function AskSkyConversation({
       </div>
 
       <form
-        className="shrink-0 border-t border-slate-100 bg-white px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8"
+        className="shrink-0 min-w-0 border-t border-slate-100 bg-white px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8"
         onSubmit={(e) => {
           e.preventDefault();
           submit(draft);
@@ -174,7 +174,7 @@ export function AskSkyConversation({
         <label htmlFor="asksky-followup" className="sr-only">
           Continue asking AskSKY
         </label>
-        <div className="flex items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1 pl-3 pr-1 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
+        <div className="flex min-w-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1 pl-3 pr-1 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
           <input
             id="asksky-followup"
             type="text"
@@ -229,9 +229,9 @@ function ConversationTurn({
   );
 
   return (
-    <div className="space-y-3.5 sm:space-y-4">
-      <div className="flex justify-end">
-        <div className="max-w-[92%] rounded-2xl rounded-br-md bg-violet-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-md shadow-violet-500/20 sm:max-w-[70%] sm:px-4">
+    <div className="min-w-0 space-y-3.5 sm:space-y-4">
+      <div className="flex min-w-0 justify-end">
+        <div className="min-w-0 max-w-[min(92%,100%)] break-words rounded-2xl rounded-br-md bg-violet-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-md shadow-violet-500/20 sm:max-w-[70%] sm:px-4">
           {turn.query}
         </div>
       </div>

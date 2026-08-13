@@ -177,12 +177,14 @@
   html.news-light-html.dark {
     color-scheme: light !important;
   }
-  body.news-light-body {
-    color-scheme: light;
-  }
   html.news-light-html {
     scrollbar-width: thin;
     scrollbar-color: rgb(196 181 253) rgb(248 250 252); /* violet-300 / slate-50 */
+    overflow-x: clip;
+  }
+  body.news-light-body {
+    color-scheme: light;
+    overflow-x: clip;
   }
   html.news-light-html::-webkit-scrollbar {
     width: 10px;

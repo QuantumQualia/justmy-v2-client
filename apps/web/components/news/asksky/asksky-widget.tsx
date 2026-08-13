@@ -106,8 +106,8 @@ export function AskSkyWidget({
 
   return (
     <section
-      className={`relative mx-auto flex w-full flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 ${
-        hasConversation ? "max-w-5xl lg:max-w-6xl" : "max-w-3xl"
+      className={`relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 ${
+        hasConversation ? "sm:max-w-5xl lg:max-w-6xl" : "max-w-3xl"
       }`}
     >
       <div className="relative z-10 -mb-8 flex h-16 w-16 items-center justify-center sm:-mb-10 sm:h-20 sm:w-20">
@@ -132,20 +132,20 @@ export function AskSkyWidget({
       </div>
 
       <div
-        className={`flex w-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.18)] sm:rounded-[2rem] ${
+        className={`flex w-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.18)] sm:rounded-[2rem] ${
           hasConversation
-            ? "h-[min(68dvh,34rem)] sm:h-[min(72vh,44rem)] lg:h-[min(75vh,48rem)]"
+            ? "h-auto max-h-[min(68svh,34rem)] sm:h-[min(72vh,44rem)] sm:max-h-none lg:h-[min(75vh,48rem)]"
             : ""
         }`}
       >
         <div
-          className={`shrink-0 px-4 pt-11 sm:px-8 sm:pt-14 ${
+          className={`min-w-0 shrink-0 px-4 pt-11 sm:px-8 sm:pt-14 ${
             hasConversation ? "pb-3" : "pb-5 sm:pb-8"
           }`}
         >
-          <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
             <h1
-              className={`min-w-0 flex-1 font-serif leading-snug tracking-tight text-slate-900 ${
+              className={`min-w-0 flex-1 break-words font-serif leading-snug tracking-tight text-slate-900 ${
                 hasConversation
                   ? "text-left text-lg sm:text-2xl"
                   : "text-center text-[1.45rem] sm:text-[2.15rem] sm:leading-tight"

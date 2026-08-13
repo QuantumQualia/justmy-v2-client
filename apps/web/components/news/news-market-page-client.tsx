@@ -181,7 +181,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
     <div
       className={cn(
         instrumentSerif.variable,
-        "relative min-h-screen overflow-x-hidden bg-[#f7f6fb] text-slate-900",
+        "relative min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-[#f7f6fb] text-slate-900",
         "[&_.font-serif]:font-[family-name:var(--font-asksky-serif),ui-serif,Georgia,serif]",
       )}
     >
@@ -198,7 +198,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
         className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-indigo-200/20 blur-3xl"
       />
 
-      <div className="relative z-10">
+      <div className="relative z-10 min-w-0 max-w-full overflow-x-hidden">
         {loadState === "loading" ? (
           <MarketStatusMessage title="Loading market…" />
         ) : loadState === "error" ? (

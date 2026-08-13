@@ -80,7 +80,7 @@ export function AskSkyEventsCarousel({ market }: AskSkyEventsCarouselProps) {
   if (state === "empty" || state === "error") return null;
 
   return (
-    <section className="relative mx-auto w-full max-w-6xl px-3 pb-6 pt-2 sm:px-6 sm:pb-10">
+    <section className="relative mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden px-3 pb-6 pt-2 sm:px-6 sm:pb-10">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="font-serif text-[1.55rem] leading-snug tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
           {city} is showing off tonight. Here is where you should be.
@@ -110,7 +110,7 @@ export function AskSkyEventsCarousel({ market }: AskSkyEventsCarouselProps) {
                 ? { el: paginationEl, clickable: true }
                 : false
             }
-            className="!overflow-visible [&_.swiper-wrapper]:items-stretch"
+            className="[&_.swiper-wrapper]:items-stretch"
           >
             {events.map((event, index) => (
               <SwiperSlide
