@@ -4,15 +4,18 @@ import {
   ChevronDown,
   CloudSun,
   Loader2,
+  LogIn,
   Pause,
   Play,
-  Wallet,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { AuthDialog } from "@/components/auth/auth-dialog";
+import { NewsAccountAvatar } from "@/components/news/asksky/news-account-avatar";
+import { NewsAccountSidebar } from "@/components/news/asksky/news-account-sidebar";
 import { marketDtoToContext } from "@/components/news/asksky/market-context";
 import { NEWS_HOME_HREF } from "@/components/news/news-home-link";
 import { ApiClientError } from "@/lib/api-client";
@@ -21,20 +24,46 @@ import {
   marketSiteToDomain,
   type SkyDailyAudioBriefing,
 } from "@/lib/news/fetch-daily-audio-briefing";
+import type { SkyMeConversationDetail } from "@/lib/news/fetch-sky-conversations";
 import {
   fetchTodayWeather,
   type TodayWeather,
 } from "@/lib/news/fetch-today-weather";
 import { isValidUsZip } from "@/lib/news/market-routing";
 import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
+import type { AuthResponse } from "@/lib/services/auth";
+import { tokenStorage } from "@/lib/storage/token-storage";
+import { useNewsAuthUiStore } from "@/lib/store/news-auth-ui-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
+import { useProfileStore } from "@/lib/store/profile-store";
 import type { NewsMarketContext } from "./types";
+
+type NewsAccountUser = {
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string;
+  avatarUrl?: string | null;
+};
 
 type NewsMarketNavProps = {
   market: NewsMarketContext;
+  onNewChat?: () => void;
+  onOpenConversation?: (detail: SkyMeConversationDetail) => void;
+  activeConversationId?: number | null;
+  onConversationDeleted?: (id: number) => void;
+  onAuthSuccess?: (response: AuthResponse) => void;
+  recentsRefreshKey?: number;
 };
 
-export function NewsMarketNav({ market }: NewsMarketNavProps) {
+export function NewsMarketNav({
+  market,
+  onNewChat,
+  onOpenConversation,
+  activeConversationId = null,
+  onConversationDeleted,
+  onAuthSuccess: onAuthSuccessFromPage,
+  recentsRefreshKey = 0,
+}: NewsMarketNavProps) {
   const setMarket = useNewsZipStore((s) => s.setMarket);
   const setBriefingExtras = useNewsZipStore((s) => s.setBriefingExtras);
   const clearBriefingExtras = useNewsZipStore((s) => s.clearBriefingExtras);
@@ -46,7 +75,15 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
   const [zipLoading, setZipLoading] = useState(false);
   const [zipError, setZipError] = useState<string | null>(null);
   const [zipEditing, setZipEditing] = useState(false);
+  const [authUser, setAuthUser] = useState<NewsAccountUser | null>(null);
+  const authOpen = useNewsAuthUiStore((s) => s.authOpen);
+  const setAuthOpen = useNewsAuthUiStore((s) => s.setAuthOpen);
+  const sidebarOpen = useNewsAuthUiStore((s) => s.sidebarOpen);
+  const setSidebarOpen = useNewsAuthUiStore((s) => s.setSidebarOpen);
+  const profilePhoto = useProfileStore((s) => s.data.photo);
+  const profileVerified = useProfileStore((s) => s.data.isVerified);
 
+  const authButtonRef = useRef<HTMLButtonElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const locationLabel = [market.zipcode, market.cityState]
@@ -58,6 +95,21 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
     setZipError(null);
     setZipEditing(false);
   }, [market.zipcode]);
+
+  useEffect(() => {
+    let cancelled = false;
+    tokenStorage
+      .getUser<NewsAccountUser>()
+      .then((user) => {
+        if (!cancelled && user) setAuthUser(user);
+      })
+      .catch(() => {
+        /* stay signed out */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   // Load daily briefing on mount / market change (when enabled)
   useEffect(() => {
@@ -219,6 +271,15 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
     }
   }
 
+  function onAuthSuccess(response: AuthResponse) {
+    setAuthUser(response.user);
+    onAuthSuccessFromPage?.(response);
+  }
+
+  const authLabel = authUser
+    ? firstNonEmpty(authUser.firstName, authUser.email?.split("@")[0], "Account")
+    : null;
+
   const sponsorName = firstNonEmpty(
     briefing?.sponsor?.companyName,
     briefing?.sponsor?.name,
@@ -230,7 +291,8 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
   );
 
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl">
+    <>
+      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl">
       <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -338,16 +400,35 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
             <div className="ml-auto flex shrink-0 items-center gap-2">
               <TodayWeatherPill weather={weather} />
 
-              <button
-                type="button"
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-cyan-400 text-white shadow-md shadow-violet-500/20 transition hover:brightness-110 lg:w-auto lg:gap-1.5 lg:px-3"
-                aria-label="myCARD Wallet"
-              >
-                <Wallet className="h-3.5 w-3.5" aria-hidden />
-                <span className="hidden text-xs font-semibold lg:inline">
-                  myCARD Wallet
-                </span>
-              </button>
+              {authUser ? (
+                <button
+                  type="button"
+                  onClick={() => setSidebarOpen(true)}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:w-auto lg:gap-1.5 lg:px-2.5"
+                  aria-label={`Account menu for ${authLabel}`}
+                >
+                  <NewsAccountAvatar
+                    photoUrl={profilePhoto || authUser.avatarUrl}
+                    label={authLabel ?? "Account"}
+                  />
+                  <span className="hidden max-w-28 truncate text-xs font-semibold text-slate-800 lg:inline">
+                    {authLabel}
+                  </span>
+                </button>
+              ) : (
+                <button
+                  ref={authButtonRef}
+                  type="button"
+                  onClick={() => setAuthOpen(true)}
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-cyan-400 text-white shadow-md shadow-violet-500/20 transition hover:brightness-110 lg:w-auto lg:gap-1.5 lg:px-3"
+                  aria-label="Login or register"
+                >
+                  <LogIn className="h-3.5 w-3.5" aria-hidden />
+                  <span className="hidden text-xs font-semibold lg:inline">
+                    Login / Register
+                  </span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -366,7 +447,33 @@ export function NewsMarketNav({ market }: NewsMarketNavProps) {
           ) : null}
         </div>
       </div>
-    </header>
+      </header>
+      <AuthDialog
+        open={authOpen}
+        onOpenChange={setAuthOpen}
+        defaultMode="register"
+        defaultZip={market.zipcode}
+        profileKind="personal"
+        onAuthSuccess={onAuthSuccess}
+        anchorRef={authButtonRef}
+      />
+      {authUser ? (
+        <NewsAccountSidebar
+          open={sidebarOpen}
+          onClose={() => setSidebarOpen(false)}
+          market={market}
+          user={authUser}
+          photoUrl={profilePhoto || authUser.avatarUrl}
+          isVerified={Boolean(profileVerified)}
+          onNewChat={() => onNewChat?.()}
+          onOpenConversation={(detail) => onOpenConversation?.(detail)}
+          activeConversationId={activeConversationId}
+          onConversationDeleted={(id) => onConversationDeleted?.(id)}
+          onSignedOut={() => setAuthUser(null)}
+          refreshKey={recentsRefreshKey}
+        />
+      ) : null}
+    </>
   );
 }
 

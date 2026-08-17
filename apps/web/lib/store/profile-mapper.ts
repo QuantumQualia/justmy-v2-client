@@ -59,6 +59,7 @@ export interface ApiProfileResponse {
   markets?: Market[];
   referralCode?: string | null;
   allowsSubProfiles?: boolean;
+  isVerified?: boolean;
 }
 
 // Map social name to type
@@ -198,6 +199,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     hotlinks,
     markets,
     about: apiProfile.about || "",
+    isVerified: apiProfile.isVerified === true,
     referralCode: apiProfile.referralCode ?? undefined,
     allowsSubProfiles: apiProfile.allowsSubProfiles === true,
   };

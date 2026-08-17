@@ -7,15 +7,21 @@ import { toast } from "sonner";
 import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
 import { AskSkyEventsCarousel } from "@/components/news/asksky/asksky-events-carousel";
 import { AskSkyFooter } from "@/components/news/asksky/asksky-footer";
-import { mapSkySearchToAnswer } from "@/components/news/asksky/map-sky-search";
+import { mapSkySearchToAnswer, turnsFromSkyMessages } from "@/components/news/asksky/map-sky-search";
 import { marketDtoToContext } from "@/components/news/asksky/market-context";
 import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
 import { AskSkyWidget } from "@/components/news/asksky/asksky-widget";
 import type { AskSkyTurn } from "@/components/news/asksky/types";
 import { ApiClientError } from "@/lib/api-client";
 import { marketSiteToDomain } from "@/lib/news/fetch-daily-audio-briefing";
+import {
+  claimSkyConversation,
+  type SkyMeConversationDetail,
+} from "@/lib/news/fetch-sky-conversations";
 import { fetchSkySearch } from "@/lib/news/fetch-sky-search";
 import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
+import type { AuthResponse } from "@/lib/services/auth";
+import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -50,6 +56,10 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
   );
   const [turns, setTurns] = useState<AskSkyTurn[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(
+    null,
+  );
+  const [recentsRefreshKey, setRecentsRefreshKey] = useState(0);
   const threadRef = useRef<SkyThread | null>(null);
   const askInFlightRef = useRef(false);
 
@@ -76,6 +86,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
     setLoadState("loading");
     setTurns([]);
     threadRef.current = null;
+    setActiveConversationId(null);
 
     resolveMarketForZip(zipcode)
       .then((primary) => {
@@ -140,6 +151,8 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
           conversationId: response.conversationId,
         };
       }
+      setActiveConversationId(response.conversationId);
+      setRecentsRefreshKey((n) => n + 1);
 
       const answer = mapSkySearchToAnswer(response);
       setTurns((prev) =>
@@ -171,8 +184,42 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
   function handleNewChat() {
     setTurns([]);
     threadRef.current = null;
+    setActiveConversationId(null);
     askInFlightRef.current = false;
     setIsSearching(false);
+  }
+
+  function handleOpenConversation(detail: SkyMeConversationDetail) {
+    threadRef.current = {
+      conversationId: detail.conversationId,
+      visitorToken: detail.visitorToken?.trim() || "",
+    };
+    setActiveConversationId(detail.conversationId);
+    setTurns(turnsFromSkyMessages(detail.messages));
+    askInFlightRef.current = false;
+    setIsSearching(false);
+  }
+
+  function handleConversationDeleted(id: number) {
+    if (activeConversationId === id) {
+      handleNewChat();
+    }
+    setRecentsRefreshKey((n) => n + 1);
+  }
+
+  async function handleAuthSuccess(_response: AuthResponse) {
+    void useNewsFavoritesStore.getState().hydrate();
+    const thread = threadRef.current;
+    if (!thread?.conversationId || !thread.visitorToken) return;
+    try {
+      await claimSkyConversation({
+        conversationId: thread.conversationId,
+        visitorToken: thread.visitorToken,
+      });
+      setRecentsRefreshKey((n) => n + 1);
+    } catch {
+      /* visitor thread stays local until the next authenticated search */
+    }
   }
 
   const activeMarket = marketMatchesZip ? market : null;
@@ -208,7 +255,15 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
           />
         ) : activeMarket ? (
           <>
-            <NewsMarketNav market={activeMarket} />
+            <NewsMarketNav
+              market={activeMarket}
+              onNewChat={handleNewChat}
+              onOpenConversation={handleOpenConversation}
+              activeConversationId={activeConversationId}
+              onConversationDeleted={handleConversationDeleted}
+              onAuthSuccess={handleAuthSuccess}
+              recentsRefreshKey={recentsRefreshKey}
+            />
 
             <AskSkyWidget
               market={activeMarket}

@@ -1,4 +1,5 @@
 export type NewsMarketContext = {
+  marketId?: number;
   marketSlug: string;
   marketName: string;
   zipcode: string;
@@ -41,6 +42,8 @@ export type AskSkyBusinessCard = {
   profileId: number;
   name: string;
   verified: boolean;
+  /** Profile handle used to open myCARD on the main app origin. */
+  slug?: string;
   brief?: string;
   photo?: string;
   url?: string;

@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { buildApiUrl } from "@/lib/config";
+import { proxyNewsToBackend } from "@/app/api/news/_lib";
 import { isValidUsZip } from "@/lib/news/market-routing";
 
 type SkySearchBody = {
@@ -69,40 +69,10 @@ export async function POST(request: NextRequest) {
   const payload: Record<string, unknown> = { query };
   if (zipRaw) payload.zipCode = zipRaw.slice(0, 10);
   if (domain) payload.domain = domain;
-  if (conversationId != null && visitorToken) {
+  if (conversationId != null) {
     payload.conversationId = conversationId;
-    payload.visitorToken = visitorToken;
+    if (visitorToken) payload.visitorToken = visitorToken;
   }
 
-  const backendUrl = buildApiUrl("sky/search");
-
-  try {
-    const res = await fetch(backendUrl, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-      cache: "no-store",
-    });
-
-    const text = await res.text();
-    try {
-      const json = JSON.parse(text) as unknown;
-      return NextResponse.json(json, { status: res.status });
-    } catch {
-      return new NextResponse(text, {
-        status: res.status,
-        headers: {
-          "Content-Type": res.headers.get("content-type") || "text/plain",
-        },
-      });
-    }
-  } catch {
-    return NextResponse.json(
-      { message: "Unable to reach AskSKY search." },
-      { status: 502 },
-    );
-  }
+  return proxyNewsToBackend(request, "sky/search", "POST", { body: payload });
 }

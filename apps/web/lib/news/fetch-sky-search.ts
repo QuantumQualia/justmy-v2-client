@@ -129,9 +129,9 @@ export async function fetchSkySearch(
       ? params.visitorToken.trim().slice(0, 128)
       : null;
 
-  if (conversationId != null && visitorToken) {
+  if (conversationId != null) {
     body.conversationId = conversationId;
-    body.visitorToken = visitorToken;
+    if (visitorToken) body.visitorToken = visitorToken;
   }
 
   const res = await fetch("/api/news/sky/search", {

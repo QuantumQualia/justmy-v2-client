@@ -13,6 +13,7 @@ export function marketDtoToContext(
   const site = market.site?.trim() || null;
   const cityState = [city, state].filter(Boolean).join(", ");
   return {
+    marketId: market.id,
     marketSlug: market.slug,
     marketName: market.name,
     zipcode: cleanedZip,

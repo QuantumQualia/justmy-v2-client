@@ -31,6 +31,7 @@ export interface AuthResponse {
     email: string;
     firstName: string;
     lastName: string;
+    avatarUrl?: string | null;
   };
   profile?: any; // Profile response from formatProfileResponse
   // Default app based on user's OS
@@ -60,6 +61,7 @@ export interface User {
   email: string;
   firstName: string;
   lastName: string;
+  avatarUrl?: string | null;
   profileType?: OsName;
   businessName?: string;
   zipCode?: string;
@@ -80,6 +82,47 @@ export interface ChangePasswordData {
   newPassword: string;
 }
 
+export interface OauthGoogleData {
+  idToken: string;
+  zipCode?: string;
+  referralCode?: string;
+  profileType?: OsName;
+}
+
+export interface OauthAppleData {
+  identityToken: string;
+  firstName?: string;
+  lastName?: string;
+  zipCode?: string;
+  referralCode?: string;
+  profileType?: OsName;
+}
+
+async function persistAuthSession(response: AuthResponse): Promise<void> {
+  const accessToken = response.accessToken || response.token;
+  if (accessToken) {
+    tokenStorage.setAccessToken(accessToken);
+  }
+  if (response.refreshToken) {
+    tokenStorage.setRefreshToken(response.refreshToken);
+  }
+  if (response.user) {
+    tokenStorage.setUser(response.user);
+  }
+
+  if (response.profile) {
+    const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+    const { useProfileStore } = await import("../store/profile-store");
+    const profileData = mapApiProfileToProfileData(response.profile);
+    useProfileStore.getState().setData(profileData);
+  }
+
+  if (response.welcomeApp && typeof window !== "undefined") {
+    const { useAppStore } = await import("../store/app-store");
+    useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
+  }
+}
+
 /**
  * Authentication Service
  */
@@ -96,36 +139,7 @@ export const authService = {
         skipAuth: true, // Don't send token for login
       });
 
-      // Save tokens and user data
-      const accessToken = response.accessToken || response.token;
-      if (accessToken) {
-        tokenStorage.setAccessToken(accessToken);
-      }
-      if (response.refreshToken) {
-        tokenStorage.setRefreshToken(response.refreshToken);
-      }
-      if (response.user) {
-        tokenStorage.setUser(response.user);
-      }
-
-      // Store default profile in global state if available
-      if (response.profile) {
-        // Dynamic import to avoid circular dependencies
-        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
-        const { useProfileStore } = await import("../store/profile-store");
-        const profileData = mapApiProfileToProfileData(response.profile);
-        useProfileStore.getState().setData(profileData);
-      }
-
-      // Store welcome app info in global state if available
-      if (response.welcomeApp) {
-        if (typeof window !== "undefined") {
-          // Dynamic import to avoid circular deps
-          const { useAppStore } = await import("../store/app-store");
-          useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
-        }
-      }
-
+      await persistAuthSession(response);
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {
@@ -147,39 +161,55 @@ export const authService = {
         skipAuth: true, // Don't send token for registration
       });
 
-      // Save tokens and user data (stored in cookies - accessible to both client and server)
-      const accessToken = response.accessToken || response.token;
-      if (accessToken) {
-        tokenStorage.setAccessToken(accessToken);
-      }
-      if (response.refreshToken) {
-        tokenStorage.setRefreshToken(response.refreshToken);
-      }
-      if (response.user) {
-        tokenStorage.setUser(response.user);
-      }
-
-      // Store default profile in global state if available
-      if (response.profile) {
-        // Dynamic import to avoid circular dependencies
-        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
-        const { useProfileStore } = await import("../store/profile-store");
-        const profileData = mapApiProfileToProfileData(response.profile);
-        useProfileStore.getState().setData(profileData);
-      }
-
-      // Store welcome app info in global state if available
-      if (response.welcomeApp && typeof window !== "undefined") {
-        const { useAppStore } = await import("../store/app-store");
-        useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
-      }
-
+      await persistAuthSession(response);
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {
         throw error;
       }
       throw new ApiClientError("Registration failed. Please try again.");
+    }
+  },
+
+  /**
+   * Sign in or register with a Google Identity Services ID token.
+   */
+  async oauthGoogle(data: OauthGoogleData): Promise<AuthResponse> {
+    try {
+      const response = await apiRequest<AuthResponse>("auth/oauth/google", {
+        method: "POST",
+        body: JSON.stringify(data),
+        skipAuth: true,
+      });
+
+      await persistAuthSession(response);
+      return response;
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Google sign-in failed. Please try again.");
+    }
+  },
+
+  /**
+   * Sign in or register with an Apple identity token.
+   */
+  async oauthApple(data: OauthAppleData): Promise<AuthResponse> {
+    try {
+      const response = await apiRequest<AuthResponse>("auth/oauth/apple", {
+        method: "POST",
+        body: JSON.stringify(data),
+        skipAuth: true,
+      });
+
+      await persistAuthSession(response);
+      return response;
+    } catch (error) {
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Apple sign-in failed. Please try again.");
     }
   },
 
@@ -243,33 +273,7 @@ export const authService = {
         skipAuth: true, // Don't send access token, only refresh token in body
       });
 
-      // Update tokens in storage (cookies)
-      const accessToken = response.accessToken || response.token;
-      if (accessToken) {
-        tokenStorage.setAccessToken(accessToken);
-      }
-      if (response.refreshToken) {
-        tokenStorage.setRefreshToken(response.refreshToken);
-      }
-      if (response.user) {
-        tokenStorage.setUser(response.user);
-      }
-
-      // Store default profile in global state if available
-      if (response.profile) {
-        // Dynamic import to avoid circular dependencies
-        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
-        const { useProfileStore } = await import("../store/profile-store");
-        const profileData = mapApiProfileToProfileData(response.profile);
-        useProfileStore.getState().setData(profileData);
-      }
-
-      // Store welcome app info in global state if available
-      if (response.welcomeApp && typeof window !== "undefined") {
-        const { useAppStore } = await import("../store/app-store");
-        useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
-      }
-
+      await persistAuthSession(response);
       return response;
     } catch (error) {
       if (error instanceof ApiClientError) {

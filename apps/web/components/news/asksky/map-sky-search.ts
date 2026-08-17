@@ -1,10 +1,15 @@
 import type { SkySearchMycard, SkySearchResponse } from "@/lib/news/fetch-sky-search";
+import {
+  snapshotFromRetrievedDocs,
+  type SkyMeMessage,
+} from "@/lib/news/fetch-sky-conversations";
 
 import type {
   AskSkyAnswer,
   AskSkyBusinessCard,
   AskSkyPostCard,
   AskSkyResultCard,
+  AskSkyTurn,
   AskSkyWebCard,
 } from "./types";
 
@@ -90,6 +95,7 @@ function mapMycards(
       type: "business" as const,
       profileId: card.profileId,
       name: card.name,
+      slug: card.slug?.trim() || undefined,
       verified: Boolean(card.isVerified),
       brief: card.brief?.trim() || undefined,
       photo: card.photo?.trim() || undefined,
@@ -204,4 +210,37 @@ export function mapSkySearchToAnswer(response: SkySearchResponse): AskSkyAnswer 
     cards,
     followUps,
   };
+}
+
+/** Rebuild AskSKY turns from a persisted market-search transcript. */
+export function turnsFromSkyMessages(messages: SkyMeMessage[]): AskSkyTurn[] {
+  const turns: AskSkyTurn[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg || msg.role !== "user") continue;
+    const next = messages[i + 1];
+    const assistant = next?.role === "assistant" ? next : null;
+    const snapshot = assistant
+      ? snapshotFromRetrievedDocs(assistant.retrievedDocs)
+      : null;
+    const answer = assistant
+      ? mapSkySearchToAnswer({
+          conversationId: 0,
+          visitorToken: null,
+          market: { id: 0, name: "", site: null },
+          reply: assistant.content,
+          followUpQuestions: snapshot?.followUpQuestions ?? [],
+          data: snapshot?.data ?? { mycards: [], posts: [], webResults: [] },
+        })
+      : undefined;
+    turns.push({
+      id: `hist-${msg.id}`,
+      query: msg.content,
+      status: assistant ? "ready" : "error",
+      answer,
+      errorMessage: assistant ? undefined : "This search was not completed.",
+    });
+    if (assistant) i += 1;
+  }
+  return turns;
 }

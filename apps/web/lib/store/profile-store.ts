@@ -68,6 +68,7 @@ export interface ProfileData {
   hotlinks: Hotlink[];
   markets: Market[];
   about: string;
+  isVerified?: boolean;
   /** Unique code for refer-a-friend; set from API on login/me/refresh */
   referralCode?: string;
   /** Master profile: can create sub-profiles and deploy hubs to them (from API). */
@@ -111,6 +112,7 @@ const initialData: ProfileData = {
   hotlinks: [],
   markets: [],
   about: "",
+  isVerified: undefined,
   referralCode: undefined,
   allowsSubProfiles: undefined,
 };

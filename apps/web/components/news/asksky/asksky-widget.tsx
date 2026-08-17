@@ -227,7 +227,7 @@ export function AskSkyWidget({
       </div>
 
       {!hasConversation && chips.length > 0 ? (
-        <div className="mt-4 flex w-full max-w-2xl flex-wrap items-center justify-center gap-2 sm:mt-5 sm:gap-2.5">
+        <div className="mt-4 flex w-full max-w-5xl flex-wrap items-center justify-center gap-2 sm:mt-5 sm:gap-2.5">
           {chips.map((chip) => (
             <button
               key={chip.id}

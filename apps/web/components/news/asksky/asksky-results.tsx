@@ -1,12 +1,14 @@
 "use client";
 
 import {
+  Bookmark,
   Building2,
   Calendar,
   CheckCircle2,
   ExternalLink,
   FileText,
   Globe,
+  Heart,
   IdCard,
   Link2,
   Mail,
@@ -36,6 +38,9 @@ import {
 } from "react-icons/si";
 
 import { openShare } from "@/components/common/share/share-store";
+import { tokenStorage } from "@/lib/storage/token-storage";
+import { useNewsAuthUiStore } from "@/lib/store/news-auth-ui-store";
+import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 
 import type { AskSkyBusinessMapProps } from "./asksky-business-map";
 import type {
@@ -83,6 +88,9 @@ export function AskSkyConversation({
 }: AskSkyConversationProps) {
   const [draft, setDraft] = useState("");
   const [tab, setTab] = useState<AskSkyResultTab>("all");
+  const favorites = useNewsFavoritesStore((s) => s.byId);
+  const hydrateFavorites = useNewsFavoritesStore((s) => s.hydrate);
+  const toggleFavorite = useNewsFavoritesStore((s) => s.toggle);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const latestTurn = turns[turns.length - 1] ?? null;
   const latestReady =
@@ -96,6 +104,22 @@ export function AskSkyConversation({
     if (!el) return;
     el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [turns.length, latestTurn?.status]);
+
+  useEffect(() => {
+    let cancelled = false;
+    tokenStorage
+      .getAccessToken()
+      .then((token) => {
+        if (!token || cancelled) return;
+        return hydrateFavorites();
+      })
+      .catch(() => {
+        /* stay empty when signed out or request fails */
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [turns.length, hydrateFavorites]);
 
   const visibleTabs = useMemo(() => {
     if (!latestReady?.answer) return TABS.filter((t) => t.id === "all");
@@ -123,6 +147,24 @@ export function AskSkyConversation({
     () => cards.filter((c): c is AskSkyBusinessCard => c.type === "business"),
     [cards],
   );
+  const openAuth = useNewsAuthUiStore((s) => s.openAuth);
+
+  async function handleFavoriteToggle(
+    profileId: number,
+    field: "liked" | "bookmarked",
+    preview?: { name: string; slug?: string; photo?: string | null },
+  ) {
+    const token = await tokenStorage.getAccessToken();
+    if (!token) {
+      openAuth();
+      return;
+    }
+    try {
+      await toggleFavorite(profileId, field, preview);
+    } catch {
+      /* store reverts optimistic flags */
+    }
+  }
 
   function submit(value: string) {
     if (disabled) return;
@@ -156,6 +198,8 @@ export function AskSkyConversation({
               mapBusinesses={
                 isLatest && turn.status === "ready" ? mapBusinesses : []
               }
+              favorites={favorites}
+              onToggleFavorite={handleFavoriteToggle}
               onTabChange={setTab}
               onFollowUp={submit}
               followUpsDisabled={disabled}
@@ -206,6 +250,8 @@ function ConversationTurn({
   visibleTabs,
   cards,
   mapBusinesses,
+  favorites,
+  onToggleFavorite,
   onTabChange,
   onFollowUp,
   followUpsDisabled,
@@ -217,6 +263,12 @@ function ConversationTurn({
   visibleTabs: typeof TABS;
   cards: NonNullable<AskSkyTurn["answer"]>["cards"];
   mapBusinesses: AskSkyBusinessCard[];
+  favorites: Record<number, { liked: boolean; bookmarked: boolean }>;
+  onToggleFavorite: (
+    profileId: number,
+    field: "liked" | "bookmarked",
+    preview?: { name: string; slug?: string; photo?: string | null },
+  ) => void;
   onTabChange: (tab: AskSkyResultTab) => void;
   onFollowUp: (query: string) => void;
   followUpsDisabled: boolean;
@@ -333,7 +385,13 @@ function ConversationTurn({
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                   {cards.map((card) =>
                     card.type === "business" ? (
-                      <BusinessCard key={card.id} card={card} />
+                      <BusinessCard
+                        key={card.id}
+                        card={card}
+                        liked={Boolean(favorites[card.profileId]?.liked)}
+                        bookmarked={Boolean(favorites[card.profileId]?.bookmarked)}
+                        onToggleFavorite={onToggleFavorite}
+                      />
                     ) : card.type === "post" ? (
                       <PostCard key={card.id} card={card} />
                     ) : (
@@ -524,7 +582,21 @@ function ContactIconControl({
   );
 }
 
-function BusinessCard({ card }: { card: AskSkyBusinessCard }) {
+function BusinessCard({
+  card,
+  liked,
+  bookmarked,
+  onToggleFavorite,
+}: {
+  card: AskSkyBusinessCard;
+  liked: boolean;
+  bookmarked: boolean;
+  onToggleFavorite: (
+    profileId: number,
+    field: "liked" | "bookmarked",
+    preview?: { name: string; slug?: string; photo?: string | null },
+  ) => void;
+}) {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const initials = card.name
     .split(" ")
@@ -594,13 +666,18 @@ function BusinessCard({ card }: { card: AskSkyBusinessCard }) {
   }
 
   const hasContactBar =
-    Boolean(shareUrl) ||
     phoneItems.length > 0 ||
     emailItems.length > 0 ||
     locationItems.length > 0 ||
     Boolean(card.website?.trim()) ||
     Boolean(card.calendarLink?.trim()) ||
     card.socialLinks.length > 0;
+
+  const favoritePreview = {
+    name: card.name,
+    slug: card.slug,
+    photo: card.photo ?? null,
+  };
 
   return (
     <article className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -654,18 +731,6 @@ function BusinessCard({ card }: { card: AskSkyBusinessCard }) {
 
       {hasContactBar ? (
         <div className="mt-4 flex flex-wrap items-center justify-center gap-1.5">
-          {shareUrl ? (
-            <button
-              type="button"
-              onClick={handleShare}
-              className={CONTACT_ICON_BTN}
-              aria-label={`Share ${card.name}`}
-              title="Share"
-            >
-              <Share2 className="h-3.5 w-3.5" aria-hidden />
-            </button>
-          ) : null}
-
           <ContactIconControl
             icon={<Phone className="h-3.5 w-3.5" aria-hidden />}
             label="Phone"
@@ -750,6 +815,54 @@ function BusinessCard({ card }: { card: AskSkyBusinessCard }) {
           ))}
         </div>
       ) : null}
+
+      <div className="mt-auto flex items-center justify-center gap-2 pt-4">
+        <button
+          type="button"
+          onClick={() =>
+            onToggleFavorite(card.profileId, "liked", favoritePreview)
+          }
+          className={CONTACT_ICON_BTN}
+          aria-label={liked ? `Unlike ${card.name}` : `Like ${card.name}`}
+          aria-pressed={liked}
+          title="Like"
+        >
+          <Heart
+            className={`h-3.5 w-3.5 ${liked ? "fill-rose-500 text-rose-500" : ""}`}
+            aria-hidden
+          />
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            onToggleFavorite(card.profileId, "bookmarked", favoritePreview)
+          }
+          className={CONTACT_ICON_BTN}
+          aria-label={
+            bookmarked
+              ? `Remove bookmark for ${card.name}`
+              : `Bookmark ${card.name}`
+          }
+          aria-pressed={bookmarked}
+          title="Bookmark"
+        >
+          <Bookmark
+            className={`h-3.5 w-3.5 ${bookmarked ? "fill-violet-500 text-violet-500" : ""}`}
+            aria-hidden
+          />
+        </button>
+        {shareUrl ? (
+          <button
+            type="button"
+            onClick={handleShare}
+            className={CONTACT_ICON_BTN}
+            aria-label={`Share ${card.name}`}
+            title="Share"
+          >
+            <Share2 className="h-3.5 w-3.5" aria-hidden />
+          </button>
+        ) : null}
+      </div>
     </article>
   );
 }
