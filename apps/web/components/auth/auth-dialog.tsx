@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useState, type RefObject } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { ChevronDown, Loader2, MapPin, X } from "lucide-react";
 import {
@@ -488,37 +487,21 @@ export function AuthDialog({
   );
 }
 
-function AuthIntroVideo() {
-  const [failed, setFailed] = useState(false);
+const AUTH_INTRO_YOUTUBE_ID = "jFQ4KhofniQ";
 
-  if (failed) {
-    return (
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-linear-to-br from-violet-600 via-fuchsia-500 to-cyan-400">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <Image
-            src="/images/logo.png"
-            alt=""
-            width={72}
-            height={72}
-            className="h-16 w-16 rounded-2xl object-contain shadow-lg shadow-black/20"
-          />
-        </div>
-      </div>
-    );
-  }
+function AuthIntroVideo() {
+  const src = `https://www.youtube.com/embed/${AUTH_INTRO_YOUTUBE_ID}?rel=0&modestbranding=1`;
 
   return (
-    <video
-      className="aspect-video w-full overflow-hidden rounded-xl bg-slate-100 object-cover"
-      autoPlay
-      muted
-      loop
-      playsInline
-      poster="/images/logo.png"
-      onError={() => setFailed(true)}
-    >
-      <source src="/videos/personal-os-intro.mp4" type="video/mp4" />
-    </video>
+    <div className="relative aspect-video w-full overflow-hidden rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-none bg-slate-900">
+      <iframe
+        src={src}
+        title="JustMy intro video"
+        className="absolute inset-0 h-full w-full border-0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+      />
+    </div>
   );
 }
 
