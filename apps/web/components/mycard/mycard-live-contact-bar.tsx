@@ -11,8 +11,13 @@ import { flattenContactActions } from "@/components/mycard/flatten-contact-actio
 
 function contactBarOverflows(swiper: SwiperClass) {
   if (swiper.isLocked) return false;
+  // Swiper 12 types omit these instance metrics; they exist at runtime.
+  const { virtualSize, size } = swiper as SwiperClass & {
+    virtualSize: number;
+    size: number;
+  };
   // Ignore subpixel / rounding so arrows stay hidden when every icon is on-screen.
-  return swiper.virtualSize - swiper.size > 8;
+  return virtualSize - size > 8;
 }
 
 export function MycardLiveContactBar({

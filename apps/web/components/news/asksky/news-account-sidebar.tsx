@@ -19,6 +19,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
+import { openShare } from "@/components/common/share/share-store";
 import { NEWS_HOME_HREF } from "@/components/news/news-home-link";
 import { NewsAccountAvatar } from "@/components/news/asksky/news-account-avatar";
 import type { NewsMarketContext } from "@/components/news/asksky/types";

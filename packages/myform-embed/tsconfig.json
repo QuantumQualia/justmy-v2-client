@@ -6,7 +6,6 @@
     "module": "ESNext",
     "noEmit": true,
     "rootDir": ".",
-    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
