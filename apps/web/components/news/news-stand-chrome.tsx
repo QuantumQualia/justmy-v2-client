@@ -13,6 +13,7 @@ import { isLikelyHandlePath } from "@/lib/mycard/handle-route";
 import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
 import { useNewsNavPageStore } from "@/lib/store/news-nav-page-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
+import { useProfileStore } from "@/lib/store/profile-store";
 
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -30,6 +31,8 @@ export function NewsStandChrome() {
   const storedZip = useNewsZipStore((s) => s.zipcode);
   const hasHydrated = useNewsZipStore((s) => s.hasHydrated);
   const persistMarket = useNewsZipStore((s) => s.setMarket);
+  const profileId = useProfileStore((s) => s.data.id);
+  const profileZip = useProfileStore((s) => s.data.zipCode);
 
   const onNewChat = useNewsNavPageStore((s) => s.onNewChat);
   const onOpenConversation = useNewsNavPageStore((s) => s.onOpenConversation);
@@ -66,7 +69,7 @@ export function NewsStandChrome() {
       return;
     }
 
-    const zip = (storedZip || "").trim().slice(0, 5);
+    const zip = (storedZip || (profileId ? profileZip : "") || "").trim().slice(0, 5);
     setMarket(fallbackMarketFromZip(zip));
     if (!zip) return;
 
@@ -85,7 +88,7 @@ export function NewsStandChrome() {
     return () => {
       cancelled = true;
     };
-  }, [hasHydrated, storedMarket, storedZip, persistMarket]);
+  }, [hasHydrated, storedMarket, storedZip, profileId, profileZip, persistMarket]);
 
   if (!market) {
     return (

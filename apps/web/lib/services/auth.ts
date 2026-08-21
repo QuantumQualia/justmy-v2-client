@@ -133,6 +133,10 @@ export async function persistAuthSession(response: AuthResponse): Promise<void> 
     const { useProfileStore } = await import("../store/profile-store");
     const profileData = mapApiProfileToProfileData(response.profile);
     useProfileStore.getState().setData(profileData);
+    void import("../news/seed-newsstand-market").then(
+      ({ seedNewsstandMarketFromProfileIfUnset }) =>
+        seedNewsstandMarketFromProfileIfUnset(profileData),
+    );
   }
 
   if (response.welcomeApp && typeof window !== "undefined") {
@@ -280,6 +284,10 @@ export const authService = {
           const { useProfileStore } = await import("../store/profile-store");
           const profileData = mapApiProfileToProfileData(profile);
           useProfileStore.getState().setData(profileData);
+          void import("../news/seed-newsstand-market").then(
+            ({ seedNewsstandMarketFromProfileIfUnset }) =>
+              seedNewsstandMarketFromProfileIfUnset(profileData),
+          );
         }
 
         const stored = slimAuthUser(user, profile);

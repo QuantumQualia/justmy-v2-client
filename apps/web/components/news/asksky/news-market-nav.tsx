@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  CloudSun,
-  Loader2,
-  LogIn,
-  Pause,
-  Play,
-} from "lucide-react";
+import { CloudSun, Loader2, LogIn, MapPin, Pause, Play } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -81,7 +74,6 @@ export function NewsMarketNav({
   const [zip, setZip] = useState(market.zipcode);
   const [zipLoading, setZipLoading] = useState(false);
   const [zipError, setZipError] = useState<string | null>(null);
-  const [zipEditing, setZipEditing] = useState(false);
   const [authUser, setAuthUser] = useState<NewsAccountUser | null>(null);
   const authOpen = useNewsAuthUiStore((s) => s.authOpen);
   const setAuthOpen = useNewsAuthUiStore((s) => s.setAuthOpen);
@@ -94,6 +86,8 @@ export function NewsMarketNav({
   const authButtonRef = useRef<HTMLButtonElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const headerRef = useRef<HTMLElement>(null);
+
+  const hasMarketZip = isValidUsZip(market.zipcode);
 
   useEffect(() => {
     const el = headerRef.current;
@@ -115,14 +109,12 @@ export function NewsMarketNav({
     };
   }, []);
 
-  const locationLabel = [market.zipcode, market.cityState]
-    .filter(Boolean)
-    .join(" ");
+  const cityName = displayCityName(market);
+  const locationLabel = [cityName, market.zipcode].filter(Boolean).join(" ");
 
   useEffect(() => {
     setZip(market.zipcode);
     setZipError(null);
-    setZipEditing(false);
   }, [market.zipcode]);
 
   useEffect(() => {
@@ -147,7 +139,6 @@ export function NewsMarketNav({
     void useNewsRecentsStore.getState().hydrate(market.marketId);
   }, [authUser, market.marketId, pathname]);
 
-  // Load daily briefing on mount / market change (when enabled)
   useEffect(() => {
     const audio = audioRef.current;
     if (audio) {
@@ -160,7 +151,7 @@ export function NewsMarketNav({
     setBriefing(null);
     clearBriefingExtras();
 
-    if (!market.dailyAudioBriefingEnabled) {
+    if (!hasMarketZip || !market.dailyAudioBriefingEnabled) {
       setAudioLoading(false);
       return;
     }
@@ -215,6 +206,7 @@ export function NewsMarketNav({
       }
     };
   }, [
+    hasMarketZip,
     market.zipcode,
     market.site,
     market.marketSlug,
@@ -224,12 +216,12 @@ export function NewsMarketNav({
   ]);
 
   useEffect(() => {
-    const zipKey = market.zipcode.trim().slice(0, 5);
-    if (!isValidUsZip(zipKey)) {
+    if (!hasMarketZip) {
       setWeather(null);
       return;
     }
 
+    const zipKey = market.zipcode.trim().slice(0, 5);
     let cancelled = false;
 
     fetchTodayWeather(zipKey)
@@ -243,7 +235,7 @@ export function NewsMarketNav({
     return () => {
       cancelled = true;
     };
-  }, [market.zipcode]);
+  }, [hasMarketZip, market.zipcode]);
 
   async function toggleSkyFm() {
     if (audioLoading) return;
@@ -269,18 +261,17 @@ export function NewsMarketNav({
     }
   }
 
-  async function onZipSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function applyZip(nextZip: string) {
     setZipError(null);
 
-    const cleaned = zip.trim();
+    const cleaned = nextZip.trim();
     if (!isValidUsZip(cleaned)) {
       setZipError("Enter a valid US ZIP code (e.g. 38103).");
       return;
     }
 
     if (cleaned.slice(0, 5) === market.zipcode.trim().slice(0, 5)) {
-      setZipEditing(false);
+      setZip(market.zipcode);
       return;
     }
 
@@ -294,7 +285,6 @@ export function NewsMarketNav({
       }
 
       setMarket(marketDtoToContext(primary, cleaned));
-      setZipEditing(false);
     } catch (err) {
       const message =
         err instanceof ApiClientError
@@ -305,6 +295,11 @@ export function NewsMarketNav({
     } finally {
       setZipLoading(false);
     }
+  }
+
+  async function onZipSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await applyZip(zip);
   }
 
   function onAuthSuccess(response: AuthResponse) {
@@ -325,11 +320,13 @@ export function NewsMarketNav({
     briefing?.sponsor?.companyName,
     briefing?.sponsor?.name,
   );
-  
+
   const sponsorLink = firstNonEmpty(
     briefing?.sponsor?.targetUrl,
     briefing?.sponsor?.targetLink,
   );
+
+  const showSkyFm = hasMarketZip && market.dailyAudioBriefingEnabled;
 
   return (
     <>
@@ -362,77 +359,93 @@ export function NewsMarketNav({
               </span>
             </Link>
 
-            {zipEditing ? (
-              <form
-                onSubmit={onZipSubmit}
-                className="relative min-w-0 shrink lg:shrink-0"
+            <form
+              onSubmit={onZipSubmit}
+              className="flex min-w-0 items-center"
+            >
+              <label htmlFor="news-market-zip" className="sr-only">
+                Zip code
+              </label>
+              <div
+                className={`relative inline-flex h-9 min-w-0 items-center gap-1.5 rounded-full border bg-white pl-2.5 shadow-sm ${
+                  zipError
+                    ? "border-red-300"
+                    : hasMarketZip
+                      ? "border-slate-200"
+                      : "border-violet-200 shadow-violet-500/10"
+                }`}
               >
-                <label htmlFor="news-market-zip" className="sr-only">
-                  Zip code
-                </label>
+                <MapPin
+                  className="pointer-events-none h-3.5 w-3.5 shrink-0 text-violet-500"
+                  aria-hidden
+                />
+                <span
+                  id="news-market-zip-status"
+                  className={`hidden max-w-[8rem] truncate text-xs font-semibold sm:inline ${
+                    hasMarketZip && cityName
+                      ? "text-violet-600"
+                      : "text-slate-500"
+                  }`}
+                >
+                  {hasMarketZip && cityName ? cityName : "Your city"}
+                </span>
                 <input
                   id="news-market-zip"
                   name="zipcode"
                   type="text"
                   inputMode="numeric"
                   autoComplete="postal-code"
-                  autoFocus
-                  placeholder="ZIP"
+                  placeholder={hasMarketZip ? "ZIP" : "Enter ZIP"}
                   value={zip}
                   onChange={(e) => {
                     setZip(e.target.value.replace(/[^\d-]/g, ""));
                     if (zipError) setZipError(null);
                   }}
                   onBlur={() => {
-                    if (!zipLoading) setZipEditing(false);
+                    if (zipLoading) return;
+                    const cleaned = zip.trim();
+                    if (!cleaned) {
+                      setZip(market.zipcode);
+                      setZipError(null);
+                      return;
+                    }
+                    if (cleaned.slice(0, 5) === market.zipcode.trim().slice(0, 5)) {
+                      setZip(market.zipcode);
+                      setZipError(null);
+                      return;
+                    }
+                    void applyZip(cleaned);
                   }}
                   maxLength={10}
                   disabled={zipLoading}
-                  title={zipError ?? "Change zip code"}
+                  title={zipError ?? (locationLabel || "Enter zip code")}
                   aria-invalid={Boolean(zipError)}
                   aria-describedby={
-                    zipError ? "news-market-zip-error" : undefined
+                    zipError ? "news-market-zip-error" : "news-market-zip-status"
                   }
-                  className={`h-9 w-[6.5rem] rounded-full border bg-white px-3 text-xs font-semibold tracking-wide text-slate-800 outline-none transition focus:ring-2 disabled:opacity-60 lg:w-44 ${
-                    zipError
-                      ? "border-red-300 focus:border-red-400 focus:ring-red-200/60"
-                      : "border-slate-200 focus:border-violet-300 focus:ring-violet-200/60"
+                  className={`h-9 w-[5.5rem] border-0 bg-transparent px-0 pr-3 text-xs font-semibold tracking-wide text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400 focus:ring-0 disabled:opacity-60 lg:w-24 ${
+                    zipLoading ? "pr-7" : ""
                   }`}
                 />
                 {zipLoading ? (
                   <Loader2
-                    className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-violet-500"
+                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-violet-500"
                     aria-hidden
                   />
                 ) : null}
-                {zipError ? (
-                  <p
-                    id="news-market-zip-error"
-                    role="alert"
-                    className="sr-only"
-                  >
-                    {zipError}
-                  </p>
-                ) : null}
-              </form>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setZipEditing(true)}
-                className="inline-flex h-9 shrink-0 items-center gap-1 rounded-full border border-slate-200 bg-white px-2.5 text-xs font-semibold text-slate-800 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:gap-1.5 lg:px-3"
-                title="Change zip code"
-                aria-label={`Market location ${locationLabel}. Click to change zip code.`}
-              >
-                <span className="lg:hidden">{market.zipcode}</span>
-                <span className="hidden lg:inline">{locationLabel}</span>
-                <ChevronDown
-                  className="h-3.5 w-3.5 shrink-0 text-slate-500"
-                  aria-hidden
-                />
-              </button>
-            )}
+              </div>
+              {zipError ? (
+                <p
+                  id="news-market-zip-error"
+                  role="alert"
+                  className="sr-only"
+                >
+                  {zipError}
+                </p>
+              ) : null}
+            </form>
 
-            {market.dailyAudioBriefingEnabled ? (
+            {showSkyFm ? (
               <div className="hidden min-w-0 flex-1 lg:block">
                 <SkyFmBriefing
                   playing={playing}
@@ -446,7 +459,7 @@ export function NewsMarketNav({
             ) : null}
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
-              <TodayWeatherPill weather={weather} />
+              {hasMarketZip ? <TodayWeatherPill weather={weather} /> : null}
 
               {authUser ? (
                 <button
@@ -480,7 +493,7 @@ export function NewsMarketNav({
             </div>
           </div>
 
-          {market.dailyAudioBriefingEnabled ? (
+          {showSkyFm ? (
             <div className="lg:hidden">
               <SkyFmBriefing
                 playing={playing}
@@ -702,6 +715,14 @@ function TodayWeatherPill({ weather }: { weather: TodayWeather | null }) {
       </span>
     </div>
   );
+}
+
+function displayCityName(market: NewsMarketContext): string | null {
+  const city = market.city?.trim();
+  if (city) return city;
+  const name = market.marketName?.trim();
+  if (!name || /^zip\s/i.test(name) || /^local/i.test(name)) return null;
+  return name;
 }
 
 function firstNonEmpty(

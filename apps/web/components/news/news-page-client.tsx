@@ -8,6 +8,7 @@ import { NewsMarketPageClient } from "@/components/news/news-market-page-client"
 import { NewsZipForm } from "@/components/news/news-zip-form";
 import { useNewsHost } from "@/lib/news/news-host-context";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
+import { useProfileStore } from "@/lib/store/profile-store";
 
 const HIGHLIGHTS = [
   {
@@ -33,6 +34,11 @@ const HIGHLIGHTS = [
 export function NewsPageClient() {
   const zipcode = useNewsZipStore((s) => s.zipcode);
   const hasHydrated = useNewsZipStore((s) => s.hasHydrated);
+  const profileId = useProfileStore((s) => s.data.id);
+  const profileZip = useProfileStore((s) => s.data.zipCode);
+  const effectiveZip = (zipcode || (profileId ? profileZip : "") || "")
+    .trim()
+    .slice(0, 5);
 
   useEffect(() => {
     const markReady = () => {
@@ -55,8 +61,8 @@ export function NewsPageClient() {
     );
   }
 
-  if (zipcode) {
-    return <NewsMarketPageClient zipcode={zipcode} />;
+  if (effectiveZip) {
+    return <NewsMarketPageClient zipcode={effectiveZip} />;
   }
 
   return <NewsLanding />;
