@@ -424,35 +424,35 @@ export default function NavigationManagerPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-black p-10 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">
+            <h1 className="text-3xl font-bold text-foreground">
               Navigation Manager - {app?.name}
             </h1>
-            <p className="text-slate-400 mt-2">Manage app navigation order and homepages</p>
+            <p className="text-muted-foreground mt-2">Manage app navigation order and homepages</p>
           </div>
           <Button
             onClick={() => router.push("/admin/apps")}
             variant="outline"
-            className="border-slate-700 bg-slate-800/50 text-slate-200 hover:text-white hover:bg-slate-700/50"
+            className="border-border bg-muted text-foreground hover:text-accent-foreground hover:bg-accent"
           >
             Back to Apps
           </Button>
         </div>
 
-        <div className="border border-slate-700 rounded-xl bg-slate-900/30 p-6 space-y-4">
+        <div className="border border-border rounded-xl bg-muted p-6 space-y-4">
           <div className="mt-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold text-white">
+              <h2 className="text-xl font-semibold text-foreground">
                 Navigation Menus (Tree view, drag to reorder / nest)
               </h2>
               <Button
@@ -460,18 +460,18 @@ export default function NavigationManagerPage() {
                 variant="outline"
                 size="sm"
                 onClick={handleAddRootItem}
-                className="border-slate-700 bg-slate-800/50 text-slate-200 hover:text-white hover:bg-slate-700/50"
+                className="border-border bg-muted text-foreground hover:text-accent-foreground hover:bg-accent"
               >
                 Add Root Menu
               </Button>
             </div>
             {treeData.length === 0 ? (
-              <div className="text-center py-12 text-slate-400">
+              <div className="text-center py-12 text-muted-foreground">
                 <p>No navigation items found</p>
               </div>
             ) : (
               <DndProvider backend={HTML5Backend}>
-                <div className="border border-slate-800 rounded-lg bg-black/40 p-4">
+                <div className="border border-border rounded-lg bg-muted p-4">
                   <Tree
                     tree={treeData}
                     rootId={0}
@@ -504,7 +504,7 @@ export default function NavigationManagerPage() {
                       );
                     }}
                     dragPreviewRender={(monitorProps) => (
-                      <div className="px-3 py-2 rounded bg-slate-800 text-white text-sm shadow-lg">
+                      <div className="px-3 py-2 rounded bg-muted text-foreground text-sm shadow-lg">
                         {monitorProps.item.text}
                       </div>
                     )}
@@ -514,7 +514,7 @@ export default function NavigationManagerPage() {
                     classes={{
                       root: "space-y-1",
                       draggingSource: "opacity-50",
-                      dropTarget: "bg-slate-800/60",
+                      dropTarget: "bg-muted/60",
                       placeholder:
                         "h-2 rounded bg-emerald-500/70 mx-2 my-1 transition-all duration-150",
                     }}
@@ -601,7 +601,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={onToggle}
-          className="w-6 text-xs text-slate-400 hover:text-slate-200"
+          className="w-6 text-xs text-muted-foreground hover:text-foreground"
         >
           {isOpen ? "-" : "+"}
         </button>
@@ -611,7 +611,7 @@ function MenuTreeNodeRow({
       <button
         type="button"
         {...dragHandleProps}
-        className="mr-1 text-slate-500 hover:text-slate-200 cursor-grab"
+        className="mr-1 text-muted-foreground hover:text-foreground cursor-grab"
         title="Drag to reorder / nest"
       >
         <GripVertical className="h-4 w-4" />
@@ -623,7 +623,7 @@ function MenuTreeNodeRow({
         onClick={() => onTypeChange(node.id as number, isAppType ? "page" : "app")}
         className={`p-1.5 rounded border shrink-0 ${isAppType
           ? "bg-emerald-600/20 border-emerald-500/50 text-emerald-400"
-          : "bg-slate-800/50 border-slate-700 text-slate-400 hover:text-slate-200"
+          : "bg-muted border-border text-muted-foreground hover:text-foreground"
           }`}
         title={isAppType ? "App menu (click to switch to Page)" : "Page link (click to switch to App)"}
       >
@@ -640,15 +640,15 @@ function MenuTreeNodeRow({
                 onAppIdChange(node.id as number, val ? Number(val) : null)
               }
             >
-              <SelectTrigger className="bg-black/40 border-slate-700 text-white h-8 text-sm">
+              <SelectTrigger className="bg-muted border-border text-foreground h-8 text-sm">
                 <SelectValue placeholder="Select an app..." />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700">
+              <SelectContent className="bg-card border-border">
                 {allApps.map((a) => (
                   <SelectItem
                     key={a.id}
                     value={String(a.id)}
-                    className="text-slate-200 focus:bg-slate-800 focus:text-white"
+                    className="text-foreground focus:bg-accent focus:text-accent-foreground"
                   >
                     {a.name}
                   </SelectItem>
@@ -659,7 +659,7 @@ function MenuTreeNodeRow({
               value={data?.label ?? node.text ?? ""}
               onChange={(e) => onLabelChange(node.id as number, e.target.value)}
               placeholder="Group label (auto-filled)"
-              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+              className="bg-muted border-border text-foreground h-8 text-sm"
             />
           </>
         ) : (
@@ -669,13 +669,13 @@ function MenuTreeNodeRow({
               value={data?.label ?? node.text ?? ""}
               onChange={(e) => onLabelChange(node.id as number, e.target.value)}
               placeholder="Menu label"
-              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+              className="bg-muted border-border text-foreground h-8 text-sm"
             />
             <Input
               value={data?.path ?? ""}
               onChange={(e) => onPathChange(node.id as number, e.target.value)}
               placeholder="/path"
-              className="bg-black/40 border-slate-700 text-white h-8 text-sm"
+              className="bg-muted border-border text-foreground h-8 text-sm"
             />
           </>
         )}
@@ -686,7 +686,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onMoveUp(node.id as number)}
-          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="p-1 rounded-full border border-border text-muted-foreground hover:bg-accent"
           title="Move up"
         >
           <ArrowUp className="h-3.5 w-3.5" />
@@ -694,7 +694,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onMoveDown(node.id as number)}
-          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="p-1 rounded-full border border-border text-muted-foreground hover:bg-accent"
           title="Move down"
         >
           <ArrowDown className="h-3.5 w-3.5" />
@@ -702,7 +702,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onIndent(node.id as number)}
-          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="p-1 rounded-full border border-border text-muted-foreground hover:bg-accent"
           title="Step in (make child of previous)"
         >
           <CornerDownRight className="h-3.5 w-3.5" />
@@ -710,7 +710,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onOutdent(node.id as number)}
-          className="p-1 rounded-full border border-slate-700 text-slate-300 hover:bg-slate-800"
+          className="p-1 rounded-full border border-border text-muted-foreground hover:bg-accent"
           title="Step out (move up a level)"
         >
           <CornerUpLeft className="h-3.5 w-3.5" />
@@ -721,7 +721,7 @@ function MenuTreeNodeRow({
           onClick={() => onSetHome(node.id as number)}
           className={`p-2 rounded-full border ${data?.isHome
             ? "bg-blue-600 border-blue-500 text-white"
-            : "border-slate-700 text-slate-300 hover:bg-slate-800"
+            : "border-border text-muted-foreground hover:bg-accent"
             }`}
           title="Set as home"
         >

@@ -87,29 +87,29 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-950 text-slate-100 sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
             <Link2 className="h-5 w-5 text-emerald-400" />
             Embed myFORM
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Copy the script snippet and paste it into any website HTML (often just before{" "}
-            <code className="text-slate-400">&lt;/body&gt;</code>). The script mounts the form **inline** (React in a
+            <code className="text-muted-foreground">&lt;/body&gt;</code>). The script mounts the form **inline** (React in a
             shadow root, like AskSKY — no iframe). Height follows content automatically. Use the preview URL to test the
             full-page embed in a new tab.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-sm text-slate-300">
-            <span className="text-slate-500">Form:</span>{" "}
-            <span className="font-medium text-white">{form?.name ?? "—"}</span>
+          <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+            <span className="text-muted-foreground">Form:</span>{" "}
+            <span className="font-medium text-foreground">{form?.name ?? "—"}</span>
             {form?.slug ? (
               <>
                 {" "}
-                <span className="text-slate-600">·</span>{" "}
-                <span className="font-mono text-xs text-slate-400">{form.slug}</span>
+                <span className="text-muted-foreground">·</span>{" "}
+                <span className="font-mono text-xs text-muted-foreground">{form.slug}</span>
               </>
             ) : null}
           </div>
@@ -121,7 +121,7 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor="myform-embed-preview" className="text-slate-200">
+            <Label htmlFor="myform-embed-preview" className="text-foreground">
               Preview URL
             </Label>
             <Textarea
@@ -129,14 +129,14 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
               readOnly
               rows={3}
               value={previewUrl || "—"}
-              className="resize-none border-slate-700 bg-black/40 font-mono text-xs text-slate-200"
+              className="resize-none border-border bg-muted font-mono text-xs text-foreground"
             />
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-slate-600 bg-slate-900 text-slate-100"
+                className="border-border bg-card text-foreground"
                 disabled={!previewUrl}
                 onClick={() => copy(previewUrl, "Preview URL")}
               >
@@ -148,7 +148,7 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 bg-slate-900 text-slate-100"
+                  className="border-border bg-card text-foreground"
                   asChild
                 >
                   <a href={previewUrl} target="_blank" rel="noopener noreferrer">
@@ -161,7 +161,7 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="myform-embed-script" className="text-slate-200">
+            <Label htmlFor="myform-embed-script" className="text-foreground">
               Script embed
             </Label>
             <Textarea
@@ -169,17 +169,17 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
               readOnly
               rows={10}
               value={scriptSnippet || "—"}
-              className="resize-none border-slate-700 bg-black/40 font-mono text-xs text-slate-200"
+              className="resize-none border-border bg-muted font-mono text-xs text-foreground"
             />
-            <p className="text-xs leading-relaxed text-slate-500">
-              Partners should allow this origin in <code className="text-slate-400">script-src</code>. Submissions from
-              this embed are stored with <code className="text-slate-400">source=embed</code>.
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Partners should allow this origin in <code className="text-muted-foreground">script-src</code>. Submissions from
+              this embed are stored with <code className="text-muted-foreground">source=embed</code>.
             </p>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="border-slate-600 bg-slate-900 text-slate-100"
+              className="border-border bg-card text-foreground"
               disabled={!scriptSnippet || !published}
               onClick={() => copy(scriptSnippet, "Script embed")}
             >

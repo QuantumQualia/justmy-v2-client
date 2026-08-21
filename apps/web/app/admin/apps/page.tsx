@@ -61,12 +61,12 @@ export default function AppsPage() {
   const filteredApps = appsList;
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Apps</h1>
-            <p className="text-slate-400 mt-2">Manage applications</p>
+            <h1 className="text-3xl font-bold text-foreground">Apps</h1>
+            <p className="text-muted-foreground mt-2">Manage applications</p>
           </div>
           <Button
             onClick={() => router.push("/admin/apps/create")}
@@ -77,15 +77,15 @@ export default function AppsPage() {
           </Button>
         </div>
 
-        <div className="border border-slate-700 rounded-xl bg-slate-900/30 p-6">
+        <div className="border border-border rounded-xl bg-muted p-6">
           <div className="mb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search apps..."
-                className="pl-10 bg-black/50 border-slate-700 text-white"
+                className="pl-10"
               />
             </div>
           </div>
@@ -98,18 +98,18 @@ export default function AppsPage() {
             <>
               <div className="space-y-2">
                 {filteredApps.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>No apps found</p>
                   </div>
                 ) : (
                   filteredApps.map((app) => (
                     <div
                       key={app.id}
-                      className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-blue-500 transition"
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-white">
+                          <h3 className="font-semibold text-foreground">
                             {app.name}
                           </h3>
                           {!app.isActive && (
@@ -129,7 +129,7 @@ export default function AppsPage() {
                           )}
                         </div>
                         {app.description && (
-                          <p className="text-sm text-slate-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {app.description}
                           </p>
                         )}
@@ -149,7 +149,7 @@ export default function AppsPage() {
                           size="sm"
                           onClick={() => router.push(`/admin/apps/${app.id}/edit`)}
                           title="Edit App"
-                          className="text-slate-300 hover:text-white hover:bg-slate-700/50 border border-transparent hover:border-slate-600"
+                          className="text-muted-foreground hover:text-accent-foreground hover:bg-accent border border-transparent hover:border-border"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>

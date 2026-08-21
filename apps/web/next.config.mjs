@@ -12,6 +12,11 @@ const nextConfig = {
     root: path.join(__dirname, "../.."),
   },
   transpilePackages: ["@workspace/ui", "@workspace/asksky-embed", "@workspace/myform-embed"],
+  // Evict Turbopack's in-memory cache to disk so long `next dev` sessions
+  // do not grow until OOM (this app previously hit ~12GB on 16.2).
+  experimental: {
+    turbopackMemoryEviction: "full",
+  },
   images: {
     remotePatterns: [
       {

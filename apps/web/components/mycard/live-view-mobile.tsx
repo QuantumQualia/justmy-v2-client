@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import type { ProfileData } from "@/lib/store";
 import { MyCardMobileDefaultView } from "@/components/mycard/live-view-mobile-default";
 import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
@@ -15,8 +16,6 @@ export interface MyCardMobileViewProps {
   outerTextClass: string;
   screenBgClass: string;
   avatarOuterClass: string;
-  avatarPlaceholderBgClass: string;
-  avatarPlaceholderTextClass: string;
   nameTextClass: string;
   taglineTextClass: string;
   aboutTitleTextClass: string;
@@ -25,10 +24,6 @@ export interface MyCardMobileViewProps {
   ctaButtonClassName: string;
   registerHref: string;
   footerAdUrl: string;
-  shouldCenterItems: boolean;
-  swiperRef: React.RefObject<HTMLDivElement | null>;
-  contactPrevBtnRef: React.RefObject<HTMLButtonElement | null>;
-  contactNextBtnRef: React.RefObject<HTMLButtonElement | null>;
   contactActions: React.ReactNode;
   isLightMycard: boolean;
 }

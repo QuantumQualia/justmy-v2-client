@@ -170,7 +170,7 @@
   }
 
   /*
-   * /news is a light surface while the app default theme is dark.
+   * /news is a dedicated light surface.
    * Force light color-scheme so the viewport scrollbar matches the page.
    */
   html.news-light-html,

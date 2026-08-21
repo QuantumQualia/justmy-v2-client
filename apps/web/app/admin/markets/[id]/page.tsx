@@ -227,15 +227,15 @@ export default function EditMarketPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black p-10">
+      <div className="min-h-screen bg-background p-10 text-foreground">
         <div className="max-w-5xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Edit Market</h1>
-            <p className="text-slate-400">Market ID: {marketId}</p>
+            <h1 className="text-3xl font-bold text-foreground">Edit Market</h1>
+            <p className="text-muted-foreground">Market ID: {marketId}</p>
           </div>
-          <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+          <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
             <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Loading market data...
               </div>
@@ -247,11 +247,11 @@ export default function EditMarketPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Edit Market</h1>
-          <p className="text-slate-400">Market ID: {marketId}</p>
+          <h1 className="text-3xl font-bold text-foreground">Edit Market</h1>
+          <p className="text-muted-foreground">Market ID: {marketId}</p>
         </div>
 
         {error && (
@@ -260,11 +260,11 @@ export default function EditMarketPage() {
           </div>
         )}
 
-        <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Link href="/admin/markets">
-                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground hover:bg-accent">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back
                 </Button>
@@ -288,7 +288,7 @@ export default function EditMarketPage() {
               </Button>
             </div>
 
-            <div className="border-b border-slate-800">
+            <div className="border-b border-border">
               <nav className="flex gap-4">
                 {tabs.map((tab) => (
                   <button
@@ -297,7 +297,7 @@ export default function EditMarketPage() {
                     className={`px-4 py-2 border-b-2 transition-colors cursor-pointer ${
                       activeTab === tab.id
                         ? "border-emerald-500 text-emerald-500 font-medium"
-                        : "border-transparent text-slate-400 hover:text-white"
+                        : "border-transparent text-muted-foreground hover:text-accent-foreground"
                     }`}
                   >
                     {tab.label}

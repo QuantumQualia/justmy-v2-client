@@ -12,6 +12,9 @@ import { cn } from "@workspace/ui/lib/utils"
 import { Providers } from "@/components/providers"
 import { Navbar } from "@/components/common/navbar/navbar"
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
+import { NewsStandChrome } from "@/components/news/news-stand-chrome"
+import { isNewsHost } from "@/lib/hosts"
+import { NewsHostProvider } from "@/lib/news/news-host-context"
 
 // Configure fonts with fallback to handle network issues during build
 const fontSans = Geist({
@@ -82,11 +85,21 @@ export default async function RootLayout({
 
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
+  const newsHost = isNewsHost(headerList.get("host"))
+  const embedPath = pathname.startsWith("/embed/")
   const hideSiteChrome =
-    pathname.startsWith("/embed/") || pathname === "/news" || pathname.startsWith("/news/")
+    embedPath ||
+    newsHost ||
+    pathname === "/news" ||
+    pathname.startsWith("/news/") ||
+    pathname === "/biz-os" ||
+    pathname.startsWith("/biz-os/") ||
+    pathname === "/verify-email" ||
+    pathname.startsWith("/verify-email/")
   const embedAskSky = pathname.startsWith("/embed/asksky")
   const embedMyForm = pathname.startsWith("/embed/myform")
   const embedTransparentHost = embedAskSky || embedMyForm
+  const showNewsStandChrome = newsHost && !embedPath
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
@@ -121,32 +134,35 @@ export default async function RootLayout({
         )}
       >
         <Providers>
-          <a
-            href="#site-main"
-            className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
-          >
-            Skip to content
-          </a>
-          {!hideSiteChrome ? (
-            <>
-              <Navbar
-                initialIsAuthed={initialIsAuthed}
-                initialMycardPublicNav={initialMycardPublicNav}
-                initialMycardRegisterType={initialMycardRegisterType}
-                initialMycardProfileSlug={initialMycardProfileSlug}
-              />
-              <SearchResultsPanel />
-            </>
-          ) : null}
-          <div
-            id="site-main"
-            className={cn(
-              hideSiteChrome ? cn("min-w-0", embedMyForm ? "min-h-0" : "min-h-screen") : "min-h-0",
-              embedTransparentHost && "bg-transparent",
-            )}
-          >
-            {children}
-          </div>
+          <NewsHostProvider value={newsHost}>
+            <a
+              href="#site-main"
+              className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
+            >
+              Skip to content
+            </a>
+            {showNewsStandChrome ? <NewsStandChrome /> : null}
+            {!hideSiteChrome ? (
+              <>
+                <Navbar
+                  initialIsAuthed={initialIsAuthed}
+                  initialMycardPublicNav={initialMycardPublicNav}
+                  initialMycardRegisterType={initialMycardRegisterType}
+                  initialMycardProfileSlug={initialMycardProfileSlug}
+                />
+                <SearchResultsPanel />
+              </>
+            ) : null}
+            <div
+              id="site-main"
+              className={cn(
+                hideSiteChrome ? cn("min-w-0", embedMyForm ? "min-h-0" : "min-h-screen") : "min-h-0",
+                embedTransparentHost && "bg-transparent",
+              )}
+            >
+              {children}
+            </div>
+          </NewsHostProvider>
         </Providers>
       </body>
     </html>

@@ -95,9 +95,9 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
   };
 
   return (
-    <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700 min-h-[200px] flex flex-col min-w-[480px] w-full max-w-full overflow-hidden">
+    <div className="bg-muted rounded-lg p-3 border border-border min-h-[200px] flex flex-col min-w-[480px] w-full max-w-full overflow-hidden">
       {/* Column Header */}
-      <div className="flex items-center justify-between mb-3 pb-2 border-b border-slate-700">
+      <div className="flex items-center justify-between mb-3 pb-2 border-b border-border">
         <input
           type="text"
           value={column.name}
@@ -106,7 +106,7 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
             updatedColumns[colIndex] = { ...column, name: e.target.value };
             onUpdateLayout({ ...block.layout, columns: updatedColumns });
           }}
-          className="flex-1 bg-black/50 border border-slate-700 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <Button
           variant="ghost"
@@ -159,14 +159,14 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
             </div>
           ))
         ) : (
-          <div className="flex items-center justify-center h-24 border-2 border-dashed border-slate-700 rounded text-slate-500 text-xs text-center">
+          <div className="flex items-center justify-center h-24 border-2 border-dashed border-border rounded text-muted-foreground text-xs text-center">
             Empty column
           </div>
         )}
       </div>
 
       {/* Add Block Button */}
-      <div className="mt-3 pt-2 border-t border-slate-700">
+      <div className="mt-3 pt-2 border-t border-border">
         <BlockSelector onSelect={handleAddBlock} size="sm" className="w-full" />
       </div>
     </div>
@@ -229,7 +229,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
   return (
     <div className="space-y-4">
       <div>
-        <Label className="text-slate-300 mb-2 block">Layout Type</Label>
+        <Label className="text-muted-foreground mb-2 block">Layout Type</Label>
         <select
           value={block.layout?.type || "container"}
           onChange={(e) => {
@@ -238,7 +238,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
               type: e.target.value as "container" | "full-width" | "boxed",
             });
           }}
-          className="w-full bg-black/50 border border-slate-700 rounded px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="container">Container</option>
           <option value="full-width">Full Width</option>
@@ -247,9 +247,9 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
       </div>
 
       {/* Grid Layout Configuration */}
-      <div className="border-t border-slate-700 pt-4">
+      <div className="border-t border-border pt-4">
         <div className="flex items-center justify-between mb-3">
-          <Label className="text-slate-300">Grid Layout</Label>
+          <Label className="text-muted-foreground">Grid Layout</Label>
           <div className="flex gap-1">
             {breakpoints.map((bp) => (
               <button
@@ -258,7 +258,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
                 className={`p-1.5 rounded text-xs transition-colors ${
                   activeBreakpoint === bp.key
                     ? "bg-blue-600 text-white"
-                    : "bg-slate-700 text-slate-400 hover:bg-slate-600 hover:text-white"
+                    : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
                 title={bp.label}
               >
@@ -269,7 +269,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
         </div>
         <div className="space-y-3">
           <div>
-            <Label className="text-xs text-slate-500">Columns ({activeBreakpoint})</Label>
+            <Label className="text-xs text-muted-foreground">Columns ({activeBreakpoint})</Label>
             <input
               type="number"
               min="1"
@@ -312,17 +312,17 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
                   columns: newColumns,
                 });
               }}
-              className="w-full mt-1 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <Label className="text-xs text-slate-500">Gap ({activeBreakpoint})</Label>
+            <Label className="text-xs text-muted-foreground">Gap ({activeBreakpoint})</Label>
             <input
               type="text"
               value={getGridValue("gap", activeBreakpoint).toString()}
               onChange={(e) => updateGridLayout("gap", e.target.value, activeBreakpoint)}
               placeholder="16px"
-              className="w-full mt-1 bg-black/50 border border-slate-700 rounded px-2 py-1.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
@@ -330,8 +330,8 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
 
       {/* Column Management - Horizontal Grid View */}
       {block.layout?.columns && block.layout.columns.length > 0 && (
-        <div className="border-t border-slate-700 pt-4 w-full max-w-full">
-          <Label className="text-slate-300 mb-3 block">Columns</Label>
+        <div className="border-t border-border pt-4 w-full max-w-full">
+          <Label className="text-muted-foreground mb-3 block">Columns</Label>
           <div className="w-full max-w-full overflow-x-auto pb-2">
             <div
               className="grid mb-4"

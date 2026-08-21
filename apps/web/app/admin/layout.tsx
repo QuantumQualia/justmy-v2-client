@@ -14,7 +14,8 @@ import {
   ChevronRight,
   Newspaper,
   Monitor,
-  Grid3x3
+  Grid3x3,
+  Briefcase,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -43,6 +44,11 @@ const navItems = [
     title: "Apps",
     href: "/admin/apps",
     icon: Grid3x3,
+  },
+  {
+    title: "Biz OS queue",
+    href: "/admin/biz-os/queue",
+    icon: Briefcase,
   },
 ];
 
@@ -82,16 +88,16 @@ export default function AdminLayout({
   }, [isCmsActive, isCmsExpanded]);
 
   return (
-    <div className="min-h-screen bg-black">
+    <div className="min-h-screen bg-background">
       {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-slate-800 bg-slate-950/50 backdrop-blur-sm">
+      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar backdrop-blur-sm">
         <div className="flex h-full flex-col">
           {/* Logo/Header */}
-          <div className="border-b border-slate-800 p-6">
-            <h1 className="text-xl font-bold text-white">
+          <div className="border-b border-border p-6">
+            <h1 className="text-xl font-bold text-foreground">
               Admin Panel
             </h1>
-            <p className="text-xs text-slate-400 mt-1">Management Panel</p>
+            <p className="text-xs text-muted-foreground mt-1">Management Panel</p>
           </div>
 
           {/* Navigation */}
@@ -108,7 +114,7 @@ export default function AdminLayout({
                     "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                     isActive
                       ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                      : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                   )}
                 >
                   <Icon className="h-4 w-4" />
@@ -125,7 +131,7 @@ export default function AdminLayout({
                   "flex items-center justify-between w-full rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                   isCmsActive
                     ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                    : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
+                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -141,7 +147,7 @@ export default function AdminLayout({
 
               {/* CMS Submenu */}
               {isCmsExpanded && (
-                <div className="ml-4 mt-1 space-y-1 border-l border-slate-700 pl-2">
+                <div className="ml-4 mt-1 space-y-1 border-l border-border pl-2">
                   {cmsSubItems.map((item) => {
                     const Icon = item.icon;
                     const isDashboard = item.href === "/admin/cms";
@@ -157,7 +163,7 @@ export default function AdminLayout({
                           "flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors",
                           isActive
                             ? "bg-emerald-500/10 text-emerald-400"
-                            : "text-slate-500 hover:bg-slate-800/50 hover:text-slate-300"
+                            : "text-muted-foreground hover:bg-accent hover:text-foreground"
                         )}
                       >
                         <Icon className="h-3.5 w-3.5" />
@@ -171,10 +177,10 @@ export default function AdminLayout({
           </nav>
 
           {/* Footer */}
-          <div className="border-t border-slate-800 p-4">
+          <div className="border-t border-border p-4">
             <button
               onClick={() => router.push("/dashboard")}
-              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 hover:bg-slate-800/50 hover:text-white transition-colors"
+              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
             >
               <Settings className="h-4 w-4" />
               Back to Dashboard

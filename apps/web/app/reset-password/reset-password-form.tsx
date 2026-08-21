@@ -59,19 +59,19 @@ export default function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <Card className="w-full max-w-md bg-slate-900 border-slate-800 text-white shadow-2xl">
+      <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="text-center">
           <div className="mx-auto h-12 w-12 bg-red-600/20 rounded-full flex items-center justify-center mb-4">
             <LockKeyhole className="h-6 w-6 text-red-400" />
           </div>
           <CardTitle className="text-2xl font-bold">Invalid Reset Link</CardTitle>
-          <p className="text-slate-400 text-sm">
+          <p className="text-muted-foreground text-sm">
             This password reset link is invalid or has expired.
           </p>
         </CardHeader>
         <CardContent className="text-center space-y-4">
           <Link href="/forgot-password">
-            <Button className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold h-12">
+            <Button className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12">
               Request New Link
             </Button>
           </Link>
@@ -88,13 +88,13 @@ export default function ResetPasswordForm() {
   }
 
   return (
-    <Card className="w-full max-w-md bg-slate-900 border-slate-800 text-white shadow-2xl">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
           <LockKeyhole className="h-6 w-6 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold">Reset Password</CardTitle>
-        <p className="text-slate-400 text-sm">Enter your new password below.</p>
+        <p className="text-muted-foreground text-sm">Enter your new password below.</p>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -110,11 +110,10 @@ export default function ResetPasswordForm() {
               type="password"
               required
               minLength={MIN_PASSWORD_LENGTH}
-              className="bg-black/50 border-slate-700"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <p className="text-[10px] text-slate-500">Must be at least {MIN_PASSWORD_LENGTH} characters.</p>
+            <p className="text-[10px] text-muted-foreground">Must be at least {MIN_PASSWORD_LENGTH} characters.</p>
           </div>
 
           <div className="space-y-2">
@@ -123,7 +122,6 @@ export default function ResetPasswordForm() {
               type="password"
               required
               minLength={MIN_PASSWORD_LENGTH}
-              className="bg-black/50 border-slate-700"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
@@ -131,13 +129,13 @@ export default function ResetPasswordForm() {
 
           <Button
             type="submit"
-            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold mt-4 h-12 text-lg"
+            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg"
             disabled={loading}
           >
             {loading ? "Resetting..." : "Reset Password"}
           </Button>
 
-          <div className="text-center text-sm text-slate-400 pt-4 border-t border-slate-800">
+          <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
             <Link
               href="/login"
               className="inline-flex items-center gap-2 text-emerald-500 hover:text-emerald-400 font-medium"

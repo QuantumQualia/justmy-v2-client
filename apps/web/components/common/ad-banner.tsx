@@ -53,7 +53,7 @@ export function AdBanner({
   const wrappedImage = bannerLink ? (
     <Link
       href={bannerLink}
-      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded-lg rounded-br-none"
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg rounded-br-none"
       aria-label={imageAlt || "Open banner link"}
     >
       {imageArea}
@@ -68,14 +68,14 @@ export function AdBanner({
 
       <div className="flex flex-wrap items-center justify-end gap-2 pl-4 py-1.5 text-[11px] sm:text-xs md:text-[13px] md:pl-6">
         {profileSlug && (
-          <Link href={`/${profileSlug}`} className="text-white/80">
-            <span className="text-white/80">@{profileSlug}</span>
+          <Link href={`/${profileSlug}`} className="text-muted-foreground">
+            <span className="text-muted-foreground">@{profileSlug}</span>
           </Link>
         )}
         <nav className="flex items-center sm:gap-2 gap-1" aria-label="Banner links">
           {hotlinks.map((link, i) => (
             <React.Fragment key={link.href}>
-              {i > 0 && <span className="text-white/50" aria-hidden>|</span>}
+              {i > 0 && <span className="text-muted-foreground" aria-hidden>|</span>}
               <Link
                 href={link.href}
                 className="text-purple-300 underline underline-offset-2 hover:text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400/50"

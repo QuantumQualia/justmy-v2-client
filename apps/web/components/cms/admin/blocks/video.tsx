@@ -25,35 +25,35 @@ export function VideoBlockEditor({ block, onUpdate }: VideoBlockEditorProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-slate-300">Video URL</Label>
+        <Label className="text-muted-foreground">Video URL</Label>
         <Input
           value={videoUrl ?? ""}
           onChange={(e) => handleFieldChange("videoUrl", e.target.value)}
           placeholder="https://www.youtube.com/watch?v=..."
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Supports embeddable URLs from YouTube, Vimeo, or direct MP4 links.
         </p>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Title (optional)</Label>
+        <Label className="text-muted-foreground">Title (optional)</Label>
         <Input
           value={title ?? ""}
           onChange={(e) => handleFieldChange("title", e.target.value)}
           placeholder="Short title displayed above the video"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Description (optional)</Label>
+        <Label className="text-muted-foreground">Description (optional)</Label>
         <Input
           value={description ?? ""}
           onChange={(e) => handleFieldChange("description", e.target.value)}
           placeholder="Context or summary shown below the title"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
     </div>

@@ -190,7 +190,7 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
     <div className="relative w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="relative flex items-center gap-2 md:gap-3 rounded-full border border-emerald-500/30 bg-slate-900/60 px-2 md:px-4 py-1.5 md:py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
+        className="relative flex items-center gap-2 md:gap-3 rounded-full border border-emerald-500/30 bg-card/80 px-2 md:px-4 py-1.5 md:py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
       >
         {/* Leading icon */}
         <div className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 flex-shrink-0">
@@ -217,9 +217,9 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
                     : "Search profiles, markets, content…"
               }
               className={cn(
-                "h-7 md:h-9 border-0 px-0 text-xs md:text-sm text-slate-100 dark:bg-transparent",
-                "placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0",
-                businessSearchMode && showGhostPhrase && "placeholder:text-slate-400/60"
+                "h-7 md:h-9 border-0 px-0 text-xs md:text-sm text-foreground bg-transparent",
+                "placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0",
+                businessSearchMode && showGhostPhrase && "placeholder:text-muted-foreground/60"
               )}
             />
             {/* Ghost phrase overlay animation */}
@@ -228,7 +228,7 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
                 className="absolute inset-0 flex items-center pointer-events-none overflow-hidden"
                 key={ghostPhraseIndex}
               >
-                <span className="text-xs md:text-sm text-slate-400/60 animate-in fade-in duration-500 whitespace-nowrap truncate">
+                <span className="text-xs md:text-sm text-muted-foreground/60 animate-in fade-in duration-500 whitespace-nowrap truncate">
                   {currentGhostPhrase}
                 </span>
               </div>

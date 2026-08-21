@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function ChangePasswordPage() {
   return (
-    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white flex items-center justify-center p-4">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground flex items-center justify-center p-4">
       <ChangePasswordForm />
     </div>
   );

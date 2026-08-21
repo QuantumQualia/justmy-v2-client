@@ -118,15 +118,15 @@ export default function EditUserPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black p-10">
+      <div className="min-h-screen bg-background p-10 text-foreground">
         <div className="max-w-5xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-white">Edit User</h1>
-            <p className="text-slate-400">User ID: {userId}</p>
+            <h1 className="text-3xl font-bold text-foreground">Edit User</h1>
+            <p className="text-muted-foreground">User ID: {userId}</p>
           </div>
-          <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+          <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
             <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-2 text-slate-400">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
                 Loading user data...
               </div>
@@ -138,11 +138,11 @@ export default function EditUserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Edit User</h1>
-          <p className="text-slate-400">User ID: {userId}</p>
+          <h1 className="text-3xl font-bold text-foreground">Edit User</h1>
+          <p className="text-muted-foreground">User ID: {userId}</p>
         </div>
 
         {error && (
@@ -151,11 +151,11 @@ export default function EditUserPage() {
           </div>
         )}
 
-        <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Link href="/admin/users">
-                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground hover:bg-accent">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back
                 </Button>

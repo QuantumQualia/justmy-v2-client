@@ -120,10 +120,10 @@ export function MyFormSubmissionsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-950 text-white sm:max-w-3xl">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{selected ? `Submission #${selected.id}` : titleBase}</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             {selected
               ? "Full field values and metadata."
               : "Search across answers, source, origin, referer, and user id. Paginated list from your profile API."}
@@ -141,7 +141,7 @@ export function MyFormSubmissionsDialog({
           <div className="space-y-4">
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
               <div className="relative min-w-0 flex-1 sm:max-w-md">
-                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   value={qDraft}
                   onChange={(e) => setQDraft(e.target.value)}
@@ -152,14 +152,14 @@ export function MyFormSubmissionsDialog({
                     }
                   }}
                   placeholder="Search submissions…"
-                  className="border-slate-700 bg-slate-900 pl-9 text-white placeholder:text-slate-500"
+                  className="border-border bg-card pl-9 text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
                   size="sm"
-                  className="bg-slate-800 text-white hover:bg-slate-700"
+                  className="bg-muted text-foreground hover:bg-accent"
                   onClick={() => setAppliedQ(qDraft.trim())}
                 >
                   Search
@@ -168,7 +168,7 @@ export function MyFormSubmissionsDialog({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-slate-400 hover:text-white"
+                  className="text-muted-foreground hover:text-accent-foreground"
                   disabled={!appliedQ && !qDraft}
                   onClick={() => {
                     setQDraft("");
@@ -187,13 +187,13 @@ export function MyFormSubmissionsDialog({
             ) : (
               <>
                 {submissionsQuery.isFetching ? (
-                  <div className="overflow-hidden rounded-lg border border-slate-800">
+                  <div className="overflow-hidden rounded-lg border border-border">
                     <FormSubmissionsListLoading />
                   </div>
                 ) : (
-                  <div className="overflow-x-auto rounded-lg border border-slate-800">
+                  <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="w-full min-w-[480px] text-left text-sm">
-                      <thead className="border-b border-slate-800 bg-slate-900/80 text-xs uppercase text-slate-400">
+                      <thead className="border-b border-border bg-card text-xs uppercase text-muted-foreground">
                         <tr>
                           <th className="px-3 py-2">Submitted</th>
                           <th className="max-w-[200px] px-3 py-2">{col0?.label ?? "Field 1"}</th>
@@ -203,7 +203,7 @@ export function MyFormSubmissionsDialog({
                       <tbody>
                         {rows.length === 0 ? (
                           <tr>
-                            <td colSpan={3} className="px-3 py-8 text-center text-slate-500">
+                            <td colSpan={3} className="px-3 py-8 text-center text-muted-foreground">
                               {appliedQ.trim()
                                 ? "No submissions match your search."
                                 : "No submissions yet."}
@@ -216,16 +216,16 @@ export function MyFormSubmissionsDialog({
                             return (
                               <tr
                                 key={r.id}
-                                className="cursor-pointer border-b border-slate-800/80 hover:bg-slate-900/60"
+                                className="cursor-pointer border-b border-border/80 hover:bg-card"
                                 onClick={() => setSelected(r)}
                               >
-                                <td className="whitespace-nowrap px-3 py-2 text-slate-300">
+                                <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
                                   {new Date(r.createdAt).toLocaleString()}
                                 </td>
-                                <td className="max-w-[220px] truncate px-3 py-2 text-slate-200" title={v0}>
+                                <td className="max-w-[220px] truncate px-3 py-2 text-foreground" title={v0}>
                                   {v0 || "—"}
                                 </td>
-                                <td className="max-w-[220px] truncate px-3 py-2 text-slate-200" title={v1}>
+                                <td className="max-w-[220px] truncate px-3 py-2 text-foreground" title={v1}>
                                   {v1 || "—"}
                                 </td>
                               </tr>
@@ -237,7 +237,7 @@ export function MyFormSubmissionsDialog({
                   </div>
                 )}
 
-                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-800/80 pt-3 text-xs text-slate-500">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/80 pt-3 text-xs text-muted-foreground">
                   <span>
                     {total === 0
                       ? "No matches"
@@ -248,7 +248,7 @@ export function MyFormSubmissionsDialog({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-8 border-slate-700 bg-slate-900 px-2"
+                      className="h-8 border-border bg-card px-2"
                       disabled={!canPrev || submissionsQuery.isFetching}
                       onClick={() => setSkip((s) => Math.max(0, s - PAGE_SIZE))}
                     >
@@ -259,7 +259,7 @@ export function MyFormSubmissionsDialog({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-8 border-slate-700 bg-slate-900 px-2"
+                      className="h-8 border-border bg-card px-2"
                       disabled={!canNext || submissionsQuery.isFetching}
                       onClick={() => setSkip((s) => s + PAGE_SIZE)}
                     >

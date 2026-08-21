@@ -12,12 +12,12 @@ interface LocalDealsBlockEditorProps {
 export function LocalDealsBlockEditor({}: LocalDealsBlockEditorProps) {
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card>
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Renders the Daily Drop Local Deals grid (The Hook) for the current user&apos;s city.
           </p>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             No configuration needed. Data comes from the ai/daily-drop/deals API. When unavailable,
             a simple &quot;Coming Soon&quot; placeholder will be shown.
           </CardDescription>

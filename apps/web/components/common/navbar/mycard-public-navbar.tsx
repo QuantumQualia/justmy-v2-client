@@ -136,7 +136,8 @@ export function MycardPublicNavbar({
         onClick={() => setMenuOpen(true)}
         aria-label="Open navigation menu"
         className={cn(
-          "fixed z-50 flex items-center gap-1 px-3 py-2",
+          "fixed z-50 items-center gap-1 px-3 py-2",
+          "hidden lg:flex",
           "top-[max(1rem,env(safe-area-inset-top))]",
           "right-[max(1rem,env(safe-area-inset-right))]",
           "justmy-corners-lg border border-white/70 bg-white/92 shadow-lg cursor-pointer",

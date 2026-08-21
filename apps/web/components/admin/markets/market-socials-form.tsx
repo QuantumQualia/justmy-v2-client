@@ -46,72 +46,72 @@ export function MarketSocialsForm({ initialData, onChange }: MarketSocialsFormPr
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 text-white">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-white">Social Media</CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardTitle className="text-foreground">Social Media</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Add social media links for this market
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="facebookUrl" className="text-slate-300">Facebook URL</Label>
+            <Label htmlFor="facebookUrl" className="text-muted-foreground">Facebook URL</Label>
             <Input
               id="facebookUrl"
               type="url"
               value={formData.facebookUrl}
               onChange={(e) => handleChange("facebookUrl", e.target.value)}
               placeholder="https://facebook.com/..."
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="instagramUrl" className="text-slate-300">Instagram URL</Label>
+            <Label htmlFor="instagramUrl" className="text-muted-foreground">Instagram URL</Label>
             <Input
               id="instagramUrl"
               type="url"
               value={formData.instagramUrl}
               onChange={(e) => handleChange("instagramUrl", e.target.value)}
               placeholder="https://instagram.com/..."
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="twitterUrl" className="text-slate-300">X (Twitter) URL</Label>
+            <Label htmlFor="twitterUrl" className="text-muted-foreground">X (Twitter) URL</Label>
             <Input
               id="twitterUrl"
               type="url"
               value={formData.twitterUrl}
               onChange={(e) => handleChange("twitterUrl", e.target.value)}
               placeholder="https://x.com/..."
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="youtubeUrl" className="text-slate-300">YouTube URL</Label>
+            <Label htmlFor="youtubeUrl" className="text-muted-foreground">YouTube URL</Label>
             <Input
               id="youtubeUrl"
               type="url"
               value={formData.youtubeUrl}
               onChange={(e) => handleChange("youtubeUrl", e.target.value)}
               placeholder="https://youtube.com/..."
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="linkedinUrl" className="text-slate-300">LinkedIn URL</Label>
+            <Label htmlFor="linkedinUrl" className="text-muted-foreground">LinkedIn URL</Label>
             <Input
               id="linkedinUrl"
               type="url"
               value={formData.linkedinUrl}
               onChange={(e) => handleChange("linkedinUrl", e.target.value)}
               placeholder="https://linkedin.com/..."
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
           </div>
         </div>

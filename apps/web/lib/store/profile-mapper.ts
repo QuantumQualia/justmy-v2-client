@@ -202,6 +202,10 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     isVerified: apiProfile.isVerified === true,
     referralCode: apiProfile.referralCode ?? undefined,
     allowsSubProfiles: apiProfile.allowsSubProfiles === true,
+    zipCode: (apiProfile as any).zipCode,
+    googleStarRating: (apiProfile as any).googleStarRating ?? null,
+    googleRatingCount: (apiProfile as any).googleRatingCount ?? null,
+    googlePlaceId: (apiProfile as any).googlePlaceId ?? null,
   };
 }
 

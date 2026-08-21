@@ -35,13 +35,13 @@ export default function ForgotPasswordForm() {
   };
 
   return (
-    <Card className="w-full max-w-md bg-slate-900 border-slate-800 text-white shadow-2xl">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
           <KeyRound className="h-6 w-6 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
-        <p className="text-slate-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           Enter your email and we&apos;ll send you a link to reset your password.
         </p>
       </CardHeader>
@@ -51,8 +51,8 @@ export default function ForgotPasswordForm() {
             <div className="mx-auto h-12 w-12 bg-emerald-600/20 rounded-full flex items-center justify-center">
               <CheckCircle2 className="h-6 w-6 text-emerald-500" />
             </div>
-            <p className="text-slate-300 text-sm">
-              If an account exists for <span className="text-white font-medium">{email}</span>,
+            <p className="text-muted-foreground text-sm">
+              If an account exists for <span className="text-foreground font-medium">{email}</span>,
               you will receive a password reset link shortly.
             </p>
             <Link
@@ -76,7 +76,6 @@ export default function ForgotPasswordForm() {
               <Input
                 type="email"
                 required
-                className="bg-black/50 border-slate-700"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -84,13 +83,13 @@ export default function ForgotPasswordForm() {
 
             <Button
               type="submit"
-              className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold mt-4 h-12 text-lg"
+              className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg"
               disabled={loading}
             >
               {loading ? "Sending..." : "Send Reset Link"}
             </Button>
 
-            <div className="text-center text-sm text-slate-400 pt-4 border-t border-slate-800">
+            <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
               <Link
                 href="/login"
                 className="inline-flex items-center gap-2 text-emerald-500 hover:text-emerald-400 font-medium"

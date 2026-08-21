@@ -113,7 +113,7 @@ export function MarketList() {
         accessorKey: "id",
         header: "ID",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-slate-500">#{row.original.id}</span>
+          <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>
         ),
       },
       {
@@ -122,7 +122,7 @@ export function MarketList() {
         cell: ({ row }) => {
           const market = row.original
           return (
-            <span className="font-medium text-lg text-white">
+            <span className="font-medium text-lg text-foreground">
               {market.city || market.name || market.siteTitle}
             </span>
           )
@@ -132,7 +132,7 @@ export function MarketList() {
         accessorKey: "state",
         header: "State",
         cell: ({ row }) => (
-          <span className="text-slate-400">{row.original.state || "-"}</span>
+          <span className="text-muted-foreground">{row.original.state || "-"}</span>
         ),
       },
       {
@@ -141,7 +141,7 @@ export function MarketList() {
         cell: ({ row }) => {
           const parent = row.original.parent
           return (
-            <span className="text-slate-400">
+            <span className="text-muted-foreground">
               {parent ? (
                 parent.city || parent.name || parent.siteTitle || `Market #${parent.id}`
               ) : (
@@ -156,7 +156,7 @@ export function MarketList() {
         header: () => <div className="text-right">Zip Count</div>,
         cell: ({ row }) => (
           <div className="text-right">
-            <Badge variant="secondary" className="bg-slate-800 text-slate-300">
+            <Badge variant="secondary" className="bg-muted text-muted-foreground">
               {row.original.zipCount || 0}
             </Badge>
           </div>
@@ -173,7 +173,7 @@ export function MarketList() {
               className={
                 displayStatus === "Active"
                   ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50"
-                  : "text-slate-400 border-slate-700"
+                  : "text-muted-foreground border-border"
               }
             >
               {displayStatus}
@@ -192,7 +192,7 @@ export function MarketList() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 w-8 p-0 text-blue-400 hover:text-white hover:bg-blue-600"
+                  className="h-8 w-8 p-0 text-blue-400 hover:text-accent-foreground hover:bg-blue-600"
                 >
                   <Edit className="h-4 w-4" />
                 </Button>
@@ -215,12 +215,12 @@ export function MarketList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-slate-900 p-4 rounded-lg border border-slate-800">
+      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search markets..."
-            className="pl-8 bg-black/50 border-slate-700 text-white"
+            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

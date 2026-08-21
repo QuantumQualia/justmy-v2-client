@@ -135,15 +135,15 @@ export function ProfileSpotlightBlockEditor({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-lg border border-border bg-card p-3">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-slate-100">Block mode</p>
-          <p className="text-xs text-slate-400">
+          <p className="text-sm font-medium text-foreground">Block mode</p>
+          <p className="text-xs text-muted-foreground">
             Toggle between a single profile spotlight hero or a multi-profile feed strip.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-slate-400">Feed</span>
+          <span className="text-xs text-muted-foreground">Feed</span>
           <Switch
             id="profile-mode-toggle"
             checked={isSpotlight}
@@ -151,35 +151,35 @@ export function ProfileSpotlightBlockEditor({
               updateBlock({ mode: value ? "spotlight" : "feed" })
             }
           />
-          <Label htmlFor="profile-mode-toggle" className="text-slate-200 text-sm">
+          <Label htmlFor="profile-mode-toggle" className="text-foreground text-sm">
             Spotlight
           </Label>
         </div>
       </div>
       <div className="space-y-2">
-        <Label className="text-slate-300">Section heading</Label>
+        <Label className="text-muted-foreground">Section heading</Label>
         <Input
           value={heading}
           onChange={(e) => updateBlock({ heading: e.target.value })}
           placeholder="Learn more about JustMy: Your OS is Here!"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Subheading (optional)</Label>
+        <Label className="text-muted-foreground">Subheading (optional)</Label>
         <Input
           value={subheading}
           onChange={(e) => updateBlock({ subheading: e.target.value })}
           placeholder="Spotlight a primary profile and feature additional profiles from this market."
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {isSpotlight && (
           <div className="space-y-3">
-            <Label className="text-slate-300">Primary profile (spotlight)</Label>
+            <Label className="text-muted-foreground">Primary profile (spotlight)</Label>
             <Select
               value={primaryProfileSlug || "none"}
               onValueChange={(value) => {
@@ -187,25 +187,25 @@ export function ProfileSpotlightBlockEditor({
                 setSearchQuery("");
               }}
             >
-              <SelectTrigger className="bg-black/50 border-slate-700 text-white">
+              <SelectTrigger className="bg-muted border-border text-foreground">
                 <SelectValue placeholder="Search and select a primary profile">
                   {primaryProfile
                     ? primaryProfile.name || primaryProfile.slug
                     : primaryProfileSlug || "None selected"}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700 text-white">
-                <div className="p-2 border-b border-slate-800">
+              <SelectContent className="bg-card border-border text-foreground">
+                <div className="p-2 border-b border-border">
                   <Input
                     placeholder="Search profiles…"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-sm"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-sm"
                     onKeyDown={(e) => e.stopPropagation()}
                     onClick={(e) => e.stopPropagation()}
                   />
                   {loadingProfiles && (
-                    <div className="mt-2 flex items-center gap-2 text-xs text-slate-400">
+                    <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Searching profiles…
                     </div>
@@ -214,12 +214,12 @@ export function ProfileSpotlightBlockEditor({
                 <div className="max-h-[320px] overflow-y-auto">
                   <SelectItem
                     value="none"
-                    className="focus:bg-slate-800 focus:text-white text-slate-300"
+                    className="focus:bg-accent focus:text-accent-foreground text-muted-foreground"
                   >
                     None
                   </SelectItem>
                   {profiles.length === 0 && !loadingProfiles && (
-                    <div className="px-3 py-4 text-xs text-slate-400">
+                    <div className="px-3 py-4 text-xs text-muted-foreground">
                       {debouncedSearch
                         ? `No profiles found matching "${debouncedSearch}".`
                         : "Start typing to search profiles in your markets."}
@@ -229,13 +229,13 @@ export function ProfileSpotlightBlockEditor({
                     <SelectItem
                       key={profile.id}
                       value={profile.slug}
-                      className="focus:bg-slate-800 focus:text-white text-slate-200"
+                      className="focus:bg-accent focus:text-accent-foreground text-foreground"
                     >
                       <div className="flex flex-col">
                         <span className="text-sm">
                           {profile.name || profile.slug}
                         </span>
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] text-muted-foreground">
                           {profile.type || "Profile"}
                           {profile.zipCode ? ` • ${profile.zipCode}` : ""}
                         </span>
@@ -245,7 +245,7 @@ export function ProfileSpotlightBlockEditor({
                 </div>
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               This profile will be highlighted in a large hero-style card with its primary video and details.
             </p>
           </div>
@@ -253,10 +253,10 @@ export function ProfileSpotlightBlockEditor({
 
         {!isSpotlight && (
         <div className="space-y-3">
-          <Label className="text-slate-300">Feed profiles (horizontal list)</Label>
-          <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+          <Label className="text-muted-foreground">Feed profiles (horizontal list)</Label>
+          <div className="space-y-2 rounded-lg border border-border bg-card p-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-xs text-slate-400">
+              <span className="text-xs text-muted-foreground">
                 Search profiles and add them to the feed.
               </span>
             </div>
@@ -265,7 +265,7 @@ export function ProfileSpotlightBlockEditor({
                 placeholder="Search profiles…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-sm"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-sm"
               />
               <Button
                 type="button"
@@ -283,9 +283,9 @@ export function ProfileSpotlightBlockEditor({
                 )}
               </Button>
             </div>
-            <div className="max-h-48 overflow-y-auto rounded-md border border-slate-800 bg-slate-950/40">
+            <div className="max-h-48 overflow-y-auto rounded-md border border-border bg-muted">
               {profiles.length === 0 && !loadingProfiles ? (
-                <div className="px-3 py-4 text-xs text-slate-500">
+                <div className="px-3 py-4 text-xs text-muted-foreground">
                   {debouncedSearch
                     ? `No profiles found matching "${debouncedSearch}".`
                     : "Type a search term to load profiles in your markets."}
@@ -294,13 +294,13 @@ export function ProfileSpotlightBlockEditor({
                 profiles.map((profile) => (
                   <div
                     key={profile.id}
-                    className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-slate-200 hover:bg-slate-800/70"
+                    className="flex items-center justify-between gap-2 px-3 py-2 text-xs text-foreground hover:bg-accent/70"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium">
                         {profile.name || profile.slug}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-muted-foreground">
                         {profile.type || "Profile"}
                         {profile.zipCode ? ` • ${profile.zipCode}` : ""}
                       </span>
@@ -323,18 +323,18 @@ export function ProfileSpotlightBlockEditor({
 
           {feedProfileSlugs.length > 0 && (
             <div className="space-y-2">
-              <Label className="text-slate-300">Selected feed profiles</Label>
-              <div className="space-y-2 rounded-lg border border-slate-800 bg-slate-900/60 p-3">
+              <Label className="text-muted-foreground">Selected feed profiles</Label>
+              <div className="space-y-2 rounded-lg border border-border bg-card p-3">
                 {feedProfiles.map((profile, index) => (
                   <div
                     key={profile.slug ?? index}
-                    className="flex items-center justify-between gap-2 rounded border border-slate-800 bg-slate-950/40 px-3 py-2 text-xs text-slate-200"
+                    className="flex items-center justify-between gap-2 rounded border border-border bg-muted px-3 py-2 text-xs text-foreground"
                   >
                     <div className="flex flex-col">
                       <span className="font-medium">
                         {profile.name || profile.slug || "Unknown profile"}
                       </span>
-                      <span className="text-[11px] text-slate-400">
+                      <span className="text-[11px] text-muted-foreground">
                         {profile.type || "Profile"}
                         {profile.zipCode ? ` • ${profile.zipCode}` : ""}
                       </span>
@@ -344,7 +344,7 @@ export function ProfileSpotlightBlockEditor({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-accent-foreground"
                         onClick={() => handleReorderFeedProfile(index, "up")}
                         disabled={index === 0}
                         title="Move up"
@@ -355,7 +355,7 @@ export function ProfileSpotlightBlockEditor({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-slate-400 hover:text-white"
+                        className="h-7 w-7 p-0 text-muted-foreground hover:text-accent-foreground"
                         onClick={() => handleReorderFeedProfile(index, "down")}
                         disabled={index === feedProfileSlugs.length - 1}
                         title="Move down"

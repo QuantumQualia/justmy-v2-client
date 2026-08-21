@@ -8,6 +8,7 @@ import type { NewsMarketContext } from "./types";
 type AskSkyClaimCtaProps = {
   market: NewsMarketContext;
   href?: string;
+  onClaim?: () => void;
 };
 
 /**
@@ -15,7 +16,8 @@ type AskSkyClaimCtaProps = {
  */
 export function AskSkyClaimCta({
   market,
-  href = "/#",
+  href = "/?claim=1",
+  onClaim,
 }: AskSkyClaimCtaProps) {
   const city = market.city || market.marketName;
 
@@ -50,20 +52,38 @@ export function AskSkyClaimCta({
             {city} asks, your storefront is the answer.
           </p>
 
-          <Link
-            href={href}
-            className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110 sm:px-7 sm:text-base"
-          >
-            <span className="relative inline-flex h-5 w-5 items-center justify-center">
-              <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-              <span
-                aria-hidden
-                className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white"
-              />
-            </span>
-            Claim Your Free Dot Hub
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+          {onClaim ? (
+            <button
+              type="button"
+              onClick={onClaim}
+              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110 sm:px-7 sm:text-base"
+            >
+              <span className="relative inline-flex h-5 w-5 items-center justify-center">
+                <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+                <span
+                  aria-hidden
+                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white"
+                />
+              </span>
+              Claim Your Free Dot Hub
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+          ) : (
+            <Link
+              href={href}
+              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110 sm:px-7 sm:text-base"
+            >
+              <span className="relative inline-flex h-5 w-5 items-center justify-center">
+                <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
+                <span
+                  aria-hidden
+                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white"
+                />
+              </span>
+              Claim Your Free Dot Hub
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          )}
         </div>
       </div>
     </section>

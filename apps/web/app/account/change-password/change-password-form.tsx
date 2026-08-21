@@ -57,13 +57,13 @@ export default function ChangePasswordForm() {
   };
 
   return (
-    <Card className="w-full max-w-md bg-slate-900 border-slate-800 text-white shadow-2xl">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
           <ShieldCheck className="h-6 w-6 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold">Change Password</CardTitle>
-        <p className="text-slate-400 text-sm">Update your account password.</p>
+        <p className="text-muted-foreground text-sm">Update your account password.</p>
       </CardHeader>
       <CardContent>
         {success ? (
@@ -71,9 +71,9 @@ export default function ChangePasswordForm() {
             <div className="mx-auto h-12 w-12 bg-emerald-600/20 rounded-full flex items-center justify-center">
               <CheckCircle2 className="h-6 w-6 text-emerald-500" />
             </div>
-            <p className="text-slate-300 text-sm">Your password has been updated successfully.</p>
+            <p className="text-muted-foreground text-sm">Your password has been updated successfully.</p>
             <Link href="/dashboard">
-              <Button className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold h-12">
+              <Button className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold h-12">
                 Back to Dashboard
               </Button>
             </Link>
@@ -91,7 +91,6 @@ export default function ChangePasswordForm() {
               <Input
                 type="password"
                 required
-                className="bg-black/50 border-slate-700"
                 value={formData.currentPassword}
                 onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
               />
@@ -103,11 +102,10 @@ export default function ChangePasswordForm() {
                 type="password"
                 required
                 minLength={MIN_PASSWORD_LENGTH}
-                className="bg-black/50 border-slate-700"
                 value={formData.newPassword}
                 onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
               />
-              <p className="text-[10px] text-slate-500">Must be at least {MIN_PASSWORD_LENGTH} characters.</p>
+              <p className="text-[10px] text-muted-foreground">Must be at least {MIN_PASSWORD_LENGTH} characters.</p>
             </div>
 
             <div className="space-y-2">
@@ -116,7 +114,6 @@ export default function ChangePasswordForm() {
                 type="password"
                 required
                 minLength={MIN_PASSWORD_LENGTH}
-                className="bg-black/50 border-slate-700"
                 value={formData.confirmPassword}
                 onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
               />
@@ -124,7 +121,7 @@ export default function ChangePasswordForm() {
 
             <Button
               type="submit"
-              className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold mt-4 h-12 text-lg"
+              className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg"
               disabled={loading}
             >
               {loading ? "Updating..." : "Update Password"}

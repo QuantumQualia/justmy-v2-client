@@ -69,24 +69,24 @@ export default function EditAppPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-black p-10 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Edit App</h1>
-          <p className="text-slate-400 mt-2">Update app configuration</p>
+          <h1 className="text-3xl font-bold text-foreground">Edit App</h1>
+          <p className="text-muted-foreground mt-2">Update app configuration</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border border-slate-700 rounded-xl bg-slate-900/30 p-6 space-y-4">
+          <div className="border border-border rounded-xl bg-muted p-6 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white">
+              <Label htmlFor="name" className="text-foreground">
                 Name *
               </Label>
               <Input
@@ -94,20 +94,20 @@ export default function EditAppPage() {
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
-                className="bg-black/50 border-slate-700 text-white"
+                className="bg-muted border-border text-foreground"
               />
             </div>
 
 
             <div className="space-y-2">
-              <Label htmlFor="description" className="text-white">
+              <Label htmlFor="description" className="text-foreground">
                 Description
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="bg-black/50 border-slate-700 text-white"
+                className="bg-muted border-border text-foreground"
                 rows={3}
               />
             </div>
@@ -121,7 +121,7 @@ export default function EditAppPage() {
                   setFormData({ ...formData, isActive: checked === true })
                 }
               />
-              <Label htmlFor="isActive" className="text-white cursor-pointer">
+              <Label htmlFor="isActive" className="text-foreground cursor-pointer">
                 Active
               </Label>
             </div>

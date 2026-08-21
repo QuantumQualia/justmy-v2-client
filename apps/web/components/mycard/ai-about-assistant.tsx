@@ -258,7 +258,7 @@ export function AIAboutAssistant({
       onClick={onClose}
     >
       <div
-        className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-lg animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
+        className="bg-card p-6 rounded-2xl border border-border shadow-2xl w-full max-w-lg animate-in zoom-in-95 max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -268,15 +268,15 @@ export function AIAboutAssistant({
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white">AI About Assistant</h3>
-              <p className="text-xs text-slate-400">Let's write your story</p>
+              <h3 className="text-lg font-bold text-foreground">AI About Assistant</h3>
+              <p className="text-xs text-muted-foreground">Let's write your story</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+            className="h-8 w-8 rounded-full bg-muted hover:bg-accent flex items-center justify-center transition-colors cursor-pointer"
           >
-            <X className="h-4 w-4 text-slate-300" />
+            <X className="h-4 w-4 text-muted-foreground" />
           </button>
         </div>
 
@@ -307,7 +307,7 @@ export function AIAboutAssistant({
                 </div>
               </div>
               <div>
-                <p className="text-sm text-slate-300 mb-2">
+                <p className="text-sm text-muted-foreground mb-2">
                   Don't worry about being perfect. Just brain dump who you are, what you do, and why you love it.
                 </p>
                 {isPreparing && prepCountdown !== null ? (
@@ -315,7 +315,7 @@ export function AIAboutAssistant({
                     Starting in {prepCountdown}...
                   </p>
                 ) : (
-                  <p className="text-xs text-slate-500 animate-pulse">
+                  <p className="text-xs text-muted-foreground animate-pulse">
                     {PROMPT_SUGGESTIONS[currentPromptIndex]}
                   </p>
                 )}
@@ -329,7 +329,7 @@ export function AIAboutAssistant({
                   setRawInput(e.target.value);
                 }}
                 placeholder="Start typing or use voice input..."
-                className="w-full min-h-[150px] p-4 text-sm text-slate-100 bg-slate-900/50 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 resize-none placeholder:text-slate-500"
+                className="w-full min-h-[150px] p-4 text-sm text-foreground bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 resize-none placeholder:text-muted-foreground"
                 autoFocus
               />
               <div className="flex gap-2">
@@ -340,7 +340,7 @@ export function AIAboutAssistant({
                     className={`flex-1 px-4 py-2.5 text-sm font-medium rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2 ${
                       isRecording || isPreparing
                         ? "bg-red-600 hover:bg-red-700 text-white"
-                        : "bg-slate-700 hover:bg-slate-600 text-slate-200"
+                        : "bg-muted hover:bg-accent text-foreground"
                     }`}
                   >
                     <Mic className="h-4 w-4" />
@@ -354,7 +354,7 @@ export function AIAboutAssistant({
                 <button
                   onClick={handleMagicStart}
                   disabled={!rawInput.trim() || isLoading}
-                  className="flex-1 px-4 py-2.5 text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <>
@@ -374,13 +374,13 @@ export function AIAboutAssistant({
             {/* Progress Bar */}
             {isLoading && (
               <div className="space-y-2">
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-blue-600 to-purple-600 h-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-center text-slate-400">Synthesizing your greatness...</p>
+                <p className="text-xs text-center text-muted-foreground">Synthesizing your greatness...</p>
               </div>
             )}
           </div>
@@ -389,7 +389,7 @@ export function AIAboutAssistant({
         {/* State 2: Suggestion Stage */}
         {state === "suggesting" && suggestions && (
           <div className="space-y-4">
-            <p className="text-sm text-slate-300 text-center mb-4">
+            <p className="text-sm text-muted-foreground text-center mb-4">
               Choose the style that best represents you:
             </p>
 
@@ -397,40 +397,40 @@ export function AIAboutAssistant({
               {/* Professional */}
               <button
                 onClick={() => handleSelectSuggestion("professional")}
-                className="w-full p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
+                className="w-full p-4 bg-muted/50 hover:bg-accent border border-border hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="text-sm font-semibold text-white">The Professional</h4>
+                  <h4 className="text-sm font-semibold text-foreground">The Professional</h4>
                   <Check className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100" />
                 </div>
-                <p className="text-xs text-slate-400 mb-2">Credential-heavy and authoritative</p>
-                <p className="text-xs text-slate-300 line-clamp-3">{suggestions.professional}</p>
+                <p className="text-xs text-muted-foreground mb-2">Credential-heavy and authoritative</p>
+                <p className="text-xs text-muted-foreground line-clamp-3">{suggestions.professional}</p>
               </button>
 
               {/* Neighbor */}
               <button
                 onClick={() => handleSelectSuggestion("neighbor")}
-                className="w-full p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
+                className="w-full p-4 bg-muted/50 hover:bg-accent border border-border hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="text-sm font-semibold text-white">The Neighbor</h4>
+                  <h4 className="text-sm font-semibold text-foreground">The Neighbor</h4>
                   <Check className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100" />
                 </div>
-                <p className="text-xs text-slate-400 mb-2">Warm, community-focused, and approachable</p>
-                <p className="text-xs text-slate-300 line-clamp-3">{suggestions.neighbor}</p>
+                <p className="text-xs text-muted-foreground mb-2">Warm, community-focused, and approachable</p>
+                <p className="text-xs text-muted-foreground line-clamp-3">{suggestions.neighbor}</p>
               </button>
 
               {/* Visionary */}
               <button
                 onClick={() => handleSelectSuggestion("visionary")}
-                className="w-full p-4 bg-slate-800/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
+                className="w-full p-4 bg-muted/50 hover:bg-accent border border-border hover:border-blue-500 rounded-xl transition-all text-left cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-2">
-                  <h4 className="text-sm font-semibold text-white">The Visionary</h4>
+                  <h4 className="text-sm font-semibold text-foreground">The Visionary</h4>
                   <Check className="h-4 w-4 text-blue-400 opacity-0 group-hover:opacity-100" />
                 </div>
-                <p className="text-xs text-slate-400 mb-2">Bold, high-energy, and mission-driven</p>
-                <p className="text-xs text-slate-300 line-clamp-3">{suggestions.visionary}</p>
+                <p className="text-xs text-muted-foreground mb-2">Bold, high-energy, and mission-driven</p>
+                <p className="text-xs text-muted-foreground line-clamp-3">{suggestions.visionary}</p>
               </button>
             </div>
           </div>
@@ -440,13 +440,13 @@ export function AIAboutAssistant({
         {state === "refining" && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">
+              <label className="block text-xs font-semibold text-foreground uppercase tracking-wide">
                 Your About Text
               </label>
               <textarea
                 value={selectedText || ""}
                 onChange={(e) => setSelectedText(e.target.value)}
-                className="w-full min-h-[200px] p-4 text-sm text-slate-100 bg-slate-900/50 border border-slate-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 resize-none"
+                className="w-full min-h-[200px] p-4 text-sm text-foreground bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500 resize-none"
               />
             </div>
 
@@ -455,7 +455,7 @@ export function AIAboutAssistant({
               <button
                 onClick={() => handleRefine("punchier")}
                 disabled={isLoading}
-                className="px-3 py-2 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+                className="px-3 py-2 text-xs font-medium bg-muted text-foreground hover:bg-accent disabled:bg-muted/50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
               >
                 <Wand2 className="h-3 w-3" />
                 Make it punchier
@@ -463,7 +463,7 @@ export function AIAboutAssistant({
               <button
                 onClick={() => handleRefine("add-education")}
                 disabled={isLoading}
-                className="px-3 py-2 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+                className="px-3 py-2 text-xs font-medium bg-muted text-foreground hover:bg-accent disabled:bg-muted/50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
               >
                 <Wand2 className="h-3 w-3" />
                 Add education
@@ -471,7 +471,7 @@ export function AIAboutAssistant({
               <button
                 onClick={() => handleRefine("add-experience")}
                 disabled={isLoading}
-                className="px-3 py-2 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+                className="px-3 py-2 text-xs font-medium bg-muted text-foreground hover:bg-accent disabled:bg-muted/50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
               >
                 <Wand2 className="h-3 w-3" />
                 Add experience
@@ -479,7 +479,7 @@ export function AIAboutAssistant({
               <button
                 onClick={() => handleRefine("add-passion")}
                 disabled={isLoading}
-                className="px-3 py-2 text-xs font-medium bg-slate-700 hover:bg-slate-600 disabled:bg-slate-800 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
+                className="px-3 py-2 text-xs font-medium bg-muted text-foreground hover:bg-accent disabled:bg-muted/50 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1"
               >
                 <Wand2 className="h-3 w-3" />
                 Add passion
@@ -489,13 +489,13 @@ export function AIAboutAssistant({
             {/* Progress Bar */}
             {isLoading && (
               <div className="space-y-2">
-                <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-2 overflow-hidden">
                   <div
                     className="bg-gradient-to-r from-blue-600 to-purple-600 h-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <p className="text-xs text-center text-slate-400">Refining your text...</p>
+                <p className="text-xs text-center text-muted-foreground">Refining your text...</p>
               </div>
             )}
 
@@ -504,14 +504,14 @@ export function AIAboutAssistant({
               <Button
                 onClick={handleAccept}
                 disabled={!selectedText || !selectedText.trim()}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-sm font-medium shadow-lg shadow-blue-600/20 cursor-pointer"
+                className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-muted disabled:to-muted disabled:text-muted-foreground disabled:cursor-not-allowed text-white text-sm font-medium shadow-lg shadow-blue-600/20 cursor-pointer"
               >
                 Accept & Populate
               </Button>
               <Button
                 onClick={() => setState("suggesting")}
                 variant="outline"
-                className="px-4 bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100 text-sm font-medium cursor-pointer"
+                className="px-4 bg-muted hover:bg-accent border-border text-foreground hover:text-foreground text-sm font-medium cursor-pointer"
               >
                 Back
               </Button>

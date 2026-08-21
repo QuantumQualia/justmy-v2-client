@@ -83,14 +83,14 @@ export default function DashboardLobby() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white flex items-center justify-center">
+      <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground flex items-center justify-center">
         <div>Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white font-sans relative">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground font-sans relative">
       <div className="pt-20">
         {/* <WelcomeMessage />
         <DayInHistory /> */}
@@ -118,7 +118,7 @@ export default function DashboardLobby() {
 
         <BlocksRenderer
           blocks={DASHBOARD_AGENT_PREVIEW_BLOCKS}
-          className="w-full bg-transparent text-white"
+          className="w-full bg-transparent text-foreground"
           emptyMessage="No dashboard blocks configured."
         />
       </div>

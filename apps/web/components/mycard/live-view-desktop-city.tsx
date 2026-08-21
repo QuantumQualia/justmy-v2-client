@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MyCardContentDesktopView } from "@/components/mycard/mycard-content-desktop-view";
+import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
@@ -13,8 +14,6 @@ interface MyCardDesktopDefaultViewProps {
   usePublicNavbar: boolean;
   outerTextClass: string;
   avatarOuterClass: string;
-  avatarPlaceholderBgClass: string;
-  avatarPlaceholderTextClass: string;
   ctaButtonClassName: string;
   registerHref: string;
   contactActions: React.ReactNode;
@@ -25,8 +24,6 @@ export function MyCardDesktopCityView({
   usePublicNavbar,
   outerTextClass,
   avatarOuterClass,
-  avatarPlaceholderBgClass,
-  avatarPlaceholderTextClass,
   ctaButtonClassName,
   registerHref,
   contactActions,
@@ -79,15 +76,7 @@ export function MyCardDesktopCityView({
             <div className="relative">
               <div className="relative flex justify-center">
                 <div className={`h-24 w-24 overflow-hidden rounded-full ${avatarOuterClass}`}>
-                  {data.photo ? (
-                    <img src={data.photo} alt="Profile" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className={`h-full w-full flex items-center justify-center ${avatarPlaceholderBgClass}`}>
-                      <span className={`text-2xl font-bold ${avatarPlaceholderTextClass}`}>
-                        {data.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  <MycardProfileAvatar name={data.name} photo={data.photo} />
                 </div>
               </div>
             </div>
@@ -132,11 +121,15 @@ export function MyCardDesktopCityView({
           </aside>
 
           <section className="overflow-hidden justmy-corners relative min-h-[410px]">
-            <img
-              src={data.banner || "/images/banner.jpg"}
-              alt="Banner"
-              className="h-full min-h-[410px] w-full object-cover"
-            />
+            {hasMycardMedia(data.banner) ? (
+              <img
+                src={data.banner}
+                alt=""
+                className="h-full min-h-[410px] w-full object-cover"
+              />
+            ) : (
+              <MycardFallbackBanner name={data.name} className="h-full min-h-[410px] w-full" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
               <h1 className="text-3xl font-bold text-white font-serif md:text-4xl">

@@ -107,7 +107,7 @@ export function TagInput({
       {label && (
         <Label
           htmlFor={id}
-          className="text-slate-300"
+          className="text-muted-foreground"
         >
           {label}
         </Label>
@@ -116,7 +116,7 @@ export function TagInput({
         className={cn(
           // Match Input background, border, and focus styles
           "flex min-h-9 w-full flex-wrap items-center gap-2 rounded-md border border-input px-3 py-1 text-base text-foreground shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
-          "bg-black/50 dark:bg-input/30",
+          "bg-muted dark:bg-input/30",
           "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           inputClassName
@@ -127,7 +127,7 @@ export function TagInput({
             key={`${tag}-${index}`}
             variant="secondary"
             className={cn(
-              "gap-1 pr-1 font-normal border border-slate-600 bg-black/40 text-slate-200 hover:bg-black/60"
+              "gap-1 pr-1 font-normal border border-border bg-muted text-foreground hover:bg-accent"
             )}
           >
             {tag}
@@ -135,7 +135,7 @@ export function TagInput({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-4 w-4 min-w-4 rounded-full p-0 text-slate-300 hover:bg-slate-500/50 hover:text-slate-100"
+              className="h-4 w-4 min-w-4 rounded-full p-0 text-muted-foreground hover:bg-accent hover:text-foreground"
               onClick={() => removeTag(index)}
               aria-label={`Remove ${tag}`}
             >
@@ -152,7 +152,7 @@ export function TagInput({
           placeholder={value.length === 0 ? placeholder : ""}
           disabled={disabled}
           className={cn(
-            "min-w-[120px] flex-1 border-0 p-0 bg-transparent dark:bg-transparent text-slate-100 shadow-none placeholder:text-slate-500 focus-visible:ring-0 focus-visible:ring-offset-0"
+            "min-w-[120px] flex-1 border-0 p-0 bg-transparent dark:bg-transparent text-foreground shadow-none placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0"
           )}
         />
       </div>

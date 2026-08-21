@@ -94,7 +94,7 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
   return (
     <Card
       className={cn(
-        "border-slate-800/50 bg-slate-900 backdrop-blur-xl",
+        "border-border bg-card backdrop-blur-xl",
         "shadow-[0_8px_32px_rgba(0,0,0,0.4)] rounded-2xl",
         className
       )}
@@ -117,7 +117,7 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
                 "hover:scale-105 active:scale-95",
                 selected
                   ? "border-emerald-500/60 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-500/15"
-                  : "border-slate-700/50 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/60",
+                  : "border-border bg-muted/40 hover:border-border hover:bg-accent",
                 disabled && "opacity-40 cursor-not-allowed hover:scale-100",
                 category.hasFoundingPartner &&
                   !selected &&
@@ -139,7 +139,7 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
               <span className="text-3xl md:text-4xl">{category.icon}</span>
 
               {/* Category label */}
-              <Label className="text-xs md:text-sm font-medium text-slate-200 text-center cursor-pointer">
+              <Label className="text-xs md:text-sm font-medium text-foreground text-center cursor-pointer">
                 {category.label}
               </Label>
 
@@ -153,14 +153,14 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
 
         {/* Max selection hint */}
         {isMaxSelected && (
-          <Label className="col-span-full text-center text-xs text-slate-400 mt-2">
+          <Label className="col-span-full text-center text-xs text-muted-foreground mt-2">
             Maximum 3 categories selected. Remove one to add another.
           </Label>
         )}
       </CardContent>
 
       {/* Apply button footer */}
-      <CardFooter className="flex items-center justify-end gap-2 pt-2 border-t border-slate-800/50">
+      <CardFooter className="flex items-center justify-end gap-2 pt-2 border-t border-border">
         <Button
           type="button"
           variant="outline"
@@ -171,7 +171,7 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
             "rounded-full px-4 py-2 transition-colors",
             selectedCategories.length > 0
               ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-400/90 hover:text-emerald-200"
-              : "border-slate-700/50 text-slate-500 cursor-not-allowed"
+              : "border-border text-muted-foreground cursor-not-allowed"
           )}
         >
           <Check className="h-4 w-4 mr-2" />

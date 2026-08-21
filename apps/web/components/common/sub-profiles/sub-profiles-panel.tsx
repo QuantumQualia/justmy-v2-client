@@ -224,8 +224,8 @@ export function SubProfilesPanel() {
 
   if (profileId == null) {
     return (
-      <Card className="rounded-2xl rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md">
-        <CardContent className="p-6 text-sm text-white/70">
+      <Card className="rounded-2xl rounded-br-none border border-border bg-card">
+        <CardContent className="p-6 text-sm text-muted-foreground">
           Select or load a profile to manage content cards.
         </CardContent>
       </Card>
@@ -236,15 +236,15 @@ export function SubProfilesPanel() {
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-2xl rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md overflow-hidden">
+      <Card className="rounded-2xl rounded-br-none border border-border bg-card overflow-hidden">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
             <LayoutGrid className="size-5" aria-hidden />
             ContentCard
           </CardTitle>
-          <p className="text-sm text-white/60">
+          <p className="text-sm text-muted-foreground">
             Linked profiles for departments, locations, or teams—each with its own page at{" "}
-            <span className="text-white/80">/your-slug</span>.
+            <span className="text-foreground">/your-slug</span>.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -256,7 +256,7 @@ export function SubProfilesPanel() {
           </div>
 
           {listLoading ? (
-            <div className="flex items-center gap-2 py-8 text-white/70">
+            <div className="flex items-center gap-2 py-8 text-muted-foreground">
               <Loader2 className="size-5 animate-spin" aria-hidden />
               Loading…
             </div>
@@ -265,18 +265,18 @@ export function SubProfilesPanel() {
               {listError}
             </p>
           ) : subProfiles.length === 0 ? (
-            <p className="text-sm text-white/60 py-2">No content cards yet. Use Create to add one.</p>
+            <p className="text-sm text-muted-foreground py-2">No content cards yet. Use Create to add one.</p>
           ) : (
-            <ul className="divide-y divide-white/10 rounded-xl border border-white/10 overflow-hidden">
+            <ul className="divide-y divide-border rounded-xl border border-border overflow-hidden">
               {subProfiles.map((sp) => (
                 <li
                   key={sp.id}
-                  className="flex flex-col gap-3 bg-white/[0.03] px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                  className="flex flex-col gap-3 bg-muted/30 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium text-white">{sp.name}</div>
-                    <div className="text-xs text-white/50 font-mono mt-0.5 truncate">{publicPath(sp.slug)}</div>
-                    <span className="mt-1 inline-block text-xs text-white/45">
+                    <div className="font-medium text-foreground">{sp.name}</div>
+                    <div className="text-xs text-muted-foreground font-mono mt-0.5 truncate">{publicPath(sp.slug)}</div>
+                    <span className="mt-1 inline-block text-xs text-muted-foreground">
                       Added{" "}
                       {new Date(sp.createdAt).toLocaleDateString(undefined, {
                         month: "short",
@@ -330,13 +330,13 @@ export function SubProfilesPanel() {
 
       <Dialog open={createOpen} onOpenChange={handleCreateOpenChange}>
         <DialogContent
-          className="rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 p-6 text-white shadow-2xl shadow-black/40 sm:max-w-md"
+          className="rounded-2xl rounded-br-none border border-border bg-card p-6 text-foreground shadow-2xl shadow-black/40 sm:max-w-md"
           onPointerDownOutside={(e) => submitting && e.preventDefault()}
           onEscapeKeyDown={(e) => submitting && e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle className="text-white">Create content card</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-foreground">Create content card</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Requires permission on this profile. Leave email blank to use the parent profile&apos;s email.
             </DialogDescription>
           </DialogHeader>
@@ -347,7 +347,7 @@ export function SubProfilesPanel() {
               </p>
             )}
             <div className="space-y-2">
-              <Label htmlFor="content-card-name" className="text-slate-300">
+              <Label htmlFor="content-card-name" className="text-foreground">
                 Display name
               </Label>
               <Input
@@ -355,14 +355,14 @@ export function SubProfilesPanel() {
                 value={name}
                 onChange={(ev) => setName(ev.target.value)}
                 placeholder="e.g. East Coast Sales"
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 autoComplete="organization"
                 autoFocus
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="content-card-slug" className="text-slate-300">
+              <Label htmlFor="content-card-slug" className="text-foreground">
                 URL slug
               </Label>
               <Input
@@ -373,14 +373,14 @@ export function SubProfilesPanel() {
                   setSlug(ev.target.value);
                 }}
                 placeholder="east-coast-sales"
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 font-mono text-sm text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background font-mono text-sm text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 spellCheck={false}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="content-card-email" className="text-slate-300">
-                Contact email <span className="text-slate-500 font-normal">(optional)</span>
+              <Label htmlFor="content-card-email" className="text-foreground">
+                Contact email <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
               <Input
                 id="content-card-email"
@@ -388,7 +388,7 @@ export function SubProfilesPanel() {
                 value={email}
                 onChange={(ev) => setEmail(ev.target.value)}
                 placeholder={parentEmail ? parentEmail : "defaults to parent profile"}
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 autoComplete="email"
               />
@@ -418,13 +418,13 @@ export function SubProfilesPanel() {
 
       <Dialog open={editingCard != null} onOpenChange={handleEditOpenChange}>
         <DialogContent
-          className="rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 p-6 text-white shadow-2xl shadow-black/40 sm:max-w-md"
+          className="rounded-2xl rounded-br-none border border-border bg-card p-6 text-foreground shadow-2xl shadow-black/40 sm:max-w-md"
           onPointerDownOutside={(e) => submitting && e.preventDefault()}
           onEscapeKeyDown={(e) => submitting && e.preventDefault()}
         >
           <DialogHeader>
-            <DialogTitle className="text-white">Edit content card</DialogTitle>
-            <DialogDescription className="text-slate-400">
+            <DialogTitle className="text-foreground">Edit content card</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Update display name, URL slug, or contact email. Leave email blank to leave it unchanged on the
               server.
             </DialogDescription>
@@ -436,7 +436,7 @@ export function SubProfilesPanel() {
               </p>
             )}
             <div className="space-y-2">
-              <Label htmlFor="content-card-edit-name" className="text-slate-300">
+              <Label htmlFor="content-card-edit-name" className="text-foreground">
                 Display name
               </Label>
               <Input
@@ -444,14 +444,14 @@ export function SubProfilesPanel() {
                 value={name}
                 onChange={(ev) => setName(ev.target.value)}
                 placeholder="e.g. East Coast Sales"
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 autoComplete="organization"
                 autoFocus
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="content-card-edit-slug" className="text-slate-300">
+              <Label htmlFor="content-card-edit-slug" className="text-foreground">
                 URL slug
               </Label>
               <Input
@@ -462,14 +462,14 @@ export function SubProfilesPanel() {
                   setSlug(ev.target.value);
                 }}
                 placeholder="east-coast-sales"
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 font-mono text-sm text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background font-mono text-sm text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 spellCheck={false}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="content-card-edit-email" className="text-slate-300">
-                Contact email <span className="text-slate-500 font-normal">(optional)</span>
+              <Label htmlFor="content-card-edit-email" className="text-foreground">
+                Contact email <span className="text-muted-foreground font-normal">(optional)</span>
               </Label>
               <Input
                 id="content-card-edit-email"
@@ -477,7 +477,7 @@ export function SubProfilesPanel() {
                 value={email}
                 onChange={(ev) => setEmail(ev.target.value)}
                 placeholder="Leave blank to keep current"
-                className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                 disabled={submitting}
                 autoComplete="email"
               />

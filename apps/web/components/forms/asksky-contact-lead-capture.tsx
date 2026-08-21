@@ -64,7 +64,7 @@ function AskSkyContactLeadCaptureInner({
     "rounded-xl rounded-br-none border px-3 py-3",
     embedChrome
       ? "border-white/10 bg-black/25 shadow-inner"
-      : "border-slate-600/70 bg-slate-800/90 shadow-sm",
+      : "border-border bg-card shadow-sm",
   );
 
   if (done) {
@@ -85,7 +85,7 @@ function AskSkyContactLeadCaptureInner({
       <p
         className={cn(
           "mb-2 text-xs font-medium",
-          embedChrome ? "text-zinc-200" : "text-slate-200",
+          embedChrome ? "text-zinc-200" : "text-foreground",
         )}
       >
         Need a human? Share your contact details below.
@@ -93,7 +93,7 @@ function AskSkyContactLeadCaptureInner({
       {loadError ? (
         <p className="text-xs text-red-300">{loadError}</p>
       ) : !schema ? (
-        <p className={cn("text-xs", embedChrome ? "text-zinc-400" : "text-slate-400")}>Loading form…</p>
+        <p className={cn("text-xs", embedChrome ? "text-zinc-400" : "text-muted-foreground")}>Loading form…</p>
       ) : (
         <DynamicForm
           schema={schema}

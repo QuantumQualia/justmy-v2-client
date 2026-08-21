@@ -111,24 +111,24 @@ export function AskSkyStaticEmbedDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-950 text-slate-100 sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
+          <DialogTitle className="flex items-center gap-2 text-foreground">
             <Link2 className="h-5 w-5 text-emerald-400" />
             AskSKY! static embed
           </DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Choose how AskSKY! should appear, then copy the preview URL or the script snippet. The preview URL uses{" "}
-            <span className="text-slate-300">profileSlug</span>, <span className="text-slate-300">agentToken</span>, and{" "}
-            <span className="text-slate-300">variant</span> as query parameters; the script embed uses the same values as{" "}
-            <span className="text-slate-300">data-*</span> attributes.
+            <span className="text-muted-foreground">profileSlug</span>, <span className="text-muted-foreground">agentToken</span>, and{" "}
+            <span className="text-muted-foreground">variant</span> as query parameters; the script embed uses the same values as{" "}
+            <span className="text-muted-foreground">data-*</span> attributes.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="rounded-lg border border-slate-800 bg-slate-900/60 px-3 py-2 text-sm text-slate-300">
-            <span className="text-slate-500">Agent:</span>{" "}
-            <span className="font-medium text-white">{agent?.name ?? "—"}</span>
+          <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+            <span className="text-muted-foreground">Agent:</span>{" "}
+            <span className="font-medium text-foreground">{agent?.name ?? "—"}</span>
           </div>
 
           {!slugOk ? (
@@ -143,9 +143,9 @@ export function AskSkyStaticEmbedDialog({
             </p>
           ) : null}
 
-          <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+          <div className="rounded-lg border border-border bg-card p-4">
             <div className="min-w-0 space-y-2">
-              <Label htmlFor="asksky-embed-variant" className="text-slate-200">
+              <Label htmlFor="asksky-embed-variant" className="text-foreground">
                 Interface style
               </Label>
               <Select
@@ -155,11 +155,11 @@ export function AskSkyStaticEmbedDialog({
               >
                 <SelectTrigger
                   id="asksky-embed-variant"
-                  className="h-11 w-full border-slate-700 bg-slate-900 text-white"
+                  className="h-11 w-full border-input bg-background text-foreground"
                 >
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
+                <SelectContent>
                   <SelectItem value="inline">Embedded inline</SelectItem>
                   <SelectItem value="chatbot">Chatbot (floating button)</SelectItem>
                   <SelectItem value="voice">Voice line (coming soon)</SelectItem>
@@ -167,15 +167,15 @@ export function AskSkyStaticEmbedDialog({
               </Select>
             </div>
 
-            <p className="mt-4 border-t border-slate-800 pt-3 text-xs leading-relaxed text-slate-500">
+            <p className="mt-4 border-t border-border pt-3 text-xs leading-relaxed text-muted-foreground">
               Voice shows a placeholder until audio is available. For the chatbot style, avoid{" "}
-              <code className="text-slate-400">overflow: hidden</code> on <code className="text-slate-400">body</code>{" "}
+              <code className="text-muted-foreground">overflow: hidden</code> on <code className="text-muted-foreground">body</code>{" "}
               without checking stacking; the launcher uses a high z-index.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="asksky-embed-url" className="text-slate-200">
+            <Label htmlFor="asksky-embed-url" className="text-foreground">
               Preview URL
             </Label>
             <Textarea
@@ -183,14 +183,14 @@ export function AskSkyStaticEmbedDialog({
               readOnly
               rows={3}
               value={embedUrl || "—"}
-              className="resize-none border-slate-700 bg-black/40 font-mono text-xs text-slate-200"
+              className="resize-none border-input bg-background font-mono text-xs text-foreground"
             />
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-slate-600 bg-slate-900 text-slate-100"
+                className="border-border bg-card text-foreground"
                 disabled={!embedUrl}
                 onClick={() => copy(embedUrl, "Preview URL")}
               >
@@ -202,7 +202,7 @@ export function AskSkyStaticEmbedDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 bg-slate-900 text-slate-100"
+                  className="border-border bg-card text-foreground"
                   asChild
                 >
                   <a href={embedUrl} target="_blank" rel="noopener noreferrer">
@@ -215,7 +215,7 @@ export function AskSkyStaticEmbedDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-slate-600 bg-slate-900 text-slate-100"
+                  className="border-border bg-card text-foreground"
                   disabled
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
@@ -226,7 +226,7 @@ export function AskSkyStaticEmbedDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="asksky-embed-script" className="text-slate-200">
+            <Label htmlFor="asksky-embed-script" className="text-foreground">
               Script embed
             </Label>
             <Textarea
@@ -234,19 +234,19 @@ export function AskSkyStaticEmbedDialog({
               readOnly
               rows={8}
               value={scriptSnippet || "—"}
-              className="resize-none border-slate-700 bg-black/40 font-mono text-xs text-slate-200"
+              className="resize-none border-input bg-background font-mono text-xs text-foreground"
             />
-            <p className="text-xs leading-relaxed text-slate-500">
-              Partners must allow this origin in <span className="text-slate-400">script-src</span> (and typically{" "}
-              <span className="text-slate-400">connect-src</span> to the same host for the AskSKY API proxy). The inline
-              variant uses at least <span className="text-slate-400">min-height: min(calc(100dvh - 150px), 640px)</span>{" "}
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Partners must allow this origin in <span className="text-muted-foreground">script-src</span> (and typically{" "}
+              <span className="text-muted-foreground">connect-src</span> to the same host for the AskSKY API proxy). The inline
+              variant uses at least <span className="text-muted-foreground">min-height: min(calc(100dvh - 150px), 640px)</span>{" "}
               on the embed host so the chat has room to grow.
             </p>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="border-slate-600 bg-slate-900 text-slate-100"
+              className="border-border bg-card text-foreground"
               disabled={!scriptSnippet}
               onClick={() => copy(scriptSnippet, "Script embed")}
             >

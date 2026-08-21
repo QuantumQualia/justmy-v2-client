@@ -124,27 +124,27 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
   return (
     <div className="space-y-6">
       <div className="space-y-2">
-        <Label className="text-slate-300">LookBook title (optional)</Label>
+        <Label className="text-muted-foreground">LookBook title (optional)</Label>
         <Input
           value={title ?? ""}
           onChange={(e) => handleGlobalFieldChange("title", e.target.value)}
           placeholder="Summer collection 2025"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Description (optional)</Label>
+        <Label className="text-muted-foreground">Description (optional)</Label>
         <Input
           value={description ?? ""}
           onChange={(e) => handleGlobalFieldChange("description", e.target.value)}
           placeholder="A curated lookbook of our favorite shots."
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Images ({items.length}/{MAX_IMAGES})</Label>
+        <Label className="text-muted-foreground">Images ({items.length}/{MAX_IMAGES})</Label>
         <div className="space-y-2">
           <button
             type="button"
@@ -153,19 +153,19 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
               setInsertOpen(true);
             }}
             disabled={items.length >= MAX_IMAGES}
-            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 text-left transition-colors hover:border-blue-500/70 hover:bg-slate-900/80 disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card disabled:cursor-not-allowed disabled:opacity-50"
           >
-            <div className="flex h-32 flex-col items-center justify-center gap-2 text-slate-400">
-              <ImageIcon className="h-7 w-7 text-slate-500" />
+            <div className="flex h-32 flex-col items-center justify-center gap-2 text-muted-foreground">
+              <ImageIcon className="h-7 w-7 text-muted-foreground" />
               <span className="text-xs font-medium">
                 Add up to {MAX_IMAGES - items.length} images
               </span>
-              <span className="text-[11px] text-slate-500">
+              <span className="text-[11px] text-muted-foreground">
                 Device or Unsplash; crop each image before upload
               </span>
             </div>
           </button>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             JPEG, PNG, or WebP. Images are uploaded via the files/images API.
           </p>
         </div>
@@ -173,7 +173,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
 
       {items.length > 0 && (
         <div className="space-y-3">
-          <Label className="text-slate-300">Images metadata</Label>
+          <Label className="text-muted-foreground">Images metadata</Label>
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {items.map((item, index) => {
               const thumbSrc = resolveThumbSrc(item);
@@ -182,8 +182,8 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                   key={item.id || index}
                   className={`flex flex-col gap-2 rounded-lg border p-3 cursor-move ${
                     hoverIndex === index
-                      ? "border-blue-500/70 bg-slate-900"
-                      : "border-slate-800 bg-slate-900/60"
+                      ? "border-blue-500/70 bg-card"
+                      : "border-border bg-card"
                   }`}
                   draggable
                   onDragStart={(e) => {
@@ -223,8 +223,8 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                   }}
                 >
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <div className="relative h-8 w-8 overflow-hidden rounded border border-slate-700 bg-black/40">
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <div className="relative h-8 w-8 overflow-hidden rounded border border-border bg-muted">
                         {thumbSrc ? (
                           <img
                             src={thumbSrc}
@@ -232,7 +232,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <ImageIcon className="h-4 w-4 text-slate-500 absolute inset-0 m-auto" />
+                          <ImageIcon className="h-4 w-4 text-muted-foreground absolute inset-0 m-auto" />
                         )}
                       </div>
                       <span>Image {index + 1}</span>
@@ -250,19 +250,19 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                     value={item.title ?? ""}
                     onChange={(e) => handleItemChange(index, { title: e.target.value })}
                     placeholder="Title (optional)"
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-xs"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-xs"
                   />
                   <Input
                     value={item.description ?? ""}
                     onChange={(e) => handleItemChange(index, { description: e.target.value })}
                     placeholder="Description (optional)"
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-xs"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-xs"
                   />
                   <Input
                     value={item.linkUrl ?? ""}
                     onChange={(e) => handleItemChange(index, { linkUrl: e.target.value })}
                     placeholder="Link URL (optional)"
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-xs"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-xs"
                   />
                 </div>
               );
@@ -301,9 +301,9 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
 
       {uploading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 rounded-xl border border-slate-700 bg-slate-900/90 px-4 py-3 shadow-xl">
+          <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xl">
             <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">Processing image…</span>
+            <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>
       )}

@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 
 import { isNewsHost } from "@/lib/hosts";
 import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
+import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
 
 /**
  * Public routes that don't require authentication
@@ -13,7 +14,8 @@ const publicRoutes = [
   "/register",
   "/forgot-password",
   "/reset-password",
-  "/stripe-callback", // Stripe callback doesn't require auth (handles it internally)
+  "/verify-email",
+  "/stripe-callback",
 ];
 
 /**
@@ -70,6 +72,52 @@ function getAuthToken(request: NextRequest): string | null {
   return request.cookies.get("auth_access_token")?.value || null;
 }
 
+/** Logged-in users are verified only when the cookie explicitly says so. */
+function isEmailVerified(request: NextRequest): boolean {
+  return readAuthUser(request)?.emailVerified === true;
+}
+
+function isBizCookieUser(request: NextRequest): boolean {
+  const user = readAuthUser(request);
+  const t = String(user?.profileType || "").toUpperCase();
+  return t === "BIZ";
+}
+
+function readAuthUser(request: NextRequest): {
+  emailVerified?: boolean;
+  profileType?: string;
+} | null {
+  const raw = request.cookies.get("auth_user")?.value;
+  if (!raw) return null;
+  try {
+    return JSON.parse(decodeURIComponent(raw));
+  } catch {
+    try {
+      return JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+}
+
+function redirectToVerifyEmail(request: NextRequest, explicitRedirect?: string | null) {
+  const url = new URL("/verify-email", request.url);
+  const { pathname, search } = request.nextUrl;
+  let next = (explicitRedirect || "").trim();
+  if (
+    !next &&
+    !isEmailVerificationExemptPath(pathname) &&
+    pathname !== "/login" &&
+    pathname !== "/register"
+  ) {
+    next = `${pathname}${search}`;
+  }
+  if (next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/verify-email")) {
+    url.searchParams.set("redirect", next);
+  }
+  return NextResponse.redirect(url);
+}
+
 /** Pass pathname into Server Components via `headers().get("x-pathname")`. */
 function nextWithPathname(request: NextRequest, pathname = request.nextUrl.pathname) {
   const requestHeaders = new Headers(request.headers);
@@ -87,10 +135,33 @@ function rewriteWithPathname(request: NextRequest, internalPath: string) {
 }
 
 /**
+ * App routes that must render even when the request Host is a news host.
+ * Locally NEXT_PUBLIC_APP_URL and NEXT_PUBLIC_NEWS_HOSTS can be the same
+ * origin (127.0.0.1), so claim/verify/onboard would otherwise 302 to `/`.
+ */
+function isNewsHostAppPassthrough(pathname: string): boolean {
+  const prefixes = [
+    "/verify-email",
+    "/biz-os",
+    "/login",
+    "/register",
+    "/forgot-password",
+    "/reset-password",
+    "/stripe-callback",
+    "/dashboard",
+    "/admin",
+    "/account",
+    "/lab",
+  ];
+  return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+}
+
+/**
  * news.justmy.com: `/` and `/news` serve the dual-mode news page.
  * Legacy `/{slug}` and `/news/{slug}` redirect to `/`.
+ * Returns null so the main proxy can auth-check app routes on this host.
  */
-function handleNewsHost(request: NextRequest): NextResponse {
+function handleNewsHost(request: NextRequest): NextResponse | null {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/" || pathname === "") {
@@ -106,50 +177,58 @@ function handleNewsHost(request: NextRequest): NextResponse {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  const segments = pathname.split("/").filter(Boolean);
-  if (segments.length === 1 && segments[0]) {
-    return NextResponse.redirect(new URL("/", request.url));
+  if (isNewsHostAppPassthrough(pathname)) {
+    return null;
+  }
+
+  // Public myCARD / CMS handles (`/acme-coffee`). Legacy news slugs used this
+  // path and now live at `/`; do not 302 those handles away.
+  if (isHandleRoute(pathname)) {
+    return null;
   }
 
   return NextResponse.redirect(new URL("/", request.url));
 }
 
 /**
- * Authentication Proxy
- * Protects routes except public/auth routes.
- * News host is gated separately and never uses main-app auth redirects.
+ * Authentication proxy for the whole platform (City OS, Biz OS, admin).
+ * News host only rewrites `/` → `/news`; app routes still use this gate.
  */
 export function proxy(request: NextRequest) {
   const host = request.headers.get("host");
 
   if (isNewsHost(host)) {
-    return handleNewsHost(request);
+    const newsResponse = handleNewsHost(request);
+    if (newsResponse) return newsResponse;
   }
 
   const { pathname } = request.nextUrl;
+  const token = getAuthToken(request);
+  const unverified = Boolean(token) && !isEmailVerified(request);
 
-  // Allow public routes
+  if (unverified && !isPublicRoute(pathname) && !isEmailVerificationExemptPath(pathname)) {
+    return redirectToVerifyEmail(request);
+  }
+
   if (isPublicRoute(pathname)) {
-    // If user is already authenticated and tries to access login/register, redirect to dashboard
-    const token = getAuthToken(request);
     if (token && (pathname === "/login" || pathname === "/register")) {
+      if (unverified) {
+        return redirectToVerifyEmail(request, request.nextUrl.searchParams.get("redirect"));
+      }
+      if (isBizCookieUser(request)) {
+        return NextResponse.redirect(new URL("/biz-os", request.url));
+      }
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
     return nextWithPathname(request);
   }
 
-  // Check authentication for protected routes (everything that's not public)
-  const token = getAuthToken(request);
-
   if (!token) {
-    // Redirect to login if not authenticated
     const loginUrl = new URL("/login", request.url);
-    // Add redirect parameter to return to the original page after login
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  // User is authenticated, allow the request
   return nextWithPathname(request);
 }
 

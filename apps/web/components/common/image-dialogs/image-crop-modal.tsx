@@ -25,6 +25,7 @@ interface ImageCropModalProps {
   /** May be async (e.g. upload); the modal shows progress until it settles. */
   onCrop: (croppedImage: string) => void | Promise<void>;
   onCancel: () => void;
+  variant?: "light" | "default";
 }
 
 export function ImageCropModal({
@@ -32,7 +33,9 @@ export function ImageCropModal({
   aspectRatio,
   onCrop,
   onCancel,
+  variant = "default",
 }: ImageCropModalProps) {
+  const isLight = variant === "light";
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
@@ -182,24 +185,27 @@ export function ImageCropModal({
           : "Crop image";
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-md">
+    <div className={cn("fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4", isLight ? "bg-slate-900/40" : "bg-black/40")}>
+      <div className={cn("p-6 rounded-2xl border shadow-xl w-full max-w-md", isLight ? "bg-white border-slate-200 text-slate-900" : "bg-background border-border text-foreground")}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-white">{cropTitle}</h3>
+          <h3 className={cn("text-lg font-bold", isLight ? "text-slate-900" : "text-foreground")}>{cropTitle}</h3>
           <button
             type="button"
             onClick={onCancel}
             disabled={isApplying}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-700 transition-colors hover:bg-slate-600 disabled:pointer-events-none disabled:opacity-40"
+            className={cn(
+              "flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
+              isLight ? "bg-slate-100 hover:bg-slate-200" : "bg-muted hover:bg-muted",
+            )}
             aria-label="Close"
           >
-            <X className="h-4 w-4 text-slate-300" />
+            <X className={cn("h-4 w-4", isLight ? "text-slate-500" : "text-muted-foreground")} />
           </button>
         </div>
 
         <div
           className={cn(
-            "relative mx-auto mb-4 w-full overflow-hidden rounded-lg bg-slate-900",
+            "relative mx-auto mb-4 w-full overflow-hidden rounded-lg bg-muted",
             isApplying && "pointer-events-none opacity-60",
           )}
           style={{
@@ -224,14 +230,14 @@ export function ImageCropModal({
                 position: "relative",
                 width: "100%",
                 height: "100%",
-                background: "#1e293b",
+                background: "var(--muted)",
               },
             }}
           />
         </div>
 
         <div className="mb-4">
-          <label className="block text-xs text-slate-400 mb-2">
+          <label className="block text-xs text-muted-foreground mb-2">
             Zoom: {zoom.toFixed(1)}x
           </label>
           <input
@@ -252,7 +258,12 @@ export function ImageCropModal({
             onClick={onCancel}
             disabled={isApplying}
             variant="outline"
-            className="flex-1 border-slate-600 bg-slate-700 text-white hover:bg-slate-600 disabled:opacity-50"
+            className={cn(
+              "flex-1 disabled:opacity-50",
+              isLight
+                ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                : "border-border bg-background text-foreground hover:bg-muted hover:text-foreground",
+            )}
           >
             Cancel
           </Button>
@@ -260,7 +271,10 @@ export function ImageCropModal({
             type="button"
             onClick={() => void handleCrop()}
             disabled={isApplying || !croppedAreaPixels}
-            className="flex-1 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            className={cn(
+              "flex-1 text-white disabled:opacity-50",
+              isLight ? "bg-violet-600 hover:bg-violet-700" : "bg-blue-600 hover:bg-blue-700",
+            )}
           >
             {isApplying ? (
               <>

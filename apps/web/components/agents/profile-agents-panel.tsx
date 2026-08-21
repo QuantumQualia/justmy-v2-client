@@ -257,7 +257,7 @@ function KnowledgeIngestionProgress({
       value={knowledgeIngestionProgressValue(value)}
       aria-valuetext={ariaValueText}
       className={cn(
-        "mt-3 h-2 w-full min-w-0 border border-slate-700/90 bg-slate-950 shadow-inner",
+        "mt-3 h-2 w-full min-w-0 border border-border bg-muted shadow-inner",
         variant === "website"
           ? "[&_[data-slot=progress-indicator]]:bg-gradient-to-r [&_[data-slot=progress-indicator]]:from-blue-600 [&_[data-slot=progress-indicator]]:to-sky-500"
           : "[&_[data-slot=progress-indicator]]:bg-gradient-to-r [&_[data-slot=progress-indicator]]:from-emerald-600 [&_[data-slot=progress-indicator]]:to-emerald-400",
@@ -348,7 +348,7 @@ function statusBadgeClass(status: KnowledgeIngestionStatus): string {
     case "processing":
       return "border-blue-500/30 bg-blue-500/10 text-blue-300";
     default:
-      return "border-slate-600 bg-slate-800 text-slate-300";
+      return "border-border bg-muted text-muted-foreground";
   }
 }
 
@@ -409,12 +409,12 @@ function StatCard({
   description: string;
 }) {
   return (
-    <Card className="min-w-0 max-w-full rounded-br-none border-slate-800 bg-slate-900/60 py-0">
-      <CardHeader className="gap-1 border-b border-slate-800/80 py-4">
-        <CardDescription className="text-slate-400">{title}</CardDescription>
-        <CardTitle className="text-2xl text-white">{value}</CardTitle>
+    <Card className="min-w-0 max-w-full rounded-br-none border-border bg-card py-0">
+      <CardHeader className="gap-1 border-b border-border/80 py-4">
+        <CardDescription className="text-muted-foreground">{title}</CardDescription>
+        <CardTitle className="text-2xl text-foreground">{value}</CardTitle>
       </CardHeader>
-      <CardContent className="py-4 text-sm text-slate-400">{description}</CardContent>
+      <CardContent className="py-4 text-sm text-muted-foreground">{description}</CardContent>
     </Card>
   );
 }
@@ -577,7 +577,7 @@ function AgentFormDialog({
       }}
     >
       <DialogContent
-        className="max-h-[90vh] overflow-y-auto border-slate-800 bg-slate-950 text-white sm:max-w-2xl"
+        className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-2xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -591,7 +591,7 @@ function AgentFormDialog({
       >
         <DialogHeader>
           <DialogTitle>{state.mode === "create" ? "Create agent" : "Edit agent"}</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             Set the agent name, activation state, and optional greeting or custom prompt for this profile.
           </DialogDescription>
         </DialogHeader>
@@ -605,7 +605,7 @@ function AgentFormDialog({
 
           <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_220px] md:items-end">
             <div className="space-y-2">
-              <Label htmlFor="agent-name" className="text-slate-200">
+              <Label htmlFor="agent-name" className="text-foreground">
                 Agent name
               </Label>
               <Input
@@ -613,23 +613,23 @@ function AgentFormDialog({
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 placeholder="e.g. Sales Concierge"
-                className="border-slate-700 bg-slate-900 text-white"
+                className="border-input bg-background text-foreground"
                 disabled={submitting}
                 autoFocus
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="agent-active" className="text-slate-200">
+              <Label htmlFor="agent-active" className="text-foreground">
                 Status
               </Label>
-              <div className="flex h-10 items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-3">
+              <div className="flex h-10 items-center justify-between rounded-lg border border-border bg-card px-3">
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-400" : "bg-slate-500"}`}
+                    className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-400" : "bg-muted-foreground"}`}
                   />
-                  <span className="text-sm font-medium text-slate-200">
+                  <span className="text-sm font-medium text-foreground">
                     {isActive ? "Active" : "Inactive"}
                   </span>
                 </div>
@@ -638,43 +638,43 @@ function AgentFormDialog({
                   checked={isActive}
                   onCheckedChange={setIsActive}
                   disabled={submitting}
-                  className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-700"
+                  className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
                 />
               </div>
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="agent-greeting-message" className="text-slate-200">
-              Greeting message <span className="text-slate-500">(optional)</span>
+            <Label htmlFor="agent-greeting-message" className="text-foreground">
+              Greeting message <span className="text-muted-foreground">(optional)</span>
             </Label>
             <Textarea
               id="agent-greeting-message"
               value={greetingMessage}
               onChange={(event) => setGreetingMessage(event.target.value)}
               placeholder="Shown when visitors open AskSKY! before they send a message."
-              className="min-h-24 border-slate-700 bg-slate-900 text-white"
+              className="min-h-24 border-input bg-background text-foreground"
               disabled={submitting}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="agent-custom-prompt" className="text-slate-200">
-              Custom prompt text <span className="text-slate-500">(optional)</span>
+            <Label htmlFor="agent-custom-prompt" className="text-foreground">
+              Custom prompt text <span className="text-muted-foreground">(optional)</span>
             </Label>
             <Textarea
               id="agent-custom-prompt"
               value={customPromptText}
               onChange={(event) => setCustomPromptText(event.target.value)}
               placeholder="Leave blank to use the shared/default prompt behavior from the backend."
-              className="min-h-40 border-slate-700 bg-slate-900 text-white"
+              className="min-h-40 border-input bg-background text-foreground"
               disabled={submitting}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="agent-contact-form" className="text-slate-200">
-              AskSKY contact form <span className="text-slate-500">(optional)</span>
+            <Label htmlFor="agent-contact-form" className="text-foreground">
+              AskSKY contact form <span className="text-muted-foreground">(optional)</span>
             </Label>
             <Select
               value={contactFormKey}
@@ -683,7 +683,7 @@ function AgentFormDialog({
             >
               <SelectTrigger
                 id="agent-contact-form"
-                className="border-slate-700 bg-slate-900 text-white"
+                className="border-input bg-background text-foreground"
               >
                 <SelectValue
                   placeholder={formsLoading ? "Loading forms…" : "No form"}
@@ -698,19 +698,19 @@ function AgentFormDialog({
                 ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Only published myFORM definitions can be linked. Visitors see it inside AskSKY as an optional lead
               capture card.
             </p>
           </div>
 
-          <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+          <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <Label htmlFor="agent-live-search" className="text-slate-200">
+                <Label htmlFor="agent-live-search" className="text-foreground">
                   Enable live web search when knowledge base has no answer
                 </Label>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Sky will only search these sites when your uploaded knowledge has no match. Off by default.
                 </p>
               </div>
@@ -719,7 +719,7 @@ function AgentFormDialog({
                 checked={liveSearchEnabled}
                 onCheckedChange={setLiveSearchEnabled}
                 disabled={submitting}
-                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-700"
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
               />
             </div>
 
@@ -732,9 +732,9 @@ function AgentFormDialog({
                 placeholder="justmy.com, electionshelbytn.gov"
                 disabled={submitting}
                 splitPaste
-                inputClassName="border-slate-700 bg-slate-900"
+                inputClassName="border-border bg-card"
               />
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted-foreground">
                 Paste URLs or hostnames (max {LIVE_SEARCH_DOMAINS_MAX}). Wildcards like{" "}
                 <span className="font-mono">*.com</span> are rejected. Examples:{" "}
                 <span className="font-mono">justmy.com</span>,{" "}
@@ -742,20 +742,20 @@ function AgentFormDialog({
                 <span className="font-mono">electionshelbytn.gov</span>.
               </p>
               {liveSearchDomains.length > 0 ? (
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-muted-foreground">
                   {liveSearchDomains.length} / {LIVE_SEARCH_DOMAINS_MAX} domains
                 </p>
               ) : null}
             </div>
           </div>
 
-          <div className="space-y-3 rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+          <div className="space-y-3 rounded-lg border p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="space-y-1">
-                <Label htmlFor="agent-share-tray" className="text-slate-200">
+                <Label htmlFor="agent-share-tray" className="text-foreground">
                   Post-answer share tray
                 </Label>
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   After each answer, AskSKY always shows &quot;Ask Another Question&quot;. When this is on, it
                   also shows a Ready CTA that opens a share tray (SMS, WhatsApp, Facebook, X).
                 </p>
@@ -765,13 +765,13 @@ function AgentFormDialog({
                 checked={shareTrayEnabled}
                 onCheckedChange={setShareTrayEnabled}
                 disabled={submitting}
-                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-slate-700"
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
               />
             </div>
 
             <div className={cn("space-y-3", !shareTrayEnabled && "opacity-60")}>
               <div className="space-y-2">
-                <Label htmlFor="agent-share-ready-label" className="text-slate-200">
+                <Label htmlFor="agent-share-ready-label" className="text-foreground">
                   Ready button label{shareTrayEnabled ? " (required)" : ""}
                 </Label>
                 <Input
@@ -780,14 +780,14 @@ function AgentFormDialog({
                   onChange={(event) => setShareTrayReadyLabel(event.target.value)}
                   placeholder="I'm Ready to Vote!"
                   maxLength={SHARE_TRAY_READY_LABEL_MAX}
-                  className="border-slate-700 bg-slate-900 text-white"
+                  className="border-input bg-background text-foreground"
                   disabled={submitting || !shareTrayEnabled}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agent-share-closing" className="text-slate-200">
-                  Closing message <span className="text-slate-500">(optional)</span>
+                <Label htmlFor="agent-share-closing" className="text-foreground">
+                  Closing message <span className="text-muted-foreground">(optional)</span>
                 </Label>
                 <Textarea
                   id="agent-share-closing"
@@ -795,13 +795,13 @@ function AgentFormDialog({
                   onChange={(event) => setShareTrayClosingMessage(event.target.value)}
                   placeholder="Awesome! Knowledge is power—now let's use it to move Shelby County forward…"
                   maxLength={SHARE_TRAY_CLOSING_MESSAGE_MAX}
-                  className="min-h-20 border-slate-700 bg-slate-900 text-white"
+                  className="min-h-20 border-input bg-background text-foreground"
                   disabled={submitting || !shareTrayEnabled}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agent-share-url" className="text-slate-200">
+                <Label htmlFor="agent-share-url" className="text-foreground">
                   Share URL{shareTrayEnabled ? " (required)" : ""}
                 </Label>
                 <Input
@@ -809,13 +809,13 @@ function AgentFormDialog({
                   value={shareTrayShareUrl}
                   onChange={(event) => setShareTrayShareUrl(event.target.value)}
                   placeholder="https://justmymemphis.com/election2026"
-                  className="border-slate-700 bg-slate-900 text-white"
+                  className="border-input bg-background text-foreground"
                   disabled={submitting || !shareTrayEnabled}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="agent-share-text" className="text-slate-200">
+                <Label htmlFor="agent-share-text" className="text-foreground">
                   Share text{shareTrayEnabled ? " (required)" : ""}
                 </Label>
                 <Textarea
@@ -824,17 +824,17 @@ function AgentFormDialog({
                   onChange={(event) => setShareTrayShareText(event.target.value)}
                   placeholder="I just used AskSKY! to map out my voter card…"
                   maxLength={SHARE_TRAY_SHARE_TEXT_MAX}
-                  className="min-h-24 border-slate-700 bg-slate-900 text-white"
+                  className="min-h-24 border-input bg-background text-foreground"
                   disabled={submitting || !shareTrayEnabled}
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Prefills SMS / WhatsApp / X. The share URL is appended automatically if it is not already in
                   the text.
                 </p>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-slate-200">Channels</p>
+                <p className="text-sm text-foreground">Channels</p>
                 <div className="flex flex-wrap gap-4">
                   {SHARE_TRAY_CHANNELS.map((channel) => {
                     const id = `agent-share-channel-${channel}`;
@@ -848,7 +848,7 @@ function AgentFormDialog({
                             ? "Facebook"
                             : "X";
                     return (
-                      <label key={channel} htmlFor={id} className="flex items-center gap-2 text-sm text-slate-300">
+                      <label key={channel} htmlFor={id} className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Checkbox
                           id={id}
                           checked={checked}
@@ -865,8 +865,8 @@ function AgentFormDialog({
           </div>
 
           {publicIdentifier ? (
-            <div className="rounded-lg border border-slate-800 bg-slate-900/70 px-4 py-3">
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+            <div className="rounded-lg border border-border bg-card px-4 py-3">
+              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Public identifier
               </p>
               <p className="mt-1 font-mono text-sm text-emerald-300">{publicIdentifier}</p>
@@ -879,7 +879,7 @@ function AgentFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+              className="border-input bg-background text-foreground hover:bg-accent"
             >
               Cancel
             </Button>
@@ -1006,7 +1006,7 @@ function KnowledgeSourceDialog({
       }}
     >
       <DialogContent
-        className="border-slate-800 bg-slate-950 text-white sm:max-w-xl"
+        className="border-border bg-background text-foreground sm:max-w-xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -1020,7 +1020,7 @@ function KnowledgeSourceDialog({
       >
         <DialogHeader>
           <DialogTitle>{dialogTitle}</DialogTitle>
-          <DialogDescription className="text-slate-400">
+          <DialogDescription className="text-muted-foreground">
             {scopeLabel(state.scope)} will be available according to the scope you choose here.
           </DialogDescription>
         </DialogHeader>
@@ -1034,7 +1034,7 @@ function KnowledgeSourceDialog({
 
           {state.sourceType === "website" ? (
             <div className="space-y-2">
-              <Label htmlFor="knowledge-url" className="text-slate-200">
+              <Label htmlFor="knowledge-url" className="text-foreground">
                 Website URL
               </Label>
               <Input
@@ -1043,11 +1043,11 @@ function KnowledgeSourceDialog({
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
                 placeholder="https://example.com/docs"
-                className="border-slate-700 bg-slate-900 text-white"
+                className="border-input bg-background text-foreground"
                 disabled={submitting}
               />
               <div className="space-y-2">
-                <Label htmlFor="knowledge-max-pages" className="text-slate-200">
+                <Label htmlFor="knowledge-max-pages" className="text-foreground">
                   Max pages
                 </Label>
                 <Input
@@ -1059,14 +1059,14 @@ function KnowledgeSourceDialog({
                   value={maxPagesStr}
                   onChange={(event) => setMaxPagesStr(event.target.value)}
                   placeholder="50"
-                  className="border-slate-700 bg-slate-900 text-white"
+                  className="border-input bg-background text-foreground"
                   disabled={submitting}
                 />
               </div>
             </div>
           ) : (
             <div className="space-y-2">
-              <Label htmlFor="knowledge-file" className="text-slate-200">
+              <Label htmlFor="knowledge-file" className="text-foreground">
                 Document
               </Label>
               <input
@@ -1088,28 +1088,28 @@ function KnowledgeSourceDialog({
               <div
                 className={`flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2 ${
                   error === documentRequiredError
-                    ? "border-red-500/60 bg-slate-900"
-                    : "border-slate-700 bg-slate-900"
+                    ? "border-red-500/60 bg-card"
+                    : "border-border bg-card"
                 }`}
               >
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="shrink-0 border-slate-600 bg-slate-950 text-slate-100 hover:bg-slate-800"
+                  className="shrink-0 border-border bg-muted text-foreground hover:bg-accent"
                   disabled={submitting}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   Choose file
                 </Button>
-                <span className={`truncate text-sm ${file ? "text-slate-200" : "text-slate-500"}`}>
+                <span className={`truncate text-sm ${file ? "text-foreground" : "text-muted-foreground"}`}>
                   {file?.name ?? "No file chosen"}
                 </span>
               </div>
               {error === documentRequiredError ? (
                 <p className="text-xs text-red-400">{documentRequiredError}</p>
               ) : (
-                <p className="text-xs text-slate-500">PDF only (application/pdf).</p>
+                <p className="text-xs text-muted-foreground">PDF only (application/pdf).</p>
               )}
             </div>
           )}
@@ -1120,7 +1120,7 @@ function KnowledgeSourceDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+              className="border-input bg-background text-foreground hover:bg-accent"
             >
               Cancel
             </Button>
@@ -1199,15 +1199,15 @@ function KnowledgeSourcesCard({
       id={scope === "agent" ? "agent-knowledge-panel" : undefined}
       className={
         scope === "agent"
-          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0"
-          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0"
+          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0"
+          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0"
       }
     >
-      <CardHeader className="min-w-0 gap-3 border-b border-slate-800/80 px-4 py-5 sm:px-6">
+      <CardHeader className="min-w-0 gap-3 border-b border-border/80 px-4 py-5 sm:px-6">
         <div className="grid min-w-0 gap-3 lg:min-h-[152px] lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-6">
           <div className="min-w-0 space-y-2">
             <div className="flex min-w-0 flex-wrap items-center gap-2">
-              <CardTitle className="min-w-0 break-words text-white">{title}</CardTitle>
+              <CardTitle className="min-w-0 break-words text-foreground">{title}</CardTitle>
               <Badge
                 variant="outline"
                 className={
@@ -1219,13 +1219,13 @@ function KnowledgeSourcesCard({
                 {scope === "shared" ? "Shared" : "Agent-specific"}
               </Badge>
             </div>
-            <CardDescription className="max-w-full min-w-0 text-balance text-slate-400 sm:max-w-2xl">
+            <CardDescription className="max-w-full min-w-0 text-balance text-muted-foreground sm:max-w-2xl">
               {description}
             </CardDescription>
             {scope === "agent" && selectedAgent ? (
-              <div className="rounded-lg border border-slate-800 bg-slate-950/60 px-3 py-2 text-xs text-slate-300">
+              <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
                 <div className="flex min-w-0 flex-col gap-1">
-                  <span className="font-medium text-slate-100">{selectedAgent.name}</span>
+                  <span className="font-medium text-foreground">{selectedAgent.name}</span>
                   {resolveAgentPublicIdentifier(selectedAgent) ? (
                     <span className="break-all font-mono text-emerald-300">
                       {resolveAgentPublicIdentifier(selectedAgent)}
@@ -1244,10 +1244,10 @@ function KnowledgeSourcesCard({
                   onValueChange={onSelectedAgentChange}
                   disabled={!availableAgents.length}
                 >
-                  <SelectTrigger className="border-slate-700 bg-slate-900 text-white">
+                  <SelectTrigger className="border-input bg-background text-foreground">
                     <SelectValue placeholder="Select an agent" />
                   </SelectTrigger>
-                  <SelectContent className="border-slate-700 bg-slate-900 text-slate-100">
+                  <SelectContent className="border-border bg-card text-foreground">
                     {availableAgents.map((agent) => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.name}
@@ -1262,7 +1262,7 @@ function KnowledgeSourcesCard({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full justify-center border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                className="w-full justify-center border-input bg-background text-foreground hover:bg-accent"
                 onClick={onAddWebsite}
                 disabled={scope === "agent" && !selectedAgent}
               >
@@ -1292,12 +1292,12 @@ function KnowledgeSourcesCard({
         ) : null}
 
         {loading ? (
-          <div className="flex items-center gap-2 rounded-lg border border-slate-800 bg-slate-950/60 px-4 py-6 text-sm text-slate-300">
+          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading knowledge sources...
           </div>
         ) : sources.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/40 px-4 py-6 text-sm text-slate-400">
+          <div className="rounded-lg border border-dashed border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
             {scope === "shared"
               ? "No shared knowledge sources yet."
               : selectedAgent
@@ -1319,13 +1319,13 @@ function KnowledgeSourcesCard({
               return (
                 <div
                   key={source.id}
-                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950/60 p-3 sm:p-4"
+                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-border bg-muted p-3 sm:p-4"
                 >
                   <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
-                      <p className="break-words text-sm font-semibold text-slate-100 sm:truncate">{primaryLabel}</p>
+                      <p className="break-words text-sm font-semibold text-foreground sm:truncate">{primaryLabel}</p>
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className="border-slate-700 text-slate-300">
+                        <Badge variant="outline" className="border-border text-muted-foreground">
                           {sourceTypeLabel(source.sourceType)}
                         </Badge>
                         <Badge variant="outline" className={statusBadgeClass(source.status)}>
@@ -1334,15 +1334,15 @@ function KnowledgeSourcesCard({
                       </div>
 
                       {secondaryLabel ? (
-                        <p className="break-all text-xs text-slate-400">{secondaryLabel}</p>
+                        <p className="break-all text-xs text-muted-foreground">{secondaryLabel}</p>
                       ) : null}
 
-                      <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         {source.agentName && scope === "shared" ? (
                           <span>{source.agentName}</span>
                         ) : null}
                         {scrapedPagesLabel ? (
-                          <span className="tabular-nums text-slate-400">{scrapedPagesLabel}</span>
+                          <span className="tabular-nums text-muted-foreground">{scrapedPagesLabel}</span>
                         ) : null}
                         <span>Updated {formatDateTime(source.updatedAt ?? source.createdAt)}</span>
                       </div>
@@ -1354,7 +1354,7 @@ function KnowledgeSourcesCard({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
+                          className="w-full shrink-0 border-input bg-background text-foreground hover:bg-accent sm:w-auto"
                           onClick={() => onDownloadDocument(source)}
                           disabled={!canDownloadDocumentKnowledgeSource(source, busy)}
                         >
@@ -1370,7 +1370,7 @@ function KnowledgeSourcesCard({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full shrink-0 border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800 sm:w-auto"
+                          className="w-full shrink-0 border-input bg-background text-foreground hover:bg-accent sm:w-auto"
                           onClick={() => onReindex(source)}
                           disabled={!canReindexKnowledgeSource(source, busy)}
                         >
@@ -1418,8 +1418,8 @@ function KnowledgeSourcesCard({
             })}
 
             {totalPages > 1 ? (
-              <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-                <p className="min-w-0 text-xs text-slate-400">
+              <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                <p className="min-w-0 text-xs text-muted-foreground">
                   Showing {rangeStart}-{rangeEnd} of {total}
                 </p>
                 <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 self-stretch sm:self-auto">
@@ -1427,20 +1427,20 @@ function KnowledgeSourcesCard({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                    className="border-input bg-background text-foreground hover:bg-accent"
                     onClick={() => onPageChange(page - 1)}
                     disabled={loading || page <= 1}
                   >
                     Previous
                   </Button>
-                  <span className="min-w-20 text-center text-xs text-slate-400">
+                  <span className="min-w-20 text-center text-xs text-muted-foreground">
                     Page {page} of {totalPages}
                   </span>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                    className="border-input bg-background text-foreground hover:bg-accent"
                     onClick={() => onPageChange(page + 1)}
                     disabled={loading || page >= totalPages}
                   >
@@ -1949,8 +1949,8 @@ export function ProfileAgentsPanel({
           const agent = row.original;
           return (
             <div className="min-w-[220px] space-y-1">
-              <p className="font-medium text-white">{agent.name}</p>
-              <p className="text-xs text-slate-400">
+              <p className="font-medium text-foreground">{agent.name}</p>
+              <p className="text-xs text-muted-foreground">
                 {agent.customPromptText?.trim()
                   ? "Custom prompt configured"
                   : "Using default prompt behavior"}
@@ -1985,7 +1985,7 @@ export function ProfileAgentsPanel({
             className={
               row.original.isActive
                 ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
-                : "border-slate-600 bg-slate-800 text-slate-300"
+                : "border-border bg-muted text-muted-foreground"
             }
           >
             {row.original.isActive ? "Active" : "Inactive"}
@@ -1996,7 +1996,7 @@ export function ProfileAgentsPanel({
         id: "knowledge",
         header: "Private knowledge",
         cell: ({ row }) => (
-          <span className="text-sm text-slate-300">
+          <span className="text-sm text-muted-foreground">
             {countLabel(
               row.original.privateKnowledgeSourceCount ?? perAgentSourceCounts.get(row.original.id) ?? 0,
               "source",
@@ -2008,7 +2008,7 @@ export function ProfileAgentsPanel({
         accessorKey: "updatedAt",
         header: "Updated",
         cell: ({ row }) => (
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-muted-foreground">
             {formatDateTime(row.original.updatedAt ?? row.original.createdAt)}
           </span>
         ),
@@ -2025,7 +2025,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                className="border-input bg-background text-foreground hover:bg-accent"
                 onClick={() =>
                   setAgentDialogState({
                     open: true,
@@ -2041,7 +2041,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                className="border-input bg-background text-foreground hover:bg-accent"
                 disabled={typeof agent.contactFormId !== "number"}
                 title={
                   typeof agent.contactFormId === "number"
@@ -2057,7 +2057,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                className="border-input bg-background text-foreground hover:bg-accent"
                 disabled={!agent.isActive}
                 title={
                   agent.isActive
@@ -2169,7 +2169,7 @@ export function ProfileAgentsPanel({
         description={
           <span>
             Delete{" "}
-            <span className="font-medium text-white">
+            <span className="font-medium text-foreground">
               {deleteAgentTarget?.name ?? "this agent"}
             </span>
             . Agent-specific knowledge sources may also be removed depending on backend rules.
@@ -2198,7 +2198,7 @@ export function ProfileAgentsPanel({
         description={
           <span>
             Delete{" "}
-            <span className="font-medium text-white">
+            <span className="font-medium text-foreground">
               {deleteSourceTarget?.title ||
                 deleteSourceTarget?.fileName ||
                 deleteSourceTarget?.url ||
@@ -2230,7 +2230,7 @@ export function ProfileAgentsPanel({
         description={
           <span>
             This will start a new crawl for{" "}
-            <span className="font-medium text-white">
+            <span className="font-medium text-foreground">
               {reindexSourceTarget?.title ||
                 reindexSourceTarget?.fileName ||
                 reindexSourceTarget?.url ||
@@ -2250,8 +2250,8 @@ export function ProfileAgentsPanel({
             <Bot className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h2 className="text-2xl font-semibold text-white">Agents and knowledge base</h2>
-            <p className="text-sm text-balance text-slate-400">
+            <h2 className="text-2xl font-semibold text-foreground">Agents and knowledge base</h2>
+            <p className="text-sm text-balance text-muted-foreground">
               Manage multiple agents for {profileName || "this profile"}, set optional
               prompts, and track shared versus agent-specific ingestion.
             </p>
@@ -2280,15 +2280,15 @@ export function ProfileAgentsPanel({
         />
       </div>
 
-      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-slate-800 bg-slate-900/70 py-0">
-        <CardHeader className="border-b border-slate-800/80 py-5">
+      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0">
+        <CardHeader className="border-b border-border/80 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
-              <CardTitle className="text-white">Agent management</CardTitle>
-              <CardDescription className="max-w-2xl text-slate-400">
-                Create, edit, deactivate, or delete agents. Use <span className="text-slate-300">Embed</span> to build
-                a shareable AskSKY! page URL (with <span className="text-slate-300">profileSlug</span>,{" "}
-                <span className="text-slate-300">agentToken</span>, and <span className="text-slate-300">variant</span>
+              <CardTitle className="text-foreground">Agent management</CardTitle>
+              <CardDescription className="max-w-2xl text-muted-foreground">
+                Create, edit, deactivate, or delete agents. Use <span className="text-muted-foreground">Embed</span> to build
+                a shareable AskSKY! page URL (with <span className="text-muted-foreground">profileSlug</span>,{" "}
+                <span className="text-muted-foreground">agentToken</span>, and <span className="text-muted-foreground">variant</span>
                 ) for iframes or other sites. Public identifiers are what AskSKY! needs to resolve the agent.
               </CardDescription>
             </div>
@@ -2317,8 +2317,8 @@ export function ProfileAgentsPanel({
             emptyMessage="No agents yet. Create the first one to start configuring multi-agent behavior."
           />
           {agentsTotalPages > 1 ? (
-            <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-slate-800 bg-slate-950/40 px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
-              <p className="min-w-0 text-xs text-slate-400">
+            <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+              <p className="min-w-0 text-xs text-muted-foreground">
                 Showing {agentsRangeStart}-{agentsRangeEnd} of {agentsTotal}
               </p>
               <div className="flex min-w-0 flex-wrap items-center justify-end gap-2 self-stretch sm:self-auto">
@@ -2326,20 +2326,20 @@ export function ProfileAgentsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                  className="border-input bg-background text-foreground hover:bg-accent"
                   onClick={() => setAgentsPage((current) => Math.max(1, current - 1))}
                   disabled={agentsQuery.isPending || agentsPage <= 1}
                 >
                   Previous
                 </Button>
-                <span className="min-w-20 text-center text-xs text-slate-400">
+                <span className="min-w-20 text-center text-xs text-muted-foreground">
                   Page {agentsPage} of {agentsTotalPages}
                 </span>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-slate-700 bg-slate-900 text-slate-100 hover:bg-slate-800"
+                  className="border-input bg-background text-foreground hover:bg-accent"
                   onClick={() => setAgentsPage((current) => current + 1)}
                   disabled={agentsQuery.isPending || agentsPage >= agentsTotalPages}
                 >

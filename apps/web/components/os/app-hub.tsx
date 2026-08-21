@@ -36,7 +36,7 @@ interface VideoPreviewModalProps {
 const overlayBase =
   "fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4";
 const panelBase =
-  "bg-slate-950 rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-slate-800";
+  "bg-muted rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden border border-border";
 
 const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({
   isOpen,
@@ -53,23 +53,23 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({
           e.stopPropagation();
         }}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
           <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700">
-              <span className="text-xs text-slate-400">{app.name[0]}</span>
+            <div className="h-9 w-9 rounded-xl bg-muted flex items-center justify-center overflow-hidden border border-border">
+              <span className="text-xs text-muted-foreground">{app.name[0]}</span>
             </div>
             <div>
-              <div className="text-sm font-semibold text-white">
+              <div className="text-sm font-semibold text-foreground">
                 {app.name} Preview
               </div>
-              <div className="text-xs text-slate-400">
+              <div className="text-xs text-muted-foreground">
                 Personal OS &middot; App Demo
               </div>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-slate-800 text-slate-400 cursor-pointer"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-accent text-muted-foreground cursor-pointer"
           >
             <span className="sr-only">Close</span>
             ✕
@@ -86,9 +86,9 @@ const VideoPreviewModal: React.FC<VideoPreviewModalProps> = ({
           />
         </div>
 
-        <div className="px-6 py-4 bg-slate-950 border-t border-slate-800">
-          <div className="text-sm text-slate-200 mb-2">{app.description}</div>
-          <div className="text-xs text-slate-500">
+        <div className="px-6 py-4 bg-muted border-t border-border">
+          <div className="text-sm text-foreground mb-2">{app.description}</div>
+          <div className="text-xs text-muted-foreground">
             You&apos;re viewing a promo inside the OS. Installing will not
             reload this page.
           </div>
@@ -248,7 +248,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
       return {
         label: "Coming Soon",
         variant: "outline" as const,
-        className: "border-slate-700 text-slate-300 bg-transparent",
+        className: "border-border text-muted-foreground bg-transparent",
       };
     }
 
@@ -286,10 +286,10 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
         key={app.id}
         value={String(app.id)}
         className={[
-          "border border-slate-800 rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 mb-2 last:border-b",
-          "bg-gradient-to-r from-slate-900/60 to-slate-900/30",
+          "border border-border rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 mb-2 last:border-b",
+          "bg-gradient-to-r from-muted/60 to-muted/30",
           "hover:border-emerald-500/60 transition-all duration-200 cursor-pointer",
-          isNewlyInstalled ? "ring-2 ring-emerald-500/70 ring-offset-2 ring-offset-black" : "",
+          isNewlyInstalled ? "ring-2 ring-emerald-500/70 ring-offset-2 ring-offset-background" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -299,14 +299,14 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
           onClick={() => handleToggle(app.id)}
         >
           <div className="flex items-center gap-3 sm:gap-4 flex-1">
-            <div className="h-10 w-10 rounded-xl bg-slate-800 flex items-center justify-center overflow-hidden border border-slate-700 shrink-0">
-              <span className="text-sm font-semibold text-slate-200">
+            <div className="h-10 w-10 rounded-xl bg-muted flex items-center justify-center overflow-hidden border border-border shrink-0">
+              <span className="text-sm font-semibold text-foreground">
                 {app.name[0]}
               </span>
             </div>
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm sm:text-base font-semibold text-white tracking-tight">
+                <span className="text-sm sm:text-base font-semibold text-foreground tracking-tight">
                   {app.name}
                 </span>
                 <Badge
@@ -316,18 +316,18 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                   {status.label}
                 </Badge>
               </div>
-              <span className="text-[11px] sm:text-xs text-slate-400 uppercase tracking-[0.16em]">
+              <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-[0.16em]">
                 {area === "active" ? "Installed" : "Available"}
               </span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs sm:text-sm text-slate-400 hover:underline">
+          <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground hover:underline">
             <span className="hidden sm:inline">View details</span>
           </div>
         </AccordionTrigger>
         <AccordionContent className="pt-2 sm:pt-3 pb-2">
           <div className="space-y-2 sm:space-y-3">
-            <p className="text-sm text-slate-300 leading-relaxed">
+            <p className="text-sm text-muted-foreground leading-relaxed">
               {app.description}
             </p>
             <div className="flex flex-wrap gap-3 sm:gap-4 items-center justify-between">
@@ -336,7 +336,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                   variant="outline"
                   size="sm"
                   type="button"
-                  className="cursor-pointer border-slate-600 bg-slate-800/50 text-slate-200 hover:border-emerald-500/50 hover:bg-slate-700/80 hover:text-white inline-flex items-center gap-2 rounded-full px-4 transition-colors"
+                  className="cursor-pointer border-border bg-muted text-foreground hover:border-emerald-500/50 hover:bg-accent hover:text-accent-foreground inline-flex items-center gap-2 rounded-full px-4 transition-colors"
                   onClick={() => handlePreview(app)}
                 >
                   <Play className="h-3 w-3" />
@@ -379,7 +379,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                       variant="outline"
                       size="sm"
                       type="button"
-                      className="cursor-pointer border-slate-600 bg-slate-800/50 text-slate-300 hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 inline-flex items-center gap-2 rounded-full px-4 transition-colors"
+                      className="cursor-pointer border-border bg-muted text-muted-foreground hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 inline-flex items-center gap-2 rounded-full px-4 transition-colors"
                       onClick={() => handleUninstall(app.id)}
                     >
                       <Minus className="h-3 w-3" />
@@ -398,7 +398,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4.1rem)] bg-black text-white px-4 py-6 sm:px-6 sm:py-10 font-sans">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground px-4 py-6 sm:px-6 sm:py-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-8 sm:space-y-10">
         <header className="space-y-2 sm:space-y-3">
           <div className="text-xs sm:text-sm font-semibold tracking-[0.22em] text-emerald-400 uppercase">
@@ -407,7 +407,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">
             APPs
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 max-w-xl">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl">
             Curate your personal operating system. Pin the tools you rely on
             every day and explore new ones below.
           </p>
@@ -418,26 +418,26 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
             <h2 className="text-sm sm:text-base font-semibold tracking-tight">
               My Active Apps
             </h2>
-            <span className="text-[11px] sm:text-xs text-slate-400 uppercase tracking-[0.18em]">
+            <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-[0.18em]">
               DOCK
             </span>
           </div>
           <div
             className={[
-              "rounded-2xl border border-slate-900 bg-gradient-to-b from-slate-950 to-slate-950/60",
+              "rounded-2xl border border-border bg-gradient-to-b from-muted to-muted/60",
               "px-3 sm:px-4 py-3 sm:py-4 shadow-[0_0_40px_rgba(0,0,0,0.75)]",
             ].join(" ")}
           >
             {isLoading ? (
-              <div className="py-8 text-center text-slate-400 text-sm">
+              <div className="py-8 text-center text-muted-foreground text-sm">
                 Loading your apps...
               </div>
             ) : activeApps.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 py-10 px-4 text-center">
-                <div className="text-slate-500 text-sm font-medium mb-1">
+              <div className="rounded-xl border border-dashed border-border bg-muted py-10 px-4 text-center">
+                <div className="text-muted-foreground text-sm font-medium mb-1">
                   No active apps
                 </div>
-                <p className="text-slate-600 text-xs max-w-xs mx-auto">
+                <p className="text-muted-foreground text-xs max-w-xs mx-auto">
                   Install apps from the discovery library below to add them here.
                 </p>
               </div>
@@ -459,26 +459,26 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
             <h2 className="text-sm sm:text-base font-semibold tracking-tight">
               Available Apps
             </h2>
-            <span className="text-[11px] sm:text-xs text-slate-400 uppercase tracking-[0.18em]">
+            <span className="text-[11px] sm:text-xs text-muted-foreground uppercase tracking-[0.18em]">
               DISCOVERY LIBRARY
             </span>
           </div>
           <div
             className={[
-              "rounded-2xl border border-slate-900 bg-gradient-to-b from-slate-950/80 to-slate-950",
+              "rounded-2xl border border-border bg-gradient-to-b from-muted to-muted",
               "px-3 sm:px-4 py-3 sm:py-4 shadow-[0_0_50px_rgba(0,0,0,0.9)]",
             ].join(" ")}
           >
             {isLoading ? (
-              <div className="py-8 text-center text-slate-400 text-sm">
+              <div className="py-8 text-center text-muted-foreground text-sm">
                 Loading your apps...
               </div>
             ) : availableApps.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/30 py-10 px-4 text-center">
-                <div className="text-slate-500 text-sm font-medium mb-1">
+              <div className="rounded-xl border border-dashed border-border bg-muted py-10 px-4 text-center">
+                <div className="text-muted-foreground text-sm font-medium mb-1">
                   No available apps
                 </div>
-                <p className="text-slate-600 text-xs max-w-xs mx-auto">
+                <p className="text-muted-foreground text-xs max-w-xs mx-auto">
                   You’ve installed everything from the library. New apps will show up here when they’re added.
                 </p>
               </div>

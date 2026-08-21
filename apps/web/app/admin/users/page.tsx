@@ -8,14 +8,14 @@ export const metadata: Metadata = {
 
 export default function UsersPage() {
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Users</h1>
-          <p className="text-slate-400">Manage users, block/unblock accounts, and soft delete users</p>
+          <h1 className="text-3xl font-bold text-foreground">Users</h1>
+          <p className="text-muted-foreground">Manage users, block/unblock accounts, and soft delete users</p>
         </div>
 
-        <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
           <UserList />
         </div>
       </div>

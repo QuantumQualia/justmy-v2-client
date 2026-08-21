@@ -48,7 +48,7 @@ export function ReferAFriend() {
               {row.original.name}
             </Link>
             {row.original.osName && (
-              <span className="text-xs text-white/60">{row.original.osName}</span>
+              <span className="text-xs text-muted-foreground">{row.original.osName}</span>
             )}
           </div>
         ),
@@ -57,7 +57,7 @@ export function ReferAFriend() {
         accessorKey: "joinedAt",
         header: "Joined",
         cell: ({ row }) => (
-          <span className="text-white/70">
+          <span className="text-muted-foreground">
             {new Date(row.original.joinedAt).toLocaleDateString("en-US", {
               month: "short",
               day: "numeric",
@@ -98,9 +98,9 @@ export function ReferAFriend() {
   return (
     <div className="space-y-6">
       {/* Refer section: show code + copy / share */}
-      <Card className="rounded-2xl rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md overflow-hidden">
+      <Card className="rounded-2xl rounded-br-none border border-border bg-card overflow-hidden">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
             <UserPlus className="size-5" />
             Your referral code
           </CardTitle>
@@ -108,7 +108,7 @@ export function ReferAFriend() {
         <CardContent className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="rounded-lg border border-white/20 bg-white/10 px-4 py-2 font-mono text-lg font-semibold text-white tracking-wide"
+              className="rounded-lg border border-border bg-muted px-4 py-2 font-mono text-lg font-semibold text-foreground tracking-wide"
               aria-label="Referral code"
             >
               {displayCode}
@@ -118,7 +118,7 @@ export function ReferAFriend() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="gap-2 border border-white/20 bg-white/10 text-white hover:bg-white/20"
+                className="gap-2 border border-border bg-muted text-foreground hover:bg-accent"
                 onClick={handleCopyCode}
               >
                 {copied ? (
@@ -132,15 +132,15 @@ export function ReferAFriend() {
           </div>
           {shareUrl && (
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm text-white/70">Share link:</span>
-              <code className="max-w-full truncate rounded bg-white/10 px-2 py-1 text-sm text-white/90">
+              <span className="text-sm text-muted-foreground">Share link:</span>
+              <code className="max-w-full truncate rounded bg-muted px-2 py-1 text-sm text-foreground">
                 {shareUrl}
               </code>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="gap-2 text-white/90 hover:bg-white/10 hover:text-white"
+                className="gap-2 text-foreground hover:bg-accent hover:text-accent-foreground"
                 onClick={handleCopyLink}
               >
                 {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
@@ -152,9 +152,9 @@ export function ReferAFriend() {
       </Card>
 
       {/* Referral list: people who signed up with this profile's code */}
-      <Card className="rounded-2xl rounded-br-none border border-white/15 bg-white/5 backdrop-blur-md overflow-hidden">
+      <Card className="rounded-2xl rounded-br-none border border-border bg-card overflow-hidden">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-lg font-medium text-white">
+          <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
             <Users className="size-5" />
             People you referred
           </CardTitle>

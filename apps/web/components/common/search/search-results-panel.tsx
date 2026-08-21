@@ -37,7 +37,7 @@ function BusinessResultCard({
     typeof item.photo === "string" && item.photo.length > 0 ? item.photo : null;
 
   const avatar = (
-    <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-slate-700 flex items-center justify-center text-slate-200 text-sm font-medium">
+    <div className="h-10 w-10 flex-shrink-0 rounded-full overflow-hidden bg-muted flex items-center justify-center text-foreground text-sm font-medium">
       {photoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img
@@ -55,7 +55,7 @@ function BusinessResultCard({
     <>
       <div className="flex items-start justify-between gap-2">
         <div className="flex flex-col gap-0.5">
-          <div className="text-sm font-semibold text-slate-100 flex items-center gap-1.5">
+          <div className="text-sm font-semibold text-foreground flex items-center gap-1.5">
             <span>{title}</span>
             <span className="flex items-center gap-1">
               {item.isVerified && (
@@ -83,13 +83,13 @@ function BusinessResultCard({
         <div className="text-xs text-emerald-300/80 mt-0.5">{item.subtitle}</div>
       )}
       {item.snippet && (
-        <p className="mt-1 line-clamp-2 text-xs text-slate-400">{item.snippet}</p>
+        <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.snippet}</p>
       )}
     </>
   );
 
   const className =
-    "rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 p-3 hover:border-emerald-500/60 hover:bg-slate-900/90 transition-colors flex gap-3 items-start";
+    "rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-emerald-500/60 hover:bg-muted transition-colors flex gap-3 items-start";
 
   if (href) {
     return (
@@ -145,7 +145,7 @@ function StandardSearchResultsPanel() {
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-5">
-      <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
+      <Card className="border-border bg-card/80 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           {/* Header / toggle */}
           <div className="flex items-center justify-between gap-3">
@@ -153,7 +153,7 @@ function StandardSearchResultsPanel() {
               <div className="text-xs uppercase tracking-[0.2em] text-emerald-400">
                 Super Search
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-300 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                 <span>
                   {lastQuery
                     ? `Results for “${lastQuery}”`
@@ -168,7 +168,7 @@ function StandardSearchResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-slate-700/80 bg-slate-900/70 text-slate-200 hover:border-emerald-500/70 hover:bg-slate-900 hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse search results" : "Expand search results"}
               >
@@ -183,9 +183,9 @@ function StandardSearchResultsPanel() {
 
           {/* Collapsible content */}
           {isOpen && (
-            <div className="border-t border-slate-800 pt-3">
+            <div className="border-t border-border pt-3">
               {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
                   Searching the network…
                 </div>
@@ -201,7 +201,7 @@ function StandardSearchResultsPanel() {
               {!isLoading && !error && hasResults && (
                 <div className="space-y-3">
                   {summary && (
-                    <p className="text-xs leading-relaxed text-slate-200">
+                    <p className="text-xs leading-relaxed text-foreground">
                       {summary}
                     </p>
                   )}
@@ -225,7 +225,7 @@ function StandardSearchResultsPanel() {
                         <>
                           <div className="flex items-start justify-between gap-2">
                             <div>
-                              <div className="text-sm font-semibold text-slate-100">
+                              <div className="text-sm font-semibold text-foreground">
                                 {title}
                               </div>
                               {subtitle && (
@@ -233,13 +233,13 @@ function StandardSearchResultsPanel() {
                               )}
                             </div>
                             {item.type && (
-                              <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-400">
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] uppercase tracking-wide text-muted-foreground">
                                 {item.type}
                               </span>
                             )}
                           </div>
                           {snippet && (
-                            <p className="mt-1 line-clamp-2 text-xs text-slate-400">
+                            <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                               {snippet}
                             </p>
                           )}
@@ -252,14 +252,14 @@ function StandardSearchResultsPanel() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 p-3 hover:border-emerald-500/60 hover:bg-slate-900/90 transition-colors block"
+                          className="rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-emerald-500/60 hover:bg-muted transition-colors block"
                         >
                           {content}
                         </a>
                       ) : (
                         <div
                           key={item.id ?? index}
-                          className="rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 p-3"
+                          className="rounded-lg rounded-br-none border border-border bg-muted/50 p-3"
                         >
                           {content}
                         </div>
@@ -270,7 +270,7 @@ function StandardSearchResultsPanel() {
               )}
 
               {!isLoading && !error && !hasResults && (
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-muted-foreground">
                   No results yet. Try a different search query.
                 </div>
               )}
@@ -316,14 +316,14 @@ export function BusinessInternalResultsPanel() {
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-5">
-      <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
+      <Card className="border-border bg-card/80 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
               <div className="text-xs uppercase tracking-[0.2em] text-emerald-400">
                 JustMy Partners
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-300 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                 <span>
                   {lastQuery
                     ? `Partner results for “${lastQuery}”`
@@ -336,7 +336,7 @@ export function BusinessInternalResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-slate-700/80 bg-slate-900/70 text-slate-200 hover:border-emerald-500/70 hover:bg-slate-900 hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse partner results" : "Expand partner results"}
               >
@@ -350,9 +350,9 @@ export function BusinessInternalResultsPanel() {
           </div>
 
           {isOpen && (
-            <div className="border-t border-slate-800 pt-3">
+            <div className="border-t border-border pt-3">
               {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
                   Searching partners…
                 </div>
@@ -378,7 +378,7 @@ export function BusinessInternalResultsPanel() {
               )}
 
               {!isLoading && !error && !hasResults && (
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-muted-foreground">
                   No partner results yet. Try a different search query.
                 </div>
               )}
@@ -424,14 +424,14 @@ export function BusinessExternalResultsPanel() {
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-5">
-      <Card className="border-slate-800 bg-black/70 backdrop-blur-2xl py-3 rounded-br-none">
+      <Card className="border-border bg-card/80 backdrop-blur-2xl py-3 rounded-br-none">
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <div className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 Local Results
               </div>
-              <div className="flex items-center gap-2 text-sm text-slate-300 flex-wrap">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
                 <span>
                   {lastQuery
                     ? `Local results for “${lastQuery}”`
@@ -444,7 +444,7 @@ export function BusinessExternalResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-slate-700/80 bg-slate-900/70 text-slate-200 hover:border-emerald-500/70 hover:bg-slate-900 hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse local results" : "Expand local results"}
               >
@@ -458,9 +458,9 @@ export function BusinessExternalResultsPanel() {
           </div>
 
           {isOpen && (
-            <div className="border-t border-slate-800 pt-3">
+            <div className="border-t border-border pt-3">
               {isLoading && (
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
                   Searching local results…
                 </div>
@@ -486,7 +486,7 @@ export function BusinessExternalResultsPanel() {
               )}
 
               {!isLoading && !error && !hasResults && (
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-muted-foreground">
                   No local results yet. Try a different search query.
                 </div>
               )}

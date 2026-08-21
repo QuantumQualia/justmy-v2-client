@@ -50,14 +50,14 @@ export function MyFormNewPanel({ basePath }: MyFormNewPanelProps) {
   });
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 px-4 py-10 text-white">
-      <Button asChild variant="ghost" size="sm" className="text-slate-400 hover:text-white">
+    <div className="mx-auto max-w-lg space-y-6 px-4 py-10 text-foreground">
+      <Button asChild variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground">
         <Link href={myFormListHref(basePath)}>← Back to forms</Link>
       </Button>
-      <Card className="border-slate-800 bg-slate-950">
+      <Card className="border-border bg-muted">
         <CardHeader>
           <CardTitle className="text-lg">New form</CardTitle>
-          <CardDescription className="text-slate-400">
+          <CardDescription className="text-muted-foreground">
             Creates a draft with a starter schema. You can edit JSON and publish next.
           </CardDescription>
         </CardHeader>
@@ -69,7 +69,7 @@ export function MyFormNewPanel({ basePath }: MyFormNewPanelProps) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Contact us"
-              className="border-slate-700 bg-slate-900 text-white"
+              className="border-input bg-background text-foreground"
             />
           </div>
           <Button

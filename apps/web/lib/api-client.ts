@@ -6,6 +6,11 @@
 import { tokenStorage } from "./storage/token-storage";
 import { buildApiUrl } from "./config";
 
+function currentAppOrigin(): string | undefined {
+  if (typeof window === "undefined") return undefined;
+  return window.location.origin;
+}
+
 export interface ApiError {
   message: string;
   error?: string;
@@ -53,10 +58,12 @@ async function attemptTokenRefresh(): Promise<string | null> {
     try {
       // Direct fetch call to avoid circular dependency
       const refreshUrl = buildApiUrl("auth/refresh");
+      const origin = currentAppOrigin();
       const response = await fetch(refreshUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          ...(origin ? { "X-App-Origin": origin } : {}),
         },
         body: JSON.stringify({ refreshToken }),
       });
@@ -75,7 +82,9 @@ async function attemptTokenRefresh(): Promise<string | null> {
           tokenStorage.setRefreshToken(data.refreshToken);
         }
         if (data.user) {
-          tokenStorage.setUser(data.user);
+          const { slimAuthUser } = await import("./auth/session-user");
+          const stored = slimAuthUser(data.user, data.profile);
+          if (stored) tokenStorage.setUser(stored);
         }
         return accessToken;
       }
@@ -154,6 +163,11 @@ export async function apiRequest<T>(
     } else {
       Object.assign(headers, fetchOptions.headers);
     }
+  }
+
+  const origin = currentAppOrigin();
+  if (origin && !headers["X-App-Origin"]) {
+    headers["X-App-Origin"] = origin;
   }
 
   // Add Authorization header if not skipped

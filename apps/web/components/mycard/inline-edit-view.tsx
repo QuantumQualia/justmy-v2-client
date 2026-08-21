@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useDebouncedCallback } from "use-debounce";
 import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
@@ -8,6 +9,13 @@ import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dia
 import { readFileAsDataUrl } from "@/lib/read-image-files";
 import { AIAboutAssistant } from "@/components/mycard/ai-about-assistant";
 import { ContentHubLiteView } from "@/components/content/content-hub-lite-view";
+import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
+import {
+  MycardFallbackBanner,
+  MycardProfileAvatar,
+  hasMycardMedia,
+} from "@/components/mycard/mycard-cover-fallbacks";
+import { cn } from "@workspace/ui/lib/utils";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
@@ -71,6 +79,53 @@ import {
 
 export type MyCardMode = "edit" | "live";
 export type { ProfileKind } from "@/lib/os-types";
+type ModalAppearance = "light" | "dark";
+
+function modalUi(appearance: ModalAppearance = "dark") {
+  const isLight = appearance === "light";
+  const lightScroll =
+    "[scrollbar-width:thin] [scrollbar-color:rgb(203_213_225)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300";
+  return {
+    isLight,
+    overlay: isLight ? "bg-slate-900/40" : "bg-black/70",
+    card: isLight
+      ? "bg-white p-6 rounded-2xl border border-slate-200 shadow-xl w-full max-w-sm text-slate-900"
+      : "bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm",
+    scroll: isLight ? lightScroll : "custom-scrollbar",
+    iconWrap: isLight ? "bg-slate-100 text-slate-600" : "bg-slate-700",
+    title: isLight ? "text-slate-900" : "text-white",
+    desc: isLight ? "text-slate-500" : "text-slate-400",
+    closeBtn: isLight ? "bg-slate-100 hover:bg-slate-200" : "bg-slate-700 hover:bg-slate-600",
+    closeIcon: isLight ? "text-slate-500" : "text-slate-300",
+    input: isLight
+      ? "w-full bg-white border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-200"
+      : "w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500",
+    item: isLight
+      ? "p-3 rounded-xl border border-slate-200 bg-slate-50"
+      : "p-3 bg-slate-900/50 rounded-lg",
+    itemTitle: isLight ? "text-sm font-medium text-slate-900" : "text-sm font-medium text-white",
+    itemSub: isLight ? "text-xs text-slate-500" : "text-xs text-slate-400",
+    addTile: isLight
+      ? "flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-violet-200 rounded-xl transition-all group cursor-pointer"
+      : "flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer",
+    addTileIcon: isLight
+      ? "h-8 w-8 rounded-full bg-white border border-slate-200 text-slate-600 group-hover:border-violet-200 group-hover:text-violet-700 flex items-center justify-center transition-colors"
+      : "h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors",
+    addTileLabel: isLight
+      ? "text-[10px] font-medium text-slate-500 leading-tight text-center"
+      : "text-[10px] font-medium text-slate-300 leading-tight text-center",
+    saveBtn: isLight
+      ? "px-4 py-2.5 text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+      : "px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer",
+    secondaryBtn: isLight
+      ? "px-4 py-2.5 text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
+      : "px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer",
+    dangerBtn: isLight
+      ? "px-4 py-2.5 text-sm font-medium bg-white text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+      : "px-4 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors cursor-pointer",
+    sectionLabel: isLight ? "text-sm font-semibold text-slate-500 mb-2" : "text-sm font-semibold text-slate-400 mb-2",
+  };
+}
 
 // Helper: Simple field edit modal props
 interface SimpleFieldEditModalProps {
@@ -87,6 +142,7 @@ interface SimpleFieldEditModalProps {
   type?: "text" | "email" | "url";
   error?: string;
   validate?: (value: string) => string | undefined;
+  appearance?: ModalAppearance;
 }
 
 // Helper: Simple field edit modal component
@@ -104,7 +160,9 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
   type = "text",
   error,
   validate,
+  appearance = "dark",
 }) => {
+  const ui = modalUi(appearance);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     onChange(newValue);
@@ -127,19 +185,19 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
     <>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center">
+          <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", ui.iconWrap)}>
             {icon}
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">{title}</h3>
-            <p className="text-xs text-slate-400">{description}</p>
+            <h3 className={cn("text-lg font-bold", ui.title)}>{title}</h3>
+            <p className={cn("text-xs", ui.desc)}>{description}</p>
           </div>
         </div>
         <button
           onClick={onCancel}
-          className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+          className={cn("h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer", ui.closeBtn)}
         >
-          <X className="h-4 w-4 text-slate-300" />
+          <X className={cn("h-4 w-4", ui.closeIcon)} />
         </button>
       </div>
       <Input
@@ -148,8 +206,7 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${error ? "border-red-500 focus:border-red-500" : ""
-          }`}
+        className={cn(ui.input, "mb-1", error ? "border-red-500 focus:border-red-500" : "")}
         autoFocus
       />
       {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
@@ -157,14 +214,14 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
         <button
           onClick={onSave}
           disabled={!!error}
-          className="flex-1 px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+          className={cn("flex-1", ui.saveBtn)}
         >
           Save
         </button>
         {showRemove && onRemove && (
           <button
             onClick={onRemove}
-            className="px-4 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 rounded-lg transition-colors cursor-pointer"
+            className={ui.dangerBtn}
           >
             Remove
           </button>
@@ -179,22 +236,33 @@ interface ModalWrapperProps {
   onClose: () => void;
   children: React.ReactNode;
   maxHeight?: string;
+  appearance?: ModalAppearance;
+  cardClassName?: string;
 }
 
-const ModalWrapper: React.FC<ModalWrapperProps> = ({ onClose, children, maxHeight = "max-h-[80vh]" }) => {
-  return (
+const ModalWrapper: React.FC<ModalWrapperProps> = ({
+  onClose,
+  children,
+  maxHeight = "max-h-[80vh]",
+  appearance = "dark",
+  cardClassName,
+}) => {
+  const ui = modalUi(appearance);
+  const node = (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in"
+      className={cn("fixed inset-0 z-[80] flex items-center justify-center backdrop-blur-sm p-4 animate-in fade-in", ui.overlay)}
       onClick={onClose}
     >
       <div
-        className={`bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm animate-in zoom-in-95 ${maxHeight} overflow-y-auto`}
+        className={cn(ui.card, "animate-in zoom-in-95 overflow-y-auto", ui.scroll, maxHeight, cardClassName)}
         onClick={(e) => e.stopPropagation()}
       >
         {children}
       </div>
     </div>
   );
+  if (typeof document === "undefined") return node;
+  return createPortal(node, document.body);
 };
 
 // Helper: Modal header component
@@ -203,25 +271,27 @@ interface ModalHeaderProps {
   description: string;
   icon: React.ReactNode;
   onClose: () => void;
+  appearance?: ModalAppearance;
 }
 
-const ModalHeader: React.FC<ModalHeaderProps> = ({ title, description, icon, onClose }) => {
+const ModalHeader: React.FC<ModalHeaderProps> = ({ title, description, icon, onClose, appearance = "dark" }) => {
+  const ui = modalUi(appearance);
   return (
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center">
+        <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", ui.iconWrap)}>
           {icon}
         </div>
         <div>
-          <h3 className="text-lg font-bold text-white">{title}</h3>
-          <p className="text-xs text-slate-400">{description}</p>
+          <h3 className={cn("text-lg font-bold", ui.title)}>{title}</h3>
+          <p className={cn("text-xs", ui.desc)}>{description}</p>
         </div>
       </div>
       <button
         onClick={onClose}
-        className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+        className={cn("h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer", ui.closeBtn)}
       >
-        <X className="h-4 w-4 text-slate-300" />
+        <X className={cn("h-4 w-4", ui.closeIcon)} />
       </button>
     </div>
   );
@@ -229,6 +299,8 @@ const ModalHeader: React.FC<ModalHeaderProps> = ({ title, description, icon, onC
 
 export interface InlineEditProps {
   mode?: MyCardMode;
+  /** Match public myCARD chrome (`light`) or the CMS dark editor. */
+  appearance?: "light" | "dark";
   profileType?: ProfileKind;
   data: ProfileData;
   onDataChange: (updates: Partial<ProfileData>) => void;
@@ -240,8 +312,12 @@ export interface InlineEditProps {
   onHotlinkRemove: (id: string) => void;
 }
 
+const LIGHT_CTA_CLASSNAME =
+  "block w-full py-3 px-4 justmy-corners text-center text-sm font-medium text-foreground transition-all duration-200 active:scale-95 hover:shadow-md border-[1.5px] border-border bg-[var(--hotlink-bg)] touch-manipulation cursor-pointer";
+
 export default function InlineEdit({
   mode = "edit",
+  appearance = "dark",
   data,
   onDataChange,
   onSocialLinkUpdate,
@@ -253,6 +329,30 @@ export default function InlineEdit({
 }: InlineEditProps) {
 
   const isEditMode = mode === "edit";
+  const isLight = appearance === "light";
+  const ui = modalUi(appearance);
+  const contactBtnClass = isLight
+    ? "h-10 w-10 rounded-full border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer bg-muted hover:bg-muted/70 border-border"
+    : "h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer";
+  const contactGlassStyle = isLight
+    ? {
+        background: "var(--glass-bg)",
+        border: "1px solid var(--glass-border)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: "0 2px 12px oklch(0 0 0 / 0.08)",
+      }
+    : undefined;
+  const contactIconClass = isLight ? "text-foreground/60" : undefined;
+  const editPencilBtnClass = isLight
+    ? "absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-[var(--glass-bg)] border border-border hover:border-primary/30 flex items-center justify-center transition-all duration-200 cursor-pointer"
+    : "absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer";
+  const dashedAddClass = isLight
+    ? "w-full p-4 rounded-xl border-2 border-dashed border-border hover:border-primary/40 bg-[var(--glass-bg)] hover:bg-muted/60 transition-all duration-200 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
+    : "w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer";
+  const ctaButtonClassName = isLight
+    ? LIGHT_CTA_CLASSNAME
+    : "w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium";
 
   // Get profileId from data
   const profileId = data.id;
@@ -260,6 +360,8 @@ export default function InlineEdit({
   // Auto-save state
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState(false);
+  const [editingTagline, setEditingTagline] = useState(false);
 
   // Track initial load and last saved data
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -333,11 +435,18 @@ export default function InlineEdit({
       return;
     }
 
-    // Only check auto-save fields (name, tagline, about)
+    // Only check auto-save fields (name, tagline)
     const currentAutoSaveFields = getAutoSaveFields(data);
 
     // Check if auto-save fields actually changed
     if (lastSavedDataRef.current === currentAutoSaveFields) {
+      return;
+    }
+
+    // AskSKY Apply (and other store writes) update tagline without the inline
+    // editor being open. Don't PATCH the whole profile again.
+    if (!editingName && !editingTagline) {
+      lastSavedDataRef.current = currentAutoSaveFields;
       return;
     }
 
@@ -353,11 +462,9 @@ export default function InlineEdit({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [data.name, data.tagline, isEditMode, profileId, isInitialLoad, debouncedSave]);
+  }, [data.name, data.tagline, editingName, editingTagline, isEditMode, profileId, isInitialLoad, debouncedSave]);
 
   // Inline editing states
-  const [editingName, setEditingName] = useState(false);
-  const [editingTagline, setEditingTagline] = useState(false);
   const [editingAbout, setEditingAbout] = useState(false);
   const [editingSocialLink, setEditingSocialLink] = useState<string | null>(null);
   const [editingSocialLinkUrl, setEditingSocialLinkUrl] = useState<string | undefined>(undefined); // Local state for editing
@@ -696,13 +803,18 @@ export default function InlineEdit({
   };
 
   return (
-    <div className="text-white w-full relative">
+    <div className={cn("w-full relative", isLight ? "text-foreground" : "text-white")}>
       {/* Mobile View Container */}
-      <div className="w-full max-w-[375px] mx-auto bg-slate-900 rounded-2xl shadow-2xl relative overflow-hidden">
+      <div
+        className={cn(
+          "w-full max-w-[375px] mx-auto relative overflow-hidden",
+          isLight ? "bg-background border border-border/60 rounded-2xl shadow-sm" : "bg-slate-900 rounded-2xl shadow-2xl",
+        )}
+      >
         {/* Banner and Profile Image - Step 1 */}
         <div className="relative">
           {/* Edit Step Badge */}
-          {isEditMode && (
+          {isEditMode && !isLight && (
             <div className="absolute left-2 top-2 flex items-center gap-2 z-20">
               <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                 1
@@ -710,8 +822,13 @@ export default function InlineEdit({
             </div>
           )}
           <div className="relative">
-            <div className="relative h-48 bg-gradient-to-r from-orange-600 to-amber-600 overflow-hidden group">
-              <div className="absolute inset-0 bg-black/10" />
+            <div
+              className={cn(
+                "relative h-48 overflow-hidden group",
+                isLight ? "rounded-b-3xl" : "",
+              )}
+            >
+              <div className="absolute inset-0 z-[1] bg-black/10 pointer-events-none" />
               <button
                 type="button"
                 onClick={() => openImageInsert("banner")}
@@ -720,43 +837,43 @@ export default function InlineEdit({
               >
                 <Pencil className="h-4 w-4 text-white" />
               </button>
-              {data.banner ? (
-                <img src={data.banner} alt="Banner" className="w-full h-full object-cover" />
+              {hasMycardMedia(data.banner) ? (
+                <img src={data.banner} alt="Banner" className="w-full h-full object-cover object-center" />
               ) : (
-                <button
-                  type="button"
-                  onClick={() => openImageInsert("banner")}
-                  className="absolute inset-0 flex cursor-pointer items-center justify-center"
-                >
-                  <div className="text-center">
-                    <ImageIcon className="mx-auto mb-2 h-8 w-8 text-white/50" />
-                    <p className="text-xs text-white/70">Tap to upload banner</p>
-                  </div>
-                </button>
+                <>
+                  <MycardFallbackBanner name={data.name} />
+                  <button
+                    type="button"
+                    onClick={() => openImageInsert("banner")}
+                    className="absolute inset-0 z-[1] flex cursor-pointer items-center justify-center"
+                  >
+                    <div className="text-center">
+                      <ImageIcon className="mx-auto mb-2 h-8 w-8 text-white/70" />
+                      <p className="text-xs text-white/80">Tap to upload banner</p>
+                    </div>
+                  </button>
+                </>
               )}
             </div>
 
             {/* Profile Picture */}
             <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
               <div className="relative group">
-                <div className="h-24 w-24 rounded-full bg-slate-800 border-4 border-slate-900 overflow-hidden">
+                <div
+                  className={cn(
+                    "h-24 w-24 rounded-full overflow-hidden",
+                    isLight ? "bg-card border-4 border-border shadow-xl" : "bg-slate-800 border-4 border-slate-900",
+                  )}
+                >
                   <button
                     type="button"
                     onClick={() => openImageInsert("profile")}
-                    className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-colors touch-manipulation hover:bg-black/60 group-hover:opacity-100"
+                    className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-colors touch-manipulation hover:bg-black/60 group-hover:opacity-100"
                     aria-label="Edit profile photo"
                   >
                     <Pencil className="h-5 w-5 text-white" />
                   </button>
-                  {data.photo ? (
-                    <img src={data.photo} alt="Profile" className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="h-full w-full flex items-center justify-center bg-slate-700">
-                      <span className="text-2xl font-bold text-slate-400">
-                        {data.name.charAt(0)}
-                      </span>
-                    </div>
-                  )}
+                  <MycardProfileAvatar name={data.name} photo={data.photo} />
                 </div>
               </div>
             </div>
@@ -767,13 +884,14 @@ export default function InlineEdit({
         <div className="px-4 pt-16 pb-8 space-y-6">
           {/* Social Links - Step 1 (continued) */}
           <div className="relative">
-            <div className="flex items-center justify-center gap-3 flex-wrap">
+            <div className={cn("flex items-center justify-center gap-3 flex-wrap", contactIconClass)}>
               {/* Upload - Fixed, always first */}
               <button
                 onClick={() => {
                   // TODO: Handle upload action
                 }}
-                className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                className={contactBtnClass}
+                style={contactGlassStyle}
                 title="Upload/Share"
               >
                 <Upload className="h-5 w-5" />
@@ -783,7 +901,8 @@ export default function InlineEdit({
               {data.phones && data.phones.length > 0 && (
                 <button
                   onClick={() => setEditingFixedItem("phone")}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                   title={
                     data.phones.length > 1
                       ? `Phone (${data.phones.length} numbers)`
@@ -792,7 +911,12 @@ export default function InlineEdit({
                 >
                   <Phone className="h-5 w-5" />
                   {data.phones.length > 1 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-blue-500 text-xs flex items-center justify-center text-white">
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 h-4 w-4 rounded-full text-xs flex items-center justify-center",
+                        isLight ? "bg-violet-600 text-white" : "bg-blue-500 text-white",
+                      )}
+                    >
                       {data.phones.length}
                     </span>
                   )}
@@ -806,7 +930,8 @@ export default function InlineEdit({
                     setEditingFixedItem("email");
                     setEditingEmail(data.email); // Initialize with current email
                   }}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                   title={`Email: ${data.email}`}
                 >
                   <Mail className="h-5 w-5" />
@@ -820,7 +945,8 @@ export default function InlineEdit({
                     setEditingFixedItem("website");
                     setEditingWebsite(data.website); // Initialize with current website
                   }}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                   title={`Website: ${data.website}`}
                 >
                   <Globe className="h-5 w-5" />
@@ -831,7 +957,8 @@ export default function InlineEdit({
               {data.addresses && data.addresses.length > 0 && (
                 <button
                   onClick={() => setEditingFixedItem("address")}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                   title={
                     data.addresses.length > 1
                       ? `Address (${data.addresses.length} locations)`
@@ -840,7 +967,12 @@ export default function InlineEdit({
                 >
                   <MapPin className="h-5 w-5" />
                   {data.addresses.length > 1 && (
-                    <span className="absolute -top-1 -right-1 h-4 w-4 rounded-full bg-blue-500 text-xs flex items-center justify-center text-white">
+                    <span
+                      className={cn(
+                        "absolute -top-1 -right-1 h-4 w-4 rounded-full text-xs flex items-center justify-center",
+                        isLight ? "bg-violet-600 text-white" : "bg-blue-500 text-white",
+                      )}
+                    >
                       {data.addresses.length}
                     </span>
                   )}
@@ -854,7 +986,8 @@ export default function InlineEdit({
                     setEditingFixedItem("calendarLink");
                     setEditingCalendarLink(data.calendarLink); // Initialize with current calendar link
                   }}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                   title="Calendar"
                 >
                   <Calendar className="h-5 w-5" />
@@ -869,114 +1002,105 @@ export default function InlineEdit({
                     setEditingSocialLink(link.id);
                     setEditingSocialLinkUrl(link.url); // Initialize with current URL
                   }}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer"
+                  className={contactBtnClass}
+                  style={contactGlassStyle}
                 >
                   {getSocialIcon(link.type)}
                 </button>
               ))}
               {showAddSocial ? (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in" onClick={() => setShowAddSocial(false)}>
-                  <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-5 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm animate-in zoom-in-95 flex flex-col max-h-[80vh]" onClick={(e) => e.stopPropagation()}>
-                    <div className="flex items-center justify-between mb-3 flex-shrink-0">
-                      <h3 className="text-lg font-bold text-white">Add Contact</h3>
-                      <button
-                        onClick={() => setShowAddSocial(false)}
-                        className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
-                      >
-                        <X className="h-4 w-4 text-slate-300" />
-                      </button>
+                <ModalWrapper
+                  appearance={appearance}
+                  onClose={() => setShowAddSocial(false)}
+                  cardClassName="flex flex-col p-5"
+                >
+                  <div className="flex items-center justify-between mb-3 flex-shrink-0">
+                    <h3 className={cn("text-lg font-bold", ui.title)}>Add Contact</h3>
+                    <button
+                      onClick={() => setShowAddSocial(false)}
+                      className={cn("h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer", ui.closeBtn)}
+                    >
+                      <X className={cn("h-4 w-4", ui.closeIcon)} />
+                    </button>
+                  </div>
+                  <div className={cn("overflow-y-auto flex-1 min-h-0", ui.scroll)}>
+                    <div className="mb-4">
+                      <h4 className={ui.sectionLabel}>Contact Info</h4>
+                      <div className="grid grid-cols-3 gap-2">
+                        {!data.email && (
+                          <button onClick={() => addFixedItem("email")} className={ui.addTile}>
+                            <div className={ui.addTileIcon}>
+                              <Mail className="h-4 w-4" />
+                            </div>
+                            <span className={ui.addTileLabel}>Email</span>
+                          </button>
+                        )}
+                        {!data.website && (
+                          <button onClick={() => addFixedItem("website")} className={ui.addTile}>
+                            <div className={ui.addTileIcon}>
+                              <Globe className="h-4 w-4" />
+                            </div>
+                            <span className={ui.addTileLabel}>Website</span>
+                          </button>
+                        )}
+                        {!data.calendarLink && (
+                          <button onClick={() => addFixedItem("calendarLink")} className={ui.addTile}>
+                            <div className={ui.addTileIcon}>
+                              <Calendar className="h-4 w-4" />
+                            </div>
+                            <span className={ui.addTileLabel}>Calendar</span>
+                          </button>
+                        )}
+                        <button onClick={() => addFixedItem("phone")} className={ui.addTile}>
+                          <div className={ui.addTileIcon}>
+                            <Phone className="h-4 w-4" />
+                          </div>
+                          <span className={ui.addTileLabel}>Phone</span>
+                        </button>
+                        <button onClick={() => addFixedItem("address")} className={ui.addTile}>
+                          <div className={ui.addTileIcon}>
+                            <MapPin className="h-4 w-4" />
+                          </div>
+                          <span className={ui.addTileLabel}>Address</span>
+                        </button>
+                      </div>
                     </div>
-                    <div className="overflow-y-auto custom-scrollbar flex-1 min-h-0">
-                      {/* Fixed Items Section */}
-                      <div className="mb-4">
-                        <h4 className="text-sm font-semibold text-slate-400 mb-2">Contact Info</h4>
-                        <div className="grid grid-cols-3 gap-2">
-                          {!data.email && (
+
+                    {availableSocialTypes.length > 0 && (
+                      <div>
+                        <h4 className={ui.sectionLabel}>Social Media</h4>
+                        <div className="grid grid-cols-3 gap-2 pr-2">
+                          {availableSocialTypes.map((type) => (
                             <button
-                              onClick={() => addFixedItem("email")}
-                              className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
+                              key={type}
+                              onClick={() => addSocialLink(type)}
+                              className={ui.addTile}
                             >
-                              <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                                <Mail className="h-4 w-4" />
+                              <div className={ui.addTileIcon}>
+                                {getSocialIcon(type, "sm")}
                               </div>
-                              <span className="text-[10px] font-medium text-slate-300 leading-tight text-center">Email</span>
+                              <span className={cn(ui.addTileLabel, "capitalize")}>{type}</span>
                             </button>
-                          )}
-                          {!data.website && (
-                            <button
-                              onClick={() => addFixedItem("website")}
-                              className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
-                            >
-                              <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                                <Globe className="h-4 w-4" />
-                              </div>
-                              <span className="text-[10px] font-medium text-slate-300 leading-tight text-center">Website</span>
-                            </button>
-                          )}
-                          {!data.calendarLink && (
-                            <button
-                              onClick={() => addFixedItem("calendarLink")}
-                              className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
-                            >
-                              <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                                <Calendar className="h-4 w-4" />
-                              </div>
-                              <span className="text-[10px] font-medium text-slate-300 leading-tight text-center">Calendar</span>
-                            </button>
-                          )}
-                          <button
-                            onClick={() => addFixedItem("phone")}
-                            className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
-                          >
-                            <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                              <Phone className="h-4 w-4" />
-                            </div>
-                            <span className="text-[10px] font-medium text-slate-300 leading-tight text-center">Phone</span>
-                          </button>
-                          <button
-                            onClick={() => addFixedItem("address")}
-                            className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
-                          >
-                            <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                              <MapPin className="h-4 w-4" />
-                            </div>
-                            <span className="text-[10px] font-medium text-slate-300 leading-tight text-center">Address</span>
-                          </button>
+                          ))}
                         </div>
                       </div>
-
-                      {/* Social Links Section */}
-                      {availableSocialTypes.length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-slate-400 mb-2">Social Media</h4>
-                          <div className="grid grid-cols-3 gap-2 pr-2">
-                            {availableSocialTypes.map((type) => (
-                              <button
-                                key={type}
-                                onClick={() => addSocialLink(type)}
-                                className="flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer"
-                              >
-                                <div className="h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors">
-                                  {getSocialIcon(type, "sm")}
-                                </div>
-                                <span className="text-[10px] font-medium text-slate-300 capitalize leading-tight text-center">{type}</span>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    {availableSocialTypes.length === 0 && !data.email && !data.website && !data.calendarLink && (
-                      <p className="text-sm text-slate-400 text-center py-4">All items have been added</p>
                     )}
                   </div>
-                </div>
+                  {availableSocialTypes.length === 0 && !data.email && !data.website && !data.calendarLink && (
+                    <p className={cn("text-sm text-center py-4", ui.desc)}>All items have been added</p>
+                  )}
+                </ModalWrapper>
               ) : (availableSocialTypes.length > 0 || !data.email || !data.website || !data.calendarLink || true) ? (
                 <button
                   onClick={() => setShowAddSocial(true)}
-                  className="h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 border-dashed flex items-center justify-center transition-colors touch-manipulation cursor-pointer"
+                  className={cn(contactBtnClass, "border-dashed")}
+                  style={
+                    isLight && contactGlassStyle
+                      ? { ...contactGlassStyle, border: "1px dashed var(--glass-border)" }
+                      : contactGlassStyle
+                  }
                 >
-                  <Plus className="h-5 w-5 text-slate-400" />
+                  <Plus className={cn("h-5 w-5", isLight ? "text-muted-foreground" : "text-slate-400")} />
                 </button>
               ) : null}
             </div>
@@ -991,6 +1115,7 @@ export default function InlineEdit({
 
             return (
               <ModalWrapper
+                appearance={appearance}
                 onClose={() => {
                   setEditingSocialLink(null);
                   setEditingSocialLinkUrl(undefined);
@@ -999,12 +1124,12 @@ export default function InlineEdit({
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-slate-700 flex items-center justify-center">
+                    <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", ui.iconWrap)}>
                       {getSocialIcon(link.type)}
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{link.label || link.type}</h3>
-                      <p className="text-xs text-slate-400">Enter your profile URL</p>
+                      <h3 className={cn("text-lg font-bold", ui.title)}>{link.label || link.type}</h3>
+                      <p className={cn("text-xs", ui.desc)}>Enter your profile URL</p>
                     </div>
                   </div>
                   <button
@@ -1013,9 +1138,9 @@ export default function InlineEdit({
                       setEditingSocialLinkUrl(undefined);
                       setValidationErrors((prev) => ({ ...prev, socialLink: undefined }));
                     }}
-                    className="h-8 w-8 rounded-full bg-slate-700 hover:bg-slate-600 flex items-center justify-center transition-colors cursor-pointer"
+                    className={cn("h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer", ui.closeBtn)}
                   >
-                    <X className="h-4 w-4 text-slate-300" />
+                    <X className={cn("h-4 w-4", ui.closeIcon)} />
                   </button>
                 </div>
                 <Input
@@ -1041,8 +1166,7 @@ export default function InlineEdit({
                     }
                   }}
                   placeholder="https://..."
-                  className={`w-full bg-slate-900/50 border-slate-600 text-sm mb-1 focus:border-blue-500 ${validationErrors.socialLink ? "border-red-500 focus:border-red-500" : ""
-                    }`}
+                  className={cn(ui.input, "mb-1", validationErrors.socialLink ? "border-red-500 focus:border-red-500" : "")}
                   autoFocus
                 />
                 {validationErrors.socialLink && (
@@ -1061,7 +1185,7 @@ export default function InlineEdit({
                       }
                     }}
                     disabled={!!validationErrors.socialLink}
-                    className="flex-1 px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                    className={cn("flex-1", ui.saveBtn)}
                   >
                     Save
                   </button>
@@ -1074,7 +1198,7 @@ export default function InlineEdit({
                       setEditingSocialLinkUrl(undefined);
                       setValidationErrors((prev) => ({ ...prev, socialLink: undefined }));
                     }}
-                    className="px-4 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 rounded-lg transition-colors cursor-pointer"
+                    className={ui.dangerBtn}
                   >
                     Delete
                   </button>
@@ -1086,6 +1210,7 @@ export default function InlineEdit({
           {/* Fixed Item Edit Modals */}
           {editingFixedItem === "email" && (
             <ModalWrapper
+              appearance={appearance}
               onClose={() => {
                 setEditingFixedItem(null);
                 setEditingEmail(undefined);
@@ -1093,6 +1218,7 @@ export default function InlineEdit({
               }}
             >
               <SimpleFieldEditModal
+                appearance={appearance}
                 title="Email"
                 description="Enter your email address"
                 icon={<Mail className="h-5 w-5" />}
@@ -1127,6 +1253,7 @@ export default function InlineEdit({
 
           {editingFixedItem === "website" && (
             <ModalWrapper
+              appearance={appearance}
               onClose={() => {
                 setEditingFixedItem(null);
                 setEditingWebsite(undefined);
@@ -1134,6 +1261,7 @@ export default function InlineEdit({
               }}
             >
               <SimpleFieldEditModal
+                appearance={appearance}
                 title="Website"
                 description="Enter your website URL"
                 icon={<Globe className="h-5 w-5" />}
@@ -1176,6 +1304,7 @@ export default function InlineEdit({
 
           {editingFixedItem === "calendarLink" && (
             <ModalWrapper
+              appearance={appearance}
               onClose={() => {
                 setEditingFixedItem(null);
                 setEditingCalendarLink(undefined);
@@ -1183,6 +1312,7 @@ export default function InlineEdit({
               }}
             >
               <SimpleFieldEditModal
+                appearance={appearance}
                 title="Calendar Link"
                 description="Enter your calendar booking URL"
                 icon={<Calendar className="h-5 w-5" />}
@@ -1225,12 +1355,14 @@ export default function InlineEdit({
 
           {editingFixedItem === "phone" && (
             <ModalWrapper
+              appearance={appearance}
               onClose={() => {
                 setEditingFixedItem(null);
                 setValidationErrors({});
               }}
             >
               <ModalHeader
+                appearance={appearance}
                 title="Phone Numbers"
                 description="Manage your phone numbers"
                 icon={<Phone className="h-5 w-5" />}
@@ -1242,10 +1374,10 @@ export default function InlineEdit({
               <>
                 <div className="space-y-3 mb-4">
                   {data.phones?.map((phone) => (
-                    <div key={phone.id} className="flex items-center gap-2 p-3 bg-slate-900/50 rounded-lg">
+                    <div key={phone.id} className={cn("flex items-center gap-2", ui.item)}>
                       <div className="flex-1">
-                        <div className="text-sm font-medium text-white">{phone.number}</div>
-                        {phone.type && <div className="text-xs text-slate-400">{phone.type}</div>}
+                        <div className={ui.itemTitle}>{phone.number}</div>
+                        {phone.type && <div className={ui.itemSub}>{phone.type}</div>}
                       </div>
                       <button
                         onClick={() => {
@@ -1272,8 +1404,7 @@ export default function InlineEdit({
                         setValidationErrors((prev) => ({ ...prev, phone: error }));
                       }}
                       placeholder="Phone number"
-                      className={`w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500 ${validationErrors.phone ? "border-red-500 focus:border-red-500" : ""
-                        }`}
+                      className={cn(ui.input, validationErrors.phone ? "border-red-500 focus:border-red-500" : "")}
                     />
                     {validationErrors.phone && (
                       <p className="text-xs text-red-400 mt-1">{validationErrors.phone}</p>
@@ -1283,7 +1414,7 @@ export default function InlineEdit({
                     value={newPhoneType}
                     onChange={(e) => setNewPhoneType(e.target.value)}
                     placeholder="Type (e.g., mobile, work)"
-                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    className={ui.input}
                   />
                   <button
                     onClick={() => {
@@ -1294,7 +1425,7 @@ export default function InlineEdit({
                       }
                     }}
                     disabled={!newPhoneNumber.trim() || !!validationErrors.phone}
-                    className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                    className={cn("w-full", ui.saveBtn)}
                   >
                     Add Phone
                   </button>
@@ -1304,7 +1435,7 @@ export default function InlineEdit({
                     setEditingFixedItem(null);
                     setValidationErrors({});
                   }}
-                  className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
+                  className={cn("w-full", ui.secondaryBtn)}
                 >
                   Done
                 </button>
@@ -1314,6 +1445,7 @@ export default function InlineEdit({
 
           {editingFixedItem === "address" && (
             <ModalWrapper
+              appearance={appearance}
               onClose={() => {
                 setEditingFixedItem(null);
                 setEditingAddressId(null);
@@ -1322,6 +1454,7 @@ export default function InlineEdit({
               }}
             >
               <ModalHeader
+                appearance={appearance}
                 title="Addresses"
                 description="Manage your addresses"
                 icon={<MapPin className="h-5 w-5" />}
@@ -1338,19 +1471,19 @@ export default function InlineEdit({
                     // Extract address fields for display/editing
                     const extractedFields = extractAddressFields(address.address);
                     return (
-                      <div key={address.id} className="p-3 bg-slate-900/50 rounded-lg">
+                      <div key={address.id} className={ui.item}>
                         <div className="flex items-start justify-between">
-                          <div className="flex-1 text-sm text-white">
+                          <div className={cn("flex-1 text-sm", ui.itemTitle)}>
                             {address.title && (
-                              <div className="font-semibold text-blue-400 mb-1">{address.title}</div>
+                              <div className={cn("font-semibold mb-1", isLight ? "text-violet-700" : "text-blue-400")}>{address.title}</div>
                             )}
                             <div className="font-medium">{extractedFields.address}</div>
                             {(extractedFields.city || extractedFields.state || extractedFields.zipCode) && (
-                              <div className="text-xs text-slate-400 mt-1">
+                              <div className={cn("text-xs mt-1", ui.itemSub)}>
                                 {[extractedFields.city, extractedFields.state, extractedFields.zipCode].filter(Boolean).join(", ")}
                               </div>
                             )}
-                            {extractedFields.country && <div className="text-xs text-slate-400">{extractedFields.country}</div>}
+                            {extractedFields.country && <div className={cn("text-xs", ui.itemSub)}>{extractedFields.country}</div>}
                           </div>
                           <div className="flex gap-2 ml-2">
                             <button
@@ -1366,7 +1499,7 @@ export default function InlineEdit({
                                   country: extractedFields.country || "",
                                 });
                               }}
-                              className="p-1.5 text-blue-400 hover:text-blue-300 transition-colors cursor-pointer"
+                              className={cn("p-1.5 transition-colors cursor-pointer", isLight ? "text-slate-400 hover:text-slate-700" : "text-blue-400 hover:text-blue-300")}
                               title="Edit"
                             >
                               <Pencil className="h-4 w-4" />
@@ -1393,26 +1526,26 @@ export default function InlineEdit({
                     value={newAddress.title}
                     onChange={(e) => setNewAddress({ ...newAddress, title: e.target.value })}
                     placeholder="Title (e.g., Office, Home)"
-                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    className={ui.input}
                   />
                   <Input
                     value={newAddress.address}
                     onChange={(e) => setNewAddress({ ...newAddress, address: e.target.value })}
                     placeholder="Street address"
-                    className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                    className={ui.input}
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <Input
                       value={newAddress.city}
                       onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
                       placeholder="City"
-                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                      className={ui.input}
                     />
                     <Input
                       value={newAddress.state}
                       onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
                       placeholder="State"
-                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                      className={ui.input}
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -1420,19 +1553,19 @@ export default function InlineEdit({
                       value={newAddress.zipCode}
                       onChange={(e) => setNewAddress({ ...newAddress, zipCode: e.target.value })}
                       placeholder="ZIP Code"
-                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                      className={ui.input}
                     />
                     <Input
                       value={newAddress.country}
                       onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
                       placeholder="Country"
-                      className="w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500"
+                      className={ui.input}
                     />
                   </div>
                   <button
                     onClick={handleSaveFixedItem}
                     disabled={!newAddress.address.trim()}
-                    className="w-full px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+                    className={cn("w-full", ui.saveBtn)}
                   >
                     {editingAddressId ? "Update Address" : "Add Address"}
                   </button>
@@ -1444,7 +1577,7 @@ export default function InlineEdit({
                     setNewAddress({ title: "", address: "", city: "", state: "", zipCode: "", country: "" });
                     setValidationErrors({});
                   }}
-                  className="w-full px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer"
+                  className={cn("w-full", ui.secondaryBtn)}
                 >
                   Done
                 </button>
@@ -1463,25 +1596,37 @@ export default function InlineEdit({
                   onKeyDown={(e) => {
                     if (e.key === "Enter") setEditingName(false);
                   }}
-                  className="w-full text-xl font-bold text-center bg-slate-800 border border-blue-500 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500 text-slate-200"
+                  className={cn(
+                    "w-full text-xl font-bold text-center rounded-lg p-2 focus:outline-none focus:ring-2",
+                    isLight
+                      ? "font-serif bg-background border border-primary focus:ring-primary text-foreground"
+                      : "bg-slate-800 border border-blue-500 focus:ring-blue-500 text-slate-200",
+                  )}
                   autoFocus
                 />
               ) : (
                 <>
                   {data.name ? (
                     <div className="flex items-center justify-center gap-2">
-                      <h1 className="text-xl font-bold text-slate-200">{data.name}</h1>
+                      <h1
+                        className={cn(
+                          "text-xl md:text-2xl font-bold font-serif",
+                          isLight ? "text-foreground" : "text-slate-200",
+                        )}
+                      >
+                        {data.name}
+                      </h1>
                       <button
                         onClick={() => setEditingName(true)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer"
+                        className={editPencilBtnClass}
                       >
-                        <Pencil className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors" />
+                        <Pencil className={cn("h-4 w-4", isLight ? "text-foreground/70" : "text-blue-400 group-hover:text-white transition-colors")} />
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setEditingName(true)}
-                      className="w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer"
+                      className={dashedAddClass}
                     >
                       + Add Name
                     </button>
@@ -1495,25 +1640,32 @@ export default function InlineEdit({
                   value={data.tagline}
                   onChange={(e) => onDataChange({ tagline: e.target.value })}
                   onBlur={() => setEditingTagline(false)}
-                  className="w-full min-h-[60px] p-2 text-sm text-slate-400 text-center bg-slate-800 border border-blue-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className={cn(
+                    "w-full min-h-[60px] p-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 resize-none",
+                    isLight
+                      ? "text-muted-foreground bg-background border border-primary focus:ring-primary"
+                      : "text-slate-400 bg-slate-800 border border-blue-500 focus:ring-blue-500",
+                  )}
                   autoFocus
                 />
               ) : (
                 <>
                   {data.tagline ? (
                     <div className="flex items-center justify-center gap-2">
-                      <p className="text-sm text-slate-400 break-words">{data.tagline}</p>
+                      <p className={cn("text-sm break-words", isLight ? "text-muted-foreground" : "text-slate-400")}>
+                        {data.tagline}
+                      </p>
                       <button
                         onClick={() => setEditingTagline(true)}
-                        className="absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer"
+                        className={editPencilBtnClass}
                       >
-                        <Pencil className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors" />
+                        <Pencil className={cn("h-4 w-4", isLight ? "text-foreground/70" : "text-blue-400 group-hover:text-white transition-colors")} />
                       </button>
                     </div>
                   ) : (
                     <button
                       onClick={() => setEditingTagline(true)}
-                      className="w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer"
+                      className={dashedAddClass}
                     >
                       + Add Tagline
                     </button>
@@ -1523,20 +1675,10 @@ export default function InlineEdit({
             </div>
           </div>
 
-          {/* Fixed Share Contact Buttons */}
-          <div className="flex flex-col gap-2">
-            <Button className="w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium">
-              Save to Contacts
-            </Button>
-            <Button className="w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium">
-              Send myCARD
-            </Button>
-          </div>
-
           {/* Hotlinks - Step 2 */}
           <div className="relative space-y-2">
             {/* Edit Step Badge */}
-            {isEditMode && (
+            {isEditMode && !isLight && (
               <div className="absolute left-0 top-0 flex items-center gap-2 z-20">
                 <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                   2
@@ -1546,7 +1688,14 @@ export default function InlineEdit({
             {data.hotlinks.map((hotlink) => (
               <div key={hotlink.id} className="relative group">
                 {editingHotlink === hotlink.id ? (
-                  <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 rounded-2xl border-2 border-blue-500/60 shadow-xl backdrop-blur-sm">
+                  <div
+                    className={cn(
+                      "p-5 rounded-2xl border-2 shadow-xl backdrop-blur-sm",
+                      isLight
+                        ? "bg-card border-primary/40"
+                        : "bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 border-blue-500/60",
+                    )}
+                  >
                     <div className="space-y-4">
                       <div className="space-y-2">
                         <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">Title</label>
@@ -1623,6 +1772,28 @@ export default function InlineEdit({
                       </div>
                     </div>
                   </div>
+                ) : isLight ? (
+                  <div className="relative group/item">
+                    <button
+                      type="button"
+                      onClick={() => setEditingHotlink(hotlink.id)}
+                      className={ctaButtonClassName}
+                      title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
+                    >
+                      <span className="min-w-0 truncate">{hotlink.title}</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onHotlinkRemove(hotlink.id);
+                        performSave({ ...data, hotlinks: data.hotlinks.filter((h) => h.id !== hotlink.id) });
+                      }}
+                      className="absolute right-2 top-1/2 z-10 -translate-y-1/2 h-8 w-8 rounded-full border border-border bg-[var(--glass-bg)] opacity-100 sm:opacity-0 group-hover/item:opacity-100 flex items-center justify-center cursor-pointer"
+                      aria-label="Remove hotlink"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 text-muted-foreground" />
+                    </button>
+                  </div>
                 ) : (
                   <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 group/item backdrop-blur-sm">
                     <div className="flex-1 min-w-0">
@@ -1656,17 +1827,31 @@ export default function InlineEdit({
             {data.hotlinks.length < 3 && (
               <button
                 onClick={addHotlink}
-                className="w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer"
+                className={dashedAddClass}
               >
                 + Add Hotlink
               </button>
             )}
+            <button type="button" className={ctaButtonClassName}>
+              Save to Contacts
+            </button>
+            <button type="button" className={ctaButtonClassName}>
+              Send myCARD
+            </button>
           </div>
+
+          {isLight && data.slug ? (
+            <MyCardContentLiteView
+              profileType={data.type}
+              profileSlug={data.slug}
+              variant="light"
+            />
+          ) : null}
 
           {/* About Section - Step 3 */}
           <div className="relative group">
             {/* Edit Step Badge */}
-            {isEditMode && (
+            {isEditMode && !isLight && (
               <div className="absolute left-0 top-2 flex items-center gap-2 z-20">
                 <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                   3
@@ -1674,21 +1859,40 @@ export default function InlineEdit({
               </div>
             )}
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-bold text-slate-100 ml-8">About</h2>
+              <h2
+                className={cn(
+                  "font-bold font-serif",
+                  isLight ? "text-xl text-foreground" : "text-lg text-slate-100 ml-8",
+                )}
+              >
+                About
+              </h2>
               {!editingAbout && data.about && (
                 <button
                   onClick={() => setEditingAbout(true)}
-                  className="h-9 w-9 rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer"
+                  className={cn(
+                    "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer",
+                    isLight
+                      ? "bg-[var(--glass-bg)] border border-border hover:border-primary/30"
+                      : "bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-blue-500/30",
+                  )}
                 >
-                  <Pencil className="h-4 w-4 text-blue-400 group-hover:text-white transition-colors" />
+                  <Pencil className={cn("h-4 w-4", isLight ? "text-foreground/70" : "text-blue-400 group-hover:text-white transition-colors")} />
                 </button>
               )}
             </div>
             {editingAbout ? (
-              <div className="p-5 bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 rounded-2xl border-2 border-blue-500/60 shadow-xl backdrop-blur-sm">
+              <div
+                className={cn(
+                  "p-5 rounded-2xl border-2 shadow-xl backdrop-blur-sm",
+                  isLight
+                    ? "bg-card border-primary/40"
+                    : "bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 border-blue-500/60",
+                )}
+              >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">About Text</label>
+                    <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>About Text</label>
                     <button
                       onClick={() => setShowAIAssistant(true)}
                       className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
@@ -1701,7 +1905,12 @@ export default function InlineEdit({
                   <textarea
                     value={data.about}
                     onChange={(e) => onDataChange({ about: e.target.value })}
-                    className="w-full min-h-[220px] p-5 text-sm text-slate-100 leading-relaxed bg-slate-900/90 border-2 border-slate-600/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/40 focus:border-blue-500/80 resize-none placeholder:text-slate-500/70 transition-all duration-200 custom-scrollbar"
+                    className={cn(
+                      "w-full min-h-[220px] p-5 text-sm leading-relaxed border-2 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all duration-200 custom-scrollbar",
+                      isLight
+                        ? "text-foreground bg-background border-border focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground"
+                        : "text-slate-100 bg-slate-900/90 border-slate-600/30 focus:ring-blue-500/40 focus:border-blue-500/80 placeholder:text-slate-500/70",
+                    )}
                     placeholder="Tell people about yourself..."
                     autoFocus
                   />
@@ -1719,7 +1928,12 @@ export default function InlineEdit({
                     <Button
                       onClick={() => setEditingAbout(false)}
                       variant="outline"
-                      className="px-4 bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100 text-sm font-medium cursor-pointer"
+                      className={cn(
+                        "px-4 text-sm font-medium cursor-pointer",
+                        isLight
+                          ? "bg-muted hover:bg-muted/80 border-border text-foreground"
+                          : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
+                      )}
                     >
                       Cancel
                     </Button>
@@ -1729,13 +1943,17 @@ export default function InlineEdit({
             ) : (
               <>
                 {data.about ? (
-                  <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 backdrop-blur-sm">
-                    <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{data.about}</p>
-                  </div>
+                  isLight ? (
+                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{data.about}</p>
+                  ) : (
+                    <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 backdrop-blur-sm">
+                      <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{data.about}</p>
+                    </div>
+                  )
                 ) : (
                   <button
                     onClick={() => setEditingAbout(true)}
-                    className="w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer"
+                    className={dashedAddClass}
                   >
                     + Add About
                   </button>
@@ -1744,7 +1962,7 @@ export default function InlineEdit({
             )}
           </div>
 
-          {data.type === PROFILE_KIND.PERSONAL ? (
+          {!isLight && data.type === PROFILE_KIND.PERSONAL ? (
             <div className="relative">
               {isEditMode && (
                 <div className="absolute left-0 top-2 flex items-center gap-2 z-20">
@@ -1758,6 +1976,7 @@ export default function InlineEdit({
           ) : null}
 
           <ImageInsertDialog
+            variant={isLight ? "light" : "default"}
             open={imageInsertOpen}
             onOpenChange={setImageInsertOpen}
             onPick={async (result) => {
@@ -1780,6 +1999,7 @@ export default function InlineEdit({
           {/* Image Crop Modal */}
           {imageUploadType && imagePreview && (
             <ImageCropModal
+              variant={isLight ? "light" : "default"}
               imageSrc={imagePreview}
               aspectRatio={imageUploadType === "banner" ? 1200 / 630 : 1}
               onCrop={handleImageCrop}

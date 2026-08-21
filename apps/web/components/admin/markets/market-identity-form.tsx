@@ -259,17 +259,17 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 text-white">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-white">Market Identity</CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardTitle className="text-foreground">Market Identity</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Configure the basic information for this market
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="name" className="text-slate-300">
+            <Label htmlFor="name" className="text-muted-foreground">
               Market Name <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -277,13 +277,13 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
               value={formData.name}
               onChange={(e) => handleNameChange(e.target.value)}
               placeholder="e.g., Memphis"
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="state" className="text-slate-300">
+            <Label htmlFor="state" className="text-muted-foreground">
               Market State <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -296,16 +296,16 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
               }
               placeholder="e.g., TN"
               maxLength={2}
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               required
             />
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               2-character state code (e.g., TN, AR, MS)
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="urlSlug" className="text-slate-300">URL Slug</Label>
+            <Label htmlFor="urlSlug" className="text-muted-foreground">URL Slug</Label>
             <Input
               id="urlSlug"
               value={formData.urlSlug}
@@ -315,15 +315,15 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                 })
               }
               placeholder="e.g., memphis"
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               URL-friendly identifier for this market
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="site" className="text-slate-300">Site URL</Label>
+            <Label htmlFor="site" className="text-muted-foreground">Site URL</Label>
             <Input
               id="site"
               type="url"
@@ -334,15 +334,15 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                 })
               }
               placeholder="https://example.com"
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               Website URL for this market
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="siteTitle" className="text-slate-300">Site Title</Label>
+            <Label htmlFor="siteTitle" className="text-muted-foreground">Site Title</Label>
             <Input
               id="siteTitle"
               value={formData.siteTitle || ""}
@@ -352,15 +352,15 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                 })
               }
               placeholder="e.g., Memphis Market Site"
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               Title for the market website
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="parentMarket" className="text-slate-300">Parent Market</Label>
+            <Label htmlFor="parentMarket" className="text-muted-foreground">Parent Market</Label>
             <Select
               value={formData.parentMarket || "none"}
               onValueChange={(value) => {
@@ -372,7 +372,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
             >
               <SelectTrigger
                 id="parentMarket"
-                className="bg-black/50 border-slate-700 text-white focus:ring-emerald-500"
+                className="bg-muted border-border text-foreground focus:ring-emerald-500"
               >
                 <SelectValue placeholder="Search and select a parent market">
                   {(() => {
@@ -391,15 +391,15 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                   })()}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-700 text-white">
+              <SelectContent className="bg-card border-border text-foreground">
                 {/* Search input */}
-                <div className="p-2 border-b border-slate-800">
+                <div className="p-2 border-b border-border">
                   <div className="relative">
                     <Input
                       placeholder="Search markets..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 h-8 text-sm"
+                      className="bg-muted border-border text-foreground placeholder:text-muted-foreground h-8 text-sm"
                       onKeyDown={(e) => {
                         // Prevent select from closing when typing
                         e.stopPropagation()
@@ -410,7 +410,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                       }}
                     />
                     {loadingParents && (
-                      <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-slate-400" />
+                      <Loader2 className="absolute right-2 top-2 h-4 w-4 animate-spin text-muted-foreground" />
                     )}
                   </div>
                 </div>
@@ -419,17 +419,17 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                 <div className="max-h-[300px] overflow-y-auto">
                   <SelectItem
                     value="none"
-                    className="focus:bg-slate-800 focus:text-white"
+                    className="focus:bg-accent focus:text-accent-foreground"
                   >
                     None (Top Level)
                   </SelectItem>
                   {parentMarkets.length === 0 && !loadingParents && debouncedSearch && (
-                    <div className="px-2 py-6 text-center text-slate-400 text-sm">
+                    <div className="px-2 py-6 text-center text-muted-foreground text-sm">
                       No markets found matching "{debouncedSearch}"
                     </div>
                   )}
                   {parentMarkets.length === 0 && !loadingParents && !debouncedSearch && (
-                    <div className="px-2 py-6 text-center text-slate-400 text-sm">
+                    <div className="px-2 py-6 text-center text-muted-foreground text-sm">
                       Start typing to search for markets
                     </div>
                   )}
@@ -437,18 +437,18 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                     <SelectItem
                       key={market.id}
                       value={String(market.id)}
-                      className="focus:bg-slate-800 focus:text-white"
+                      className="focus:bg-accent focus:text-accent-foreground"
                     >
                       {market.city || market.name || market.siteTitle || `Market #${market.id}`}
                       {market.state && (
-                        <span className="ml-2 text-xs text-slate-500">({market.state})</span>
+                        <span className="ml-2 text-xs text-muted-foreground">({market.state})</span>
                       )}
                     </SelectItem>
                   ))}
                 </div>
               </SelectContent>
             </Select>
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               {loadingParents ? (
                 <span className="flex items-center gap-1">
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -461,9 +461,9 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Status</Label>
+            <Label className="text-muted-foreground">Status</Label>
             <div className="flex items-center gap-4">
-              <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+              <label className="flex items-center gap-2 cursor-pointer text-muted-foreground">
                 <input
                   type="radio"
                   name="status"
@@ -478,7 +478,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                 />
                 <span>Active</span>
               </label>
-              <label className="flex items-center gap-2 cursor-pointer text-slate-300">
+              <label className="flex items-center gap-2 cursor-pointer text-muted-foreground">
                 <input
                   type="radio"
                   name="status"

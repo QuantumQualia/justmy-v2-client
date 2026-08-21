@@ -32,35 +32,35 @@ function getRainWallClass(precipChancePercent: number) {
   if (precipChancePercent >= 50) {
     return "bg-sky-700/60 border-sky-300/60 text-sky-50";
   }
-  return "bg-slate-900/60 border-slate-700/80 text-slate-50";
+  return "bg-card border-input text-foreground";
 }
 
 export function HourlyScroll({ points, className }: HourlyScrollProps) {
   return (
     <section
       className={cn(
-        "rounded-2xl rounded-br-none bg-slate-900/80 border border-slate-800/80 p-4 sm:p-5 shadow-lg",
+        "rounded-2xl rounded-br-none bg-card border border-border p-4 sm:p-5 shadow-lg",
         className,
       )}
       aria-label="Hourly tactical scroll"
     >
       <header className="flex items-baseline justify-between gap-2 mb-3 sm:mb-4">
         <div>
-          <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+          <h2 className="text-sm sm:text-base font-semibold text-foreground">
             Hourly Tactical Scroll
           </h2>
-          <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-slate-400">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-muted-foreground">
             Spot the pivot points in your day
           </p>
         </div>
-        <p className="hidden sm:block text-[11px] text-slate-400">
+        <p className="hidden sm:block text-[11px] text-muted-foreground">
           Blue = Rain Wall, ● Commute = 8 AM / 5 PM
         </p>
       </header>
 
       <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-slate-900 via-slate-900/80 to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-slate-900 via-slate-900/80 to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-6 bg-gradient-to-r from-muted via-card to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-6 bg-gradient-to-l from-muted via-card to-transparent" />
 
         <div className="flex gap-3 overflow-x-auto pb-2 scroll-smooth scrollbar-horizontal-dark">
           {points.map((point) => {
@@ -84,7 +84,7 @@ export function HourlyScroll({ points, className }: HourlyScrollProps) {
                           ? "bg-emerald-400 text-slate-900"
                           : isRainWall
                             ? "bg-sky-300 text-slate-900"
-                            : "bg-slate-700/80 text-slate-100",
+                            : "bg-muted text-foreground",
                       )}
                     >
                       {isCommute ? "Commute" : `${point.precipChancePercent}%`}
@@ -96,13 +96,13 @@ export function HourlyScroll({ points, className }: HourlyScrollProps) {
                       {Math.round(point.temperatureF)}°
                     </p>
                   </div>
-                  <p className="text-[11px] text-slate-100/80 line-clamp-1">
+                  <p className="text-[11px] text-muted-foreground line-clamp-1">
                     {point.condition}
                   </p>
                 </div>
 
                 {isCommute && (
-                  <p className="text-[10px] text-center text-slate-400">
+                  <p className="text-[10px] text-center text-muted-foreground">
                     {point.precipChancePercent >= 50
                       ? "Red Commute: pad your schedule."
                       : "Green Commute: smooth in and out."}

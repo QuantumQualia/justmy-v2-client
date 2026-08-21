@@ -137,7 +137,7 @@ export default function OSAppManagerPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-black p-10 flex items-center justify-center">
+      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
       </div>
     );
@@ -148,7 +148,7 @@ export default function OSAppManagerPage() {
   );
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
@@ -157,25 +157,25 @@ export default function OSAppManagerPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => router.push("/admin/os")}
-                className="border-slate-700/80 bg-slate-900/60 text-slate-300 hover:bg-slate-800 hover:text-white hover:border-slate-500"
+                className="border-input bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground hover:border-border"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Back
               </Button>
             </div>
-            <h1 className="text-3xl font-bold text-white">OS-App Manager</h1>
-            <p className="text-slate-400 mt-2">
-              Manage apps for: <span className="text-white font-semibold">{osName}</span>
+            <h1 className="text-3xl font-bold text-foreground">OS-App Manager</h1>
+            <p className="text-muted-foreground mt-2">
+              Manage apps for: <span className="text-foreground font-semibold">{osName}</span>
             </p>
           </div>
         </div>
 
-        <div className="border border-slate-700 rounded-xl bg-slate-900/30 p-6 space-y-6">
+        <div className="border border-border rounded-xl bg-muted p-6 space-y-6">
           {/* Current Apps */}
           <div>
-            <h2 className="text-xl font-semibold text-white mb-4">Connected Apps</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-4">Connected Apps</h2>
             {appConfigs.length === 0 ? (
-              <div className="text-center py-8 text-slate-400 border border-dashed border-slate-700 rounded-lg">
+              <div className="text-center py-8 text-muted-foreground border border-dashed border-border rounded-lg">
                 <p>No apps connected to this OS</p>
               </div>
             ) : (
@@ -183,11 +183,11 @@ export default function OSAppManagerPage() {
                 {appConfigs.map((config) => (
                   <div
                     key={config.appId}
-                    className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700"
+                    className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border"
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <h3 className="font-semibold text-white">{config.appName}</h3>
+                        <h3 className="font-semibold text-foreground">{config.appName}</h3>
                         {config.isWelcome && (
                           <span className="flex items-center gap-1 text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
                             <Star className="h-3 w-3 fill-yellow-400" />
@@ -210,7 +210,7 @@ export default function OSAppManagerPage() {
                         />
                         <Label
                           htmlFor={`standard-${config.appId}`}
-                          className="text-white cursor-pointer text-sm"
+                          className="text-foreground cursor-pointer text-sm"
                         >
                           Standard
                         </Label>
@@ -223,7 +223,7 @@ export default function OSAppManagerPage() {
                         />
                         <Label
                           htmlFor={`welcome-${config.appId}`}
-                          className="text-white cursor-pointer text-sm"
+                          className="text-foreground cursor-pointer text-sm"
                         >
                           Welcome
                         </Label>
@@ -246,24 +246,24 @@ export default function OSAppManagerPage() {
           {/* Available Apps to Add */}
           {availableApps.length > 0 && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">Available Apps</h2>
+              <h2 className="text-xl font-semibold text-foreground mb-4">Available Apps</h2>
               <div className="space-y-2">
                 {availableApps.map((app) => (
                   <div
                     key={app.id}
-                    className="flex items-center justify-between p-3 bg-slate-800/30 rounded-lg border border-slate-700"
+                    className="flex items-center justify-between p-3 bg-muted/30 rounded-lg border border-border"
                   >
                     <div className="flex-1">
-                      <h3 className="font-medium text-white">{app.name}</h3>
+                      <h3 className="font-medium text-foreground">{app.name}</h3>
                       {app.description && (
-                        <p className="text-xs text-slate-400 mt-1">{app.description}</p>
+                        <p className="text-xs text-muted-foreground mt-1">{app.description}</p>
                       )}
                     </div>
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddApp(app.id)}
-                      className="border-slate-600"
+                      className="border-border"
                     >
                       Add to OS
                     </Button>
@@ -274,7 +274,7 @@ export default function OSAppManagerPage() {
           )}
 
           {/* Save Button */}
-          <div className="flex justify-end pt-4 border-t border-slate-800">
+          <div className="flex justify-end pt-4 border-t border-border">
             <Button
               onClick={handleSave}
               disabled={loading}

@@ -171,10 +171,10 @@ export function MobileSidebar({
               level === 0
                 ? isActive
                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                  : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 : isActive
-                  ? "bg-slate-800/50 text-emerald-400"
-                  : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
+                  ? "bg-accent text-emerald-400"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
             style={{ paddingLeft: `${1 + level * 1}rem` }}
           >
@@ -206,10 +206,10 @@ export function MobileSidebar({
           level === 0
             ? isActive
               ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-              : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
             : isActive
-              ? "bg-slate-800/50 text-emerald-400"
-              : "text-slate-400 hover:bg-slate-800/30 hover:text-white"
+              ? "bg-accent text-emerald-400"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
         style={{ paddingLeft: `${1 + level * 1}rem` }}
       >
@@ -233,15 +233,15 @@ export function MobileSidebar({
           className={cn(
             "w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
             isExpanded
-              ? "bg-slate-800/60 text-white"
-              : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+              ? "bg-accent text-foreground"
+              : "text-muted-foreground hover:bg-accent hover:text-foreground"
           )}
         >
           <span className="font-semibold text-sm tracking-wider">
             {item.label}
           </span>
           {isLoading ? (
-            <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
           ) : (
             <ChevronDown
               className={cn(
@@ -256,13 +256,13 @@ export function MobileSidebar({
         {isExpanded && (
           <div className="mt-1 space-y-1">
             {isLoading ? (
-              <div className="px-6 py-2 text-xs text-slate-500">Loading...</div>
+              <div className="px-6 py-2 text-xs text-muted-foreground">Loading...</div>
             ) : appNav.length > 0 ? (
               appNav.map((child, ci) =>
                 renderPageItem(child, 1, `${groupKey}-${ci}`)
               )
             ) : (
-              <div className="px-6 py-2 text-xs text-slate-500">
+              <div className="px-6 py-2 text-xs text-muted-foreground">
                 No menu items
               </div>
             )}
@@ -293,18 +293,18 @@ export function MobileSidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-slate-900 border-l border-slate-800 z-70 transform transition-transform duration-300 ease-in-out flex flex-col",
+          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-card border-l border-border z-70 transform transition-transform duration-300 ease-in-out flex flex-col",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 flex-shrink-0">
-          <h2 className="text-lg font-semibold text-white">Menu</h2>
+        <div className="flex items-center justify-between p-4 border-b border-border bg-muted flex-shrink-0">
+          <h2 className="text-lg font-semibold text-foreground">Menu</h2>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
-            className="h-8 w-8 text-slate-400 hover:text-white"
+            className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -317,14 +317,14 @@ export function MobileSidebar({
             {navigation.length > 0 ? (
               navigation.map((item, i) => renderNavItem(item, i))
             ) : (
-              <div className="px-4 py-8 text-center text-slate-500">
+              <div className="px-4 py-8 text-center text-muted-foreground">
                 <p>No menu items available</p>
               </div>
             )}
           </div>
 
           {/* Default Menu Items at Bottom - Fixed */}
-          <div className="border-t border-slate-800 p-4 space-y-2 flex-shrink-0 bg-slate-900">
+          <div className="border-t border-border p-4 space-y-2 flex-shrink-0 bg-muted">
             <button
               onClick={() => handleNavClick("/app-hub")}
               className={cn(
@@ -332,7 +332,7 @@ export function MobileSidebar({
                 pathname === "/lab/app-hub" ||
                   pathname?.startsWith("/lab/app-hub/")
                   ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                  : "text-slate-300 hover:bg-slate-800/50 hover:text-white"
+                  : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
               <Grid3x3 className="h-5 w-5" />

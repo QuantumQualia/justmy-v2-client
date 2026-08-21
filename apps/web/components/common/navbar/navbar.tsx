@@ -64,7 +64,7 @@ function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
 
   return (
     <>
-      <nav className="sticky top-0 z-50 w-full border-b border-slate-800/50 bg-black/80 backdrop-blur-xl">
+      <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 items-center justify-between gap-2 px-2 md:px-6 lg:px-8">
           {/* Left: Profile Switcher */}
           <div className="flex items-center gap-2 flex-shrink-0">
@@ -83,7 +83,7 @@ function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
               variant="ghost"
               size="icon"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="h-10 w-10 text-slate-300 hover:text-white hover:bg-slate-800"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-accent"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (

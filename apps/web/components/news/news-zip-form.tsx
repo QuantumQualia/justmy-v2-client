@@ -50,7 +50,7 @@ export function NewsZipForm() {
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <MapPin
-            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-white/30"
+            className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground"
             aria-hidden
           />
           <input
@@ -66,7 +66,7 @@ export function NewsZipForm() {
               if (error) setError(null);
             }}
             maxLength={10}
-            className="h-14 w-full rounded-xl border border-white/15 bg-black/40 pl-12 pr-4 text-lg tracking-wide text-white outline-none transition placeholder:text-base placeholder:tracking-normal placeholder:text-white/30 hover:border-white/25 focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 disabled:opacity-60"
+            className="h-14 w-full rounded-xl border border-input bg-background pl-12 pr-4 text-lg tracking-wide text-foreground outline-none transition placeholder:text-base placeholder:tracking-normal placeholder:text-muted-foreground hover:border-ring focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 disabled:opacity-60"
             disabled={loading}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "zip-error" : undefined}
@@ -102,7 +102,7 @@ export function NewsZipForm() {
           {error}
         </p>
       ) : (
-        <p className="text-xs text-white/40">
+        <p className="text-xs text-muted-foreground">
           We use your zip code only to find your local market.
         </p>
       )}

@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
 import { toast } from "sonner";
 
 import { AuthDialog } from "@/components/auth/auth-dialog";
@@ -34,7 +35,10 @@ import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
 import type { AuthResponse } from "@/lib/services/auth";
 import { tokenStorage } from "@/lib/storage/token-storage";
 import { useNewsAuthUiStore } from "@/lib/store/news-auth-ui-store";
+import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
+import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
+import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
 import { useProfileStore } from "@/lib/store/profile-store";
 import type { NewsMarketContext } from "./types";
 
@@ -43,6 +47,7 @@ type NewsAccountUser = {
   lastName?: string | null;
   email?: string;
   avatarUrl?: string | null;
+  role?: string;
 };
 
 type NewsMarketNavProps = {
@@ -52,7 +57,8 @@ type NewsMarketNavProps = {
   activeConversationId?: number | null;
   onConversationDeleted?: (id: number) => void;
   onAuthSuccess?: (response: AuthResponse) => void;
-  recentsRefreshKey?: number;
+  /** When false, the parent owns stickiness (Biz OS stacks this with its subnav). */
+  sticky?: boolean;
 };
 
 export function NewsMarketNav({
@@ -62,8 +68,9 @@ export function NewsMarketNav({
   activeConversationId = null,
   onConversationDeleted,
   onAuthSuccess: onAuthSuccessFromPage,
-  recentsRefreshKey = 0,
+  sticky = true,
 }: NewsMarketNavProps) {
+  const pathname = usePathname();
   const setMarket = useNewsZipStore((s) => s.setMarket);
   const setBriefingExtras = useNewsZipStore((s) => s.setBriefingExtras);
   const clearBriefingExtras = useNewsZipStore((s) => s.clearBriefingExtras);
@@ -82,9 +89,31 @@ export function NewsMarketNav({
   const setSidebarOpen = useNewsAuthUiStore((s) => s.setSidebarOpen);
   const profilePhoto = useProfileStore((s) => s.data.photo);
   const profileVerified = useProfileStore((s) => s.data.isVerified);
+  const profileName = useProfileStore((s) => s.data.name);
 
   const authButtonRef = useRef<HTMLButtonElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const apply = () => {
+      document.documentElement.style.setProperty(
+        "--news-header-h",
+        `${Math.round(el.getBoundingClientRect().height)}px`,
+      );
+    };
+    apply();
+    const ro = new ResizeObserver(apply);
+    ro.observe(el);
+    window.addEventListener("resize", apply);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", apply);
+      document.documentElement.style.removeProperty("--news-header-h");
+    };
+  }, []);
 
   const locationLabel = [market.zipcode, market.cityState]
     .filter(Boolean)
@@ -110,6 +139,13 @@ export function NewsMarketNav({
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (!authUser) return;
+    if (isEmailVerificationExemptPath(pathname)) return;
+    void useNewsFavoritesStore.getState().hydrate();
+    void useNewsRecentsStore.getState().hydrate(market.marketId);
+  }, [authUser, market.marketId, pathname]);
 
   // Load daily briefing on mount / market change (when enabled)
   useEffect(() => {
@@ -277,7 +313,12 @@ export function NewsMarketNav({
   }
 
   const authLabel = authUser
-    ? firstNonEmpty(authUser.firstName, authUser.email?.split("@")[0], "Account")
+    ? firstNonEmpty(
+        profileName,
+        authUser.firstName,
+        authUser.email?.split("@")[0],
+        "Account",
+      )
     : null;
 
   const sponsorName = firstNonEmpty(
@@ -292,7 +333,14 @@ export function NewsMarketNav({
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl">
+      <header
+        ref={headerRef}
+        className={
+          sticky
+            ? "sticky top-0 z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
+            : "border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
+        }
+      >
       <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
           <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -470,7 +518,6 @@ export function NewsMarketNav({
           activeConversationId={activeConversationId}
           onConversationDeleted={(id) => onConversationDeleted?.(id)}
           onSignedOut={() => setAuthUser(null)}
-          refreshKey={recentsRefreshKey}
         />
       ) : null}
     </>

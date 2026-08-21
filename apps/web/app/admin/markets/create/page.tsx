@@ -92,14 +92,14 @@ export default function CreateMarketPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-white">Create Market</h1>
-          <p className="text-slate-400">Add a new market to the system</p>
+          <h1 className="text-3xl font-bold text-foreground">Create Market</h1>
+          <p className="text-muted-foreground">Add a new market to the system</p>
         </div>
 
-        <div className="border border-dashed border-slate-700 p-8 rounded-xl bg-slate-900/30">
+        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
           <div className="space-y-6">
             {error && (
               <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-red-400">
@@ -109,7 +109,7 @@ export default function CreateMarketPage() {
 
             <div className="flex items-center justify-between">
               <Link href="/admin/markets">
-                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white hover:bg-white/10">
+                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground hover:bg-accent">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Back
                 </Button>
@@ -133,7 +133,7 @@ export default function CreateMarketPage() {
               </Button>
             </div>
 
-            <div className="border-b border-slate-800">
+            <div className="border-b border-border">
               <nav className="flex gap-4">
                 {tabs.map((tab) => (
                   <button
@@ -142,7 +142,7 @@ export default function CreateMarketPage() {
                     className={`px-4 py-2 border-b-2 transition-colors cursor-pointer ${
                       activeTab === tab.id
                         ? "border-emerald-500 text-emerald-500 font-medium"
-                        : "border-transparent text-slate-400 hover:text-white"
+                        : "border-transparent text-muted-foreground hover:text-accent-foreground"
                     }`}
                   >
                     {tab.label}

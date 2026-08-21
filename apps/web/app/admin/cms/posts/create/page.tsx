@@ -127,18 +127,18 @@ export default function CreatePostPage() {
       .replace(/(^-|-$)/g, "");
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Create New Post</h1>
-            <p className="text-slate-400">Create a new blog post</p>
+            <h1 className="text-3xl font-bold text-foreground">Create New Post</h1>
+            <p className="text-muted-foreground">Create a new blog post</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="postType" className="text-slate-300">
+            <Label htmlFor="postType" className="text-muted-foreground">
               Post Type
             </Label>
             <Select
@@ -147,22 +147,22 @@ export default function CreatePostPage() {
                 setPostType(value as "standard" | "shared-from-url")
               }
             >
-              <SelectTrigger className="bg-black/50 border-slate-700 text-white">
+              <SelectTrigger className="bg-muted border-border text-foreground">
                 <SelectValue placeholder="Select post type" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="standard">Standard Post</SelectItem>
                 <SelectItem value="shared-from-url">Shared from URL</SelectItem>
               </SelectContent>
             </Select>
           </div>
 
-          <Card className="border-slate-800 bg-slate-900/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">
+              <CardTitle className="text-foreground">
                 {postType === "standard" ? "Basic Information" : "Shared Post From URL"}
               </CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardDescription className="text-muted-foreground">
                 {postType === "standard"
                   ? "Title, slug, excerpt, and tags for your post."
                   : "Paste an external URL and we will fetch metadata (title, excerpt, SEO) automatically."}
@@ -172,7 +172,7 @@ export default function CreatePostPage() {
               {postType === "standard" ? (
                 <>
                   <div className="space-y-2">
-                    <Label htmlFor="title" className="text-slate-300">
+                    <Label htmlFor="title" className="text-muted-foreground">
                       Title *
                     </Label>
                     <Input
@@ -193,12 +193,12 @@ export default function CreatePostPage() {
                         });
                       }}
                       placeholder="Post title"
-                      className="bg-black/50 border-slate-700 text-white"
+                      className="bg-muted border-border text-foreground"
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="slug" className="text-slate-300">
+                    <Label htmlFor="slug" className="text-muted-foreground">
                       Slug (URL)
                     </Label>
                     <Input
@@ -222,14 +222,14 @@ export default function CreatePostPage() {
                         }
                       }}
                       placeholder="my-post"
-                      className="bg-black/50 border-slate-700 text-white"
+                      className="bg-muted border-border text-foreground"
                     />
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Optional. URL: /blog/{standardFormData.slug || "my-post"}
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="excerpt" className="text-slate-300">
+                    <Label htmlFor="excerpt" className="text-muted-foreground">
                       Excerpt
                     </Label>
                     <Textarea
@@ -242,7 +242,7 @@ export default function CreatePostPage() {
                         })
                       }
                       placeholder="Short excerpt..."
-                      className="min-h-[80px] bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none"
+                      className="min-h-[80px] resize-none"
                     />
                   </div>
                   <TagInput
@@ -256,10 +256,10 @@ export default function CreatePostPage() {
                       })
                     }
                     placeholder="Add tag (Enter or comma)"
-                    className="text-slate-300"
+                    className="text-muted-foreground"
                   />
                   <div className="space-y-2">
-                    <Label htmlFor="status" className="text-slate-300">
+                    <Label htmlFor="status" className="text-muted-foreground">
                       Status
                     </Label>
                     <Select
@@ -273,11 +273,11 @@ export default function CreatePostPage() {
                     >
                       <SelectTrigger
                         id="status"
-                        className="bg-black/50 border-slate-700 text-white"
+                        className="bg-muted border-border text-foreground"
                       >
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
-                      <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                      <SelectContent className="bg-card border-border text-foreground">
                         <SelectItem value="draft">Draft</SelectItem>
                         <SelectItem value="publish">Publish</SelectItem>
                         <SelectItem value="archive">Archive</SelectItem>
@@ -287,7 +287,7 @@ export default function CreatePostPage() {
                 </>
               ) : (
                 <div className="space-y-2">
-                  <Label htmlFor="externalUrl" className="text-slate-300">
+                  <Label htmlFor="externalUrl" className="text-muted-foreground">
                     External URL *
                   </Label>
                   <Input
@@ -296,10 +296,10 @@ export default function CreatePostPage() {
                     value={sharedExternalUrl}
                     onChange={(e) => setSharedExternalUrl(e.target.value)}
                     placeholder="https://example.com/article"
-                    className="bg-black/50 border-slate-700 text-white"
+                    className="bg-muted border-border text-foreground"
                     required
                   />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Title, excerpt, and SEO settings will be fetched from the URL.
                   </p>
                 </div>

@@ -8,6 +8,8 @@
 const ACCESS_TOKEN_KEY = "auth_access_token";
 const REFRESH_TOKEN_KEY = "auth_refresh_token";
 const USER_KEY = "auth_user";
+/** Browsers typically reject a single cookie over ~4KB. */
+const COOKIE_MAX_BYTES = 3500;
 
 /**
  * Check if we're in a browser environment
@@ -42,7 +44,14 @@ async function getCookie(name: string): Promise<string | null> {
     }
   }
   
-  // Client-side: use document.cookie
+  return readBrowserCookie(name);
+}
+
+/**
+ * Set a cookie (client-side only)
+ */
+function readBrowserCookie(name: string): string | null {
+  if (!isBrowser()) return null;
   const nameEQ = name + "=";
   const cookiesStr = document.cookie.split(";");
   for (let i = 0; i < cookiesStr.length; i++) {
@@ -58,9 +67,6 @@ async function getCookie(name: string): Promise<string | null> {
   return null;
 }
 
-/**
- * Set a cookie (client-side only)
- */
 function setCookie(name: string, value: string, days = 7): void {
   if (!isBrowser()) return;
   const expires = new Date();
@@ -95,6 +101,10 @@ export const tokenStorage = {
     return await getCookie(ACCESS_TOKEN_KEY);
   },
 
+  getAccessTokenSync(): string | null {
+    return readBrowserCookie(ACCESS_TOKEN_KEY);
+  },
+
   /**
    * Save refresh token (stores in cookies)
    */
@@ -114,7 +124,12 @@ export const tokenStorage = {
    */
   setUser(user: unknown): void {
     try {
-      setCookie(USER_KEY, JSON.stringify(user));
+      const payload = JSON.stringify(user);
+      if (encodeURIComponent(payload).length > COOKIE_MAX_BYTES) {
+        console.warn("[TokenStorage] auth_user cookie too large; storing a slimmer session.");
+        return;
+      }
+      setCookie(USER_KEY, payload);
     } catch (error) {
       console.error("Failed to save user data:", error);
     }
@@ -129,6 +144,18 @@ export const tokenStorage = {
       return user ? (JSON.parse(user) as T) : null;
     } catch (error) {
       console.error("Failed to get user data:", error);
+      return null;
+    }
+  },
+
+  /**
+   * Sync cookie read for client hydrations (React Query initialData).
+   */
+  getUserSync<T = unknown>(): T | null {
+    try {
+      const user = readBrowserCookie(USER_KEY);
+      return user ? (JSON.parse(user) as T) : null;
+    } catch {
       return null;
     }
   },

@@ -27,7 +27,7 @@ export function ChatbotButton({ className, variant = "floating" }: ChatbotButton
       >
         <MessageCircle className="h-6 w-6" />
         {!isOpen && (
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-slate-900 animate-pulse" />
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-green-400 rounded-full border-2 border-background animate-pulse" />
         )}
       </Button>
     );
@@ -37,7 +37,7 @@ export function ChatbotButton({ className, variant = "floating" }: ChatbotButton
     <Button
       onClick={open}
       variant="outline"
-      className={`border-slate-700 bg-slate-800/50 text-slate-200 hover:text-white hover:bg-slate-700/50 ${className || ""}`}
+      className={`border-border bg-muted text-foreground hover:text-foreground hover:bg-accent ${className || ""}`}
     >
       <MessageCircle className="h-4 w-4 mr-2" />
       Need Help & Ask

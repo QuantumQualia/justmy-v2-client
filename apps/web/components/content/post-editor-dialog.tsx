@@ -386,15 +386,15 @@ export function PostEditorDialog({
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 p-0 shadow-2xl shadow-black/40",
+          "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl rounded-br-none border border-border bg-card p-0 shadow-2xl shadow-black/40",
           isSimplifiedSharedCreate
             ? "max-h-[min(90dvh,560px)] sm:max-w-lg"
             : "max-h-[min(92dvh,920px)] w-[calc(100vw-1rem)] sm:max-w-[min(100vw-2rem,1200px)]"
         )}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-slate-800 px-4 py-3 sm:px-5 sm:py-4">
-          <DialogTitle className="min-w-0 flex-1 truncate text-left text-white">
+        <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5 sm:py-4">
+          <DialogTitle className="min-w-0 flex-1 truncate text-left text-foreground">
             {mode === "create"
               ? postType === "shared-from-url"
                 ? "Create shared post from URL"
@@ -413,7 +413,7 @@ export function PostEditorDialog({
                   variant="outline"
                   size="sm"
                   asChild
-                  className="h-8 rounded-lg rounded-br-none border-slate-600 px-2 text-slate-200 hover:bg-slate-800 sm:px-3"
+                  className="h-8 rounded-lg rounded-br-none border-border px-2 text-foreground hover:bg-accent sm:px-3"
                   title="Open published post"
                 >
                   <a
@@ -431,7 +431,7 @@ export function PostEditorDialog({
               variant="ghost"
               size="icon"
               onClick={close}
-              className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+              className="h-8 w-8 rounded-lg rounded-br-none text-muted-foreground hover:bg-accent hover:text-foreground"
               aria-label="Close"
               disabled={saving}
             >
@@ -446,12 +446,12 @@ export function PostEditorDialog({
           {loadingPost ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
-              <span className="ml-3 text-sm text-slate-400">Loading post…</span>
+              <span className="ml-3 text-sm text-muted-foreground">Loading post…</span>
             </div>
           ) : isSimplifiedSharedCreate ? (
             <fieldset disabled={saving} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="peExternalUrl" className="text-slate-300">
+                <Label htmlFor="peExternalUrl" className="text-foreground">
                   External URL <span className="text-red-400">*</span>
                 </Label>
                 <Input
@@ -460,10 +460,10 @@ export function PostEditorDialog({
                   value={formData.externalUrl}
                   onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
                   placeholder="https://example.com/article"
-                  className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                  className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                   autoFocus
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Title, excerpt, and SEO metadata will be fetched from the URL automatically.
                   You can review and edit them afterwards.
                 </p>
@@ -479,7 +479,7 @@ export function PostEditorDialog({
               <div className={cn("space-y-6", isStandard && "lg:col-span-5")}>
               {/* ── Post settings ── */}
               <fieldset disabled={saving} className="space-y-4">
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   Post settings
                 </h3>
 
@@ -487,7 +487,7 @@ export function PostEditorDialog({
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="peTitle" className="text-slate-300">
+                        <Label htmlFor="peTitle" className="text-foreground">
                           Title <span className="text-red-400">*</span>
                         </Label>
                         <Input
@@ -500,12 +500,12 @@ export function PostEditorDialog({
                             }
                           }}
                           placeholder="Post title"
-                          className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                           autoFocus={mode === "create"}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="peSlug" className="text-slate-300">Slug</Label>
+                        <Label htmlFor="peSlug" className="text-foreground">Slug</Label>
                         <Input
                           id="peSlug"
                           value={formData.slug}
@@ -521,18 +521,18 @@ export function PostEditorDialog({
                             }
                           }}
                           placeholder="my-post"
-                          className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="peExcerpt" className="text-slate-300">Excerpt</Label>
+                      <Label htmlFor="peExcerpt" className="text-foreground">Excerpt</Label>
                       <Textarea
                         id="peExcerpt"
                         value={formData.excerpt}
                         onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                         placeholder="Short excerpt…"
-                        className="min-h-[80px] rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500 resize-none"
+                        className="min-h-[80px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -542,21 +542,21 @@ export function PostEditorDialog({
                         value={formData.tags}
                         onChange={(tags) => setFormData({ ...formData, tags })}
                         placeholder="Add tag (Enter or comma)"
-                        className="text-slate-300"
-                        inputClassName="border-slate-700 bg-black/40"
+                        className="text-foreground"
+                        inputClassName="border-input bg-background"
                       />
                       <div className="space-y-2">
-                        <Label className="text-slate-300">Status</Label>
+                        <Label className="text-foreground">Status</Label>
                         <Select
                           value={formData.status}
                           onValueChange={(v) =>
                             setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
                           }
                         >
-                          <SelectTrigger className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white">
+                          <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
                             <SelectValue />
                           </SelectTrigger>
-                          <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                          <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="publish">Publish</SelectItem>
                             <SelectItem value="archive">Archive</SelectItem>
@@ -569,18 +569,18 @@ export function PostEditorDialog({
                   <>
                     {mode === "edit" && (
                       <div className="space-y-2">
-                        <Label htmlFor="peTitle" className="text-slate-300">Title</Label>
+                        <Label htmlFor="peTitle" className="text-foreground">Title</Label>
                         <Input
                           id="peTitle"
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           placeholder="Post title"
-                          className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                     )}
                     <div className="space-y-2">
-                      <Label htmlFor="peExternalUrl" className="text-slate-300">
+                      <Label htmlFor="peExternalUrl" className="text-foreground">
                         External URL {mode === "create" && <span className="text-red-400">*</span>}
                       </Label>
                       <Input
@@ -589,12 +589,12 @@ export function PostEditorDialog({
                         value={formData.externalUrl}
                         onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
                         placeholder="https://example.com/article"
-                        className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                        className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         autoFocus={mode === "create"}
                         readOnly={mode === "edit"}
                       />
                       {mode === "create" && (
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-muted-foreground">
                           Title, excerpt, and SEO will be fetched from the URL automatically.
                         </p>
                       )}
@@ -602,13 +602,13 @@ export function PostEditorDialog({
                     {mode === "edit" && (
                       <>
                         <div className="space-y-2">
-                          <Label htmlFor="peExcerpt" className="text-slate-300">Excerpt</Label>
+                          <Label htmlFor="peExcerpt" className="text-foreground">Excerpt</Label>
                           <Textarea
                             id="peExcerpt"
                             value={formData.excerpt}
                             onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                             placeholder="Short excerpt…"
-                            className="min-h-[80px] rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500 resize-none"
+                            className="min-h-[80px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -618,21 +618,21 @@ export function PostEditorDialog({
                             value={formData.tags}
                             onChange={(tags) => setFormData({ ...formData, tags })}
                             placeholder="Add tag (Enter or comma)"
-                            className="text-slate-300"
-                            inputClassName="border-slate-700 bg-black/40"
+                            className="text-foreground"
+                            inputClassName="border-input bg-background"
                           />
                           <div className="space-y-2">
-                            <Label className="text-slate-300">Status</Label>
+                            <Label className="text-foreground">Status</Label>
                             <Select
                               value={formData.status}
                               onValueChange={(v) =>
                                 setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
                               }
                             >
-                              <SelectTrigger className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white">
+                              <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
                                 <SelectValue />
                               </SelectTrigger>
-                              <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                              <SelectContent>
                                 <SelectItem value="draft">Draft</SelectItem>
                                 <SelectItem value="publish">Publish</SelectItem>
                                 <SelectItem value="archive">Archive</SelectItem>
@@ -648,12 +648,12 @@ export function PostEditorDialog({
 
               {/* ── SEO ── */}
               <fieldset disabled={saving} className="space-y-4">
-                <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                   SEO settings
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="peSeoTitle" className="text-slate-300">SEO Title</Label>
+                    <Label htmlFor="peSeoTitle" className="text-foreground">SEO Title</Label>
                     <Input
                       id="peSeoTitle"
                       value={formData.seo.title}
@@ -661,7 +661,7 @@ export function PostEditorDialog({
                         setFormData({ ...formData, seo: { ...formData.seo, title: e.target.value } })
                       }
                       placeholder="Override page title for search engines"
-                      className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                      className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
                   <TagInput
@@ -679,12 +679,12 @@ export function PostEditorDialog({
                       })
                     }
                     placeholder="Add keyword"
-                    className="text-slate-300"
-                    inputClassName="border-slate-700 bg-black/40"
+                    className="text-foreground"
+                    inputClassName="border-input bg-background"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="peSeoDesc" className="text-slate-300">SEO Description</Label>
+                  <Label htmlFor="peSeoDesc" className="text-foreground">SEO Description</Label>
                   <Textarea
                     id="peSeoDesc"
                     value={formData.seo.description}
@@ -695,15 +695,15 @@ export function PostEditorDialog({
                       })
                     }
                     placeholder="Description for search results…"
-                    className="min-h-[60px] rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500 resize-none"
+                    className="min-h-[60px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-slate-300">OG Image</Label>
+                  <Label className="text-foreground">OG Image</Label>
                   <button
                     type="button"
                     onClick={() => setOgInsertOpen(true)}
-                    className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-700 bg-black/30 text-left transition-colors hover:border-blue-500/70 hover:bg-black/40"
+                    className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-input bg-background text-left transition-colors hover:border-blue-500/70 hover:bg-muted"
                   >
                     {formData.seo.ogImage ? (
                       <>
@@ -719,14 +719,14 @@ export function PostEditorDialog({
                         </div>
                       </>
                     ) : (
-                      <div className="flex h-36 flex-col items-center justify-center gap-2 text-slate-400">
-                        <ImageIcon className="h-6 w-6 text-slate-500" />
+                      <div className="flex h-36 flex-col items-center justify-center gap-2 text-muted-foreground">
+                        <ImageIcon className="h-6 w-6 text-muted-foreground" />
                         <span className="text-xs font-medium">Add OG image</span>
-                        <span className="text-[11px] text-slate-500">1200 × 630 recommended</span>
+                        <span className="text-[11px] text-muted-foreground">1200 × 630 recommended</span>
                       </div>
                     )}
                   </button>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-muted-foreground">
                     Used for social sharing (Open Graph image).
                   </p>
                 </div>
@@ -735,14 +735,14 @@ export function PostEditorDialog({
 
               {/* ── Content blocks: header always visible; list scrolls (esp. mobile) ── */}
               {isStandard && (
-                <div className="flex min-h-0 flex-col lg:col-span-7 lg:h-full lg:self-stretch lg:border-l lg:border-slate-800/60 lg:pl-8">
+                <div className="flex min-h-0 flex-col lg:col-span-7 lg:h-full lg:self-stretch lg:border-l lg:border-border/60 lg:pl-8">
                   <fieldset
                     disabled={saving}
-                    className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-800/80 bg-slate-950/40 lg:min-h-[min(70vh,640px)]"
+                    className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-muted/50 lg:min-h-[min(70vh,640px)]"
                   >
                     <legend className="sr-only">Content blocks</legend>
-                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-slate-800/60 bg-slate-900/70 px-3 py-2.5">
-                      <h3 className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
+                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted px-3 py-2.5">
+                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
                         Content blocks ({content.length})
                       </h3>
                       <PostBlockSelector onSelect={handleAddBlock} size="sm" />
@@ -755,10 +755,10 @@ export function PostEditorDialog({
                       )}
                     >
                       {content.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-slate-700/90 bg-slate-900/30 py-8 text-center text-slate-500">
+                        <div className="rounded-lg border border-dashed border-border bg-muted/50 py-8 text-center text-muted-foreground">
                           <p className="text-sm">No content blocks yet.</p>
                           <p className="mt-1 text-xs">
-                            Use <span className="text-slate-400">Add block</span> to get started.
+                            Use <span className="text-muted-foreground">Add block</span> to get started.
                           </p>
                         </div>
                       ) : (
@@ -789,13 +789,13 @@ export function PostEditorDialog({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-800 px-4 py-3 sm:px-5 sm:py-4">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-border px-4 py-3 sm:px-5 sm:py-4">
           <Button
             type="button"
             variant="outline"
             onClick={close}
             disabled={saving}
-            className="rounded-lg rounded-br-none border-slate-600 text-slate-200 hover:bg-slate-800"
+            className="rounded-lg rounded-br-none border-border text-foreground hover:bg-accent"
           >
             Cancel
           </Button>
@@ -845,9 +845,9 @@ export function PostEditorDialog({
 
         {uploadingOgImage && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl">
-            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
               <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-              <span className="text-sm text-slate-100">Processing image…</span>
+              <span className="text-sm text-foreground">Processing image…</span>
             </div>
           </div>
         )}

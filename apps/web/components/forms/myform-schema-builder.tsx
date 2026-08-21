@@ -102,7 +102,7 @@ function fieldTypeStyles(type: MyFormBuilderFieldType): string {
     case "checkbox":
       return "border-rose-400/35 bg-rose-500/20 text-rose-100";
     default:
-      return "border-slate-400/35 bg-slate-600/25 text-slate-100";
+      return "border-border bg-muted text-foreground";
   }
 }
 
@@ -172,16 +172,16 @@ function SortableFieldOutlineRow({
       }}
       className={cn(
         "flex items-center gap-2 py-2.5 pl-2 pr-1 outline-none transition-colors sm:gap-3 sm:py-3 sm:pl-3",
-        "focus-visible:bg-slate-800/50 focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40",
-        isDragging && "bg-slate-800/60 shadow-md",
-        selected ? "bg-emerald-950/35 ring-1 ring-inset ring-emerald-500/25" : "hover:bg-slate-800/40",
+        "focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40",
+        isDragging && "bg-muted/60 shadow-md",
+        selected ? "bg-emerald-950/35 ring-1 ring-inset ring-emerald-500/25" : "hover:bg-accent/40",
       )}
     >
       <button
         type="button"
         className={cn(
-          "flex h-9 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border text-slate-500 transition-colors",
-          "border-slate-700/60 bg-slate-900/60 hover:border-slate-600 hover:text-slate-300",
+          "flex h-9 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg border text-muted-foreground transition-colors",
+          "border-input bg-card hover:border-border hover:text-muted-foreground",
           "active:cursor-grabbing",
         )}
         aria-label="Drag to reorder"
@@ -194,7 +194,7 @@ function SortableFieldOutlineRow({
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-bold tabular-nums",
-          selected ? "bg-emerald-500/20 text-emerald-200" : "bg-slate-800/80 text-slate-500",
+          selected ? "bg-emerald-500/20 text-emerald-200" : "bg-muted text-muted-foreground",
         )}
       >
         {index + 1}
@@ -208,7 +208,7 @@ function SortableFieldOutlineRow({
         {field.type}
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-slate-100">
+        <p className="truncate text-sm font-medium text-foreground">
           {field.label || field.id}
           {field.required && field.type !== "header" ? (
             <span className="ml-1 text-amber-400 sm:hidden" aria-hidden>
@@ -216,7 +216,7 @@ function SortableFieldOutlineRow({
             </span>
           ) : null}
         </p>
-        <p className="truncate font-mono text-[10px] text-slate-500 sm:hidden" title={field.id}>
+        <p className="truncate font-mono text-[10px] text-muted-foreground sm:hidden" title={field.id}>
           {field.type} · {field.id}
         </p>
       </div>
@@ -227,7 +227,7 @@ function SortableFieldOutlineRow({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 text-slate-500 hover:bg-red-950/50 hover:text-red-400"
+        className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-950/50 hover:text-red-400"
         aria-label="Remove field"
         onClick={(e) => {
           e.stopPropagation();
@@ -280,14 +280,14 @@ function SortableFieldRow({
         "focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
         isDragging && "scale-[1.01] shadow-2xl shadow-black/50",
         selected
-          ? "border-emerald-400/55 bg-slate-800/95 shadow-lg shadow-emerald-950/25 ring-1 ring-emerald-400/25"
-          : "border-slate-500/45 bg-slate-800/90 hover:border-slate-400/50 hover:bg-slate-800",
+          ? "border-emerald-400/55 bg-muted/95 shadow-lg shadow-emerald-950/25 ring-1 ring-emerald-400/25"
+          : "border-border bg-muted hover:border-border hover:bg-accent",
       )}
     >
       <div
         className={cn(
           "absolute inset-y-0 left-0 w-1.5 transition-colors",
-          selected ? "bg-emerald-400" : "bg-slate-600/70 group-hover:bg-slate-500",
+          selected ? "bg-emerald-400" : "bg-muted-foreground/70 group-hover:bg-muted-foreground",
         )}
         aria-hidden
       />
@@ -296,8 +296,8 @@ function SortableFieldRow({
           <button
             type="button"
             className={cn(
-              "flex h-11 w-11 cursor-grab touch-none items-center justify-center rounded-xl border text-slate-400 transition-colors",
-              "border-slate-500/50 bg-slate-900/80 hover:border-slate-400/60 hover:bg-slate-900 hover:text-slate-200",
+              "flex h-11 w-11 cursor-grab touch-none items-center justify-center rounded-xl border text-muted-foreground transition-colors",
+              "border-border bg-card hover:border-border hover:bg-card hover:text-foreground",
               "active:cursor-grabbing",
             )}
             aria-label="Drag to reorder"
@@ -312,7 +312,7 @@ function SortableFieldRow({
               "flex h-8 min-w-[2rem] items-center justify-center rounded-full border px-2 font-mono text-xs font-bold tabular-nums",
               selected
                 ? "border-emerald-500/40 bg-emerald-950/50 text-emerald-200"
-                : "border-slate-500/40 bg-slate-900/70 text-slate-300",
+                : "border-border bg-card text-muted-foreground",
             )}
             aria-label={`Position ${index + 1}`}
           >
@@ -341,7 +341,7 @@ function SortableFieldRow({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-9 w-9 shrink-0 rounded-lg text-slate-400 hover:bg-red-950/60 hover:text-red-300"
+              className="h-9 w-9 shrink-0 rounded-lg text-muted-foreground hover:bg-red-950/60 hover:text-red-300"
               aria-label="Remove field"
               onClick={(e) => {
                 e.stopPropagation();
@@ -352,11 +352,11 @@ function SortableFieldRow({
             </Button>
           </div>
 
-          <p className="break-words pr-1 text-[15px] font-semibold leading-snug tracking-tight text-white sm:text-base">
+          <p className="break-words pr-1 text-[15px] font-semibold leading-snug tracking-tight text-foreground sm:text-base">
             {field.label || field.id}
           </p>
           <p
-            className="break-all font-mono text-[11px] leading-relaxed text-slate-400 sm:text-xs"
+            className="break-all font-mono text-[11px] leading-relaxed text-muted-foreground sm:text-xs"
             title={field.id}
           >
             {field.id}
@@ -500,19 +500,19 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
   };
 
   const panelClass =
-    "rounded-2xl border border-slate-700/50 bg-gradient-to-b from-slate-900/80 to-slate-950/90 p-4 shadow-lg shadow-black/20 backdrop-blur-sm";
+    "rounded-2xl border border-border bg-gradient-to-b from-card to-muted p-4 shadow-lg shadow-black/20 backdrop-blur-sm";
 
   const fieldOrderList = (
     <>
       {fields.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-slate-600/45 bg-slate-950/30 px-4 py-10 text-center">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-slate-700/50 bg-slate-900/60 text-slate-500">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border bg-muted px-4 py-10 text-center">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground">
             <Layers className="h-6 w-6" />
           </div>
           <div className="max-w-sm space-y-1">
-            <p className="text-sm font-medium text-slate-200">No fields yet</p>
-            <p className="text-xs leading-relaxed text-slate-500">
-              Use <span className="text-slate-400">Add blocks</span>{" "}
+            <p className="text-sm font-medium text-foreground">No fields yet</p>
+            <p className="text-xs leading-relaxed text-muted-foreground">
+              Use <span className="text-muted-foreground">Add blocks</span>{" "}
               {preview ? "in the sidebar" : "on the right"} to add headings and inputs.
             </p>
           </div>
@@ -520,8 +520,8 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
       ) : preview ? (
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
           <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
-            <div className="overflow-hidden rounded-xl border border-slate-700/50 bg-slate-900/30">
-              <ul className="divide-y divide-slate-800/90">
+            <div className="overflow-hidden rounded-xl border border-border bg-muted">
+              <ul className="divide-y divide-border/90">
                 {fields.map((f, i) => (
                   <li key={f.id}>
                     <SortableFieldOutlineRow
@@ -542,7 +542,7 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
           <SortableContext items={fields.map((f) => f.id)} strategy={verticalListSortingStrategy}>
             <ul
               className={cn(
-                "flex flex-col gap-3 rounded-xl border border-slate-500/35 bg-slate-950/50 p-3 sm:p-4",
+                "flex flex-col gap-3 rounded-xl border border-border bg-muted p-3 sm:p-4",
                 "shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] ring-1 ring-white/[0.05]",
               )}
             >
@@ -566,37 +566,37 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
 
   const combinedCanvas = preview ? (
     <div
-      className="overflow-hidden rounded-2xl border border-slate-600/45 bg-slate-900/25 shadow-xl shadow-black/25 ring-1 ring-white/[0.06]"
+      className="overflow-hidden rounded-2xl border border-border bg-card shadow-xl shadow-black/25 ring-1 ring-white/[0.06]"
       aria-label="Form preview and outline"
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/55 bg-slate-950/70 px-4 py-3.5 sm:px-5">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted px-4 py-3.5 sm:px-5">
         <div className="flex min-w-0 items-center gap-2.5">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
             <Eye className="h-4 w-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold tracking-tight text-white">Visitor preview</p>
-            <p className="text-[11px] leading-snug text-slate-500 sm:text-xs">
+            <p className="text-sm font-semibold tracking-tight text-foreground">Visitor preview</p>
+            <p className="text-[11px] leading-snug text-muted-foreground sm:text-xs">
               What people see on your page. Use the outline underneath to reorder blocks or pick one to edit.
             </p>
           </div>
         </div>
         {fields.length > 0 ? (
-          <span className="shrink-0 rounded-full border border-slate-500/50 bg-slate-800/90 px-2.5 py-1 text-[11px] font-medium text-slate-200">
+          <span className="shrink-0 rounded-full border border-border bg-muted/90 px-2.5 py-1 text-[11px] font-medium text-foreground">
             {fields.length} block{fields.length === 1 ? "" : "s"}
           </span>
         ) : null}
       </div>
 
-      <div className="border-b border-slate-700/50 bg-slate-950/40 p-4 sm:p-6">{preview}</div>
+      <div className="border-b border-border bg-muted p-4 sm:p-6">{preview}</div>
 
-      <div className="border-t border-slate-800/80 bg-slate-950/70 px-4 py-3 sm:px-5 sm:py-4">
+      <div className="border-t border-border/80 bg-muted px-4 py-3 sm:px-5 sm:py-4">
         <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <ListOrdered className="h-4 w-4 shrink-0 text-slate-500" />
+            <ListOrdered className="h-4 w-4 shrink-0 text-muted-foreground" />
             <div>
-              <h3 className="text-sm font-semibold text-slate-200">Form outline</h3>
-              <p className="text-[11px] leading-snug text-slate-500">
+              <h3 className="text-sm font-semibold text-foreground">Form outline</h3>
+              <p className="text-[11px] leading-snug text-muted-foreground">
                 Quick reorder · select a row to edit in the sidebar
               </p>
             </div>
@@ -620,17 +620,17 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
         <section className="order-1 min-w-0 space-y-4" aria-labelledby="myform-fields-heading">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
-              <h3 id="myform-fields-heading" className="text-base font-semibold tracking-tight text-white">
+              <h3 id="myform-fields-heading" className="text-base font-semibold tracking-tight text-foreground">
                 Form structure
               </h3>
-              <p className="mt-1 max-w-xl text-sm leading-relaxed text-slate-400">
+              <p className="mt-1 max-w-xl text-sm leading-relaxed text-muted-foreground">
                 {fields.length === 0
                   ? "Build the flow your visitors will see."
                   : `${fields.length} field${fields.length === 1 ? "" : "s"}. Drag the grip to reorder; click a card to edit it on the right.`}
               </p>
             </div>
             {fields.length > 0 ? (
-              <span className="rounded-full border border-slate-500/50 bg-slate-800/90 px-3 py-1 text-xs font-medium text-slate-200 shadow-sm">
+              <span className="rounded-full border border-border bg-muted/90 px-3 py-1 text-xs font-medium text-foreground shadow-sm">
                 {fields.length} in form
               </span>
             ) : null}
@@ -642,15 +642,15 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
       {/* Toolbox — add + properties */}
       <aside className="order-2 flex flex-col gap-4 xl:sticky xl:top-4">
         <div className={panelClass}>
-          <div className="flex items-center gap-2 border-b border-slate-700/40 pb-3">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-3">
             <Bell className="h-4 w-4 text-amber-400/90" />
             <div>
-              <p className="text-sm font-semibold text-white">Submission notifications</p>
-              <p className="text-[11px] text-slate-500">Email admins when someone submits this form</p>
+              <p className="text-sm font-semibold text-foreground">Submission notifications</p>
+              <p className="text-[11px] text-muted-foreground">Email admins when someone submits this form</p>
             </div>
           </div>
           <div className="mt-4 space-y-1.5">
-            <Label htmlFor="myform-admin-emails" className="text-xs font-medium text-slate-400">
+            <Label htmlFor="myform-admin-emails" className="text-xs font-medium text-muted-foreground">
               Admin emails
             </Label>
             <Textarea
@@ -659,10 +659,10 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
               onChange={(e) => setAdminEmailsDraft(e.target.value)}
               onBlur={() => commitAdminEmails(adminEmailsDraftRef.current)}
               placeholder={"one per line, e.g.\nadmin@example.com\nleads@example.com"}
-              className="min-h-[88px] rounded-xl border-slate-700/60 bg-slate-950/50 font-mono text-xs leading-relaxed text-white placeholder:text-slate-600"
+              className="min-h-[88px] rounded-xl border-input bg-muted font-mono text-xs leading-relaxed text-foreground placeholder:text-muted-foreground"
               spellCheck={false}
             />
-            <p className="text-[10px] leading-snug text-slate-600">
+            <p className="text-[10px] leading-snug text-muted-foreground">
               {adminEmails.length === 0
                 ? "Leave empty to skip email notifications."
                 : `${adminEmails.length} recipient${adminEmails.length === 1 ? "" : "s"} will be notified.`}
@@ -671,11 +671,11 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
         </div>
 
         <div className={panelClass}>
-          <div className="flex items-center gap-2 border-b border-slate-700/40 pb-3">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-3">
             <List className="h-4 w-4 text-emerald-400/90" />
             <div>
-              <p className="text-sm font-semibold text-white">Add blocks</p>
-              <p className="text-[11px] text-slate-500">Click to append to the end of the form</p>
+              <p className="text-sm font-semibold text-foreground">Add blocks</p>
+              <p className="text-[11px] text-muted-foreground">Click to append to the end of the form</p>
             </div>
           </div>
           <div className="mt-3 grid grid-cols-2 gap-2">
@@ -687,14 +687,14 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
                   type="button"
                   onClick={() => addField(p.type)}
                   className={cn(
-                    "flex flex-col items-start gap-1 rounded-xl border border-slate-700/40 bg-slate-950/30 p-3 text-left transition-all",
+                    "flex flex-col items-start gap-1 rounded-xl border border-border/40 bg-muted p-3 text-left transition-all",
                     "hover:border-emerald-500/35 hover:bg-emerald-950/20 hover:shadow-md hover:shadow-emerald-950/10",
                     "active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40",
                   )}
                 >
-                  <Icon className="h-4 w-4 text-slate-400" />
-                  <span className="text-xs font-medium text-slate-100">{p.label}</span>
-                  <span className="line-clamp-2 text-[10px] leading-tight text-slate-500">{p.hint}</span>
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium text-foreground">{p.label}</span>
+                  <span className="line-clamp-2 text-[10px] leading-tight text-muted-foreground">{p.hint}</span>
                 </button>
               );
             })}
@@ -702,26 +702,26 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
         </div>
 
         <div className={panelClass}>
-          <div className="flex items-center gap-2 border-b border-slate-700/40 pb-3">
+          <div className="flex items-center gap-2 border-b border-border/40 pb-3">
             <Type className="h-4 w-4 text-sky-400/90" />
             <div>
-              <p className="text-sm font-semibold text-white">Block settings</p>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-sm font-semibold text-foreground">Block settings</p>
+              <p className="text-[11px] text-muted-foreground">
                 {selected ? `Editing ${selected.type}` : "Select a field from the list"}
               </p>
             </div>
           </div>
 
           {!selected ? (
-            <p className="mt-4 text-sm leading-relaxed text-slate-500">
+            <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
               {preview ? (
                 <>
-                  Click a row in the <span className="text-slate-400">Form outline</span> (under the preview) to edit
+                  Click a row in the <span className="text-muted-foreground">Form outline</span> (under the preview) to edit
                   labels, placeholders, and validation.
                 </>
               ) : (
                 <>
-                  Click any row in <span className="text-slate-400">Form structure</span> to change labels, placeholders,
+                  Click any row in <span className="text-muted-foreground">Form structure</span> to change labels, placeholders,
                   and validation.
                 </>
               )}
@@ -729,36 +729,36 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
           ) : (
             <div className="mt-4 space-y-4">
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-400">Internal id</Label>
+                <Label className="text-xs font-medium text-muted-foreground">Internal id</Label>
                 <Input
                   readOnly
                   value={selected.id}
-                  className="h-9 rounded-xl border-slate-700/60 bg-slate-950/50 font-mono text-xs text-slate-400"
+                  className="h-9 rounded-xl border-input bg-muted font-mono text-xs text-muted-foreground"
                 />
-                <p className="text-[10px] text-slate-600">Used in submissions; stable after publish.</p>
+                <p className="text-[10px] text-muted-foreground">Used in submissions; stable after publish.</p>
               </div>
 
-              <div className="h-px bg-slate-800/80" />
+              <div className="h-px bg-muted" />
 
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-slate-400">
+                <Label className="text-xs font-medium text-muted-foreground">
                   {selected.type === "header" ? "Heading text" : "Label shown to visitors"}
                 </Label>
                 <Input
                   value={selected.label}
                   onChange={(e) => updateSelected({ label: e.target.value })}
-                  className="h-9 rounded-xl border-slate-700/60 bg-slate-950/50 text-sm text-white placeholder:text-slate-600"
+                  className="h-9 rounded-xl border-input bg-muted text-sm text-foreground placeholder:text-muted-foreground"
                 />
               </div>
 
               {selected.type !== "header" ? (
-                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-slate-700/40 bg-slate-950/30 px-3 py-2.5 transition-colors hover:bg-slate-900/50">
+                <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-border/40 bg-muted px-3 py-2.5 transition-colors hover:bg-accent">
                   <Checkbox
                     checked={Boolean(selected.required)}
                     onCheckedChange={(c) => updateSelected({ required: c === true })}
-                    className="border-slate-600"
+                    className="border-border"
                   />
-                  <span className="text-sm text-slate-200">Required before submit</span>
+                  <span className="text-sm text-foreground">Required before submit</span>
                 </label>
               ) : null}
 
@@ -768,19 +768,19 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
               selected.type !== "radio" &&
               selected.type !== "date" ? (
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-400">Placeholder</Label>
+                  <Label className="text-xs font-medium text-muted-foreground">Placeholder</Label>
                   <Input
                     value={selected.placeholder ?? ""}
                     onChange={(e) => updateSelected({ placeholder: e.target.value })}
                     placeholder="Optional hint inside the field"
-                    className="h-9 rounded-xl border-slate-700/60 bg-slate-950/50 text-sm"
+                    className="h-9 rounded-xl border-input bg-muted text-sm"
                   />
                 </div>
               ) : null}
 
               {selected.type === "select" || selected.type === "radio" ? (
                 <div className="space-y-1.5">
-                  <Label className="text-xs font-medium text-slate-400">
+                  <Label className="text-xs font-medium text-muted-foreground">
                     {selected.type === "radio" ? "Radio options" : "Dropdown choices"}
                   </Label>
                   <Textarea
@@ -796,12 +796,12 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
                       setChoicesDraft(optionsToLines(parsed));
                     }}
                     placeholder={"one per line, e.g.\nfree|Free tier\npro|Pro tier"}
-                    className="min-h-[120px] rounded-xl border-slate-700/60 bg-slate-950/50 font-mono text-xs leading-relaxed"
+                    className="min-h-[120px] rounded-xl border-input bg-muted font-mono text-xs leading-relaxed"
                     spellCheck={false}
                   />
-                  <p className="text-[10px] leading-snug text-slate-600">
-                    Each line: <code className="text-slate-500">value</code> or{" "}
-                    <code className="text-slate-500">value|visible label</code>
+                  <p className="text-[10px] leading-snug text-muted-foreground">
+                    Each line: <code className="text-muted-foreground">value</code> or{" "}
+                    <code className="text-muted-foreground">value|visible label</code>
                   </p>
                 </div>
               ) : null}

@@ -137,12 +137,12 @@ export function FixedMarketingNavbar({
     if (level === 0) {
       return isActive
         ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-        : "text-slate-300 hover:bg-slate-800/50 hover:text-white";
+        : "text-muted-foreground hover:bg-accent hover:text-foreground";
     }
 
     return isActive
-      ? "bg-slate-800/50 text-emerald-400"
-      : "text-slate-400 hover:bg-slate-800/30 hover:text-white";
+      ? "bg-accent text-emerald-400"
+      : "text-muted-foreground hover:bg-accent hover:text-foreground";
   };
 
   const getIndentStyle = (level: number): React.CSSProperties => ({
@@ -150,13 +150,13 @@ export function FixedMarketingNavbar({
   });
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/10 bg-black/60 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto h-16 max-w-7xl px-4 flex items-center justify-between">
         {/* Left */}
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/"
-            className="text-xl font-bold tracking-tighter whitespace-nowrap"
+            className="text-xl font-bold tracking-tighter whitespace-nowrap text-foreground"
             aria-label="JustMy.com"
           >
             JustMy<span className="text-emerald-500">.com</span>
@@ -169,7 +169,7 @@ export function FixedMarketingNavbar({
           className="hidden md:flex items-center gap-8 ml-6 flex-1 justify-center"
         >
             {/* Meet the OS */}
-            <Link href="/vision" className="text-slate-300 hover:text-white">
+            <Link href="/vision" className="text-muted-foreground hover:text-foreground">
               Meet the OS
             </Link>
 
@@ -179,8 +179,8 @@ export function FixedMarketingNavbar({
                 type="button"
                 onClick={() => setOsOpen((v) => !v)}
                 className={cn(
-                  "inline-flex items-center gap-1 text-slate-300 hover:text-white",
-                  osOpen ? "text-white" : ""
+                  "inline-flex items-center gap-1 text-muted-foreground hover:text-foreground",
+                  osOpen ? "text-foreground" : ""
                 )}
                 aria-haspopup="menu"
                 aria-expanded={osOpen}
@@ -189,13 +189,13 @@ export function FixedMarketingNavbar({
               </button>
 
               {osOpen ? (
-                <div className="absolute left-0 mt-2 w-56 rounded-xl border border-white/10 bg-black/90 backdrop-blur-md shadow-lg p-2">
+                <div className="absolute left-0 mt-2 w-56 rounded-xl border border-border bg-popover backdrop-blur-md shadow-lg p-2">
                   {OS_DROPDOWN.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setOsOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/10"
+                      className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent"
                       role="menuitem"
                     >
                       {item.label}
@@ -206,7 +206,7 @@ export function FixedMarketingNavbar({
             </div>
 
             {/* The Apps */}
-            <Link href="/lab/app-hub" className="text-slate-300 hover:text-white">
+            <Link href="/lab/app-hub" className="text-muted-foreground hover:text-foreground">
               The Apps
             </Link>
 
@@ -216,8 +216,8 @@ export function FixedMarketingNavbar({
                 type="button"
                 onClick={() => setResourcesOpen((v) => !v)}
                 className={cn(
-                  "inline-flex items-center gap-1 text-slate-300 hover:text-white",
-                  resourcesOpen ? "text-white" : ""
+                  "inline-flex items-center gap-1 text-muted-foreground hover:text-foreground",
+                  resourcesOpen ? "text-foreground" : ""
                 )}
                 aria-haspopup="menu"
                 aria-expanded={resourcesOpen}
@@ -226,13 +226,13 @@ export function FixedMarketingNavbar({
               </button>
 
               {resourcesOpen ? (
-                <div className="absolute left-0 mt-2 w-56 rounded-xl border border-white/10 bg-black/90 backdrop-blur-md shadow-lg p-2">
+                <div className="absolute left-0 mt-2 w-56 rounded-xl border border-border bg-popover backdrop-blur-md shadow-lg p-2">
                   {RESOURCES_DROPDOWN.map((item) => (
                     <Link
                       key={item.href}
                       href={item.href}
                       onClick={() => setResourcesOpen(false)}
-                      className="block px-3 py-2 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-white/10"
+                      className="block px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-foreground hover:bg-accent"
                       role="menuitem"
                     >
                       {item.label}
@@ -243,7 +243,7 @@ export function FixedMarketingNavbar({
             </div>
 
             {/* Pricing */}
-            <Link href="/#pricing" className="text-slate-300 hover:text-white">
+            <Link href="/#pricing" className="text-muted-foreground hover:text-foreground">
               Pricing
             </Link>
         </div>
@@ -254,7 +254,7 @@ export function FixedMarketingNavbar({
             <Button
               variant="ghost"
               size="icon"
-              className="h-10 w-10 text-slate-300 hover:text-white hover:bg-white/10"
+              className="h-10 w-10 text-muted-foreground hover:text-foreground hover:bg-accent"
               onClick={() => setMobileMenuOpen((v) => !v)}
               aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
             >
@@ -264,7 +264,7 @@ export function FixedMarketingNavbar({
           <div className="hidden md:flex items-center gap-6">
             <Link
               href="/login"
-              className="text-slate-300 hover:text-white text-sm font-medium"
+              className="text-muted-foreground hover:text-foreground text-sm font-medium"
             >
               Log In
             </Link>
@@ -291,14 +291,14 @@ export function FixedMarketingNavbar({
           />
 
           {/* Sidebar */}
-          <aside className="fixed top-0 right-0 z-70 flex h-full w-80 max-w-[85vw] transform flex-col border-l border-slate-800 bg-slate-900 transition-transform duration-300 ease-in-out md:hidden">
-            <div className="flex items-center justify-between p-4 border-b border-slate-800 bg-slate-900 flex-shrink-0">
-              <h2 className="text-lg font-semibold text-white">Menu</h2>
+          <aside className="fixed top-0 right-0 z-70 flex h-full w-80 max-w-[85vw] transform flex-col border-l border-border bg-card transition-transform duration-300 ease-in-out md:hidden">
+            <div className="flex items-center justify-between p-4 border-b border-border bg-muted flex-shrink-0">
+              <h2 className="text-lg font-semibold text-foreground">Menu</h2>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={closeAll}
-                className="h-8 w-8 text-slate-400 hover:text-white hover:bg-slate-800"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
                 aria-label="Close menu"
               >
                 <X className="h-4 w-4" />
@@ -434,7 +434,7 @@ export function FixedMarketingNavbar({
               </div>
 
               {/* Bottom actions */}
-              <div className="border-t border-slate-800 p-4 space-y-2 flex-shrink-0 bg-slate-900">
+              <div className="border-t border-border p-4 space-y-2 flex-shrink-0 bg-muted">
                 <Link
                   href="/login"
                   onClick={closeAll}

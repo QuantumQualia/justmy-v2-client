@@ -59,7 +59,7 @@ export function WeatherHeroBlock({}: WeatherHeroBlockProps) {
 
   if (isLoading) {
     return (
-      <div className="rounded-2xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-sm text-slate-400">
+      <div className="rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
         Loading current weather…
       </div>
     );

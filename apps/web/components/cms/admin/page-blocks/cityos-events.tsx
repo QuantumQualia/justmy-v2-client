@@ -56,34 +56,34 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
 
   return (
     <div className="space-y-4">
-      <Card className="border-slate-700 bg-slate-800/50 text-slate-200">
+      <Card className="border-border bg-muted text-foreground">
         <CardContent className="space-y-4 p-4 pt-4">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Tag cloud of Ticketmaster on-sale events for a market, resolved by the market&apos;s site domain.
           </p>
           <div className="space-y-2">
-            <Label className="text-slate-300">Market site domain (this app / CMS page only)</Label>
+            <Label className="text-muted-foreground">Market site domain (this app / CMS page only)</Label>
             <Input
-              className="border-slate-600 bg-slate-900 text-slate-100"
+              className="border-border bg-card text-foreground"
               placeholder="justmymemphis.com"
               value={block.cityOsEventsDomain ?? ""}
               onChange={(e) => updateField("cityOsEventsDomain", e.target.value.trim())}
             />
-            <CardDescription className="text-xs text-slate-500">
-              Required for blocks inside JustMy. Must match <code className="text-slate-400">Market.site</code> on the
+            <CardDescription className="text-xs text-muted-foreground">
+              Required for blocks inside JustMy. Must match <code className="text-muted-foreground">Market.site</code> on the
               backend (no https://). For <strong>script</strong> and <strong>iframe</strong> snippets on external
-              pages, fill this so we can emit <code className="text-slate-400">data-domain</code> / query override; on
-              a normal newsstand the script infers the market from <code className="text-slate-400">window.location</code>{" "}
+              pages, fill this so we can emit <code className="text-muted-foreground">data-domain</code> / query override; on
+              a normal newsstand the script infers the market from <code className="text-muted-foreground">window.location</code>{" "}
               when you omit it from the snippet.
             </CardDescription>
           </div>
           <div className="space-y-2">
-            <Label className="text-slate-300">Events limit</Label>
+            <Label className="text-muted-foreground">Events limit</Label>
             <Input
               type="number"
               min={1}
               max={100}
-              className="border-slate-600 bg-slate-900 text-slate-100"
+              className="border-border bg-card text-foreground"
               value={Number.isFinite(limit) ? limit : 30}
               onChange={(e) => {
                 const n = Number.parseInt(e.target.value, 10);
@@ -92,11 +92,11 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
             />
           </div>
           <div className="space-y-2">
-            <Label className="text-slate-300">Script embed (recommended)</Label>
+            <Label className="text-muted-foreground">Script embed (recommended)</Label>
             <Textarea
               readOnly
               rows={3}
-              className="font-mono text-xs border-slate-600 bg-slate-950 text-slate-300"
+              className="font-mono text-xs border-border bg-muted text-muted-foreground"
               value={scriptSnippet}
             />
             <div className="flex gap-2">
@@ -116,19 +116,19 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
               >
                 {copied === "script" ? "Copied" : "Copy script HTML"}
               </Button>
-              <CardDescription className="flex-1 self-center text-xs text-slate-500">
+              <CardDescription className="flex-1 self-center text-xs text-muted-foreground">
                 Mounts after the tag in a shadow root (no iframe sandbox limits). Wrap in a sized container if you
-                need a minimum height. Set <code className="text-slate-400">data-domain</code> when the page hostname is
-                not the market site (e.g. partner page); the script otherwise uses <code className="text-slate-400">window.location</code>.
+                need a minimum height. Set <code className="text-muted-foreground">data-domain</code> when the page hostname is
+                not the market site (e.g. partner page); the script otherwise uses <code className="text-muted-foreground">window.location</code>.
               </CardDescription>
             </div>
           </div>
           <div className="space-y-2">
-            <Label className="text-slate-300">Newsstand / legacy embed (iframe)</Label>
+            <Label className="text-muted-foreground">Newsstand / legacy embed (iframe)</Label>
             <Textarea
               readOnly
               rows={4}
-              className="font-mono text-xs border-slate-600 bg-slate-950 text-slate-300"
+              className="font-mono text-xs border-border bg-muted text-muted-foreground"
               value={iframeSnippet}
             />
             <div className="flex gap-2">
@@ -148,10 +148,10 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
               >
                 {copied === "iframe" ? "Copied" : "Copy iframe HTML"}
               </Button>
-              <CardDescription className="flex-1 self-center text-xs text-slate-500">
+              <CardDescription className="flex-1 self-center text-xs text-muted-foreground">
                 Same snippet on every newsstand: the widget resolves the parent page hostname (referrer). If a site
-                strips referrers, append <code className="text-slate-400">&amp;domain=marketsite.com</code> to the
-                iframe <code className="text-slate-400">src</code>. Adjust <code className="text-slate-400">height</code>{" "}
+                strips referrers, append <code className="text-muted-foreground">&amp;domain=marketsite.com</code> to the
+                iframe <code className="text-muted-foreground">src</code>. Adjust <code className="text-muted-foreground">height</code>{" "}
                 as needed.
               </CardDescription>
             </div>

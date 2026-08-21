@@ -28,7 +28,7 @@ export function WelcomeMessage({
   function CardWrapper({ children }: { children: React.ReactNode }) {
     return (
       <div className="w-full max-w-3xl mx-auto">
-        <div className="rounded-2xl rounded-br-none border border-purple-500/30 bg-black/60 backdrop-blur-lg p-6 md:p-8 shadow-[0_0_24px_rgba(168,85,247,0.22)] relative overflow-hidden">
+        <div className="rounded-2xl rounded-br-none border border-purple-500/30 bg-card/80 backdrop-blur-lg p-6 md:p-8 shadow-[0_0_24px_rgba(168,85,247,0.22)] relative overflow-hidden">
           {/* Liquid purple glow effect */}
           <div className="absolute inset-0 bg-gradient-to-br from-purple-600/20 via-purple-500/10 to-transparent pointer-events-none" />
           <div className="absolute -top-12 -right-12 w-28 h-28 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
@@ -85,11 +85,11 @@ export function WelcomeMessage({
 
   const content = (
     <div className="relative z-10">
-      <p className="text-2xl md:text-4xl font-semibold text-white leading-tight mb-2">
+      <p className="text-2xl md:text-4xl font-semibold text-foreground leading-tight mb-2">
         {greeting}
       </p>
       {body && (
-        <p className="text-lg md:text-xl font-semibold text-white leading-relaxed mb-3">
+        <p className="text-lg md:text-xl font-semibold text-foreground leading-relaxed mb-3">
           {body}
         </p>
       )}

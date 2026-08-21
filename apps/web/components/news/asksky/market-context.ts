@@ -27,3 +27,19 @@ export function marketDtoToContext(
     dailyAudioBriefingEnabled: Boolean(market.dailyAudioBriefingEnabled),
   };
 }
+
+/** Nav-safe market when zip is known but the markets API has not resolved yet. */
+export function fallbackMarketFromZip(zipcode: string): NewsMarketContext {
+  const cleaned = zipcode.trim().slice(0, 5);
+  return {
+    marketSlug: cleaned || "local",
+    marketName: cleaned ? `ZIP ${cleaned}` : "Local market",
+    zipcode: cleaned,
+    city: null,
+    state: null,
+    site: null,
+    cityState: cleaned,
+    metroLabel: cleaned ? `LOCAL · ${cleaned}` : "LOCAL",
+    dailyAudioBriefingEnabled: false,
+  };
+}

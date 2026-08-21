@@ -7,6 +7,10 @@ import { Input } from "@workspace/ui/components/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { MapPin, Briefcase, User } from "lucide-react";
+import Link from "next/link";
+import { AuthSocialButtons } from "@/components/auth/auth-social-buttons";
+import { finishAuthRedirect } from "@/lib/auth/finish-auth-redirect";
+import { useOauthSignIn } from "@/lib/auth/use-oauth-sign-in";
 import { authService, ApiClientError } from "@/lib/services/auth";
 import {
   DEFAULT_PROFILE_KIND,
@@ -16,6 +20,8 @@ import {
   resolveProfileKindOrDefault,
   type ProfileKind,
 } from "@/lib/os-types";
+import { verifyEmailHref } from "@/lib/auth/email-verification";
+import { useNewsZipStore } from "@/lib/store/news-zip-store";
 
 export default function RegisterForm() {
   const searchParams = useSearchParams();
@@ -31,47 +37,57 @@ export default function RegisterForm() {
   
   // 2. Get referral code from URL (supports both ?ref= and ?referral=)
   const referralCodeFromUrl = searchParams.get("ref") || searchParams.get("referral") || "";
+  const newsZip = useNewsZipStore((s) => s.zipcode);
 
-  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
-    zipCode: "",
+    zipCode: newsZip || "",
     businessName: "", // Only used if isBusiness is true
     referralCode: referralCodeFromUrl, // Auto-populate from URL
   });
 
-  const [error, setError] = useState("");
+  const afterRegisterPath = isBusiness ? "/biz-os/onboard" : "/dashboard?welcome=true";
+
+  const oauth = useOauthSignIn({
+    zipCode: formData.zipCode || newsZip || undefined,
+    referralCode: formData.referralCode,
+    profileType,
+    onSuccess: (response) =>
+      finishAuthRedirect(router, response, {
+        fallback: afterRegisterPath,
+        afterRegister: true,
+      }),
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    oauth.setLoading(true);
+    oauth.setError("");
 
     try {
-      // 2. Send to API
       await authService.register({
         ...formData,
         profileType: profileType,
         ...(formData.referralCode && { referralCode: formData.referralCode.trim() }),
       });
 
-      router.push("/dashboard?welcome=true");
+      router.push(verifyEmailHref(afterRegisterPath));
     } catch (err: unknown) {
       if (err instanceof ApiClientError) {
-        setError(err.message || "Registration failed. Please try again.");
+        oauth.setError(err.message || "Registration failed. Please try again.");
       } else {
-        setError("An error occurred. Please try again.");
+        oauth.setError("An error occurred. Please try again.");
       }
     } finally {
-      setLoading(false);
+      oauth.setLoading(false);
     }
   };
 
   return (
-    <Card className="w-full max-w-md bg-slate-900 border-slate-800 text-white shadow-2xl">
+    <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
         <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
           {isBusiness ? <Briefcase className="h-6 w-6 text-white" /> : <User className="h-6 w-6 text-white" />}
@@ -79,27 +95,39 @@ export default function RegisterForm() {
         <CardTitle className="text-2xl font-bold">
           Create {profileKindDisplayShort(profileKind)} Account
         </CardTitle>
-        <p className="text-slate-400 text-sm">
+        <p className="text-muted-foreground text-sm">
           {isBusiness 
             ? "Claim your node and start managing your presence." 
             : "Join your local City OS to connect and save."}
         </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {oauth.error ? (
+          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+            {oauth.error}
+          </div>
+        ) : null}
+
+        <AuthSocialButtons
+          loading={oauth.loading}
+          onGoogle={oauth.handleGoogle}
+          onApple={oauth.handleApple}
+          showApple={oauth.showApple}
+        />
+
+        <div className="flex items-center gap-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          <span className="h-px flex-1 bg-border" />
+          Or continue with email
+          <span className="h-px flex-1 bg-border" />
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-          
           {/* USER INFO */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>First Name</Label>
               <Input 
                 required 
-                className="bg-black/50 border-slate-700"
                 onChange={(e) => setFormData({...formData, firstName: e.target.value})}
               />
             </div>
@@ -107,7 +135,6 @@ export default function RegisterForm() {
               <Label>Last Name</Label>
               <Input 
                 required 
-                className="bg-black/50 border-slate-700"
                 onChange={(e) => setFormData({...formData, lastName: e.target.value})}
               />
             </div>
@@ -118,7 +145,6 @@ export default function RegisterForm() {
             <Input 
               type="email" 
               required 
-              className="bg-black/50 border-slate-700"
               onChange={(e) => setFormData({...formData, email: e.target.value})}
             />
           </div>
@@ -128,7 +154,6 @@ export default function RegisterForm() {
             <Input 
               type="password" 
               required 
-              className="bg-black/50 border-slate-700"
               onChange={(e) => setFormData({...formData, password: e.target.value})}
             />
           </div>
@@ -141,20 +166,20 @@ export default function RegisterForm() {
             <Input 
               required 
               placeholder="e.g. 38103"
-              className="bg-black/50 border-slate-700"
+              value={formData.zipCode}
               onChange={(e) => setFormData({...formData, zipCode: e.target.value})}
             />
-            <p className="text-[10px] text-slate-500">We use this to connect you to your local Market.</p>
+            <p className="text-[10px] text-muted-foreground">We use this to connect you to your local Market.</p>
           </div>
 
           {/* CONDITIONAL: BUSINESS NAME */}
           {isBusiness && (
-            <div className="pt-4 border-t border-slate-800 animate-in fade-in slide-in-from-top-2 space-y-2">
+            <div className="pt-4 border-t border-border animate-in fade-in slide-in-from-top-2 space-y-2">
               <Label className="text-emerald-400 font-bold">Business Name</Label>
               <Input 
                 required 
                 placeholder="e.g. Joe's Pizza"
-                className="bg-black/50 border-emerald-500/50 focus:border-emerald-500"
+                className="border-emerald-500/50 focus:border-emerald-500"
                 onChange={(e) => setFormData({...formData, businessName: e.target.value})}
               />
             </div>
@@ -162,11 +187,10 @@ export default function RegisterForm() {
 
           {/* REFERRAL CODE (Optional) */}
           <div className="space-y-2">
-            <Label className="text-xs text-slate-400">Referral Code (Optional)</Label>
+            <Label className="text-xs text-muted-foreground">Referral Code (Optional)</Label>
             <Input 
               placeholder="Enter referral code"
               value={formData.referralCode}
-              className="bg-black/50 border-slate-700"
               onChange={(e) => setFormData({...formData, referralCode: e.target.value})}
             />
             {referralCodeFromUrl && (
@@ -176,15 +200,22 @@ export default function RegisterForm() {
 
           <Button 
             type="submit" 
-            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 font-bold mt-4 h-12 text-lg" 
-            disabled={loading}
+            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg" 
+            disabled={oauth.loading}
           >
-            {loading ? "Creating Account..." : "Get Started"}
+            {oauth.loading ? "Creating Account..." : "Get Started"}
           </Button>
 
+          <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
+            <p>
+              Already have an account?{" "}
+              <Link href="/login" className="text-emerald-500 hover:text-emerald-400 font-medium">
+                Sign in
+              </Link>
+            </p>
+          </div>
         </form>
       </CardContent>
     </Card>
   );
 }
-

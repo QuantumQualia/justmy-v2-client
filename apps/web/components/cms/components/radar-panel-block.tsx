@@ -55,7 +55,7 @@ export function RadarPanelBlock({}: RadarPanelBlockProps) {
 
   if (isLoading) {
     return (
-      <div className="rounded-3xl border border-slate-900 bg-slate-950/70 px-4 py-3 text-sm text-slate-400">
+      <div className="rounded-3xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
         Loading radar…
       </div>
     );

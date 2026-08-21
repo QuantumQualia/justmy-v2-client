@@ -239,7 +239,7 @@ export default function EditPagePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
       </div>
     );
@@ -247,21 +247,21 @@ export default function EditPagePage() {
 
   if (!page) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Page not found</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Page not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-10 relative">
+    <div className="min-h-screen bg-background p-10 relative text-foreground">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">Edit Page</h1>
-              <p className="text-slate-400">{page.title}</p>
+              <h1 className="text-3xl font-bold text-foreground">Edit Page</h1>
+              <p className="text-muted-foreground">{page.title}</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -301,51 +301,51 @@ export default function EditPagePage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Page Settings */}
-            <Card className="border-slate-800 bg-slate-900/50">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Page Settings</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-foreground">Page Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Title, handle, description, and options.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-slate-300">
+                  <Label htmlFor="title" className="text-muted-foreground">
                     Title *
                   </Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="handle" className="text-slate-300">
+                  <Label htmlFor="handle" className="text-muted-foreground">
                     Handle (URL) *
                   </Label>
                   <Input
                     id="handle"
                     value={formData.handle}
                     onChange={(e) => setFormData({ ...formData, handle: e.target.value })}
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     placeholder="my-page"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="parentHandle" className="text-slate-300">
+                  <Label htmlFor="parentHandle" className="text-muted-foreground">
                     Parent Handle (optional)
                   </Label>
                   <Input
                     id="parentHandle"
                     value={formData.parentHandle}
                     onChange={(e) => setFormData({ ...formData, parentHandle: e.target.value })}
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                     placeholder="parent-page"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description" className="text-slate-300">
+                  <Label htmlFor="description" className="text-muted-foreground">
                     Description
                   </Label>
                   <Textarea
@@ -355,7 +355,7 @@ export default function EditPagePage() {
                       setFormData({ ...formData, description: e.target.value })
                     }
                     placeholder="Page description..."
-                    className="w-full bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 rounded-md px-3 py-2"
+                    className="w-full rounded-md px-3 py-2"
                     rows={3}
                   />
                 </div>
@@ -369,7 +369,7 @@ export default function EditPagePage() {
                   />
                   <Label
                     htmlFor="isPublished"
-                    className="text-slate-300 cursor-pointer font-normal"
+                    className="text-muted-foreground cursor-pointer font-normal"
                   >
                     Published
                   </Label>
@@ -384,7 +384,7 @@ export default function EditPagePage() {
                   />
                   <Label
                     htmlFor="requiresAuth"
-                    className="text-slate-300 cursor-pointer font-normal"
+                    className="text-muted-foreground cursor-pointer font-normal"
                   >
                     Requires Authentication
                   </Label>
@@ -393,13 +393,13 @@ export default function EditPagePage() {
             </Card>
 
             {/* Content Blocks */}
-            <Card className="border-slate-800 bg-slate-900/50">
+            <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                 <div>
-                  <CardTitle className="text-white">
+                  <CardTitle className="text-foreground">
                     Content Blocks ({content.length})
                   </CardTitle>
-                  <CardDescription className="text-slate-400">
+                  <CardDescription className="text-muted-foreground">
                     Add and reorder blocks for the page body.
                   </CardDescription>
                 </div>
@@ -407,7 +407,7 @@ export default function EditPagePage() {
               </CardHeader>
               <CardContent>
               {content.length === 0 ? (
-                <div className="text-center py-12 text-slate-400">
+                <div className="text-center py-12 text-muted-foreground">
                   <p>No content blocks yet. Add a block to get started.</p>
                 </div>
               ) : (
@@ -435,16 +435,16 @@ export default function EditPagePage() {
           {/* Sidebar */}
           <div className="space-y-6">
             {/* SEO Settings */}
-            <Card className="border-slate-800 bg-slate-900/50">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">SEO Settings</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-foreground">SEO Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Title, description, keywords, and OG image for sharing.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="seoTitle" className="text-slate-300">
+                  <Label htmlFor="seoTitle" className="text-muted-foreground">
                     SEO Title
                   </Label>
                   <Input
@@ -456,11 +456,11 @@ export default function EditPagePage() {
                         seo: { ...formData.seo, title: e.target.value },
                       })
                     }
-                    className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                    className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="seoDescription" className="text-slate-300">
+                  <Label htmlFor="seoDescription" className="text-muted-foreground">
                     SEO Description
                   </Label>
                   <Textarea
@@ -473,7 +473,7 @@ export default function EditPagePage() {
                       })
                     }
                     placeholder="SEO description for search results..."
-                    className="w-full bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 rounded-md px-3 py-2"
+                    className="w-full rounded-md px-3 py-2"
                     rows={3}
                   />
                 </div>
@@ -494,12 +494,12 @@ export default function EditPagePage() {
                   placeholder="Add keyword (Enter or comma)"
                 />
                 <div>
-                  <Label className="text-slate-300">OG Image</Label>
+                  <Label className="text-muted-foreground">OG Image</Label>
                   <div className="mt-2 space-y-2">
                     <button
                       type="button"
                       onClick={() => setOgInsertOpen(true)}
-                      className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 text-left transition-colors hover:border-blue-500/70 hover:bg-slate-900/80"
+                      className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card"
                     >
                       {formData.seo.ogImage ? (
                         <>
@@ -509,20 +509,20 @@ export default function EditPagePage() {
                             className="aspect-[1200/630] w-full object-cover"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span className="rounded-full border border-slate-600 bg-black/70 px-3 py-1.5 text-xs font-medium text-slate-100">
+                            <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
                               Change image
                             </span>
                           </div>
                         </>
                       ) : (
-                        <div className="flex aspect-[1200/630] flex-col items-center justify-center gap-2 text-slate-400">
-                          <ImageIcon className="h-6 w-6 text-slate-500" />
+                        <div className="flex aspect-[1200/630] flex-col items-center justify-center gap-2 text-muted-foreground">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
                           <span className="text-xs font-medium">Add OG image</span>
-                          <span className="text-[11px] text-slate-500">Recommended 1200×675</span>
+                          <span className="text-[11px] text-muted-foreground">Recommended 1200×675</span>
                         </div>
                       )}
                     </button>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Used for social sharing preview (Open Graph image).
                     </p>
                   </div>
@@ -556,9 +556,9 @@ export default function EditPagePage() {
       )}
       {uploadingOgImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
             <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">Processing image…</span>
+            <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>
       )}

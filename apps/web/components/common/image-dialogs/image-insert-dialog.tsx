@@ -72,6 +72,8 @@ export type ImageInsertDialogProps = {
   sources?: ImageInsertSourceOption[];
   /** When true, the device file input accepts multiple files (e.g. lookbook). */
   allowMultipleLocal?: boolean;
+  /** Light admin chrome (Biz OS editor). Default keeps the shared token look. */
+  variant?: "light" | "default";
 };
 
 export function ImageInsertDialog({
@@ -81,6 +83,7 @@ export function ImageInsertDialog({
   title = "Insert image",
   sources = DEFAULT_IMAGE_INSERT_SOURCES,
   allowMultipleLocal = false,
+  variant = "default",
 }: ImageInsertDialogProps) {
   const [panel, setPanel] = React.useState<"sources" | "unsplash">("sources");
   const fileRef = React.useRef<HTMLInputElement>(null);
@@ -210,19 +213,29 @@ export function ImageInsertDialog({
 
   const activeUnsplashSources = sources.filter((s) => s.id === "unsplash");
 
+  const isLight = variant === "light";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
         className={cn(
-          "gap-0 overflow-hidden border-slate-700 bg-slate-900 p-0 text-slate-100 sm:max-w-lg",
+          "gap-0 overflow-hidden p-0 sm:max-w-lg",
+          isLight
+            ? "border-slate-200 bg-white text-slate-900"
+            : "border-border bg-background text-foreground",
           panel === "unsplash" && "w-[calc(100vw-1rem)] sm:max-w-4xl",
         )}
       >
         <button
           type="button"
           onClick={() => onOpenChange(false)}
-          className="absolute right-3 top-3 z-10 rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-800 hover:text-slate-100"
+          className={cn(
+            "absolute right-3 top-3 z-10 rounded-full p-1.5 transition-colors",
+            isLight
+              ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              : "text-muted-foreground hover:bg-muted hover:text-foreground",
+          )}
           aria-label="Close"
         >
           <X className="h-4 w-4" />
@@ -230,13 +243,14 @@ export function ImageInsertDialog({
 
         {panel === "sources" ? (
           <>
-            <DialogHeader className="border-b border-slate-700 px-5 py-4 pr-12 text-left">
-              <DialogTitle className="text-lg font-semibold text-white">{title}</DialogTitle>
+            <DialogHeader className={cn("px-5 py-4 pr-12 text-left", isLight ? "border-b border-slate-200" : "border-b border-border")}>
+              <DialogTitle className={cn("text-lg font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{title}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-3 p-5 sm:grid-cols-2">
               {sources.map((src) => {
-                const sourceCardClass =
-                  "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-slate-700 bg-slate-800/60 px-4 py-6 text-center transition-colors hover:border-blue-500/50 hover:bg-slate-800";
+                const sourceCardClass = isLight
+                  ? "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center transition-colors hover:border-violet-300 hover:bg-violet-50"
+                  : "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-border bg-muted/50 px-4 py-6 text-center transition-colors hover:border-blue-500/50 hover:bg-muted";
 
                 if (src.id === "local") {
                   return (
@@ -246,9 +260,9 @@ export function ImageInsertDialog({
                       onClick={handleLocalClick}
                       className={sourceCardClass}
                     >
-                      <span className="font-semibold text-slate-100">{src.label}</span>
+                      <span className={cn("font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{src.label}</span>
                       {src.description ? (
-                        <span className="text-xs font-normal text-slate-500">{src.description}</span>
+                        <span className={cn("text-xs font-normal", isLight ? "text-slate-500" : "text-muted-foreground")}>{src.description}</span>
                       ) : null}
                     </button>
                   );
@@ -267,9 +281,9 @@ export function ImageInsertDialog({
                       }}
                       className={sourceCardClass}
                     >
-                      <span className="font-semibold text-slate-100">{src.label}</span>
+                      <span className={cn("font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{src.label}</span>
                       {src.description ? (
-                        <span className="text-xs font-normal text-slate-500">{src.description}</span>
+                        <span className={cn("text-xs font-normal", isLight ? "text-slate-500" : "text-muted-foreground")}>{src.description}</span>
                       ) : null}
                     </button>
                   );
@@ -277,11 +291,11 @@ export function ImageInsertDialog({
                 return (
                   <div
                     key={src.id}
-                    className="flex flex-col gap-1 rounded-xl border border-dashed border-slate-600 bg-slate-900/30 px-4 py-6 text-center"
+                    className="flex flex-col gap-1 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-6 text-center"
                     title="Implement this source in ImageInsertDialog (local / unsplash are built in)."
                   >
-                    <span className="font-medium text-slate-500">{src.label}</span>
-                    <span className="text-xs text-slate-600">Not connected</span>
+                    <span className="font-medium text-muted-foreground">{src.label}</span>
+                    <span className="text-xs text-muted-foreground">Not connected</span>
                   </div>
                 );
               })}
@@ -297,12 +311,17 @@ export function ImageInsertDialog({
           </>
         ) : (
           <div className="flex max-h-[min(88vh,640px)] min-h-[420px] flex-col sm:flex-row">
-            <aside className="flex shrink-0 flex-row gap-2 border-b border-slate-700 p-3 sm:w-40 sm:flex-col sm:border-b-0 sm:border-r">
+            <aside className={cn("flex shrink-0 flex-row gap-2 p-3 sm:w-40 sm:flex-col sm:border-b-0 sm:border-r", isLight ? "border-b border-slate-200 sm:border-slate-200" : "border-b border-border")}>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="justify-start text-slate-400 hover:bg-slate-800 hover:text-white sm:w-full"
+                className={cn(
+                  "justify-start sm:w-full",
+                  isLight
+                    ? "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
                 onClick={() => setPanel("sources")}
               >
                 <ArrowLeft className="mr-1 h-4 w-4" />
@@ -313,26 +332,41 @@ export function ImageInsertDialog({
                   key={s.id}
                   type="button"
                   size="sm"
-                  className="hidden border border-blue-500/40 bg-blue-600/90 text-white hover:bg-blue-600 sm:flex sm:w-full"
+                  className={cn(
+                    "hidden sm:flex sm:w-full",
+                    isLight
+                      ? "border border-violet-200 bg-violet-600 text-white hover:bg-violet-700"
+                      : "border border-blue-500/40 bg-blue-600/90 text-white hover:bg-blue-600",
+                  )}
                 >
                   {s.label}
                 </Button>
               ))}
             </aside>
             <div className="flex min-w-0 flex-1 flex-col p-4">
-              <h2 className="mb-3 text-base font-semibold text-white">Image library</h2>
+              <h2 className={cn("mb-3 text-base font-semibold", isLight ? "text-slate-900" : "text-foreground")}>Image library</h2>
               <div className="relative mb-3">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+                <Search className={cn("pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2", isLight ? "text-slate-400" : "text-muted-foreground")} />
                 <Input
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   placeholder="Search Unsplash…"
-                  className="border-slate-600 bg-black/40 pl-9 pr-9 text-white placeholder:text-slate-500"
+                  className={cn(
+                    "pl-9 pr-9",
+                    isLight
+                      ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-violet-400"
+                      : "border-input bg-background text-foreground placeholder:text-muted-foreground",
+                  )}
                 />
                 {searchInput ? (
                   <button
                     type="button"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-slate-500 hover:bg-slate-800 hover:text-slate-300"
+                    className={cn(
+                      "absolute right-2 top-1/2 -translate-y-1/2 rounded p-1",
+                      isLight
+                        ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                    )}
                     onClick={() => setSearchInput("")}
                     aria-label="Clear search"
                   >
@@ -343,7 +377,7 @@ export function ImageInsertDialog({
 
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {!debouncedQuery.trim() ? (
-                  <p className="mb-3 text-center text-xs text-slate-500">
+                  <p className="mb-3 text-center text-xs text-muted-foreground">
                     Browsing Unsplash editorial feed. Search to filter.
                   </p>
                 ) : null}
@@ -354,7 +388,7 @@ export function ImageInsertDialog({
                     <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
                   </div>
                 ) : results.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-slate-500">
+                  <p className="py-12 text-center text-sm text-muted-foreground">
                     {debouncedQuery.trim()
                       ? "No images match your search."
                       : "No photos returned."}
@@ -368,7 +402,7 @@ export function ImageInsertDialog({
                           type="button"
                           disabled={pickingId !== null}
                           onClick={() => void handleUnsplashSelect(photo)}
-                          className="group relative aspect-square overflow-hidden cursor-pointer rounded-lg border border-slate-700 bg-slate-800 outline-none ring-blue-500 focus-visible:ring-2 disabled:opacity-50"
+                          className="group relative aspect-square overflow-hidden cursor-pointer rounded-lg border border-border bg-muted outline-none ring-blue-500 focus-visible:ring-2 disabled:opacity-50"
                           title={photo.userName ? `Photo: ${photo.userName}` : undefined}
                         >
                           <img
@@ -391,7 +425,7 @@ export function ImageInsertDialog({
                           variant="outline"
                           size="sm"
                           disabled={searchLoading}
-                          className="border-slate-600 bg-slate-800 text-slate-200"
+                          className="border-border bg-card text-foreground"
                           onClick={() => {
                             const q = debouncedQuery.trim();
                             if (!q) {
@@ -423,13 +457,13 @@ export function ImageInsertDialog({
                 )}
               </div>
 
-              <p className="mt-2 border-t border-slate-800 pt-2 text-[10px] leading-relaxed text-slate-500">
+              <p className="mt-2 border-t border-border pt-2 text-[10px] leading-relaxed text-muted-foreground">
                 Photos provided by{" "}
                 <a
                   href="https://unsplash.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-slate-400 underline"
+                  className="text-muted-foreground underline"
                 >
                   Unsplash
                 </a>
@@ -438,7 +472,7 @@ export function ImageInsertDialog({
                   href="https://unsplash.com/license"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-slate-400 underline"
+                  className="text-muted-foreground underline"
                 >
                   Unsplash License
                 </a>

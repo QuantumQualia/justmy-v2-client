@@ -116,6 +116,26 @@ export interface UpdateProfileDto {
   hotlinks?: HotlinkDto[];
   phones?: PhoneDto[];
   locations?: LocationDto[];
+  allowsSubProfiles?: boolean;
+  categories?: string[];
+  googlePlaceId?: string;
+  googleStarRating?: number;
+  googleRatingCount?: number;
+  googleReviewLink?: string;
+  businessHours?: Array<{
+    weekday: number;
+    openTime?: string;
+    endTime?: string;
+    isClosed?: boolean;
+  }>;
+  publishSetting?: {
+    publishAddress?: boolean;
+    publishReview?: boolean;
+    publishPhone?: boolean;
+    publishEmail?: boolean;
+    publishWebsite?: boolean;
+    publishBusinessHours?: boolean;
+  };
 }
 
 export interface UpdateProfileResponse {

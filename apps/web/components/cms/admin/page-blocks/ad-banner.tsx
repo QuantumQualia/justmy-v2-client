@@ -33,7 +33,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
   const ensureHotlinks = (index: number) => hotlinks[index] || { label: "", href: "" };
 
   const inputClass =
-    "bg-black/50 border-slate-700 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1.5";
+    "bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1.5";
 
   const handleHotlinkChange = (index: number, key: "label" | "href", value: string) => {
     const next = [...hotlinks];
@@ -43,12 +43,12 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
 
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card className="bg-muted border-border text-foreground">
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Ad banner with an image, profile slug, and up to 3 hotlinks.
           </p>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             Banner type can be Custom, Market Sponsor, or Profile. Future types can be added without
             changing this block.
           </CardDescription>
@@ -57,7 +57,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
 
       {/* Banner type */}
       <div className="space-y-2">
-        <Label className="text-slate-300">Banner Type</Label>
+        <Label className="text-muted-foreground">Banner Type</Label>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
@@ -65,7 +65,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "custom"
                 ? "bg-blue-600 text-white"
-                : "bg-slate-700/80 text-slate-300 hover:bg-slate-600 hover:text-white"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "custom")}
           >
@@ -77,7 +77,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "market-sponsor"
                 ? "bg-blue-600 text-white"
-                : "bg-slate-700/80 text-slate-300 hover:bg-slate-600 hover:text-white"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "market-sponsor")}
           >
@@ -89,7 +89,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "profile"
                 ? "bg-blue-600 text-white"
-                : "bg-slate-700/80 text-slate-300 hover:bg-slate-600 hover:text-white"
+                : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "profile")}
           >
@@ -100,7 +100,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
 
       {/* Market sponsor: no fields, content from backend */}
       {bannerType === "market-sponsor" && (
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           Banner content will be fetched from the backend. No CMS fields needed.
         </p>
       )}
@@ -108,7 +108,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
       {/* Profile: only Profile ID */}
       {bannerType === "profile" && (
         <div className="space-y-2">
-          <Label className="text-slate-300">Profile ID</Label>
+          <Label className="text-muted-foreground">Profile ID</Label>
           <Input
             type="text"
             placeholder="Profile ID (banner fetched from backend)"
@@ -116,7 +116,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
             onChange={(e) => updateField("profileId", e.target.value)}
             className={inputClass}
           />
-          <p className="text-[11px] text-slate-500">
+          <p className="text-[11px] text-muted-foreground">
             This profile&apos;s ad banner will be fetched from the backend.
           </p>
         </div>
@@ -126,7 +126,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
       {bannerType === "custom" && (
         <>
           <div className="space-y-2">
-            <Label className="text-slate-300">Image URL</Label>
+            <Label className="text-muted-foreground">Image URL</Label>
             <Input
               type="text"
               placeholder="/images/placeholders/banner_placement.jpg"
@@ -137,7 +137,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Image Alt Text</Label>
+            <Label className="text-muted-foreground">Image Alt Text</Label>
             <Input
               type="text"
               placeholder="Ad Banner"
@@ -148,7 +148,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Banner link (optional)</Label>
+            <Label className="text-muted-foreground">Banner link (optional)</Label>
             <Input
               type="text"
               placeholder="URL when user clicks the banner image"
@@ -159,7 +159,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Profile Slug</Label>
+            <Label className="text-muted-foreground">Profile Slug</Label>
             <Input
               type="text"
               placeholder="e.g. justmymemphis"
@@ -170,8 +170,8 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-300">Hotlinks (up to 3)</Label>
-            <p className="text-[11px] text-slate-500">
+            <Label className="text-muted-foreground">Hotlinks (up to 3)</Label>
+            <p className="text-[11px] text-muted-foreground">
               These appear under the banner image as small text links.
             </p>
             {[0, 1, 2].map((idx) => {
@@ -179,7 +179,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
               return (
                 <div key={idx} className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <Label className="text-[11px] text-slate-500">Label #{idx + 1}</Label>
+                    <Label className="text-[11px] text-muted-foreground">Label #{idx + 1}</Label>
                     <Input
                       type="text"
                       placeholder={idx === 0 ? "Learn More" : idx === 1 ? "Contact Us" : "Follow Us"}
@@ -189,7 +189,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
                     />
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-[11px] text-slate-500">URL #{idx + 1}</Label>
+                    <Label className="text-[11px] text-muted-foreground">URL #{idx + 1}</Label>
                     <Input
                       type="text"
                       placeholder={idx === 0 ? "/learn-more" : idx === 1 ? "/contact-us" : "/follow-us"}

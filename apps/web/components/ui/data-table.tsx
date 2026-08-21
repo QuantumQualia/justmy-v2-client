@@ -92,13 +92,13 @@ export function DataTable<TData, TValue>({
         </div>
       )}
 
-      <div className="overflow-hidden rounded-md border border-slate-800 bg-slate-900/50 text-white">
+      <div className="overflow-hidden rounded-md border text-foreground">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-slate-800 bg-slate-950">
+              <TableRow key={headerGroup.id} className="border-border bg-muted">
                 {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-slate-400">
+                  <TableHead key={header.id} className="text-muted-foreground">
                     {header.isPlaceholder
                       ? null
                       : flexRender(header.column.columnDef.header, header.getContext())}
@@ -109,10 +109,10 @@ export function DataTable<TData, TValue>({
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow className="border-slate-800">
+              <TableRow className="border-border">
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center text-slate-400 py-8"
+                  className="text-center text-muted-foreground py-8"
                 >
                   <div className="flex items-center justify-center gap-2">
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -125,7 +125,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-slate-800 hover:bg-slate-800/50"
+                  className="border-border hover:bg-accent"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -135,10 +135,10 @@ export function DataTable<TData, TValue>({
                 </TableRow>
               ))
             ) : (
-              <TableRow className="border-slate-800">
+              <TableRow className="border-border">
                 <TableCell
                   colSpan={columns.length}
-                  className="text-center text-slate-400 py-8"
+                  className="text-center text-muted-foreground py-8"
                 >
                   {emptyMessage}
                 </TableCell>
@@ -151,7 +151,7 @@ export function DataTable<TData, TValue>({
       {/* Pagination */}
       {displayTotalPages > 1 && (
         <div className="flex items-center justify-between px-2">
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-muted-foreground">
             Showing {(currentPage - 1) * pageSize + 1} to{" "}
             {Math.min(currentPage * pageSize, displayTotal)} of {displayTotal} results
           </div>
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="bg-slate-900 border-slate-700 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-card border-border text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -187,7 +187,7 @@ export function DataTable<TData, TValue>({
                     className={
                       currentPage === pageNum
                         ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-slate-900 border-slate-700 text-white hover:bg-slate-800"
+                        : "bg-card border-border text-foreground hover:bg-accent"
                     }
                   >
                     {pageNum}
@@ -200,7 +200,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === displayTotalPages}
-              className="bg-slate-900 border-slate-700 text-white hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-card border-border text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
               <ChevronRight className="h-4 w-4" />

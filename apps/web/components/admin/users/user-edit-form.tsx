@@ -78,17 +78,17 @@ export function UserEditForm({ initialData, onChange }: UserEditFormProps) {
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 text-white">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-white">User Information</CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardTitle className="text-foreground">User Information</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Update user details and role
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-slate-300">
+            <Label htmlFor="email" className="text-muted-foreground">
               Email <span className="text-destructive">*</span>
             </Label>
             <Input
@@ -97,14 +97,14 @@ export function UserEditForm({ initialData, onChange }: UserEditFormProps) {
               value={formData.email}
               onChange={(e) => handleChange("email", e.target.value)}
               placeholder="user@example.com"
-              className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+              className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
               required
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-slate-300">
+              <Label htmlFor="firstName" className="text-muted-foreground">
                 First Name
               </Label>
               <Input
@@ -112,13 +112,13 @@ export function UserEditForm({ initialData, onChange }: UserEditFormProps) {
                 value={formData.firstName}
                 onChange={(e) => handleChange("firstName", e.target.value)}
                 placeholder="John"
-                className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                 maxLength={100}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-slate-300">
+              <Label htmlFor="lastName" className="text-muted-foreground">
                 Last Name
               </Label>
               <Input
@@ -126,24 +126,24 @@ export function UserEditForm({ initialData, onChange }: UserEditFormProps) {
                 value={formData.lastName}
                 onChange={(e) => handleChange("lastName", e.target.value)}
                 placeholder="Doe"
-                className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+                className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
                 maxLength={100}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role" className="text-slate-300">
+            <Label htmlFor="role" className="text-muted-foreground">
               Role <span className="text-destructive">*</span>
             </Label>
             <Select
               value={formData.role}
               onValueChange={(value: UserRole) => handleChange("role", value)}
             >
-              <SelectTrigger className="bg-black/50 border-slate-700 text-white">
+              <SelectTrigger className="bg-muted border-border text-foreground">
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-900 border-slate-800 text-white">
+              <SelectContent className="bg-card border-border text-foreground">
                 <SelectItem value="USER">USER</SelectItem>
                 <SelectItem value="ADMIN">ADMIN</SelectItem>
               </SelectContent>

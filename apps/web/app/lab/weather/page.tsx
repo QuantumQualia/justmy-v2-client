@@ -148,24 +148,24 @@ export default function WeatherLabPage() {
 
   if (loading) {
     return (
-      <div className="min-h-[calc(100vh-4.1rem)] bg-gradient-to-b from-slate-950 to-slate-950 text-slate-50 flex items-center justify-center p-6">
-        <p className="text-white/70">Loading your Strategic Weather…</p>
+      <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground flex items-center justify-center p-6">
+        <p className="text-muted-foreground">Loading your Strategic Weather…</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-[calc(100vh-4.1rem)] bg-gradient-to-b from-slate-950 via-slate-950 to-slate-950 text-slate-50">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground">
       <div className="max-w-4xl mx-auto px-4 py-6 sm:py-8 space-y-8 sm:space-y-10">
         <header className="space-y-1">
           <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">
             Strategic Weather Dashboard
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Not a forecast app. A lifestyle planning OS that tells you what to
             do with the forecast.
             {usedFallback && (
-              <span className="block mt-1 text-slate-500">
+              <span className="block mt-1 text-muted-foreground">
                 Showing sample data. Sign in and set your profile zip for live weather.
               </span>
             )}

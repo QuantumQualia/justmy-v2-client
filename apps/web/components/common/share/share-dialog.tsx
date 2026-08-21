@@ -28,7 +28,7 @@ interface ShareDialogProps {
 const overlayBase =
   "fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4";
 const panelBase =
-  "bg-slate-900 rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-slate-800";
+  "bg-card rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-border";
 
 export const ShareDialog: React.FC<ShareDialogProps> = ({
   isOpen,
@@ -68,11 +68,11 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
         }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-900/90">
-          <h2 className="text-lg font-semibold text-white">Share myCARD</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted">
+          <h2 className="text-lg font-semibold text-foreground">Share myCARD</h2>
           <button
             onClick={onClose}
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-slate-800 text-slate-400 cursor-pointer"
+            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-accent text-muted-foreground cursor-pointer"
           >
             <span className="sr-only">Close</span>
             <CloseIcon className="h-4 w-4" />
@@ -80,10 +80,10 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
         </div>
 
         {/* Body */}
-        <div className="px-6 pt-4 pb-6 space-y-4 bg-slate-900">
+        <div className="px-6 pt-4 pb-6 space-y-4 bg-card">
           {/* Image */}
           {imageUrl && (
-            <div className="rounded-xl overflow-hidden border border-slate-800 bg-black/40">
+            <div className="rounded-xl overflow-hidden border border-border bg-muted">
               <img
                 src={imageUrl}
                 alt={title}
@@ -99,11 +99,11 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
                 {entityLabel}
               </div>
             )}
-            <div className="text-base font-semibold text-white">
+            <div className="text-base font-semibold text-foreground">
               {title}
             </div>
             {description && (
-              <div className="text-sm text-slate-400">
+              <div className="text-sm text-muted-foreground">
                 {description}
               </div>
             )}
@@ -153,17 +153,17 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
             </a>
             <a
               href={emailUrl}
-              className="h-11 w-11 rounded-full bg-slate-700 text-white flex items-center justify-center shadow-md hover:bg-slate-600 cursor-pointer"
+              className="h-11 w-11 rounded-full bg-muted text-foreground flex items-center justify-center shadow-md hover:bg-accent cursor-pointer"
             >
               <Mail className="h-5 w-5" />
             </a>
           </div>
 
           {/* Copy link row */}
-          <div className="flex items-center gap-3 mt-4 bg-slate-800/80 rounded-full border border-slate-700 px-3 py-2 shadow-inner shadow-black/40">
+          <div className="flex items-center gap-3 mt-4 bg-muted/80 rounded-full border border-border px-3 py-2 shadow-inner">
             <div className="flex-1 min-w-0">
-              <div className="text-xs text-slate-400">Share link</div>
-              <div className="text-xs font-medium text-slate-100 truncate">
+              <div className="text-xs text-muted-foreground">Share link</div>
+              <div className="text-xs font-medium text-foreground truncate">
                 {url}
               </div>
             </div>

@@ -26,27 +26,27 @@ export function RadarPanel({ data, className }: RadarPanelProps) {
   return (
     <section
       className={cn(
-        "rounded-2xl rounded-br-none bg-slate-950 border border-slate-900 p-4 sm:p-5 shadow-xl",
+        "rounded-2xl rounded-br-none bg-muted border border-border p-4 sm:p-5 shadow-xl",
         className,
       )}
       aria-label="Radar"
     >
       <header className="mb-3 sm:mb-4 flex items-baseline justify-between gap-2">
         <div>
-          <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+          <h2 className="text-sm sm:text-base font-semibold text-foreground">
             Radar – Visual Truth
           </h2>
-          <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-slate-400">
+          <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-muted-foreground">
             Defaulted to precipitation so you can see where the rain is
           </p>
         </div>
-        <span className="inline-flex items-center rounded-full border border-slate-700 bg-slate-900 px-2 py-0.5 text-[10px]/none text-slate-300">
+        <span className="inline-flex items-center rounded-full border border-border bg-card px-2 py-0.5 text-[10px]/none text-muted-foreground">
           Precipitation layer
         </span>
       </header>
 
       {data ? (
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 h-56 sm:h-64">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-card h-56 sm:h-64">
           <RadarMap
             lat={data.lat}
             lon={data.lon}
@@ -56,8 +56,8 @@ export function RadarPanel({ data, className }: RadarPanelProps) {
           />
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-br from-slate-900 via-sky-900/60 to-slate-950 h-56 sm:h-64 flex items-center justify-center">
-          <p className="text-sm text-slate-400">
+        <div className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-muted via-sky-900/60 to-muted h-56 sm:h-64 flex items-center justify-center">
+          <p className="text-sm text-muted-foreground">
             Sign in and set your profile zip to see live radar.
           </p>
         </div>

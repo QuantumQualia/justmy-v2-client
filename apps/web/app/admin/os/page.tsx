@@ -60,12 +60,12 @@ export default function OSPage() {
   const filteredOS = osList;
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">Operating Systems</h1>
-            <p className="text-slate-400 mt-2">Manage OS configurations</p>
+            <h1 className="text-3xl font-bold text-foreground">Operating Systems</h1>
+            <p className="text-muted-foreground mt-2">Manage OS configurations</p>
           </div>
           <Button
             onClick={() => router.push("/admin/os/create")}
@@ -76,15 +76,15 @@ export default function OSPage() {
           </Button>
         </div>
 
-        <div className="border border-slate-700 rounded-xl bg-slate-900/30 p-6">
+        <div className="border border-border rounded-xl bg-muted p-6">
           <div className="mb-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search OS..."
-                className="pl-10 bg-black/50 border-slate-700 text-white"
+                className="pl-10"
               />
             </div>
           </div>
@@ -97,21 +97,21 @@ export default function OSPage() {
             <>
               <div className="space-y-2">
                 {filteredOS.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>No OS found</p>
                   </div>
                 ) : (
                   filteredOS.map((os) => (
                     <div
                       key={os.id}
-                      className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-blue-500 transition"
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-white flex items-center gap-2">
+                          <h3 className="font-semibold text-foreground flex items-center gap-2">
                             {os.name}
                             {typeof os.appsCount === "number" && (
-                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-600/80">
+                              <span className="text-[11px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground border border-border">
                                 {os.appsCount} apps
                               </span>
                             )}
@@ -128,7 +128,7 @@ export default function OSPage() {
                           )}
                         </div>
                         {os.description && (
-                          <p className="text-sm text-slate-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {os.description}
                           </p>
                         )}
@@ -148,7 +148,7 @@ export default function OSPage() {
                           size="sm"
                           onClick={() => router.push(`/admin/os/${os.id}/edit`)}
                           title="Edit OS"
-                          className="text-slate-300 hover:text-white hover:bg-slate-700/50 border border-transparent hover:border-slate-600"
+                          className="text-muted-foreground hover:text-accent-foreground hover:bg-accent border border-transparent hover:border-border"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>

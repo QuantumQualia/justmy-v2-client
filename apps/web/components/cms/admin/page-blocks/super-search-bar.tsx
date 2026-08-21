@@ -12,13 +12,13 @@ interface SuperSearchBarBlockEditorProps {
 export function SuperSearchBarBlockEditor({ block, onUpdate }: SuperSearchBarBlockEditorProps) {
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card>
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Renders the floating Super Search Bar with voice search. It uses the global search store;
             when the user submits a query, the Search Results Panel (if present on the page) will show results.
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             No configuration needed. Add a Search Results Panel block below to display results.
           </p>
         </CardContent>

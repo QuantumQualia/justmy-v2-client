@@ -126,17 +126,17 @@ export function DeployContentHubDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="w-full max-w-md gap-0 rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-950 p-0 text-slate-100 shadow-2xl shadow-black/50"
+        className="w-full max-w-md gap-0 rounded-2xl rounded-br-none border border-border bg-card p-0 text-foreground shadow-2xl shadow-black/50"
       >
-        <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-          <DialogTitle className="text-lg font-semibold tracking-tight text-white">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
             Deploy ContentHUB
           </DialogTitle>
           <Button
             type="button"
             variant="ghost"
             size="icon"
-            className="h-8 w-8 rounded-lg rounded-br-none text-slate-400 hover:bg-slate-800 hover:text-white"
+            className="h-8 w-8 rounded-lg rounded-br-none text-muted-foreground hover:bg-accent hover:text-foreground"
             aria-label="Close"
             onClick={() => onOpenChange(false)}
             disabled={saving}
@@ -145,17 +145,17 @@ export function DeployContentHubDialog({
           </Button>
         </div>
         <DialogHeader className="space-y-0 px-5 pb-0 pt-3 text-left">
-          <DialogDescription className="text-sm text-slate-400">
+          <DialogDescription className="text-sm text-muted-foreground">
             Select the profiles where you want{" "}
-            <span className="font-medium text-slate-200">{hubTitle || "this hub"}</span> to appear.
+            <span className="font-medium text-foreground">{hubTitle || "this hub"}</span> to appear.
           </DialogDescription>
         </DialogHeader>
 
         <div className="max-h-[min(60vh,22rem)] space-y-2 overflow-y-auto px-5 py-4 custom-scrollbar">
           {!canInteract ? (
-            <p className="text-sm text-slate-500">Select a hub and ensure your profile is loaded.</p>
+            <p className="text-sm text-muted-foreground">Select a hub and ensure your profile is loaded.</p>
           ) : loading ? (
-            <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-400">
+            <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
               <Loader2 className="h-5 w-5 animate-spin" />
               Loading…
             </div>
@@ -164,7 +164,7 @@ export function DeployContentHubDialog({
               {error}
             </p>
           ) : subProfiles.length === 0 ? (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-muted-foreground">
               No sub-profiles yet. Create content cards under your master profile first.
             </p>
           ) : (
@@ -179,21 +179,21 @@ export function DeployContentHubDialog({
                     "flex w-full items-center gap-3 rounded-xl border px-3 py-3 transition-colors",
                     checked
                       ? "border-success bg-success/5 ring-1 ring-success/35"
-                      : "border-slate-700/90 bg-slate-900/40"
+                      : "border-border bg-muted/50"
                   )}
                 >
                   <Checkbox
                     checked={checked}
                     onCheckedChange={() => toggleId(nid)}
-                    className="border-slate-600 data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground"
+                    className="border-input data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground"
                   />
                   <button
                     type="button"
                     onClick={() => toggleId(nid)}
-                    className="min-w-0 flex-1 cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-success/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950"
+                    className="min-w-0 flex-1 cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-success/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
-                    <span className="block truncate text-sm font-medium text-white">{sp.name}</span>
-                    <span className="mt-0.5 block truncate font-mono text-xs text-slate-500">/{sp.slug}</span>
+                    <span className="block truncate text-sm font-medium text-foreground">{sp.name}</span>
+                    <span className="mt-0.5 block truncate font-mono text-xs text-muted-foreground">/{sp.slug}</span>
                   </button>
                 </div>
               );
@@ -207,11 +207,11 @@ export function DeployContentHubDialog({
           </p>
         ) : null}
 
-        <DialogFooter className="flex-row justify-end gap-2 border-t border-slate-800 px-5 py-4 sm:space-x-0">
+        <DialogFooter className="flex-row justify-end gap-2 border-t border-border px-5 py-4 sm:space-x-0">
           <Button
             type="button"
             variant="ghost"
-            className="rounded-lg rounded-br-none text-slate-300 hover:bg-slate-800 hover:text-white"
+            className="rounded-lg rounded-br-none text-muted-foreground hover:bg-accent hover:text-foreground"
             onClick={() => onOpenChange(false)}
             disabled={saving}
           >

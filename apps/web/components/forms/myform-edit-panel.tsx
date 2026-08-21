@@ -89,13 +89,13 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
   });
 
   return (
-    <div className="mx-auto min-h-[70vh] max-w-6xl px-4 py-8 text-white md:px-6 md:py-12">
+    <div className="mx-auto min-h-[70vh] max-w-6xl px-4 py-8 text-foreground md:px-6 md:py-12">
       <div className="mb-8 md:mb-10">
         <Button
           asChild
           variant="ghost"
           size="sm"
-          className="-ml-2 mb-4 h-9 gap-1.5 px-2 text-slate-400 hover:bg-white/5 hover:text-white"
+          className="-ml-2 mb-4 h-9 gap-1.5 px-2 text-muted-foreground hover:bg-white/5 hover:text-accent-foreground"
         >
           <Link href={myFormListHref(basePath)}>
             <ArrowLeft className="h-4 w-4" />
@@ -104,7 +104,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
         </Button>
 
         {q.isLoading ? (
-          <div className="flex items-center gap-2 text-slate-400">
+          <div className="flex items-center gap-2 text-muted-foreground">
             <Loader2 className="h-5 w-5 animate-spin" />
             Loading form…
           </div>
@@ -115,10 +115,10 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
             <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
               <div className="min-w-0 space-y-3">
                 <div className="flex flex-wrap items-center gap-2.5">
-                  <h1 className="text-2xl font-semibold tracking-tight text-white md:text-3xl">Edit form</h1>
+                  <h1 className="text-2xl font-semibold tracking-tight text-foreground md:text-3xl">Edit form</h1>
                   <Badge
                     variant="secondary"
-                    className="border-slate-700/80 bg-slate-800/80 font-normal text-slate-300"
+                    className="border-input bg-muted font-normal text-muted-foreground"
                   >
                     v{q.data.publishedVersion}
                   </Badge>
@@ -133,7 +133,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                     {q.data.status === "published" ? "Published" : "Draft"}
                   </Badge>
                 </div>
-                <p className="font-mono text-xs text-slate-500 md:text-sm">{q.data.slug}</p>
+                <p className="font-mono text-xs text-muted-foreground md:text-sm">{q.data.slug}</p>
               </div>
 
               <div className="flex flex-shrink-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:justify-end">
@@ -150,7 +150,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-slate-700/80 bg-slate-900/50"
+                    className="border-input bg-card"
                     onClick={() => setSubmissionsOpen(true)}
                   >
                     Submissions
@@ -169,7 +169,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="text-slate-400 hover:bg-red-950/30 hover:text-red-400"
+                    className="text-muted-foreground hover:bg-red-950/30 hover:text-red-400"
                     onClick={() => setDeleteOpen(true)}
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />
@@ -184,17 +184,17 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
 
       {q.isLoading || q.isError || !q.data ? null : (
         <>
-          <Card className="overflow-hidden border-slate-800/80 bg-gradient-to-b from-slate-950 to-slate-900/95 shadow-xl shadow-black/30">
-            <CardHeader className="border-b border-slate-800/60 bg-slate-950/50 pb-4">
+          <Card className="overflow-hidden border-border bg-gradient-to-b from-muted to-muted/95 shadow-xl shadow-black/30">
+            <CardHeader className="border-b border-border/60 bg-muted pb-4">
               <CardTitle className="text-lg font-semibold tracking-tight">Form builder</CardTitle>
-              <CardDescription className="text-sm leading-relaxed text-slate-400">
+              <CardDescription className="text-sm leading-relaxed text-muted-foreground">
                 Preview and field order share one canvas; add blocks and edit details in the sidebar. Save when you are
                 ready — changes stay local until then.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6 p-4 sm:p-6">
               <div className="space-y-2">
-                <Label htmlFor="edit-name" className="text-xs font-medium text-slate-400">
+                <Label htmlFor="edit-name" className="text-xs font-medium text-muted-foreground">
                   Form name
                 </Label>
                 <Input
@@ -202,7 +202,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Contact — Memphis"
-                  className="h-10 max-w-md rounded-xl border-slate-700/70 bg-slate-900/80 text-base text-white placeholder:text-slate-600"
+                  className="h-10 max-w-md rounded-xl border-border bg-card text-base text-foreground placeholder:text-muted-foreground"
                 />
               </div>
               <MyFormSchemaBuilder

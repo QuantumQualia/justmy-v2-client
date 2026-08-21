@@ -73,6 +73,10 @@ export interface ProfileData {
   referralCode?: string;
   /** Master profile: can create sub-profiles and deploy hubs to them (from API). */
   allowsSubProfiles?: boolean;
+  zipCode?: string;
+  googleStarRating?: string | null;
+  googleRatingCount?: number | null;
+  googlePlaceId?: string | null;
 }
 
 interface ProfileStore {
@@ -115,6 +119,10 @@ const initialData: ProfileData = {
   isVerified: undefined,
   referralCode: undefined,
   allowsSubProfiles: undefined,
+  zipCode: undefined,
+  googleStarRating: undefined,
+  googleRatingCount: undefined,
+  googlePlaceId: undefined,
 };
 
 export const useProfileStore = create<ProfileStore>()(

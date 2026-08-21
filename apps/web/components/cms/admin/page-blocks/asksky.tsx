@@ -392,18 +392,18 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
 
   return (
     <div className="space-y-4">
-      <Card className="border-slate-700 bg-slate-800/50 text-slate-200">
+      <Card className="border-border bg-muted text-foreground">
         <CardContent className="space-y-4 p-4 pt-4">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             AskSKY! resolves the profile and agent, then streams answers over SSE.{" "}
-            <span className="font-medium text-slate-300">Profile</span> and{" "}
-            <span className="font-medium text-slate-300">agent</span> are required for this block to work on published
+            <span className="font-medium text-muted-foreground">Profile</span> and{" "}
+            <span className="font-medium text-muted-foreground">agent</span> are required for this block to work on published
             pages.
           </p>
 
           {profilesLoadFailed && !loadingProfiles && profileMenuOpen ? (
             <div className="rounded-lg border border-red-500/35 bg-red-500/10 px-3 py-2 text-sm text-red-100">
-              Could not load profiles from <span className="font-medium text-white">GET /profiles/admin</span>. Confirm
+              Could not load profiles from <span className="font-medium text-foreground">GET /profiles/admin</span>. Confirm
               you are signed in with permission to use the admin profile list.
             </div>
           ) : null}
@@ -415,7 +415,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
           ) : null}
 
           <div className="space-y-2">
-            <Label htmlFor="asksky-profile-select" className="text-slate-200">
+            <Label htmlFor="asksky-profile-select" className="text-foreground">
               Profile <span className="text-red-400">*</span>
             </Label>
             <Select
@@ -446,19 +446,19 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
               <SelectTrigger
                 id="asksky-profile-select"
                 aria-required="true"
-                className={`border-slate-600 bg-slate-900 text-white ${!profileSlug ? "border-amber-600/60" : ""}`}
+                className={`border-border bg-card text-foreground ${!profileSlug ? "border-amber-600/60" : ""}`}
               >
                 <SelectValue placeholder="Choose profile">
                   {profileSlug.trim() ? selectedProfileLabel : null}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="max-h-[min(380px,72vh)] border-slate-600 bg-slate-900 p-0 text-slate-100">
-                <div className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 p-2">
+              <SelectContent className="max-h-[min(380px,72vh)] border-border bg-card p-0 text-foreground">
+                <div className="sticky top-0 z-10 border-b border-border bg-card p-2">
                   <Input
                     placeholder="Search profiles…"
                     value={profileSearch}
                     onChange={(e) => setProfileSearch(e.target.value)}
-                    className="h-8 border-slate-600 bg-slate-950 text-sm text-white placeholder:text-slate-500"
+                    className="h-8 border-border bg-muted text-sm text-foreground placeholder:text-muted-foreground"
                     onKeyDown={(e) => e.stopPropagation()}
                     onPointerDown={(e) => e.stopPropagation()}
                   />
@@ -469,12 +469,12 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
                   className="max-h-[min(300px,52vh)] min-h-0 overflow-y-scroll overscroll-contain p-1 pr-2 [scrollbar-width:thin] [scrollbar-color:rgb(71_85_105)_rgb(15_23_42)]"
                 >
                   {loadingProfiles && profileSearch.trim() ? (
-                    <div className="flex items-center gap-2 px-3 py-4 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 px-3 py-4 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Loading profiles…
                     </div>
                   ) : displayProfiles.length === 0 ? (
-                    <div className="px-3 py-4 text-xs text-slate-400">
+                    <div className="px-3 py-4 text-xs text-muted-foreground">
                       {!profileSearch.trim()
                         ? "Type in the search box to find profiles."
                         : profileSearchPending
@@ -487,13 +487,13 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
                         <SelectItem
                           key={`${profile.id}-${profile.slug}`}
                           value={profile.slug}
-                          className="focus:bg-slate-800 focus:text-white text-slate-200"
+                          className="focus:bg-accent focus:text-accent-foreground text-foreground"
                         >
                           {profile.name || profile.slug}
                         </SelectItem>
                       ))}
                       {loadingMoreProfiles ? (
-                        <div className="flex items-center justify-center gap-2 py-3 text-xs text-slate-400">
+                        <div className="flex items-center justify-center gap-2 py-3 text-xs text-muted-foreground">
                           <Loader2 className="h-3 w-3 animate-spin" />
                           Loading more…
                         </div>
@@ -503,14 +503,14 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
                 </div>
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
-              Uses <span className="text-slate-400">GET /profiles/admin</span> (10 per page). Type to search; scroll to
-              load more. The <code className="text-slate-400">search</code> query runs after you enter text.
+            <p className="text-xs text-muted-foreground">
+              Uses <span className="text-muted-foreground">GET /profiles/admin</span> (10 per page). Type to search; scroll to
+              load more. The <code className="text-muted-foreground">search</code> query runs after you enter text.
             </p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="asksky-agent-select" className="text-slate-200">
+            <Label htmlFor="asksky-agent-select" className="text-foreground">
               Agent <span className="text-red-400">*</span>
             </Label>
             <Select
@@ -521,7 +521,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
               <SelectTrigger
                 id="asksky-agent-select"
                 aria-required="true"
-                className={`border-slate-600 bg-slate-900 text-white ${!agentToken ? "border-amber-600/60" : ""}`}
+                className={`border-border bg-card text-foreground ${!agentToken ? "border-amber-600/60" : ""}`}
               >
                 <SelectValue
                   placeholder={
@@ -529,24 +529,24 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
                   }
                 />
               </SelectTrigger>
-              <SelectContent className="max-h-[min(320px,60vh)] border-slate-600 bg-slate-900 text-slate-100">
+              <SelectContent className="max-h-[min(320px,60vh)] border-border bg-card text-foreground">
                 <div className="max-h-[280px] overflow-y-auto p-1">
                   {agentToken && !tokenInActiveAgentOptions ? (
                     <SelectItem
                       value={agentToken}
-                      className="focus:bg-slate-800 focus:text-white text-slate-200"
+                      className="focus:bg-accent focus:text-accent-foreground text-foreground"
                     >
                       {selectedAgentLabel}
                     </SelectItem>
                   ) : null}
                   {loadingAgents ? (
-                    <div className="flex items-center gap-2 px-3 py-4 text-xs text-slate-400">
+                    <div className="flex items-center gap-2 px-3 py-4 text-xs text-muted-foreground">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Loading agents…
                     </div>
                   ) : null}
                   {!loadingAgents && profileSlug && activeAgentOptions.length === 0 ? (
-                    <div className="px-3 py-4 text-xs text-slate-400">
+                    <div className="px-3 py-4 text-xs text-muted-foreground">
                       No active agents with a public token found for this profile.
                     </div>
                   ) : null}
@@ -554,7 +554,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
                     <SelectItem
                       key={o.id}
                       value={o.token}
-                      className="focus:bg-slate-800 focus:text-white text-slate-200"
+                      className="focus:bg-accent focus:text-accent-foreground text-foreground"
                     >
                       {o.label}
                     </SelectItem>
@@ -571,21 +571,21 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
           </div>
 
           <div className="space-y-2">
-            <Label className="text-slate-200">Interface variant</Label>
+            <Label className="text-foreground">Interface variant</Label>
             <Select
               value={variant}
               onValueChange={(value) => patch({ askSkyVariant: value as AskSkyVariant })}
             >
-              <SelectTrigger className="border-slate-600 bg-slate-900 text-white">
+              <SelectTrigger className="border-border bg-card text-foreground">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="border-slate-600 bg-slate-900 text-slate-100">
+              <SelectContent className="border-border bg-card text-foreground">
                 <SelectItem value="inline">Embedded inline</SelectItem>
                 <SelectItem value="chatbot">Chatbot style (floating)</SelectItem>
                 <SelectItem value="voice">Voice line (coming soon)</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               Voice line shows a &quot;Coming soon&quot; placeholder in the published page.
             </p>
           </div>

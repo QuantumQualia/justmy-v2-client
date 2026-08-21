@@ -12,12 +12,12 @@ interface LifestyleIndicesBlockEditorProps {
 export function LifestyleIndicesBlockEditor({}: LifestyleIndicesBlockEditorProps) {
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card>
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Renders the Lifestyle Indices panel with Health, Outdoors, and Activity gauges.
           </p>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             No configuration needed. Data comes from the weather/indices API and is tied to the
             user&apos;s profile zip.
           </CardDescription>

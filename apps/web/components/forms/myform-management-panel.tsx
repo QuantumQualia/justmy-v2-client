@@ -160,8 +160,8 @@ export function MyFormManagementPanel({
     <div
       className={cn(
         showHeader
-          ? "mx-auto min-h-[50vh] max-w-5xl space-y-8 px-4 py-8 text-white md:px-6 md:py-12"
-          : "min-w-0 max-w-full space-y-5 text-white",
+          ? "mx-auto min-h-[50vh] max-w-5xl space-y-8 px-4 py-8 text-foreground md:px-6 md:py-12"
+          : "min-w-0 max-w-full space-y-5 text-foreground",
         className,
       )}
     >
@@ -174,12 +174,12 @@ export function MyFormManagementPanel({
               </div>
               <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">myFORM</h1>
               {loaded ? (
-                <span className="rounded-full border border-slate-600/60 bg-slate-800/80 px-2.5 py-0.5 text-xs font-medium text-slate-300">
+                <span className="rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
                   {count} {count === 1 ? "form" : "forms"}
                 </span>
               ) : null}
             </div>
-            <p className="max-w-xl text-sm leading-relaxed text-slate-400 md:text-base">
+            <p className="max-w-xl text-sm leading-relaxed text-muted-foreground md:text-base">
               Build forms for your profile, embeds, and AskSKY. Slug is set when you create a form — use it in public
               URLs and integrations.
             </p>
@@ -187,34 +187,34 @@ export function MyFormManagementPanel({
           <div className="shrink-0 sm:pt-1">{newFormButton}</div>
         </div>
       ) : (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/80 bg-gradient-to-r from-slate-950/80 to-slate-900/40 px-4 py-3 ring-1 ring-white/[0.04]">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-gradient-to-r from-muted to-muted/40 px-4 py-3 ring-1 ring-white/[0.04]">
           <div className="flex min-w-0 items-center gap-2">
             <Sparkles className="h-4 w-4 shrink-0 text-emerald-400/90" />
-            <span className="text-sm font-semibold text-white">Forms</span>
+            <span className="text-sm font-semibold text-foreground">Forms</span>
             {loaded ? (
-              <span className="rounded-full bg-slate-800 px-2 py-0.5 text-xs text-slate-400">{count}</span>
+              <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{count}</span>
             ) : null}
           </div>
           {newFormButton}
         </div>
       )}
 
-      <Card className="overflow-hidden border-slate-800/80 bg-gradient-to-b from-slate-950 to-slate-900/95 shadow-xl shadow-black/25 ring-1 ring-white/[0.04]">
-        <CardHeader className="border-b border-slate-800/60 bg-slate-950/50 space-y-1 pb-4">
+      <Card className="overflow-hidden border-border bg-gradient-to-b from-muted to-muted/95 shadow-xl shadow-black/25 ring-1 ring-white/[0.04]">
+        <CardHeader className="border-b border-border/60 bg-muted space-y-1 pb-4">
           <div className="flex flex-wrap items-end justify-between gap-2">
-            <CardTitle className="text-lg font-semibold tracking-tight text-white">Your forms</CardTitle>
+            <CardTitle className="text-lg font-semibold tracking-tight text-foreground">Your forms</CardTitle>
             {loaded && count > 0 ? (
-              <span className="text-xs font-medium text-slate-500">{count} total</span>
+              <span className="text-xs font-medium text-muted-foreground">{count} total</span>
             ) : null}
           </div>
-          <CardDescription className="text-sm leading-relaxed text-slate-400">
+          <CardDescription className="text-sm leading-relaxed text-muted-foreground">
             Edit, publish, or delete forms here, or open submissions from the inbox. Use{" "}
-            <span className="text-slate-300">Embed</span> on a form to copy the third-party script snippet. Search
+            <span className="text-muted-foreground">Embed</span> on a form to copy the third-party script snippet. Search
             matches form name and slug.
           </CardDescription>
           <div className="flex flex-col gap-2 pt-2 sm:flex-row sm:items-center sm:gap-3">
             <div className="relative min-w-0 flex-1 sm:max-w-md">
-              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500" />
+              <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={listQDraft}
                 onChange={(e) => setListQDraft(e.target.value)}
@@ -225,7 +225,7 @@ export function MyFormManagementPanel({
                   }
                 }}
                 placeholder="Search by name or slug…"
-                className="border-slate-700 bg-slate-900 pl-9 text-sm text-white placeholder:text-slate-500"
+                className="border-border bg-card pl-9 text-sm text-foreground placeholder:text-muted-foreground"
               />
             </div>
             <div className="flex flex-wrap gap-2">
@@ -233,7 +233,7 @@ export function MyFormManagementPanel({
                 type="button"
                 size="sm"
                 variant="secondary"
-                className="bg-slate-800 text-white hover:bg-slate-700"
+                className="bg-muted text-foreground hover:bg-accent"
                 onClick={() => setListQApplied(listQDraft.trim())}
               >
                 Search
@@ -242,7 +242,7 @@ export function MyFormManagementPanel({
                 type="button"
                 size="sm"
                 variant="ghost"
-                className="text-slate-400 hover:text-white"
+                className="text-muted-foreground hover:text-accent-foreground"
                 disabled={!listQApplied && !listQDraft}
                 onClick={() => {
                   setListQDraft("");
@@ -256,7 +256,7 @@ export function MyFormManagementPanel({
         </CardHeader>
         <CardContent className="p-0">
           {formsListQuery.isLoading ? (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 text-slate-400">
+            <div className="flex flex-col items-center justify-center gap-3 py-16 text-muted-foreground">
               <Loader2 className="h-8 w-8 animate-spin text-emerald-500/80" />
               <p className="text-sm">Loading your forms…</p>
             </div>
@@ -266,17 +266,17 @@ export function MyFormManagementPanel({
             </div>
           ) : formsList.length === 0 && formsTotal === 0 && !listQApplied.trim() ? (
             <div className="flex flex-col items-center justify-center gap-4 px-6 py-16 text-center md:py-20">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-slate-700/60 bg-slate-900/60 text-slate-500">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-input bg-card text-muted-foreground">
                 <ClipboardList className="h-8 w-8" />
               </div>
               <div className="max-w-sm space-y-2">
-                <p className="text-base font-semibold text-slate-200">No forms yet</p>
-                <p className="text-sm leading-relaxed text-slate-500">
+                <p className="text-base font-semibold text-foreground">No forms yet</p>
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   Create your first form to collect leads, feedback, or sign-ups. You can refine fields and publish when
                   it looks right.
                 </p>
               </div>
-              <Button asChild variant="outline" className="mt-2 border-slate-600 bg-slate-900/80">
+              <Button asChild variant="outline" className="mt-2 border-border bg-card">
                 <Link href={myFormNewHref(basePath)} className="inline-flex items-center gap-2">
                   <Plus className="h-4 w-4" />
                   Create a form
@@ -284,7 +284,7 @@ export function MyFormManagementPanel({
               </Button>
             </div>
           ) : formsList.length === 0 ? (
-            <div className="px-6 py-12 text-center text-sm text-slate-500">
+            <div className="px-6 py-12 text-center text-sm text-muted-foreground">
               No forms match your search.
               <Button
                 type="button"
@@ -300,7 +300,7 @@ export function MyFormManagementPanel({
             </div>
           ) : (
             <>
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/60 px-4 py-2 text-xs text-slate-500 sm:px-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border/60 px-4 py-2 text-xs text-muted-foreground sm:px-6">
                 <span>
                   {formsTotal === 0
                     ? ""
@@ -311,7 +311,7 @@ export function MyFormManagementPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 border-slate-700 bg-slate-900 px-2 text-xs"
+                    className="h-8 border-border bg-card px-2 text-xs"
                     disabled={!listCanPrev || formsListQuery.isFetching}
                     onClick={() => setListSkip((s) => Math.max(0, s - FORMS_PAGE_SIZE))}
                   >
@@ -321,7 +321,7 @@ export function MyFormManagementPanel({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="h-8 border-slate-700 bg-slate-900 px-2 text-xs"
+                    className="h-8 border-border bg-card px-2 text-xs"
                     disabled={!listCanNext || formsListQuery.isFetching}
                     onClick={() => setListSkip((s) => s + FORMS_PAGE_SIZE)}
                   >
@@ -329,28 +329,28 @@ export function MyFormManagementPanel({
                   </Button>
                 </div>
               </div>
-            <ul className="divide-y divide-slate-800/80">
+            <ul className="divide-y divide-border">
               {formsList.map((f) => {
                 const nFields = schemaFieldCount(f.schema);
                 const updated = formatShortDate(f.updatedAt ?? f.createdAt);
                 return (
                   <li key={f.id}>
-                    <div className="group flex flex-col gap-4 px-4 py-5 transition-colors hover:bg-slate-900/40 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
+                    <div className="group flex flex-col gap-4 px-4 py-5 transition-colors hover:bg-accent sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
                       <div className="min-w-0 flex-1 space-y-2">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-base font-semibold tracking-tight text-white">{f.name}</p>
+                          <p className="truncate text-base font-semibold tracking-tight text-foreground">{f.name}</p>
                           {statusBadge(f.status)}
                         </div>
-                        <p className="truncate font-mono text-xs text-slate-500 sm:text-sm" title={f.slug}>
+                        <p className="truncate font-mono text-xs text-muted-foreground sm:text-sm" title={f.slug}>
                           {f.slug}
                         </p>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500 sm:text-xs">
+                        <div className="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-muted-foreground sm:text-xs">
                           <span>
-                            Version <span className="font-medium text-slate-400">v{f.publishedVersion}</span>
+                            Version <span className="font-medium text-muted-foreground">v{f.publishedVersion}</span>
                           </span>
                           {nFields > 0 ? (
                             <span>
-                              <span className="font-medium text-slate-400">{nFields}</span>{" "}
+                              <span className="font-medium text-muted-foreground">{nFields}</span>{" "}
                               {nFields === 1 ? "field" : "fields"}
                             </span>
                           ) : (
@@ -364,7 +364,7 @@ export function MyFormManagementPanel({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-8 w-8 shrink-0 rounded-full border-slate-600/80 bg-slate-900/60 p-0 hover:bg-slate-800 sm:h-9 sm:w-auto sm:px-3"
+                          className="h-8 w-8 shrink-0 rounded-full border-border bg-card p-0 hover:bg-accent sm:h-9 sm:w-auto sm:px-3"
                           aria-label={`Embed ${f.name}`}
                           onClick={() => setEmbedTarget(f)}
                         >
@@ -375,7 +375,7 @@ export function MyFormManagementPanel({
                           asChild
                           variant="outline"
                           size="sm"
-                          className="h-8 w-8 shrink-0 rounded-full border-slate-600/80 bg-slate-900/60 p-0 hover:bg-slate-800 sm:h-9 sm:w-auto sm:px-3"
+                          className="h-8 w-8 shrink-0 rounded-full border-border bg-card p-0 hover:bg-accent sm:h-9 sm:w-auto sm:px-3"
                         >
                           <Link
                             href={myFormEditHref(basePath, f.id)}
@@ -390,7 +390,7 @@ export function MyFormManagementPanel({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="h-8 w-8 shrink-0 rounded-full border-slate-600/80 bg-slate-900/60 p-0 hover:bg-slate-800 sm:h-9 sm:w-auto sm:px-3"
+                          className="h-8 w-8 shrink-0 rounded-full border-border bg-card p-0 hover:bg-accent sm:h-9 sm:w-auto sm:px-3"
                           aria-label={`Submissions for ${f.name}`}
                           onClick={() => setSubmissionsTarget(f)}
                         >
@@ -401,7 +401,7 @@ export function MyFormManagementPanel({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center gap-0 p-0 text-slate-400 hover:bg-red-950/40 hover:text-red-400 sm:h-9 sm:w-auto sm:gap-1 sm:px-3"
+                          className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center gap-0 p-0 text-muted-foreground hover:bg-red-950/40 hover:text-red-400 sm:h-9 sm:w-auto sm:gap-1 sm:px-3"
                           disabled={deleteMutation.isPending && deleteMutation.variables === f.id}
                           aria-label={`Delete ${f.name}`}
                           onClick={() => setDeleteTarget(f)}

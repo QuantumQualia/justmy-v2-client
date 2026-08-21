@@ -5,9 +5,20 @@
 
 import { apiRequest, ApiClientError } from "../api-client";
 import { tokenStorage } from "../storage/token-storage";
+import { slimAuthUser } from "../auth/session-user";
 import type { OsName } from "@/lib/os-types";
 
 export { ApiClientError };
+
+const verifyEmailInflight = new Map<
+  string,
+  Promise<{ message: string; alreadyVerified?: boolean }>
+>();
+let currentUserInflight: Promise<User> | null = null;
+const verifyLinkSessionInflight = new Map<
+  string,
+  Promise<{ stored: User | null; me: User | null; alreadyVerified: boolean }>
+>();
 
 export interface LoginCredentials {
   email: string;
@@ -32,6 +43,8 @@ export interface AuthResponse {
     firstName: string;
     lastName: string;
     avatarUrl?: string | null;
+    emailVerified?: boolean;
+    role?: string;
   };
   profile?: any; // Profile response from formatProfileResponse
   // Default app based on user's OS
@@ -54,6 +67,7 @@ export interface AuthResponse {
   accessToken?: string;
   token?: string; // Fallback for compatibility
   refreshToken?: string;
+  isFirstLogin?: boolean;
 }
 
 export interface User {
@@ -62,7 +76,10 @@ export interface User {
   firstName: string;
   lastName: string;
   avatarUrl?: string | null;
+  emailVerified?: boolean;
+  role?: string;
   profileType?: OsName;
+  profileId?: number;
   businessName?: string;
   zipCode?: string;
   profile?: any; // Profile response from formatProfileResponse
@@ -98,7 +115,7 @@ export interface OauthAppleData {
   profileType?: OsName;
 }
 
-async function persistAuthSession(response: AuthResponse): Promise<void> {
+export async function persistAuthSession(response: AuthResponse): Promise<void> {
   const accessToken = response.accessToken || response.token;
   if (accessToken) {
     tokenStorage.setAccessToken(accessToken);
@@ -107,7 +124,8 @@ async function persistAuthSession(response: AuthResponse): Promise<void> {
     tokenStorage.setRefreshToken(response.refreshToken);
   }
   if (response.user) {
-    tokenStorage.setUser(response.user);
+    const stored = slimAuthUser(response.user, response.profile);
+    if (stored) tokenStorage.setUser(stored);
   }
 
   if (response.profile) {
@@ -241,23 +259,45 @@ export const authService = {
    * Get the current authenticated user
    */
   async getCurrentUser(): Promise<User> {
+    if (currentUserInflight) return currentUserInflight;
+
+    currentUserInflight = (async () => {
+      try {
+        const response = await apiRequest<any>("auth/me");
+        const nested = response.user || response;
+        const profile = response.profile;
+        const user: User = {
+          ...nested,
+          profile,
+          profileType: nested.profileType || profile?.osName || profile?.type,
+          profileId: Number(profile?.id) || undefined,
+          emailVerified: Boolean(nested.emailVerified),
+          role: String(nested.role || "").toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
+        };
+
+        if (profile) {
+          const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
+          const { useProfileStore } = await import("../store/profile-store");
+          const profileData = mapApiProfileToProfileData(profile);
+          useProfileStore.getState().setData(profileData);
+        }
+
+        const stored = slimAuthUser(user, profile);
+        if (stored) tokenStorage.setUser(stored);
+
+        return user;
+      } catch (error) {
+        if (error instanceof ApiClientError) {
+          throw error;
+        }
+        throw new ApiClientError("Failed to fetch user data.");
+      }
+    })();
+
     try {
-      const user = await apiRequest<User>("auth/me");
-      
-      // Store default profile in global state if available
-      if (user.profile) {
-        const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
-        const { useProfileStore } = await import("../store/profile-store");
-        const profileData = mapApiProfileToProfileData(user.profile);
-        useProfileStore.getState().setData(profileData);
-      }
-      
-      return user;
-    } catch (error) {
-      if (error instanceof ApiClientError) {
-        throw error;
-      }
-      throw new ApiClientError("Failed to fetch user data.");
+      return await currentUserInflight;
+    } finally {
+      currentUserInflight = null;
     }
   },
 
@@ -339,18 +379,65 @@ export const authService = {
   /**
    * Verify email address with token
    */
-  async verifyEmail(token: string): Promise<{ message: string }> {
-    try {
-      return await apiRequest<{ message: string }>("auth/verify-email", {
-        method: "POST",
-        body: JSON.stringify({ token }),
-      });
-    } catch (error) {
-      if (error instanceof ApiClientError) {
+  async verifyEmail(token: string): Promise<{ message: string; alreadyVerified?: boolean }> {
+    const key = token.trim();
+    const existing = verifyEmailInflight.get(key);
+    if (existing) return existing;
+
+    const pending = (async () => {
+      try {
+        return await apiRequest<{ message: string; alreadyVerified?: boolean }>(
+          "auth/verify-email",
+          {
+            method: "POST",
+            body: JSON.stringify({ token: key }),
+          },
+        );
+      } catch (error) {
+        verifyEmailInflight.delete(key);
+        if (error instanceof ApiClientError) {
+          throw error;
+        }
+        throw new ApiClientError("Failed to verify email.");
+      }
+    })();
+
+    verifyEmailInflight.set(key, pending);
+    return pending;
+  },
+
+  /**
+   * Confirm the email-link token, then refresh the session with a single `auth/me`.
+   * Shared across Strict Mode remounts so verify and me never race or duplicate.
+   */
+  async verifyEmailAndRefreshSession(
+    token: string,
+  ): Promise<{ stored: User | null; me: User | null; alreadyVerified: boolean }> {
+    const key = token.trim();
+    const existing = verifyLinkSessionInflight.get(key);
+    if (existing) return existing;
+
+    const pending = (async () => {
+      try {
+        const result = await this.verifyEmail(key);
+        const alreadyVerified = result.alreadyVerified === true;
+        const stored = await tokenStorage.getUser<User>();
+        if (!stored) return { stored: null, me: null, alreadyVerified };
+        tokenStorage.setUser({ ...stored, emailVerified: true });
+        try {
+          const me = await this.getCurrentUser();
+          return { stored, me, alreadyVerified };
+        } catch {
+          return { stored, me: null, alreadyVerified };
+        }
+      } catch (error) {
+        verifyLinkSessionInflight.delete(key);
         throw error;
       }
-      throw new ApiClientError("Failed to verify email.");
-    }
+    })();
+
+    verifyLinkSessionInflight.set(key, pending);
+    return pending;
   },
 
   /**
@@ -369,4 +456,6 @@ export const authService = {
     }
   },
 };
+
+export { persistAuthSession as persistClaimSession };
 

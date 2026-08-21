@@ -71,12 +71,12 @@ export default function CmsPagesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white">CMS Pages</h1>
-            <p className="text-slate-400">Manage dynamic pages and content</p>
+            <h1 className="text-3xl font-bold text-foreground">CMS Pages</h1>
+            <p className="text-muted-foreground">Manage dynamic pages and content</p>
           </div>
           <Button
             onClick={() => router.push("/admin/cms/pages/create")}
@@ -87,21 +87,21 @@ export default function CmsPagesPage() {
           </Button>
         </div>
 
-        <Card className="border-slate-700 bg-slate-900/30">
+        <Card className="border-border bg-muted">
           <CardHeader>
-            <CardTitle className="text-white sr-only">Pages list</CardTitle>
+            <CardTitle className="text-foreground sr-only">Pages list</CardTitle>
             <CardDescription className="sr-only">
               Search and manage CMS pages
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
           <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search pages..."
-                className="pl-10 bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                className="pl-10"
               />
             </div>
 
@@ -113,21 +113,21 @@ export default function CmsPagesPage() {
             <>
               <div className="space-y-2">
                 {filteredPages.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>No pages found</p>
                   </div>
                 ) : (
                   filteredPages.map((page) => (
                     <div
                       key={page.id}
-                      className="flex items-center justify-between p-4 bg-slate-800/50 rounded-lg border border-slate-700 hover:border-blue-500 transition"
+                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
-                          <h3 className="font-semibold text-white">
+                          <h3 className="font-semibold text-foreground">
                             {page.title}
                           </h3>
-                          <span className="text-xs text-slate-400">
+                          <span className="text-xs text-muted-foreground">
                             /{page.parentHandle ? `${page.parentHandle}/` : ""}
                             {page.handle}
                           </span>
@@ -143,7 +143,7 @@ export default function CmsPagesPage() {
                           )}
                         </div>
                         {page.description && (
-                          <p className="text-sm text-slate-400 mt-1">
+                          <p className="text-sm text-muted-foreground mt-1">
                             {page.description}
                           </p>
                         )}
@@ -161,7 +161,7 @@ export default function CmsPagesPage() {
                             )
                           }
                           title="View page"
-                          className="text-slate-300 hover:text-white hover:bg-slate-700/50 border border-transparent hover:border-slate-600"
+                          className="text-muted-foreground hover:text-accent-foreground hover:bg-accent border border-transparent hover:border-border"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -172,7 +172,7 @@ export default function CmsPagesPage() {
                             router.push(`/admin/cms/pages/${page.id}/edit`)
                           }
                           title="Edit page"
-                          className="text-slate-300 hover:text-white hover:bg-slate-700/50 border border-transparent hover:border-slate-600"
+                          className="text-muted-foreground hover:text-accent-foreground hover:bg-accent border border-transparent hover:border-border"
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -193,8 +193,8 @@ export default function CmsPagesPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex items-center justify-between mt-6 pt-6 border-t border-slate-800">
-                  <div className="text-sm text-slate-400">
+                <div className="flex items-center justify-between mt-6 pt-6 border-t border-border">
+                  <div className="text-sm text-muted-foreground">
                     Page {currentPage} of {totalPages}
                   </div>
                   <div className="flex gap-2">

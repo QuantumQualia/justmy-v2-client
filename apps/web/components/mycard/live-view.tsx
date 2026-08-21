@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import {
   Upload,
   Mail,
@@ -295,14 +295,10 @@ export default function MyCardLive({
   lightAppearance = true,
   forceMobileLayout = false,
 }: MyCardLiveProps) {
-  const swiperRef = useRef<HTMLDivElement>(null);
-  const contactPrevBtnRef = useRef<HTMLButtonElement>(null);
-  const contactNextBtnRef = useRef<HTMLButtonElement>(null);
   /** Mobile-first: avoids one frame of phone chrome on phones before `matchMedia` runs. */
   const [isNarrowViewport, setIsNarrowViewport] = useState(true);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [showAddressModal, setShowAddressModal] = useState(false);
-  const [shouldCenterItems, setShouldCenterItems] = useState(true);
   const setMycardPublicProfile = useMycardPublicNavStore(
     (s) => s.setMycardPublicProfile
   );
@@ -340,12 +336,6 @@ export default function MyCardLive({
   const avatarOuterClass = isLightMycard
     ? "bg-card border-4 border-border shadow-xl"
     : "bg-slate-800 border-4 border-slate-900";
-  const avatarPlaceholderBgClass = isLightMycard
-    ? "bg-muted"
-    : "bg-slate-700";
-  const avatarPlaceholderTextClass = isLightMycard
-    ? "text-muted-foreground"
-    : "text-slate-400";
   const socialBtnColorClass = isLightMycard
     ? "bg-muted hover:bg-muted/70 border-border"
     : "bg-slate-800 hover:bg-slate-700 border-slate-700";
@@ -391,39 +381,6 @@ export default function MyCardLive({
     mq.addEventListener("change", sync);
     return () => mq.removeEventListener("change", sync);
   }, [forceMobileLayout]);
-
-  // Count total items
-  const totalItems =
-    1 + // Upload button (always present)
-    (data.phones?.length ? 1 : 0) +
-    (data.email ? 1 : 0) +
-    (data.website ? 1 : 0) +
-    (data.addresses?.length ? 1 : 0) +
-    (data.calendarLink ? 1 : 0) +
-    data.socialLinks.length;
-
-  // Check if items should be centered on mobile
-  useEffect(() => {
-    const checkWidth = () => {
-      if (!swiperRef.current) return;
-
-      const container = swiperRef.current;
-      const containerWidth = container.offsetWidth;
-
-      // Each item is approximately 40px (h-10 w-10) + 12px spacing
-      // On mobile, we consider items should be centered if they don't fill ~80% of width
-      const itemWidth = 40 + 12; // item + spacing
-      const estimatedTotalWidth = totalItems * itemWidth;
-
-      const shouldCenterItems = estimatedTotalWidth < containerWidth * 0.8;
-
-      setShouldCenterItems(shouldCenterItems);
-    };
-
-    checkWidth();
-    window.addEventListener('resize', checkWidth);
-    return () => window.removeEventListener('resize', checkWidth);
-  }, [totalItems]);
 
   const footerAdQuery = useQuery({
     queryKey: ["mycard-footer-ad-url", MYCARD_FOOTER_AD_KEY],
@@ -679,8 +636,6 @@ export default function MyCardLive({
           outerTextClass={outerTextClass}
           screenBgClass={screenBgClass}
           avatarOuterClass={avatarOuterClass}
-          avatarPlaceholderBgClass={avatarPlaceholderBgClass}
-          avatarPlaceholderTextClass={avatarPlaceholderTextClass}
           nameTextClass={nameTextClass}
           taglineTextClass={taglineTextClass}
           aboutTitleTextClass={aboutTitleTextClass}
@@ -689,10 +644,6 @@ export default function MyCardLive({
           ctaButtonClassName={ctaButtonClassName}
           registerHref={registerHref}
           footerAdUrl={footerAdUrl}
-          shouldCenterItems={shouldCenterItems}
-          swiperRef={swiperRef}
-          contactPrevBtnRef={contactPrevBtnRef}
-          contactNextBtnRef={contactNextBtnRef}
           contactActions={contactActions}
           isLightMycard={isLightMycard}
         />
@@ -702,8 +653,6 @@ export default function MyCardLive({
           usePublicNavbar={isLightMycard}
           outerTextClass={outerTextClass}
           avatarOuterClass={avatarOuterClass}
-          avatarPlaceholderBgClass={avatarPlaceholderBgClass}
-          avatarPlaceholderTextClass={avatarPlaceholderTextClass}
           ctaButtonClassName={ctaButtonClassName}
           registerHref={registerHref}
           contactActions={contactActions}

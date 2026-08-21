@@ -36,7 +36,7 @@ function MyFormHubInner({ showHeader = true, className }: MyFormHubProps) {
     if (!formId) {
       return (
         <div className="mx-auto max-w-4xl px-4 py-10 text-sm text-amber-200">
-          Missing <code className="text-white">formId</code> for edit view.{" "}
+          Missing <code className="text-foreground">formId</code> for edit view.{" "}
           <Link className="underline" href={basePath}>
             Back to list
           </Link>
@@ -49,7 +49,7 @@ function MyFormHubInner({ showHeader = true, className }: MyFormHubProps) {
   if (view === "submissions" && !formId) {
     return (
       <div className="mx-auto max-w-4xl px-4 py-10 text-sm text-amber-200">
-        Missing <code className="text-white">formId</code> for submissions.{" "}
+        Missing <code className="text-foreground">formId</code> for submissions.{" "}
         <Link className="underline" href={basePath}>
           Back to list
         </Link>
@@ -89,7 +89,7 @@ export function MyFormHub({ showHeader = true, className }: MyFormHubProps) {
       fallback={
         <div
           className={cn(
-            "flex items-center justify-center gap-2 py-16 text-sm text-slate-400",
+            "flex items-center justify-center gap-2 py-16 text-sm text-muted-foreground",
             className,
           )}
         >

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
+import { DotClaimModal } from "@/components/news/asksky/dot-claim-modal";
 import { AskSkyEventsCarousel } from "@/components/news/asksky/asksky-events-carousel";
 import { AskSkyFooter } from "@/components/news/asksky/asksky-footer";
 import { mapSkySearchToAnswer, turnsFromSkyMessages } from "@/components/news/asksky/map-sky-search";
@@ -13,6 +14,8 @@ import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
 import { AskSkyWidget } from "@/components/news/asksky/asksky-widget";
 import type { AskSkyTurn } from "@/components/news/asksky/types";
 import { ApiClientError } from "@/lib/api-client";
+import { useNewsHost } from "@/lib/news/news-host-context";
+import { useNewsNavPageStore } from "@/lib/store/news-nav-page-store";
 import { marketSiteToDomain } from "@/lib/news/fetch-daily-audio-briefing";
 import {
   claimSkyConversation,
@@ -22,6 +25,7 @@ import { fetchSkySearch } from "@/lib/news/fetch-sky-search";
 import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
 import type { AuthResponse } from "@/lib/services/auth";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
+import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -43,6 +47,7 @@ type SkyThread = {
  * News market page — uses stored market when available; otherwise resolves by zip once.
  */
 export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
+  const newsHost = useNewsHost();
   const market = useNewsZipStore((s) => s.market);
   const setMarket = useNewsZipStore((s) => s.setMarket);
   const clearZipcode = useNewsZipStore((s) => s.clearZipcode);
@@ -59,12 +64,11 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
   const [activeConversationId, setActiveConversationId] = useState<number | null>(
     null,
   );
-  const [recentsRefreshKey, setRecentsRefreshKey] = useState(0);
+  const [claimOpen, setClaimOpen] = useState(false);
   const threadRef = useRef<SkyThread | null>(null);
   const askInFlightRef = useRef(false);
 
-  // News market UI is light while the app theme defaults to dark — force a light
-  // viewport scrollbar so it doesn't clash with the page.
+  // News market is a dedicated light surface — keep the viewport scrollbar light.
   useEffect(() => {
     const html = document.documentElement;
     const body = document.body;
@@ -74,6 +78,13 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
       html.classList.remove("news-light-html");
       body.classList.remove("news-light-body");
     };
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (new URLSearchParams(window.location.search).get("claim") === "1") {
+      setClaimOpen(true);
+    }
   }, []);
 
   useEffect(() => {
@@ -152,7 +163,10 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
         };
       }
       setActiveConversationId(response.conversationId);
-      setRecentsRefreshKey((n) => n + 1);
+      useNewsRecentsStore.getState().upsert({
+        id: response.conversationId,
+        title: trimmed,
+      });
 
       const answer = mapSkySearchToAnswer(response);
       setTurns((prev) =>
@@ -204,23 +218,37 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
     if (activeConversationId === id) {
       handleNewChat();
     }
-    setRecentsRefreshKey((n) => n + 1);
   }
 
   async function handleAuthSuccess(_response: AuthResponse) {
-    void useNewsFavoritesStore.getState().hydrate();
+    void useNewsFavoritesStore.getState().hydrate({ force: true });
     const thread = threadRef.current;
-    if (!thread?.conversationId || !thread.visitorToken) return;
-    try {
-      await claimSkyConversation({
-        conversationId: thread.conversationId,
-        visitorToken: thread.visitorToken,
-      });
-      setRecentsRefreshKey((n) => n + 1);
-    } catch {
-      /* visitor thread stays local until the next authenticated search */
+    if (thread?.conversationId && thread.visitorToken) {
+      try {
+        await claimSkyConversation({
+          conversationId: thread.conversationId,
+          visitorToken: thread.visitorToken,
+        });
+      } catch {
+        /* visitor thread stays local until the next authenticated search */
+      }
     }
+    void useNewsRecentsStore.getState().hydrate(market?.marketId, { force: true });
   }
+
+  useEffect(() => {
+    if (!newsHost) return;
+    useNewsNavPageStore.getState().setBindings({
+      onNewChat: handleNewChat,
+      onOpenConversation: handleOpenConversation,
+      onConversationDeleted: handleConversationDeleted,
+      onAuthSuccess: handleAuthSuccess,
+      activeConversationId,
+    });
+    return () => {
+      useNewsNavPageStore.getState().clearBindings();
+    };
+  }, [newsHost, activeConversationId]);
 
   const activeMarket = marketMatchesZip ? market : null;
 
@@ -255,15 +283,16 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
           />
         ) : activeMarket ? (
           <>
-            <NewsMarketNav
-              market={activeMarket}
-              onNewChat={handleNewChat}
-              onOpenConversation={handleOpenConversation}
-              activeConversationId={activeConversationId}
-              onConversationDeleted={handleConversationDeleted}
-              onAuthSuccess={handleAuthSuccess}
-              recentsRefreshKey={recentsRefreshKey}
-            />
+            {newsHost ? null : (
+              <NewsMarketNav
+                market={activeMarket}
+                onNewChat={handleNewChat}
+                onOpenConversation={handleOpenConversation}
+                activeConversationId={activeConversationId}
+                onConversationDeleted={handleConversationDeleted}
+                onAuthSuccess={handleAuthSuccess}
+              />
+            )}
 
             <AskSkyWidget
               market={activeMarket}
@@ -274,8 +303,13 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
             />
 
             <AskSkyEventsCarousel market={activeMarket} />
-            <AskSkyClaimCta market={activeMarket} />
+            <AskSkyClaimCta market={activeMarket} onClaim={() => setClaimOpen(true)} />
             <AskSkyFooter market={activeMarket} />
+            <DotClaimModal
+              open={claimOpen}
+              onOpenChange={setClaimOpen}
+              defaultZip={activeMarket.zipcode || zipcode}
+            />
           </>
         ) : null}
       </div>

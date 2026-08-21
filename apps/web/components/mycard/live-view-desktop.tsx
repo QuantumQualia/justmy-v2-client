@@ -14,8 +14,6 @@ interface MyCardDesktopViewProps {
   usePublicNavbar: boolean;
   outerTextClass: string;
   avatarOuterClass: string;
-  avatarPlaceholderBgClass: string;
-  avatarPlaceholderTextClass: string;
   ctaButtonClassName: string;
   registerHref: string;
   contactActions: React.ReactNode;

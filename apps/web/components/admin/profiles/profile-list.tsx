@@ -92,7 +92,7 @@ export function ProfileList() {
         accessorKey: "id",
         header: "ID",
         cell: ({ row }) => (
-          <span className="font-mono text-xs text-slate-500">#{row.original.id}</span>
+          <span className="font-mono text-xs text-muted-foreground">#{row.original.id}</span>
         ),
       },
       {
@@ -102,8 +102,8 @@ export function ProfileList() {
           const profile = row.original
           return (
             <div className="flex flex-col">
-              <span className="font-medium text-white">{profile.name}</span>
-              <span className="text-xs text-slate-400">/{profile.slug}</span>
+              <span className="font-medium text-foreground">{profile.name}</span>
+              <span className="text-xs text-muted-foreground">/{profile.slug}</span>
             </div>
           )
         },
@@ -114,7 +114,7 @@ export function ProfileList() {
         cell: ({ row }) => {
           const profile = row.original
           return (
-            <Badge variant="outline" className="border-slate-600 text-slate-300 w-fit">
+            <Badge variant="outline" className="border-border text-muted-foreground w-fit">
               {profile.type}
             </Badge>
           )
@@ -126,15 +126,15 @@ export function ProfileList() {
         cell: ({ row }) => {
           const primaryMember = getPrimaryMember(row.original)
           if (!primaryMember) {
-            return <span className="text-slate-500 text-sm">No members</span>
+            return <span className="text-muted-foreground text-sm">No members</span>
           }
           const memberName = primaryMember.firstName || primaryMember.lastName
             ? `${primaryMember.firstName || ""} ${primaryMember.lastName || ""}`.trim()
             : primaryMember.email
           return (
             <div className="flex flex-col">
-              <span className="text-white text-sm">{memberName}</span>
-              <span className="text-xs text-slate-400">{primaryMember.email}</span>
+              <span className="text-foreground text-sm">{memberName}</span>
+              <span className="text-xs text-muted-foreground">{primaryMember.email}</span>
               {primaryMember.isDefault && (
                 <Badge variant="outline" className="mt-1 w-fit text-xs border-emerald-700 text-emerald-400">
                   Default
@@ -152,10 +152,10 @@ export function ProfileList() {
           return (
             <div className="flex flex-col text-sm">
               {profile.zipCode && (
-                <span className="text-white">ZIP: {profile.zipCode}</span>
+                <span className="text-foreground">ZIP: {profile.zipCode}</span>
               )}
               {profile.marketId && (
-                <span className="text-xs text-slate-400">Market: {profile.marketId}</span>
+                <span className="text-xs text-muted-foreground">Market: {profile.marketId}</span>
               )}
             </div>
           )
@@ -167,7 +167,7 @@ export function ProfileList() {
         cell: ({ row }) => {
           const subscription = row.original.subscription
           if (!subscription) {
-            return <span className="text-slate-500 text-sm">-</span>
+            return <span className="text-muted-foreground text-sm">-</span>
           }
           return (
             <div className="flex flex-col">
@@ -176,7 +176,7 @@ export function ProfileList() {
                 className={
                   subscription.status === "ACTIVE"
                     ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50 w-fit"
-                    : "border-slate-700 text-slate-400 w-fit"
+                    : "border-border text-muted-foreground w-fit"
                 }
               >
                 {subscription.status}
@@ -191,12 +191,12 @@ export function ProfileList() {
         cell: ({ row }) => {
           const wallet = row.original.wallet
           if (!wallet) {
-            return <span className="text-slate-500 text-sm">-</span>
+            return <span className="text-muted-foreground text-sm">-</span>
           }
           return (
             <div className="flex flex-col text-sm">
-              <span className="text-white">Balance: {wallet.balance}</span>
-              <span className="text-xs text-slate-400">Lifetime: {wallet.lifetime}</span>
+              <span className="text-foreground">Balance: {wallet.balance}</span>
+              <span className="text-xs text-muted-foreground">Lifetime: {wallet.lifetime}</span>
             </div>
           )
         },
@@ -205,7 +205,7 @@ export function ProfileList() {
         accessorKey: "createdAt",
         header: "Created",
         cell: ({ row }) => (
-          <span className="text-slate-400 text-sm">
+          <span className="text-muted-foreground text-sm">
             {new Date(row.original.createdAt).toLocaleDateString()}
           </span>
         ),
@@ -216,12 +216,12 @@ export function ProfileList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-slate-900 p-4 rounded-lg border border-slate-800">
+      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search profiles..."
-            className="pl-8 bg-black/50 border-slate-700 text-white"
+            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

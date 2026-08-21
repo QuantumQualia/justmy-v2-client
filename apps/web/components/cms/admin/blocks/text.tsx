@@ -80,7 +80,7 @@ const editorTheme = {
     italic: "italic",
     underline: "underline",
     strikethrough: "line-through",
-    code: "bg-slate-800 px-1 py-0.5 rounded text-sm font-mono",
+    code: "bg-muted px-1 py-0.5 rounded text-sm font-mono",
   },
   heading: {
     h1: "text-3xl font-bold mb-4 mt-6",
@@ -89,8 +89,8 @@ const editorTheme = {
   },
   paragraph: "mb-2",
   quote:
-    "border-l-4 border-slate-500 pl-4 italic my-4 text-slate-300",
-  code: "bg-slate-900 border border-slate-700 rounded p-4 my-4 font-mono text-sm overflow-x-auto",
+    "border-l-4 border-border pl-4 italic my-4 text-muted-foreground",
+  code: "bg-card border border-border rounded p-4 my-4 font-mono text-sm overflow-x-auto",
   list: {
     ul: "list-disc ml-6 mb-2",
     ol: "list-decimal ml-6 mb-2",
@@ -119,7 +119,7 @@ function ToolbarButton({
       title={title}
       className={`h-8 w-8 p-0 rounded border ${isActive
           ? "border-blue-500 bg-blue-500/20 text-blue-300"
-          : "border-slate-600/60 text-slate-300 hover:text-white hover:bg-slate-700/70"
+          : "border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent"
         }`}
     >
       {label}
@@ -252,9 +252,9 @@ function ToolbarPlugin() {
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-1 border-b border-slate-800 bg-slate-900/80 px-2 py-2">
+    <div className="flex flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-2">
       {/* Block types */}
-      <div className="flex items-center gap-1 border-r border-slate-700 pr-2">
+      <div className="flex items-center gap-1 border-r border-border pr-2">
         <ToolbarButton
           label={<Type className="h-4 w-4" />}
           onClick={() => setBlockTypeHandler("paragraph")}
@@ -282,7 +282,7 @@ function ToolbarPlugin() {
       </div>
 
       {/* Inline formatting */}
-      <div className="flex items-center gap-1 border-r border-slate-700 pr-2">
+      <div className="flex items-center gap-1 border-r border-border pr-2">
         <ToolbarButton
           label={<Bold className="h-4 w-4" />}
           onClick={() => dispatch(FORMAT_TEXT_COMMAND, "bold")}
@@ -316,7 +316,7 @@ function ToolbarPlugin() {
       </div>
 
       {/* Lists */}
-      <div className="flex items-center gap-1 border-r border-slate-700 pr-2">
+      <div className="flex items-center gap-1 border-r border-border pr-2">
         <ToolbarButton
           label={<List className="h-4 w-4" />}
           onClick={() => dispatch(INSERT_UNORDERED_LIST_COMMAND, undefined)}
@@ -336,7 +336,7 @@ function ToolbarPlugin() {
       </div>
 
       {/* Alignment */}
-      <div className="flex items-center gap-1 border-r border-slate-700 pr-2">
+      <div className="flex items-center gap-1 border-r border-border pr-2">
         <ToolbarButton
           label={<AlignLeft className="h-4 w-4" />}
           onClick={() => dispatch(FORMAT_ELEMENT_COMMAND, "left")}
@@ -364,7 +364,7 @@ function ToolbarPlugin() {
       </div>
 
       {/* Links & images */}
-      <div className="flex items-center gap-1 border-r border-slate-700 pr-2">
+      <div className="flex items-center gap-1 border-r border-border pr-2">
         <ToolbarButton
           label={<LinkIcon className="h-4 w-4" />}
           onClick={insertLink}
@@ -457,11 +457,11 @@ export function PageBlockText({
 
   return (
     <LexicalComposer initialConfig={initialConfig}>
-      <div className="mt-2 rounded-md border border-slate-700 bg-black/50 relative">
+      <div className="mt-2 rounded-md border border-border bg-muted relative">
         <ToolbarPlugin />
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="px-4 py-3 min-h-[200px] text-sm text-slate-100 focus:outline-none prose prose-invert max-w-none" />
+            <ContentEditable className="px-4 py-3 min-h-[200px] text-sm text-foreground focus:outline-none prose prose-invert max-w-none" />
           }
           ErrorBoundary={LexicalErrorBoundary}
         />

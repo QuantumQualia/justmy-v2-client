@@ -27,39 +27,39 @@ export default function CmsDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-white">CMS Dashboard</h1>
-          <p className="text-slate-400 mt-2">Manage your content management system</p>
+          <h1 className="text-3xl font-bold text-foreground">CMS Dashboard</h1>
+          <p className="text-muted-foreground mt-2">Manage your content management system</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Total Pages</p>
-                <p className="text-2xl font-bold text-white mt-1">-</p>
+                <p className="text-sm text-muted-foreground">Total Pages</p>
+                <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
               <FileText className="h-8 w-8 text-blue-400" />
             </div>
           </div>
-          <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Published</p>
-                <p className="text-2xl font-bold text-white mt-1">-</p>
+                <p className="text-sm text-muted-foreground">Published</p>
+                <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
               <FileText className="h-8 w-8 text-green-400" />
             </div>
           </div>
-          <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
+          <div className="bg-card rounded-lg border border-border p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-slate-400">Drafts</p>
-                <p className="text-2xl font-bold text-white mt-1">-</p>
+                <p className="text-sm text-muted-foreground">Drafts</p>
+                <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
               <FileText className="h-8 w-8 text-yellow-400" />
             </div>
@@ -84,16 +84,16 @@ export default function CmsDashboardPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <Icon className="h-6 w-6 text-white" />
-                      <h3 className="text-xl font-semibold text-white">{section.title}</h3>
+                      <Icon className="h-6 w-6 text-foreground" />
+                      <h3 className="text-xl font-semibold text-foreground">{section.title}</h3>
                     </div>
-                    <p className="text-sm text-slate-400 mb-4">{section.description}</p>
+                    <p className="text-sm text-muted-foreground mb-4">{section.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-500">{section.stats}</span>
+                      <span className="text-xs text-muted-foreground">{section.stats}</span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-slate-300 hover:text-white"
+                        className="text-muted-foreground hover:text-accent-foreground"
                       >
                         <ArrowRight className="h-4 w-4" />
                       </Button>
@@ -106,8 +106,8 @@ export default function CmsDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-slate-900/50 rounded-lg border border-slate-800 p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">Quick Actions</h2>
+        <div className="bg-card rounded-lg border border-border p-6">
+          <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => router.push("/admin/cms/pages/create")}

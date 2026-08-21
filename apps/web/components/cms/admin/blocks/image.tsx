@@ -62,12 +62,12 @@ export function ImageBlockEditor({ block, onUpdate }: ImageBlockEditorProps) {
   return (
     <div className="space-y-4">
       <div className="space-y-2">
-        <Label className="text-slate-300">Image</Label>
+        <Label className="text-muted-foreground">Image</Label>
         <div className="space-y-2">
           <button
             type="button"
             onClick={() => setInsertOpen(true)}
-            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 text-left transition-colors hover:border-blue-500/70 hover:bg-slate-900/80"
+            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card"
           >
             {src ? (
               <>
@@ -77,54 +77,54 @@ export function ImageBlockEditor({ block, onUpdate }: ImageBlockEditorProps) {
                   className="max-h-[400px] w-full bg-black/40 object-contain"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                  <span className="rounded-full border border-slate-600 bg-black/70 px-3 py-1.5 text-xs font-medium text-slate-100">
+                  <span className="rounded-full border border-border bg-black/70 px-3 py-1.5 text-xs font-medium text-foreground">
                     Change image
                   </span>
                 </div>
               </>
             ) : (
-              <div className="flex h-40 flex-col items-center justify-center gap-2 text-slate-400">
-                <ImageIcon className="h-8 w-8 text-slate-500" />
+              <div className="flex h-40 flex-col items-center justify-center gap-2 text-muted-foreground">
+                <ImageIcon className="h-8 w-8 text-muted-foreground" />
                 <span className="text-xs font-medium">Add image</span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[11px] text-muted-foreground">
                   Device or Unsplash, then crop
                 </span>
               </div>
             )}
           </button>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
             {!uploading && <span>JPEG, PNG, or WebP.</span>}
           </div>
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Title (optional)</Label>
+        <Label className="text-muted-foreground">Title (optional)</Label>
         <Input
           value={title ?? ""}
           onChange={(e) => handleFieldChange("title", e.target.value)}
           placeholder="Short title displayed with the image"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Description (optional)</Label>
+        <Label className="text-muted-foreground">Description (optional)</Label>
         <Input
           value={description ?? ""}
           onChange={(e) => handleFieldChange("description", e.target.value)}
           placeholder="Longer description shown below the title"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
       <div className="space-y-2">
-        <Label className="text-slate-300">Link URL (optional)</Label>
+        <Label className="text-muted-foreground">Link URL (optional)</Label>
         <Input
           value={linkUrl ?? ""}
           onChange={(e) => handleFieldChange("linkUrl", e.target.value)}
           placeholder="https://example.com"
-          className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500"
+          className="bg-muted border-border text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
@@ -152,9 +152,9 @@ export function ImageBlockEditor({ block, onUpdate }: ImageBlockEditorProps) {
 
       {uploading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
             <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">Processing image…</span>
+            <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>
       )}

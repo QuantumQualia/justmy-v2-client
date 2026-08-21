@@ -20,23 +20,23 @@ export function SevenDayStrategy({
   return (
     <section
       className={cn(
-        "rounded-2xl rounded-br-none bg-slate-950/80 border border-slate-900 p-4 sm:p-5 shadow-xl",
+        "rounded-2xl rounded-br-none bg-card border border-border p-4 sm:p-5 shadow-xl",
         className,
       )}
       aria-label="7-day strategy"
     >
       <header className="mb-3 sm:mb-4 space-y-1">
-        <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+        <h2 className="text-sm sm:text-base font-semibold text-foreground">
           7-Day Strategy
         </h2>
-        <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-slate-400">
+        <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-muted-foreground">
           Work Week vs. Weekend at a glance
         </p>
       </header>
 
       <div className="space-y-4 sm:space-y-5">
         <div>
-          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">
+          <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
             Work Week
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
@@ -81,30 +81,30 @@ function DayCard({ day, highlightWeekend }: DayCardProps) {
       className={cn(
         "rounded-2xl border px-3 py-2.5 sm:px-3.5 sm:py-3 flex flex-col gap-1.5",
         highlightWeekend
-          ? "border-amber-400/70 bg-gradient-to-b from-amber-500/10 via-slate-950/90 to-slate-950/90"
-          : "border-slate-800 bg-slate-950/80",
+          ? "border-amber-400/70 bg-gradient-to-b from-amber-500/10 via-muted to-muted"
+          : "border-border bg-card",
       )}
     >
       <header className="flex items-baseline justify-between gap-1">
         <p
           className={cn(
             "text-xs font-semibold",
-            highlightWeekend ? "text-amber-200" : "text-slate-100",
+            highlightWeekend ? "text-amber-200" : "text-foreground",
           )}
         >
           {day.weekdayLabel}
         </p>
-        <p className="text-[11px] text-slate-400">{day.dateLabel}</p>
+        <p className="text-[11px] text-muted-foreground">{day.dateLabel}</p>
       </header>
-      <p className="text-[11px] text-slate-300 line-clamp-1">{day.condition}</p>
+      <p className="text-[11px] text-muted-foreground line-clamp-1">{day.condition}</p>
       <p
         className={cn(
           "text-sm font-medium",
-          highlightWeekend ? "text-amber-100" : "text-slate-100",
+          highlightWeekend ? "text-amber-100" : "text-foreground",
         )}
       >
         {Math.round(day.highF)}° /{" "}
-        <span className="text-slate-400">{Math.round(day.lowF)}°</span>
+        <span className="text-muted-foreground">{Math.round(day.lowF)}°</span>
       </p>
     </article>
   );

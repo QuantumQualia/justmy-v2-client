@@ -19,10 +19,13 @@ type FavoritePreview = {
   photo?: string | null;
 };
 
+type HydrateOptions = { force?: boolean };
+
 type NewsFavoritesState = {
   items: ProfileFavoriteItem[];
   byId: Record<number, FavoriteFlags>;
-  hydrate: () => Promise<void>;
+  status: "idle" | "loading" | "ready";
+  hydrate: (opts?: HydrateOptions) => Promise<void>;
   toggle: (
     profileId: number,
     field: "liked" | "bookmarked",
@@ -71,6 +74,7 @@ function applyResult(
 }
 
 let writeChain: Promise<void> = Promise.resolve();
+let hydrateInFlight: Promise<void> | null = null;
 
 function enqueue<T>(fn: () => Promise<T>): Promise<T> {
   const run = writeChain.then(fn, fn);
@@ -84,22 +88,41 @@ function enqueue<T>(fn: () => Promise<T>): Promise<T> {
 export const useNewsFavoritesStore = create<NewsFavoritesState>((set, get) => ({
   items: [],
   byId: {},
-  reset: () => set({ items: [], byId: {} }),
+  status: "idle",
+  reset: () => {
+    hydrateInFlight = null;
+    set({ items: [], byId: {}, status: "idle" });
+  },
 
-  hydrate: async () => {
-    await enqueue(async () => {
+  hydrate: async (opts) => {
+    const force = opts?.force === true;
+    if (!force && get().status === "ready") return;
+    if (hydrateInFlight && !force) {
+      await hydrateInFlight;
+      return;
+    }
+
+    const run = enqueue(async () => {
+      set({ status: "loading" });
       const token = await tokenStorage.getAccessToken();
       if (!token) {
-        set({ items: [], byId: {} });
+        set({ items: [], byId: {}, status: "idle" });
         return;
       }
       try {
         const items = await fetchProfileFavorites();
-        set({ items, byId: toMap(items) });
+        set({ items, byId: toMap(items), status: "ready" });
       } catch {
-        /* keep current list */
+        if (get().status !== "ready") set({ status: "idle" });
       }
     });
+
+    hydrateInFlight = run;
+    try {
+      await run;
+    } finally {
+      if (hydrateInFlight === run) hydrateInFlight = null;
+    }
   },
 
   toggle: async (profileId, field, preview) => {
@@ -126,9 +149,8 @@ export const useNewsFavoritesStore = create<NewsFavoritesState>((set, get) => ({
               bookmarked: result.bookmarked,
             },
           },
+          status: "ready",
         });
-        const items = await fetchProfileFavorites();
-        set({ items, byId: toMap(items) });
       } catch {
         set((state) => ({
           byId: { ...state.byId, [profileId]: current },

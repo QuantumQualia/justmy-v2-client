@@ -14,33 +14,43 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
-import { openShare } from "@/components/common/share/share-store";
+import { NEWS_HOME_HREF } from "@/components/news/news-home-link";
 import { NewsAccountAvatar } from "@/components/news/asksky/news-account-avatar";
 import type { NewsMarketContext } from "@/components/news/asksky/types";
 import { ApiClientError } from "@/lib/api-client";
 import {
   deleteSkyConversation,
   fetchSkyConversation,
-  fetchSkyConversations,
   renameSkyConversation,
   type SkyMeConversationDetail,
   type SkyMeConversationListItem,
 } from "@/lib/news/fetch-sky-conversations";
 import type { ProfileFavoriteItem } from "@/lib/news/fetch-profile-favorites";
 import { authService } from "@/lib/services/auth";
+import { isPlatformAdmin, type StoredAuthUser } from "@/lib/auth/session-user";
+import { tokenStorage } from "@/lib/storage/token-storage";
+import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
+import { publicMycardUrl } from "@/lib/mycard/public-url";
+import { isBusinessProfileKind } from "@/lib/os-types";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
+import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
+import { useProfileStore } from "@/lib/store/profile-store";
 import { cn } from "@workspace/ui/lib/utils";
 
 const PREVIEW_COUNT = 3;
+
 
 type NewsAccountUser = {
   firstName?: string | null;
   lastName?: string | null;
   email?: string;
   avatarUrl?: string | null;
+  role?: string;
 };
 
 type NewsAccountSidebarProps = {
@@ -55,7 +65,6 @@ type NewsAccountSidebarProps = {
   activeConversationId: number | null;
   onConversationDeleted: (id: number) => void;
   onSignedOut: () => void;
-  refreshKey?: number;
 };
 
 function displayName(user: NewsAccountUser): string {
@@ -65,11 +74,6 @@ function displayName(user: NewsAccountUser): string {
     .join(" ");
   if (full) return full;
   return user.email?.split("@")[0]?.trim() || "Account";
-}
-
-function appMycardUrl(slug: string): string {
-  const base = (process.env.NEXT_PUBLIC_APP_URL ?? "").replace(/\/$/, "");
-  return `${base}/${slug}`;
 }
 
 function conversationTitle(item: SkyMeConversationListItem): string {
@@ -101,9 +105,12 @@ export function NewsAccountSidebar({
   activeConversationId,
   onConversationDeleted,
   onSignedOut,
-  refreshKey = 0,
 }: NewsAccountSidebarProps) {
-  const [recents, setRecents] = useState<SkyMeConversationListItem[]>([]);
+  const recents = useNewsRecentsStore((s) => s.items);
+  const hydrateRecents = useNewsRecentsStore((s) => s.hydrate);
+  const patchRecent = useNewsRecentsStore((s) => s.patch);
+  const removeRecent = useNewsRecentsStore((s) => s.remove);
+  const resetRecents = useNewsRecentsStore((s) => s.reset);
   const favorites = useNewsFavoritesStore((s) => s.items);
   const hydrateFavorites = useNewsFavoritesStore((s) => s.hydrate);
   const resetFavorites = useNewsFavoritesStore((s) => s.reset);
@@ -113,33 +120,27 @@ export function NewsAccountSidebar({
   const [renamingId, setRenamingId] = useState<number | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [signingOut, setSigningOut] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(() => isPlatformAdmin(user));
   const renameRef = useRef<HTMLInputElement>(null);
   const renameLockRef = useRef(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const name = displayName(user);
+  const profileName = useProfileStore((s) => s.data.name);
+  const profileKind = useProfileStore((s) => s.data.type);
+  const profileSlug = useProfileStore((s) => s.data.slug);
+  const liveCardUrl = publicMycardUrl(profileSlug);
+  const name = profileName?.trim() || displayName(user);
   const zip = market.zipcode.trim().slice(0, 5);
   const avatarSrc = photoUrl?.trim() || user.avatarUrl?.trim() || "";
+  const pathname = usePathname();
+  const showBizOsApps = profileKind ? isBusinessProfileKind(profileKind) : pathname.startsWith("/biz-os");
 
   useEffect(() => {
     if (!open) return;
-    let cancelled = false;
-    fetchSkyConversations(market.marketId)
-      .then((items) => {
-        if (!cancelled) setRecents(items);
-      })
-      .catch(() => {
-        if (!cancelled) setRecents([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [open, market.marketId, refreshKey]);
-
-  useEffect(() => {
-    if (!open) return;
+    if (isEmailVerificationExemptPath(pathname)) return;
+    void hydrateRecents(market.marketId);
     void hydrateFavorites();
-  }, [open, hydrateFavorites]);
+  }, [open, pathname, market.marketId, hydrateRecents, hydrateFavorites]);
 
   useEffect(() => {
     if (!open) return;
@@ -149,6 +150,12 @@ export function NewsAccountSidebar({
       document.body.style.overflow = prev;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const stored = tokenStorage.getUserSync<StoredAuthUser>();
+    setIsAdmin(isPlatformAdmin(stored) || isPlatformAdmin(user));
+  }, [open, user]);
 
   useEffect(() => {
     if (renamingId != null) {
@@ -219,20 +226,12 @@ export function NewsAccountSidebar({
       renameLockRef.current = false;
       return;
     }
-    setRecents((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, title } : item)),
-    );
+    patchRecent(id, { title });
     try {
       const updated = await renameSkyConversation(id, title);
-      setRecents((prev) =>
-        prev.map((item) => (item.id === id ? { ...item, ...updated } : item)),
-      );
+      patchRecent(id, updated);
     } catch (err) {
-      if (previous) {
-        setRecents((prev) =>
-          prev.map((item) => (item.id === id ? previous : item)),
-        );
-      }
+      if (previous) patchRecent(id, previous);
       toast.error(
         err instanceof ApiClientError ? err.message : "Unable to rename.",
       );
@@ -318,7 +317,7 @@ export function NewsAccountSidebar({
     if (!window.confirm("Delete this search from your account?")) return;
     try {
       await deleteSkyConversation(id);
-      setRecents((prev) => prev.filter((item) => item.id !== id));
+      removeRecent(id);
       onConversationDeleted(id);
       setMenuOpenId(null);
     } catch (err) {
@@ -334,11 +333,12 @@ export function NewsAccountSidebar({
     try {
       await authService.logout();
       resetFavorites();
+      resetRecents();
       onSignedOut();
       onClose();
+      window.location.assign(NEWS_HOME_HREF);
     } catch {
       toast.error("Unable to sign out.");
-    } finally {
       setSigningOut(false);
     }
   }
@@ -368,7 +368,20 @@ export function NewsAccountSidebar({
         <div className="flex items-start gap-3 border-b border-slate-200 px-4 py-4">
           <NewsAccountAvatar photoUrl={avatarSrc} label={name} size="md" />
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
+            {liveCardUrl ? (
+              <a
+                href={liveCardUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={onClose}
+                className="block truncate text-sm font-semibold text-slate-900 hover:text-violet-700 hover:underline"
+                title="Open myCARD"
+              >
+                {name}
+              </a>
+            ) : (
+              <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
+            )}
             <p className="mt-0.5 truncate text-xs text-slate-500">
               {zip ? `${zip} resident` : "Resident"}
               {isVerified ? (
@@ -537,7 +550,7 @@ export function NewsAccountSidebar({
             ) : (
               <ul className="mt-2 space-y-0.5">
                 {visibleFavorites.map((item) => {
-                  const href = item.slug ? appMycardUrl(item.slug) : "";
+                  const href = item.slug ? publicMycardUrl(item.slug) : "";
                   return (
                     <li key={item.profileId}>
                       {href ? (
@@ -587,6 +600,48 @@ export function NewsAccountSidebar({
               myAPPS
             </h2>
             <div className="mt-2 space-y-2">
+              {showBizOsApps ? (
+                <Link
+                  href="/biz-os"
+                  onClick={onClose}
+                  className={cn(
+                    "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
+                    pathname.startsWith("/biz-os")
+                      ? "border-violet-300 bg-violet-50 text-violet-800"
+                      : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                  )}
+                >
+                  Biz OS
+                </Link>
+              ) : null}
+              {isAdmin ? (
+                <>
+                  <Link
+                    href="/admin/biz-os/queue"
+                    onClick={onClose}
+                    className={cn(
+                      "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
+                      pathname.startsWith("/admin/biz-os")
+                        ? "border-violet-300 bg-violet-50 text-violet-800"
+                        : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                    )}
+                  >
+                    Biz OS queue
+                  </Link>
+                  <Link
+                    href="/admin/users"
+                    onClick={onClose}
+                    className={cn(
+                      "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
+                      pathname.startsWith("/admin") && !pathname.startsWith("/admin/biz-os")
+                        ? "border-violet-300 bg-violet-50 text-violet-800"
+                        : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                    )}
+                  >
+                    Admin panel
+                  </Link>
+                </>
+              ) : null}
               <button
                 type="button"
                 onClick={() => comingSoon("Night-out planner")}

@@ -224,17 +224,17 @@ export function ContentHubLiteView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl border border-slate-700 bg-slate-900 p-0"
+          className="w-full max-w-md rounded-2xl border border-border bg-card p-0"
         >
-          <div className="border-b border-slate-700 px-5 py-4">
-            <DialogTitle className="text-slate-100">Edit tab title</DialogTitle>
+          <div className="border-b border-border px-5 py-4">
+            <DialogTitle className="text-foreground">Edit tab title</DialogTitle>
           </div>
           <div className="space-y-3 px-5 py-4">
             <Input
               value={tabName}
               onChange={(e) => setTabName(e.target.value)}
               placeholder="Tab title"
-              className="h-9 rounded-md border-slate-600 bg-slate-950 text-white"
+              className="h-9 rounded-md border-border bg-muted text-foreground"
               autoFocus
               onKeyDown={(e) => {
                 if (e.key === "Enter" && tabName.trim() && !saving) {
@@ -244,7 +244,7 @@ export function ContentHubLiteView() {
               }}
             />
           </div>
-          <div className="flex justify-end gap-2 border-t border-slate-700 px-5 py-4">
+          <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
             <Button
               type="button"
               variant="outline"
@@ -272,17 +272,17 @@ export function ContentHubLiteView() {
         </DialogContent>
       </Dialog>
 
-      <Card className="overflow-hidden rounded-2xl border border-slate-700/80 bg-slate-900/70 py-0 shadow-lg shadow-black/20">
-        <CardHeader className="border-b border-slate-700/70 bg-slate-900/90 pt-3 !pb-0">
+      <Card className="overflow-hidden rounded-2xl border border-input bg-card py-0 shadow-lg shadow-black/20">
+        <CardHeader className="border-b border-border bg-card pt-3 !pb-0">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 items-center gap-2">
-              <CardTitle className="truncate text-base text-slate-100">
+              <CardTitle className="truncate text-base text-foreground">
                 {tab?.title || "My Contents"}
               </CardTitle>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 text-slate-300 hover:text-white"
+                className="h-7 w-7 text-muted-foreground hover:text-accent-foreground"
                 onClick={() => setTabNameDialogOpen(true)}
                 title="Edit tab title"
               >
@@ -293,7 +293,7 @@ export function ContentHubLiteView() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-slate-300 hover:text-white"
+              className="h-8 w-8 text-muted-foreground hover:text-accent-foreground"
               onClick={() => setIsExpanded((v) => !v)}
               title={isExpanded ? "Collapse" : "Expand"}
             >
@@ -303,7 +303,7 @@ export function ContentHubLiteView() {
         </CardHeader>
 
         {isExpanded ? (
-          <CardContent className="space-y-4 bg-slate-900/40 p-4 pt-0">
+          <CardContent className="space-y-4 bg-card p-4 pt-0">
             <div className="flex justify-end">
               <Button
                 variant="success"
@@ -318,7 +318,7 @@ export function ContentHubLiteView() {
               </Button>
             </div>
 
-            <div className="rounded-xl border border-slate-700/80 bg-slate-950/70 p-1">
+            <div className="rounded-xl border border-input bg-muted p-1">
               <div className="grid grid-cols-3 gap-1">
                 {(["draft", "publish", "archive"] as const).map((status) => {
                   const isActive = postStatusFilter === status;
@@ -327,7 +327,7 @@ export function ContentHubLiteView() {
                       ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30"
                       : status === "draft"
                         ? "bg-amber-500/15 text-amber-300 border border-amber-400/30"
-                        : "bg-slate-400/15 text-slate-200 border border-slate-400/30";
+                        : "bg-slate-400/15 text-foreground border border-slate-400/30";
                   return (
                     <button
                       key={status}
@@ -336,7 +336,7 @@ export function ContentHubLiteView() {
                       className={`h-8 rounded-lg text-xs font-semibold capitalize transition-colors ${
                         isActive
                           ? activeClass
-                          : "text-slate-400 hover:bg-slate-800/80 hover:text-slate-200"
+                          : "text-muted-foreground hover:bg-accent/80 hover:text-foreground"
                       }`}
                     >
                       {status}
@@ -347,17 +347,17 @@ export function ContentHubLiteView() {
             </div>
 
             {loadingHub ? (
-              <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-300">
+              <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading content...
               </div>
             ) : loadingPosts ? (
-              <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-300">
+              <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin" />
                 Loading posts...
               </div>
             ) : (postsQuery.data?.docs.length ?? 0) === 0 ? (
-              <div className="rounded-xl border border-dashed border-slate-700 bg-slate-950/50 p-5 text-sm text-slate-300">
+              <div className="rounded-xl border border-dashed border-border bg-muted p-5 text-sm text-muted-foreground">
                 No {postStatusFilter} posts yet. Click the add button to create one.
               </div>
             ) : (
@@ -365,19 +365,19 @@ export function ContentHubLiteView() {
                 {postsQuery.data?.docs.map((item) => (
                   <div
                     key={item.postId}
-                    className="flex items-center justify-between rounded-xl border border-slate-700/80 bg-slate-950/50 px-3 py-2.5"
+                    className="flex items-center justify-between rounded-xl border border-input bg-muted px-3 py-2.5"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-slate-100">
+                      <p className="truncate text-sm font-semibold text-foreground">
                         {item.post?.title ?? `Post #${item.postId}`}
                       </p>
-                      <p className="truncate text-xs text-slate-400">{item.post?.slug ? `/${item.post.slug}` : ""}</p>
+                      <p className="truncate text-xs text-muted-foreground">{item.post?.slug ? `/${item.post.slug}` : ""}</p>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-slate-300 hover:bg-slate-800 hover:text-white"
+                        className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                         onClick={() => {
                           setPostEditorMode("edit");
                           setPostEditorPostId(String(item.postId));
@@ -389,7 +389,7 @@ export function ContentHubLiteView() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-slate-300 hover:bg-slate-800 hover:text-destructive"
+                        className="h-8 w-8 text-muted-foreground hover:bg-accent hover:text-destructive"
                         onClick={() => setConfirmDeletePostId(item.postId)}
                       >
                         <Trash2 className="h-4 w-4" />

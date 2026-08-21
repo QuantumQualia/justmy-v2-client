@@ -119,7 +119,7 @@ export function AskSkyConversation({
     return () => {
       cancelled = true;
     };
-  }, [turns.length, hydrateFavorites]);
+  }, [hydrateFavorites]);
 
   const visibleTabs = useMemo(() => {
     if (!latestReady?.answer) return TABS.filter((t) => t.id === "all");

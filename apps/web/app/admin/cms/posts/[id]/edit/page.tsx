@@ -264,7 +264,7 @@ export default function EditPostPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
       </div>
     );
@@ -272,20 +272,20 @@ export default function EditPostPage() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Post not found</div>
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-foreground">Post not found</div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black p-10 relative">
+    <div className="min-h-screen bg-background p-10 relative text-foreground">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-white">Edit Post</h1>
-              <p className="text-slate-400">{post.title}</p>
+              <h1 className="text-3xl font-bold text-foreground">Edit Post</h1>
+              <p className="text-muted-foreground">{post.title}</p>
             </div>
           </div>
           <div className="flex gap-3">
@@ -322,10 +322,10 @@ export default function EditPostPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-slate-800 bg-slate-900/50">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">Post Settings</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-foreground">Post Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   {isSharedPost
                     ? "Title, external URL, excerpt, tags, and publish settings."
                     : "Title, slug, excerpt, tags, and content blocks."}
@@ -333,17 +333,17 @@ export default function EditPostPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="title" className="text-slate-300">Title *</Label>
+                  <Label htmlFor="title" className="text-muted-foreground">Title *</Label>
                   <Input
                     id="title"
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    className="bg-black/50 border-slate-700 text-white mt-1"
+                    className="bg-muted border-border text-foreground mt-1"
                   />
                 </div>
                 {isSharedPost ? (
                   <div>
-                    <Label htmlFor="externalUrl" className="text-slate-300">External URL *</Label>
+                    <Label htmlFor="externalUrl" className="text-muted-foreground">External URL *</Label>
                     <Input
                       id="externalUrl"
                       type="url"
@@ -356,13 +356,13 @@ export default function EditPostPage() {
                           externalUrl: e.target.value,
                         })
                       }
-                      className="bg-black/50 border-slate-700 text-white mt-1"
+                      className="bg-muted border-border text-foreground mt-1"
                       placeholder="https://example.com/article"
                     />
                   </div>
                 ) : (
                   <div>
-                    <Label htmlFor="slug" className="text-slate-300">Slug (URL) *</Label>
+                    <Label htmlFor="slug" className="text-muted-foreground">Slug (URL) *</Label>
                     <Input
                       id="slug"
                       value={formData.slug}
@@ -372,14 +372,14 @@ export default function EditPostPage() {
                           slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""),
                         })
                       }
-                      className="bg-black/50 border-slate-700 text-white mt-1"
+                      className="bg-muted border-border text-foreground mt-1"
                       placeholder="my-post"
                     />
-                    <p className="text-xs text-slate-500 mt-1">/blog/{formData.slug || "my-post"}</p>
+                    <p className="text-xs text-muted-foreground mt-1">/blog/{formData.slug || "my-post"}</p>
                   </div>
                 )}
                 <div>
-                  <Label htmlFor="excerpt" className="text-slate-300">Excerpt</Label>
+                  <Label htmlFor="excerpt" className="text-muted-foreground">Excerpt</Label>
                   <Textarea
                     id="excerpt"
                     value={formData.excerpt}
@@ -387,7 +387,7 @@ export default function EditPostPage() {
                       setFormData({ ...formData, excerpt: e.target.value })
                     }
                     placeholder="Short excerpt..."
-                    className="w-full bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 mt-1 rounded-md px-3 py-2"
+                    className="w-full mt-1 rounded-md px-3 py-2"
                     rows={3}
                   />
                 </div>
@@ -399,7 +399,7 @@ export default function EditPostPage() {
                   placeholder="Add tag (Enter or comma)"
                 />
                 <div className="space-y-2">
-                  <Label htmlFor="status" className="text-slate-300">
+                  <Label htmlFor="status" className="text-muted-foreground">
                     Status
                   </Label>
                   <Select
@@ -413,11 +413,11 @@ export default function EditPostPage() {
                   >
                     <SelectTrigger
                       id="status"
-                      className="bg-black/50 border-slate-700 text-white"
+                      className="bg-muted border-border text-foreground"
                     >
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-900 border-slate-800 text-slate-100">
+                    <SelectContent className="bg-card border-border text-foreground">
                       <SelectItem value="draft">Draft</SelectItem>
                       <SelectItem value="publish">Publish</SelectItem>
                       <SelectItem value="archive">Archive</SelectItem>
@@ -428,13 +428,13 @@ export default function EditPostPage() {
             </Card>
 
             {!isSharedPost && (
-              <Card className="border-slate-800 bg-slate-900/50">
+              <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                   <div>
-                    <CardTitle className="text-white">
+                    <CardTitle className="text-foreground">
                       Content Blocks ({content.length})
                     </CardTitle>
-                    <CardDescription className="text-slate-400">
+                    <CardDescription className="text-muted-foreground">
                       Add and reorder blocks for the post body.
                     </CardDescription>
                   </div>
@@ -442,7 +442,7 @@ export default function EditPostPage() {
                 </CardHeader>
                 <CardContent>
                 {content.length === 0 ? (
-                  <div className="text-center py-12 text-slate-400">
+                  <div className="text-center py-12 text-muted-foreground">
                     <p>No content blocks yet. Add a block to get started.</p>
                   </div>
                 ) : (
@@ -469,16 +469,16 @@ export default function EditPostPage() {
           </div>
 
           <div className="space-y-6">
-            <Card className="border-slate-800 bg-slate-900/50">
+            <Card>
               <CardHeader>
-                <CardTitle className="text-white">SEO Settings</CardTitle>
-                <CardDescription className="text-slate-400">
+                <CardTitle className="text-foreground">SEO Settings</CardTitle>
+                <CardDescription className="text-muted-foreground">
                   Title, description, keywords, and OG image for sharing.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="seoTitle" className="text-slate-300">SEO Title</Label>
+                  <Label htmlFor="seoTitle" className="text-muted-foreground">SEO Title</Label>
                   <Input
                     id="seoTitle"
                     value={formData.seo.title}
@@ -488,11 +488,11 @@ export default function EditPostPage() {
                         seo: { ...formData.seo, title: e.target.value },
                       })
                     }
-                    className="bg-black/50 border-slate-700 text-white mt-1"
+                    className="bg-muted border-border text-foreground mt-1"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="seoDescription" className="text-slate-300">
+                  <Label htmlFor="seoDescription" className="text-muted-foreground">
                     SEO Description
                   </Label>
                   <Textarea
@@ -505,7 +505,7 @@ export default function EditPostPage() {
                       })
                     }
                     placeholder="SEO description for search results..."
-                    className="w-full bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 mt-1 rounded-md px-3 py-2"
+                    className="w-full mt-1 rounded-md px-3 py-2"
                     rows={3}
                   />
                 </div>
@@ -526,12 +526,12 @@ export default function EditPostPage() {
                   placeholder="Add keyword (Enter or comma)"
                 />
                 <div>
-                  <Label className="text-slate-300">OG Image</Label>
+                  <Label className="text-muted-foreground">OG Image</Label>
                   <div className="mt-2 space-y-2">
                     <button
                       type="button"
                       onClick={() => setOgInsertOpen(true)}
-                      className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-slate-800 bg-slate-900/60 text-left transition-colors hover:border-blue-500/70 hover:bg-slate-900/80"
+                      className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card"
                     >
                       {formData.seo.ogImage ? (
                         <>
@@ -541,20 +541,20 @@ export default function EditPostPage() {
                             className="h-32 w-full object-cover"
                           />
                           <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                            <span className="rounded-full border border-slate-600 bg-black/70 px-3 py-1.5 text-xs font-medium text-slate-100">
+                            <span className="rounded-full border border-white/20 bg-black/70 px-3 py-1.5 text-xs font-medium text-white">
                               Change image
                             </span>
                           </div>
                         </>
                       ) : (
-                        <div className="flex h-32 flex-col items-center justify-center gap-2 text-slate-400">
-                          <ImageIcon className="h-6 w-6 text-slate-500" />
+                        <div className="flex h-32 flex-col items-center justify-center gap-2 text-muted-foreground">
+                          <ImageIcon className="h-6 w-6 text-muted-foreground" />
                           <span className="text-xs font-medium">Add OG image</span>
-                          <span className="text-[11px] text-slate-500">1200×630</span>
+                          <span className="text-[11px] text-muted-foreground">1200×630</span>
                         </div>
                       )}
                     </button>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-muted-foreground">
                       Used for social sharing (Open Graph image).
                     </p>
                   </div>
@@ -589,9 +589,9 @@ export default function EditPostPage() {
       )}
       {uploadingOgImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-900/90 border border-slate-700 shadow-xl">
+          <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
             <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-            <span className="text-sm text-slate-100">Processing image…</span>
+            <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>
       )}

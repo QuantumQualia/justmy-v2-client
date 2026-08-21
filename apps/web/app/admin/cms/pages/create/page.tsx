@@ -55,26 +55,26 @@ export default function CreatePagePage() {
   };
 
   return (
-    <div className="min-h-screen bg-black p-10">
+    <div className="min-h-screen bg-background p-10 text-foreground">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-white">Create New Page</h1>
-            <p className="text-slate-400">Create a new dynamic page</p>
+            <h1 className="text-3xl font-bold text-foreground">Create New Page</h1>
+            <p className="text-muted-foreground">Create a new dynamic page</p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <Card className="border-slate-800 bg-slate-900/50">
+          <Card>
             <CardHeader>
-              <CardTitle className="text-white">Basic Information</CardTitle>
-              <CardDescription className="text-slate-400">
+              <CardTitle className="text-foreground">Basic Information</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 Title, handle, and options for your page.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="title" className="text-slate-300">
+                <Label htmlFor="title" className="text-muted-foreground">
                   Title *
                 </Label>
                 <Input
@@ -90,13 +90,13 @@ export default function CreatePagePage() {
                     });
                   }}
                   placeholder="My Page Title"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                   required
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="handle" className="text-slate-300">
+                <Label htmlFor="handle" className="text-muted-foreground">
                   Handle (URL) *
                 </Label>
                 <Input
@@ -109,16 +109,16 @@ export default function CreatePagePage() {
                     })
                   }
                   placeholder="my-page"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                   required
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   URL-friendly identifier (e.g., &quot;my-page&quot; becomes /my-page)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="parentHandle" className="text-slate-300">
+                <Label htmlFor="parentHandle" className="text-muted-foreground">
                   Parent Handle (optional)
                 </Label>
                 <Input
@@ -128,15 +128,15 @@ export default function CreatePagePage() {
                     setFormData({ ...formData, parentHandle: e.target.value })
                   }
                   placeholder="parent-page"
-                  className="bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400"
+                  className="bg-muted border-border text-foreground placeholder:text-muted-foreground dark:placeholder:text-muted-foreground"
                 />
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   For nested routes (e.g., /parent-page/my-page)
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-slate-300">
+                <Label htmlFor="description" className="text-muted-foreground">
                   Description
                 </Label>
                 <Textarea
@@ -146,7 +146,7 @@ export default function CreatePagePage() {
                     setFormData({ ...formData, description: e.target.value })
                   }
                   placeholder="Page description..."
-                  className="min-h-[100px] bg-black/50 border-slate-700 text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 resize-none"
+                  className="min-h-[100px] resize-none"
                 />
               </div>
 
@@ -160,7 +160,7 @@ export default function CreatePagePage() {
                 />
                 <Label
                   htmlFor="isPublished"
-                  className="text-slate-300 cursor-pointer font-normal"
+                  className="text-muted-foreground cursor-pointer font-normal"
                 >
                   Publish immediately
                 </Label>
@@ -175,7 +175,7 @@ export default function CreatePagePage() {
                 />
                 <Label
                   htmlFor="requiresAuth"
-                  className="text-slate-300 cursor-pointer font-normal"
+                  className="text-muted-foreground cursor-pointer font-normal"
                 >
                   Requires Authentication
                 </Label>

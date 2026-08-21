@@ -111,13 +111,13 @@ function SortablePostItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="group rounded-lg rounded-br-none border border-slate-700 bg-slate-900/60 p-3"
+      className="group rounded-lg rounded-br-none border border-border bg-card p-3"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
           <button
             type="button"
-            className="shrink-0 cursor-grab touch-none text-slate-500 hover:text-slate-300 active:cursor-grabbing"
+            className="shrink-0 cursor-grab touch-none text-muted-foreground hover:text-muted-foreground active:cursor-grabbing"
             {...attributes}
             {...listeners}
           >
@@ -125,10 +125,10 @@ function SortablePostItem({
           </button>
           <span className={`h-2 w-2 shrink-0 rounded-full ${statusColor}`} />
           <div className="min-w-0">
-            <p className="text-sm font-medium text-slate-100 truncate">
+            <p className="text-sm font-medium text-foreground truncate">
               {item.post?.title ?? `Post #${item.postId}`}
             </p>
-            <p className="text-xs text-slate-400 truncate">
+            <p className="text-xs text-muted-foreground truncate">
               {status === "publish" ? "Published" : status === "archive" ? "Archived" : "Draft"}
               {item.post?.slug ? ` · /${item.post.slug}` : ""}
             </p>
@@ -784,11 +784,11 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 shadow-2xl shadow-black/40 p-0"
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
         >
           <div>
-            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-              <DialogTitle className="text-white">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <DialogTitle className="text-foreground">
                 {hubModalMode === "create" ? "New content hub" : "Edit content hub"}
               </DialogTitle>
               <Button
@@ -805,7 +805,7 @@ export function ContentHubView() {
             </div>
             <div className="space-y-4 px-5 py-4">
               <div className="space-y-2">
-                <Label htmlFor="hubFormTitle" className="text-slate-300">
+                <Label htmlFor="hubFormTitle" className="text-muted-foreground">
                   Title
                 </Label>
                 <Input
@@ -813,24 +813,24 @@ export function ContentHubView() {
                   value={hubFormTitle}
                   onChange={(e) => setHubFormTitle(e.target.value)}
                   placeholder="e.g. Main directory"
-                  className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                  className="rounded-lg rounded-br-none"
                   autoFocus
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="hubFormDescription" className="text-slate-300">
-                  Description <span className="text-slate-500">(optional)</span>
+                <Label htmlFor="hubFormDescription" className="text-muted-foreground">
+                  Description <span className="text-muted-foreground">(optional)</span>
                 </Label>
                 <Textarea
                   id="hubFormDescription"
                   value={hubFormDescription}
                   onChange={(e) => setHubFormDescription(e.target.value)}
                   placeholder="Short description for this hub…"
-                  className="min-h-[88px] rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                  className="min-h-[88px] rounded-lg rounded-br-none"
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-800 px-5 py-4">
+            <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
               <Button
                 type="button"
                 variant="outline"
@@ -874,11 +874,11 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 shadow-2xl shadow-black/40 p-0"
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
         >
           <div>
-            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-              <DialogTitle className="text-white">
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <DialogTitle className="text-foreground">
                 {tabModalMode === "create" ? "New tab" : "Edit tab"}
               </DialogTitle>
               <Button
@@ -895,7 +895,7 @@ export function ContentHubView() {
             </div>
             <div className="space-y-4 px-5 py-4">
               <div className="space-y-2">
-                <Label htmlFor="tabFormTitle" className="text-slate-300">
+                <Label htmlFor="tabFormTitle" className="text-muted-foreground">
                   Tab name
                 </Label>
                 <Input
@@ -903,7 +903,7 @@ export function ContentHubView() {
                   value={tabFormTitle}
                   onChange={(e) => setTabFormTitle(e.target.value)}
                   placeholder="e.g. Featured posts"
-                  className="rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                  className="rounded-lg rounded-br-none"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && tabFormTitle.trim() && !tabModalSaving) {
@@ -914,7 +914,7 @@ export function ContentHubView() {
                 />
               </div>
             </div>
-            <div className="flex justify-end gap-2 border-t border-slate-800 px-5 py-4">
+            <div className="flex justify-end gap-2 border-t border-border px-5 py-4">
               <Button
                 type="button"
                 variant="outline"
@@ -964,11 +964,11 @@ export function ContentHubView() {
       <Dialog open={typePickerOpen} onOpenChange={setTypePickerOpen}>
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-slate-700/80 bg-slate-900 shadow-2xl shadow-black/40 p-0"
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
         >
           <div>
-            <div className="flex items-center justify-between border-b border-slate-800 px-5 py-4">
-              <DialogTitle className="text-white">Choose post type</DialogTitle>
+            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+              <DialogTitle className="text-foreground">Choose post type</DialogTitle>
               <Button
                 type="button"
                 variant="ghost"
@@ -987,14 +987,14 @@ export function ContentHubView() {
                   setTypePickerOpen(false);
                   openPostEditor("create", undefined, "standard");
                 }}
-                className="flex items-start gap-3 rounded-xl border border-slate-700/80 bg-slate-800/40 p-4 text-left transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/[0.06]"
+                className="flex items-start gap-3 rounded-xl border border-input bg-muted/40 p-4 text-left transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/[0.06]"
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-emerald-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-emerald-400">
                   <FileText className="h-4 w-4" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-white">Standard Post</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-400">
+                  <span className="block text-sm font-semibold text-foreground">Standard Post</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
                     Write a post with title, content blocks, tags, and SEO.
                   </span>
                 </span>
@@ -1005,14 +1005,14 @@ export function ContentHubView() {
                   setTypePickerOpen(false);
                   openPostEditor("create", undefined, "shared-from-url");
                 }}
-                className="flex items-start gap-3 rounded-xl border border-slate-700/80 bg-slate-800/40 p-4 text-left transition-colors hover:border-blue-500/50 hover:bg-blue-500/[0.06]"
+                className="flex items-start gap-3 rounded-xl border border-input bg-muted/40 p-4 text-left transition-colors hover:border-blue-500/50 hover:bg-blue-500/[0.06]"
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-700 bg-slate-800 text-blue-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-blue-400">
                   <Link2 className="h-4 w-4" />
                 </span>
                 <span>
-                  <span className="block text-sm font-semibold text-white">Share from URL</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-400">
+                  <span className="block text-sm font-semibold text-foreground">Share from URL</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
                     Paste an external link — metadata is fetched automatically.
                   </span>
                 </span>
@@ -1032,10 +1032,10 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-[min(100%,20rem)] max-w-[20rem] gap-0 rounded-2xl rounded-br-none border border-slate-800/70 bg-slate-950 p-0 shadow-2xl shadow-black/30 sm:max-w-[20rem]"
+          className="w-[min(100%,20rem)] max-w-[20rem] gap-0 rounded-2xl rounded-br-none border border-border bg-muted p-0 shadow-2xl shadow-black/30 sm:max-w-[20rem]"
         >
-          <div className="flex items-center justify-between border-b border-slate-800/60 px-4 py-3">
-            <DialogTitle className="text-base font-semibold tracking-tight text-slate-100">
+          <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
+            <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
               Remove post
             </DialogTitle>
             <Button
@@ -1050,7 +1050,7 @@ export function ContentHubView() {
             </Button>
           </div>
           <div className="px-4 pb-4 pt-3">
-            <p className="mb-3 text-[13px] leading-snug text-slate-500">
+            <p className="mb-3 text-[13px] leading-snug text-muted-foreground">
               What would you like to do with this post?
             </p>
             <div className="flex flex-col gap-2">
@@ -1064,14 +1064,14 @@ export function ContentHubView() {
                   setRemovePostDialogOpen(false);
                   setRemovePostId(null);
                 }}
-                className="flex w-full items-start gap-3 rounded-lg border border-slate-800/80 border-l-orange-400/70 bg-slate-900/50 px-3 py-2.5 text-left transition-colors cursor-pointer hover:border-l-orange-400/90 hover:border-slate-700/90 hover:bg-slate-800/40 disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-start gap-3 rounded-lg border border-border border-l-orange-400/70 bg-card px-3 py-2.5 text-left transition-colors cursor-pointer hover:border-l-orange-400/90 hover:border-border hover:bg-accent/40 disabled:pointer-events-none disabled:opacity-50"
               >
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-800/60 text-orange-300/90">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted/60 text-orange-300/90">
                   <Minus className="h-3.5 w-3.5" strokeWidth={2} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-slate-200">Remove from this tab</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                  <span className="block text-sm font-medium text-foreground">Remove from this tab</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
                     The post stays in the system.
                   </span>
                 </span>
@@ -1086,14 +1086,14 @@ export function ContentHubView() {
                   setRemovePostDialogOpen(false);
                   setRemovePostId(null);
                 }}
-                className="flex w-full items-start gap-3 rounded-lg border border-slate-800/80 border-l-red-400/70 bg-slate-900/50 px-3 py-2.5 text-left transition-colors cursor-pointer hover:border-l-red-400/90 hover:border-slate-700/90 hover:bg-slate-800/40 disabled:pointer-events-none disabled:opacity-50"
+                className="flex w-full items-start gap-3 rounded-lg border border-border border-l-red-400/70 bg-card px-3 py-2.5 text-left transition-colors cursor-pointer hover:border-l-red-400/90 hover:border-border hover:bg-accent/40 disabled:pointer-events-none disabled:opacity-50"
               >
-                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-slate-800/60 text-red-300/90">
+                <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted/60 text-red-300/90">
                   <Trash2 className="h-3.5 w-3.5" strokeWidth={2} />
                 </span>
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-medium text-slate-200">Delete permanently</span>
-                  <span className="mt-0.5 block text-xs leading-relaxed text-slate-500">
+                  <span className="block text-sm font-medium text-foreground">Delete permanently</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-muted-foreground">
                     Remove from all tabs and delete from system.
                   </span>
                 </span>
@@ -1144,13 +1144,13 @@ export function ContentHubView() {
         onConfirm={handleConfirmDeletion}
       />
       <div className="mx-auto max-w-[1400px]">
-        <Card className="overflow-hidden rounded-2xl rounded-br-none border border-slate-800 bg-slate-950/95 shadow-xl shadow-black/20 py-0 gap-0">
-          <CardHeader className="flex flex-col gap-4 border-b border-slate-800/90 bg-slate-900/60 px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
+        <Card className="overflow-hidden rounded-2xl rounded-br-none border border-border bg-card shadow-xl shadow-black/20 py-0 gap-0">
+          <CardHeader className="flex flex-col gap-4 border-b border-border/90 bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
             <div className="space-y-1">
-              <CardTitle className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+              <CardTitle className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
                 Content hub
               </CardTitle>
-              <CardDescription className="text-sm text-slate-400">
+              <CardDescription className="text-sm text-muted-foreground">
                 Manage hubs, tabs, and posts for your profile.
               </CardDescription>
             </div>
@@ -1177,16 +1177,16 @@ export function ContentHubView() {
           </CardHeader>
 
           <div className="grid grid-cols-1 lg:grid-cols-12">
-            <aside className="border-b border-slate-800/80 bg-slate-950/50 lg:col-span-3 lg:border-b-0 lg:border-r lg:border-slate-800/80">
+            <aside className="border-b border-border/80 bg-muted lg:col-span-3 lg:border-b-0 lg:border-r lg:border-border">
               <div className="flex flex-col gap-4 p-4 md:p-5 lg:min-h-[min(70vh,48rem)]">
-                <div className="rounded-2xl rounded-br-none border border-slate-800/90 bg-gradient-to-b from-slate-900/95 to-slate-950/95 p-4 shadow-inner">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                <div className="rounded-2xl rounded-br-none border border-border bg-gradient-to-b from-muted/95 to-muted/95 p-4 shadow-inner">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
                     Libraries
                   </p>
-                  <h2 className="mt-1 text-sm font-semibold tracking-tight text-slate-200">
+                  <h2 className="mt-1 text-sm font-semibold tracking-tight text-foreground">
                     Your hubs
                   </h2>
-                  <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                     Select a hub below or add a new library.
                   </p>
                   <Button
@@ -1205,16 +1205,16 @@ export function ContentHubView() {
                   </Button>
                 </div>
 
-                <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto rounded-xl rounded-br-none border border-slate-800/80 bg-slate-900/30 p-2">
+                <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto rounded-xl rounded-br-none border border-border bg-muted p-2">
                   {loading ? (
-                    <div className="flex items-center justify-center gap-2 py-10 text-sm text-slate-500">
+                    <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
                       Loading hubs…
                     </div>
                   ) : hubs.length === 0 ? (
                     <div className="px-3 py-8 text-center">
-                      <p className="text-sm text-slate-400">No hubs yet</p>
-                      <p className="mt-1 text-xs text-slate-600">Create one with the button above.</p>
+                      <p className="text-sm text-muted-foreground">No hubs yet</p>
+                      <p className="mt-1 text-xs text-muted-foreground">Create one with the button above.</p>
                     </div>
                   ) : (
                     hubs.map((hub) => {
@@ -1224,7 +1224,7 @@ export function ContentHubView() {
                           key={hub.id}
                           className={`group flex items-stretch gap-0.5 rounded-xl rounded-br-none border transition-colors ${active
                             ? "border-emerald-500/40 bg-emerald-500/[0.08] ring-1 ring-emerald-500/25"
-                            : "border-transparent bg-transparent hover:bg-slate-800/50"
+                            : "border-transparent bg-transparent hover:bg-accent"
                             }`}
                         >
                           <button
@@ -1235,7 +1235,7 @@ export function ContentHubView() {
                             <span
                               className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg rounded-br-none border ${active
                                 ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
-                                : "border-slate-700/80 bg-slate-800/60 text-slate-500"
+                                : "border-input bg-muted/60 text-muted-foreground"
                                 }`}
                             >
                               {active ? (
@@ -1246,23 +1246,23 @@ export function ContentHubView() {
                             </span>
                             <span className="min-w-0 flex-1">
                               <span
-                                className={`block truncate text-sm font-medium ${active ? "text-white" : "text-slate-300"
+                                className={`block truncate text-sm font-medium ${active ? "text-foreground" : "text-muted-foreground"
                                   }`}
                               >
                                 {hub.title}
                               </span>
                               {hub.description ? (
-                                <span className="mt-0.5 line-clamp-1 text-xs text-slate-500">
+                                <span className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
                                   {hub.description}
                                 </span>
                               ) : (
-                                <span className="mt-0.5 text-xs text-slate-600">
+                                <span className="mt-0.5 text-xs text-muted-foreground">
                                   {hub.tabs.length} tab{hub.tabs.length === 1 ? "" : "s"}
                                 </span>
                               )}
                             </span>
                           </button>
-                          <div className="flex shrink-0 flex-col justify-center gap-0.5 border-l border-slate-800/80 py-1 pr-1 pl-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100">
+                          <div className="flex shrink-0 flex-col justify-center gap-0.5 border-l border-border py-1 pr-1 pl-0.5 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 lg:focus-within:opacity-100">
                             <Button
                               type="button"
                               variant="ghost"
@@ -1293,11 +1293,11 @@ export function ContentHubView() {
             </aside>
 
             <section className="space-y-5 p-5 md:p-8 lg:col-span-9">
-              <div className="border-b border-slate-800/80 pb-5">
-                <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+              <div className="border-b border-border/80 pb-5">
+                <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
                   {selectedHub ? selectedHub.title : "Your workspace"}
                 </h1>
-                <p className="mt-1 text-sm text-slate-400 md:text-base">
+                <p className="mt-1 text-sm text-muted-foreground md:text-base">
                   {selectedHub?.description?.trim()
                     ? selectedHub.description
                     : "Create tabs, add posts, and organize content by status."}
@@ -1305,8 +1305,8 @@ export function ContentHubView() {
               </div>
 
               {!selectedHub ? (
-                <Card className="rounded-xl rounded-br-none border-slate-800 bg-slate-900/50">
-                  <CardContent className="p-6 text-sm text-slate-400">
+                <Card className="rounded-xl rounded-br-none">
+                  <CardContent className="p-6 text-sm text-muted-foreground">
                     Select or create a content hub to begin.
                   </CardContent>
                 </Card>
@@ -1326,8 +1326,8 @@ export function ContentHubView() {
                   </div>
 
                   {tabs.length === 0 ? (
-                    <Card className="rounded-xl rounded-br-none border-slate-800 bg-slate-900/50">
-                      <CardContent className="p-6 text-sm text-slate-400">
+                    <Card className="rounded-xl rounded-br-none">
+                      <CardContent className="p-6 text-sm text-muted-foreground">
                         No tabs in this hub yet.
                       </CardContent>
                     </Card>
@@ -1342,7 +1342,7 @@ export function ContentHubView() {
                         return (
                           <Card
                             key={tab.id}
-                            className="overflow-hidden rounded-xl rounded-br-none border-slate-800 bg-slate-900/60 py-0"
+                            className="overflow-hidden rounded-xl rounded-br-none border-border bg-card py-0"
                           >
                             <div
                               className={`flex items-center justify-between px-4 py-3 ${
@@ -1436,12 +1436,12 @@ export function ContentHubView() {
                                 <div className="space-y-3">
                                   <div className="flex flex-wrap items-center gap-2">
                                     <div className="relative flex-1 max-w-md">
-                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+                                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                                       <Input
                                         value={searchPosts}
                                         onChange={(e) => setSearchPosts(e.target.value)}
                                         placeholder="Search existing posts to add…"
-                                        className="pl-9 rounded-lg rounded-br-none border-slate-700 bg-black/50 text-white"
+                                        className="pl-9 rounded-lg rounded-br-none"
                                       />
                                     </div>
                                     <Button
@@ -1455,14 +1455,14 @@ export function ContentHubView() {
                                   </div>
 
                                   {searchPosts.trim() && (
-                                    <div className="max-h-52 overflow-y-auto rounded-lg border border-slate-700/80 bg-black/30 divide-y divide-slate-800/80">
+                                    <div className="max-h-52 overflow-y-auto rounded-lg border border-input bg-muted divide-y divide-border">
                                       {searchingPosts ? (
-                                        <div className="flex items-center justify-center gap-2 py-4 text-xs text-slate-500">
+                                        <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
                                           <Loader2 className="h-3.5 w-3.5 animate-spin" />
                                           Searching…
                                         </div>
                                       ) : filteredPostOptions.length === 0 ? (
-                                        <p className="px-3 py-4 text-center text-xs text-slate-500">No matching posts found.</p>
+                                        <p className="px-3 py-4 text-center text-xs text-muted-foreground">No matching posts found.</p>
                                       ) : (
                                         filteredPostOptions.map((post) => {
                                           const statusColor =
@@ -1474,13 +1474,13 @@ export function ContentHubView() {
                                           return (
                                             <div
                                               key={post.id}
-                                              className="flex items-center justify-between gap-3 px-3 py-2 hover:bg-slate-800/40 transition-colors"
+                                              className="flex items-center justify-between gap-3 px-3 py-2 hover:bg-accent/40 transition-colors"
                                             >
                                               <div className="flex items-center gap-2 min-w-0">
                                                 <span className={`h-2 w-2 shrink-0 rounded-full ${statusColor}`} />
-                                                <span className="text-sm text-slate-100 truncate">{post.title}</span>
+                                                <span className="text-sm text-foreground truncate">{post.title}</span>
                                                 {post.slug && (
-                                                  <span className="text-xs text-slate-500 truncate">/{post.slug}</span>
+                                                  <span className="text-xs text-muted-foreground truncate">/{post.slug}</span>
                                                 )}
                                               </div>
                                               <Button
@@ -1512,10 +1512,10 @@ export function ContentHubView() {
                                   <div className="flex items-center gap-2 text-xs">
                                     {(["all", "draft", "publish", "archive"] as const).map((f) => {
                                       const colors: Record<string, string> = {
-                                        all: "text-white",
+                                        all: "text-foreground",
                                         draft: "text-yellow-400",
                                         publish: "text-green-400",
-                                        archive: "text-slate-200",
+                                        archive: "text-foreground",
                                       };
                                       const labels: Record<string, string> = {
                                         all: "All",
@@ -1525,11 +1525,11 @@ export function ContentHubView() {
                                       };
                                       return (
                                         <React.Fragment key={f}>
-                                          {f !== "all" && <span className="text-slate-600">|</span>}
+                                          {f !== "all" && <span className="text-muted-foreground">|</span>}
                                           <button
                                             type="button"
                                             onClick={() => setTabPostStatusFilter(f)}
-                                            className={tabPostStatusFilter === f ? colors[f] : "text-slate-400"}
+                                            className={tabPostStatusFilter === f ? colors[f] : "text-muted-foreground"}
                                           >
                                             {labels[f]}
                                           </button>
@@ -1538,12 +1538,12 @@ export function ContentHubView() {
                                     })}
                                   </div>
                                   <div className="relative ml-auto w-full sm:w-56">
-                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-500 pointer-events-none" />
+                                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
                                     <Input
                                       value={tabPostsSearch}
                                       onChange={(e) => setTabPostsSearch(e.target.value)}
                                       placeholder="Search tab posts…"
-                                      className="h-8 pl-8 text-xs rounded-lg rounded-br-none border-slate-700 bg-black/40 text-white placeholder:text-slate-500"
+                                      className="h-8 pl-8 text-xs rounded-lg rounded-br-none"
                                     />
                                   </div>
                                 </div>
@@ -1556,7 +1556,7 @@ export function ContentHubView() {
                                       Loading posts…
                                     </div>
                                   ) : displayTabPosts.length === 0 ? (
-                                    <p className="text-sm text-slate-500">
+                                    <p className="text-sm text-muted-foreground">
                                       {debouncedTabPostsSearch ? "No posts match your search." : "No posts in this tab yet."}
                                     </p>
                                   ) : (
@@ -1582,8 +1582,8 @@ export function ContentHubView() {
                                   )}
                                 </div>
                                 {!loadingTabPosts && tabPostsTotalPages > 1 ? (
-                                  <div className="flex flex-col gap-2 border-t border-slate-800/80 pt-3 sm:flex-row sm:items-center sm:justify-between">
-                                    <p className="text-xs text-slate-500">
+                                  <div className="flex flex-col gap-2 border-t border-border/80 pt-3 sm:flex-row sm:items-center sm:justify-between">
+                                    <p className="text-xs text-muted-foreground">
                                       Showing{" "}
                                       {visibleTabPostsCount === 0
                                         ? 0
@@ -1606,7 +1606,7 @@ export function ContentHubView() {
                                       >
                                         Previous
                                       </Button>
-                                      <span className="text-xs text-slate-500">
+                                      <span className="text-xs text-muted-foreground">
                                         Page {tabPostsPage} / {tabPostsTotalPages}
                                       </span>
                                       <Button

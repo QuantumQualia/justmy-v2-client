@@ -61,7 +61,7 @@ export function ProfileSwitcher() {
         variant="ghost"
         size="icon"
         onClick={() => router.push("/mycard/edit")}
-        className="h-10 w-10 rounded-full text-slate-300 hover:text-white hover:bg-slate-800"
+        className="h-10 w-10 rounded-full text-muted-foreground hover:text-foreground hover:bg-accent"
       >
         <User className="h-5 w-5" />
       </Button>
@@ -75,7 +75,7 @@ export function ProfileSwitcher() {
       open={isOpen}
       onOpenChange={setIsOpen}
     >
-      <SelectTrigger className="h-10 w-10 p-0 border-0 bg-transparent hover:bg-slate-800 rounded-full focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-black">
+      <SelectTrigger className="h-10 w-10 p-0 border-0 bg-transparent hover:bg-accent rounded-full focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-background">
         {currentProfile.photo ? (
           <img
             src={currentProfile.photo}
@@ -88,12 +88,12 @@ export function ProfileSwitcher() {
           </div>
         )}
       </SelectTrigger>
-      <SelectContent className="min-w-[200px] bg-slate-900 border-slate-800 text-slate-100 dark:bg-slate-900">
+      <SelectContent className="min-w-[200px]">
         {profiles.map((p) => (
           <SelectItem
             key={p!.id}
             value={p!.slug}
-            className="cursor-pointer text-slate-200 hover:bg-slate-800 hover:text-white focus:bg-slate-800 focus:text-white dark:text-slate-200 dark:hover:bg-slate-800 dark:focus:bg-slate-800"
+            className="cursor-pointer"
           >
             <div className="flex items-center gap-2">
               {p!.photo ? (
@@ -111,7 +111,7 @@ export function ProfileSwitcher() {
             </div>
           </SelectItem>
         ))}
-        <SelectItem value="new" className="cursor-pointer text-emerald-400 hover:bg-slate-800 hover:text-emerald-300 focus:bg-slate-800 focus:text-emerald-300 dark:text-emerald-400 dark:hover:bg-slate-800 dark:focus:bg-slate-800">
+        <SelectItem value="new" className="cursor-pointer text-emerald-400 hover:text-emerald-300 focus:text-emerald-300">
           <div className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             <span>Create New Profile</span>

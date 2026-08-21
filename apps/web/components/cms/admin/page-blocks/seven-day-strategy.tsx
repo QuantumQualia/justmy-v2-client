@@ -12,13 +12,13 @@ interface SevenDayStrategyBlockEditorProps {
 export function SevenDayStrategyBlockEditor({}: SevenDayStrategyBlockEditorProps) {
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card>
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Renders the 7-Day Strategy panel, splitting work week vs weekend and summarizing the
             weekend lookahead.
           </p>
-          <CardDescription className="text-xs text-slate-500">
+          <CardDescription className="text-xs text-muted-foreground">
             No configuration needed. Data comes from the weather/sevenday API.
           </CardDescription>
         </CardContent>

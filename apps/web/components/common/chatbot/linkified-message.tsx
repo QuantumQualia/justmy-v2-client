@@ -149,7 +149,7 @@ export function LinkifiedMessage({
       text,
       matches,
       linkClassName ??
-        "font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white",
+        "font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-foreground",
     );
   }, [text, linkClassName]);
 

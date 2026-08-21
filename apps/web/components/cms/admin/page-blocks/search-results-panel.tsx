@@ -12,14 +12,14 @@ interface SearchResultsPanelBlockEditorProps {
 export function SearchResultsPanelBlockEditor({ block, onUpdate }: SearchResultsPanelBlockEditorProps) {
   return (
     <div className="space-y-4">
-      <Card className="bg-slate-800/50 border-slate-700 text-slate-200">
+      <Card>
         <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-muted-foreground">
             Collapsible panel that displays search results from the Super Search Bar. It listens to the
             global search store and shows loading, error, or result cards. The panel is hidden until
             the user has run a search.
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-muted-foreground">
             No configuration needed. Place a Super Search Bar block above (or elsewhere on the page) so
             users can trigger searches.
           </p>

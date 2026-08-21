@@ -85,26 +85,26 @@ export function MarketZipManager({ initialZips = [], onChange }: MarketZipManage
   }
 
   return (
-    <Card className="bg-slate-900/50 border-slate-800 text-white">
+    <Card>
       <CardHeader>
-        <CardTitle className="text-white">Territory Management</CardTitle>
-        <CardDescription className="text-slate-400">
+        <CardTitle className="text-foreground">Territory Management</CardTitle>
+        <CardDescription className="text-muted-foreground">
           Manage zip codes for this market territory
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
-          <Label htmlFor="zipInput" className="text-slate-300">Add Zip Codes</Label>
+          <Label htmlFor="zipInput" className="text-muted-foreground">Add Zip Codes</Label>
           <textarea
             id="zipInput"
             value={zipInput}
             onChange={(e) => setZipInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Enter zip codes separated by commas (e.g., 38103, 38104, 38105)"
-            className="flex min-h-[100px] w-full rounded-md border border-slate-700 bg-black/50 px-3 py-2 text-sm text-white shadow-xs placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[100px] w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
           />
           <div className="flex items-center justify-between">
-            <p className="text-slate-500 text-xs">
+            <p className="text-muted-foreground text-xs">
               Press Ctrl+Enter (or Cmd+Enter) to add zip codes
             </p>
             <Button onClick={handleAddZips} size="sm" disabled={!zipInput.trim()} className="bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -115,7 +115,7 @@ export function MarketZipManager({ initialZips = [], onChange }: MarketZipManage
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label className="text-slate-300">Current Zip Codes ({zips.length})</Label>
+            <Label className="text-muted-foreground">Current Zip Codes ({zips.length})</Label>
             {zips.length > 0 && (
               <Button
                 variant="ghost"
@@ -130,16 +130,16 @@ export function MarketZipManager({ initialZips = [], onChange }: MarketZipManage
             )}
           </div>
           {zips.length === 0 ? (
-            <p className="text-slate-500 text-sm py-4 text-center border border-slate-800 rounded-md bg-black/30">
+            <p className="text-muted-foreground text-sm py-4 text-center border border-border rounded-md bg-muted">
               No zip codes added yet
             </p>
           ) : (
-            <div className="flex flex-wrap gap-2 p-3 border border-slate-800 rounded-md bg-black/30">
+            <div className="flex flex-wrap gap-2 p-3 border border-border rounded-md bg-muted">
               {zips.map((zip) => (
                 <Badge
                   key={zip}
                   variant="secondary"
-                  className="flex items-center gap-1 pr-1 bg-slate-800 text-slate-300"
+                  className="flex items-center gap-1 pr-1 bg-muted text-muted-foreground"
                 >
                   {zip}
                   <button

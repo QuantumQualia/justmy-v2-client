@@ -154,7 +154,7 @@ export function UserList() {
                   className="w-8 h-8 rounded-full object-cover"
                 />
               )}
-              <span className="font-medium text-white">{getUserDisplayName(user)}</span>
+              <span className="font-medium text-foreground">{getUserDisplayName(user)}</span>
             </div>
           )
         },
@@ -163,14 +163,14 @@ export function UserList() {
         accessorKey: "email",
         header: "Email",
         cell: ({ row }) => (
-          <span className="text-slate-400">{row.original.email}</span>
+          <span className="text-muted-foreground">{row.original.email}</span>
         ),
       },
       {
         accessorKey: "role",
         header: "Role",
         cell: ({ row }) => (
-          <Badge variant="outline" className="border-slate-600 text-slate-300">
+          <Badge variant="outline" className="border-border text-muted-foreground">
             {row.original.role}
           </Badge>
         ),
@@ -212,7 +212,7 @@ export function UserList() {
               className={
                 count > 0
                   ? "bg-emerald-900/50 text-emerald-400 border-emerald-800"
-                  : "bg-slate-800 text-slate-400 border-slate-700"
+                  : "bg-muted text-muted-foreground border-border"
               }
             >
               {count} {count === 1 ? "Profile" : "Profiles"}
@@ -236,7 +236,7 @@ export function UserList() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-slate-400 hover:text-blue-400 hover:bg-slate-800"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-blue-400 hover:bg-accent"
                     title="Edit user"
                   >
                     <Edit className="h-4 w-4" />
@@ -281,7 +281,7 @@ export function UserList() {
                       size="sm"
                       onClick={() => handleBlock(user.id)}
                       disabled={isLoading}
-                      className="h-8 w-8 p-0 text-slate-400 hover:text-orange-400 hover:bg-slate-800 disabled:opacity-50"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-orange-400 hover:bg-accent disabled:opacity-50"
                       title="Block user"
                     >
                       {isLoading ? (
@@ -296,7 +296,7 @@ export function UserList() {
                     size="sm"
                     onClick={() => handleDelete(user.id)}
                     disabled={isLoading}
-                    className="h-8 w-8 p-0 text-slate-400 hover:text-red-400 hover:bg-slate-800 disabled:opacity-50"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-accent disabled:opacity-50"
                     title="Delete user"
                   >
                     {isLoading ? (
@@ -317,12 +317,12 @@ export function UserList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-slate-900 p-4 rounded-lg border border-slate-800">
+      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-slate-500" />
+          <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Search users..."
-            className="pl-8 bg-black/50 border-slate-700 text-white"
+            className="pl-8"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -336,9 +336,9 @@ export function UserList() {
                 setIncludeDeleted(checked)
                 setCurrentPage(1)
               }}
-              className="data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-slate-700"
+              className="data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-input"
             />
-            <Label htmlFor="include-deleted" className="text-sm text-slate-400 cursor-pointer">
+            <Label htmlFor="include-deleted" className="text-sm text-muted-foreground cursor-pointer">
               Include Deleted
             </Label>
           </div>

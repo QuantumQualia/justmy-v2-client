@@ -28,16 +28,16 @@ export function LifestyleIndices({ gauges, className }: LifestyleIndicesProps) {
   return (
     <section
       className={cn(
-        "rounded-2xl rounded-br-none bg-slate-950/80 border border-slate-800 p-4 sm:p-5 shadow-lg",
+        "rounded-2xl rounded-br-none bg-card border border-border p-4 sm:p-5 shadow-lg",
         className,
       )}
       aria-label="Lifestyle indices"
     >
       <header className="mb-3 sm:mb-4 space-y-1">
-        <h2 className="text-sm sm:text-base font-semibold text-slate-50">
+        <h2 className="text-sm sm:text-base font-semibold text-foreground">
           Lifestyle Indices
         </h2>
-        <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-slate-400">
+        <p className="text-[11px] sm:text-xs uppercase tracking-[0.16em] text-muted-foreground">
           Winner&apos;s Metrics – Go / No-Go gauges
         </p>
       </header>
@@ -46,10 +46,10 @@ export function LifestyleIndices({ gauges, className }: LifestyleIndicesProps) {
         {gauges.map((gauge) => (
           <article
             key={gauge.id}
-            className="group rounded-2xl border border-slate-800/90 bg-gradient-to-br from-slate-900/80 via-slate-950/90 to-slate-950/90 p-3 sm:p-4 flex flex-col gap-2 sm:gap-3"
+            className="group rounded-2xl border border-border bg-gradient-to-br from-card via-muted to-muted p-3 sm:p-4 flex flex-col gap-2 sm:gap-3"
           >
             <header className="flex items-center justify-between gap-2">
-              <p className="text-xs font-medium text-slate-100">{gauge.label}</p>
+              <p className="text-xs font-medium text-foreground">{gauge.label}</p>
               <span
                 className={cn(
                   "inline-flex items-center rounded-full px-2 py-0.5 text-[10px]/none font-semibold uppercase tracking-[0.14em]",
@@ -59,10 +59,10 @@ export function LifestyleIndices({ gauges, className }: LifestyleIndicesProps) {
                 {statusLabel(gauge.status)}
               </span>
             </header>
-            <p className="text-xs sm:text-[13px] text-slate-50">
+            <p className="text-xs sm:text-[13px] text-foreground">
               {gauge.valueLabel}
             </p>
-            <p className="text-[11px] text-slate-400 leading-snug">
+            <p className="text-[11px] text-muted-foreground leading-snug">
               {gauge.summary}
             </p>
           </article>
