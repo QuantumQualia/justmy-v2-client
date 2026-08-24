@@ -12,6 +12,7 @@ import {
 } from "@/components/news/asksky/market-context";
 import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
 import { BizOsSubnav } from "@/components/biz-os/biz-os-ui";
+import { AskSkyConciergeDock } from "@/components/biz-os/asksky-concierge-dock";
 import { useNewsHost } from "@/lib/news/news-host-context";
 import type { NewsMarketContext } from "@/components/news/asksky/types";
 import { cn } from "@workspace/ui/lib/utils";
@@ -141,6 +142,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
+      {!lockViewport ? <AskSkyConciergeDock /> : null}
     </div>
   );
 }

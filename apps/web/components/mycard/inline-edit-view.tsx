@@ -1708,16 +1708,21 @@ export default function InlineEdit({
                   >
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">Title</label>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>Title</label>
                         <Input
                           value={hotlink.title}
                           onChange={(e) => onHotlinkUpdate(hotlink.id, { title: e.target.value })}
-                          className="bg-slate-900/90 border-2 border-slate-600/40 text-sm text-slate-100 font-semibold focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 h-12 rounded-xl px-4 transition-all duration-200 shadow-sm focus:shadow-md focus:shadow-blue-500/20"
+                          className={cn(
+                            "h-12 rounded-xl px-4 text-sm font-semibold border-2 transition-all duration-200 shadow-sm focus:ring-2",
+                            isLight
+                              ? "bg-background border-border text-foreground focus:border-primary focus:ring-primary/40"
+                              : "bg-slate-900/90 border-slate-600/40 text-slate-100 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-md focus:shadow-blue-500/20",
+                          )}
                           autoFocus
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wide">URL</label>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>URL</label>
                         <Input
                           value={hotlink.url}
                           onChange={(e) => {
@@ -1733,13 +1738,22 @@ export default function InlineEdit({
                             }));
                           }}
                           placeholder="https://example.com"
-                          className={`bg-slate-900/90 border-2 text-sm text-slate-100 font-medium focus:ring-2 h-12 rounded-xl px-4 transition-all duration-200 shadow-sm focus:shadow-md ${validationErrors.hotlink?.[hotlink.id]
-                              ? "border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:shadow-red-500/20"
-                              : "border-slate-600/40 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-blue-500/20"
-                            }`}
+                          className={cn(
+                            "h-12 rounded-xl px-4 text-sm font-medium border-2 transition-all duration-200 shadow-sm focus:ring-2",
+                            isLight
+                              ? "bg-background text-foreground placeholder:text-muted-foreground"
+                              : "bg-slate-900/90 text-slate-100",
+                            validationErrors.hotlink?.[hotlink.id]
+                              ? isLight
+                                ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
+                                : "border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:shadow-red-500/20"
+                              : isLight
+                                ? "border-border focus:border-primary focus:ring-primary/40"
+                                : "border-slate-600/40 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-blue-500/20",
+                          )}
                         />
                         {validationErrors.hotlink?.[hotlink.id] && (
-                          <p className="text-xs text-red-400 mt-1">{validationErrors.hotlink[hotlink.id]}</p>
+                          <p className={cn("text-xs mt-1", isLight ? "text-red-600" : "text-red-400")}>{validationErrors.hotlink[hotlink.id]}</p>
                         )}
                       </div>
                       <div className="flex gap-3 pt-1">
@@ -1759,7 +1773,12 @@ export default function InlineEdit({
                             }
                           }}
                           disabled={!!validationErrors.hotlink?.[hotlink.id]}
-                          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white text-sm font-medium shadow-lg shadow-blue-600/20 cursor-pointer"
+                          className={cn(
+                            "flex-1 text-sm font-medium cursor-pointer",
+                            isLight
+                              ? "bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-100 disabled:text-slate-400"
+                              : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white shadow-lg shadow-blue-600/20",
+                          )}
                         >
                           Save Changes
                         </Button>
@@ -1775,7 +1794,12 @@ export default function InlineEdit({
                             }));
                           }}
                           variant="outline"
-                          className="px-4 bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100 text-sm font-medium cursor-pointer"
+                          className={cn(
+                            "px-4 text-sm font-medium cursor-pointer",
+                            isLight
+                              ? "border-border bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                              : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
+                          )}
                         >
                           Cancel
                         </Button>
@@ -1905,18 +1929,19 @@ export default function InlineEdit({
                     <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>About Text</label>
                     <button
                       onClick={() => setShowAIAssistant(true)}
-                      className="px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
-                      title="Get AI suggestions for your About section"
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                      title="AskSKY! suggestions for your About section"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
-                      AI Assistant
+                      AskSKY!
                     </button>
                   </div>
                   <textarea
                     value={data.about}
                     onChange={(e) => onDataChange({ about: e.target.value })}
                     className={cn(
-                      "w-full min-h-[220px] p-5 text-sm leading-relaxed border-2 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all duration-200 custom-scrollbar",
+                      "w-full min-h-[220px] p-5 text-sm leading-relaxed border-2 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all duration-200 overflow-y-auto",
+                      ui.scroll,
                       isLight
                         ? "text-foreground bg-background border-border focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground"
                         : "text-slate-100 bg-slate-900/90 border-slate-600/30 focus:ring-blue-500/40 focus:border-blue-500/80 placeholder:text-slate-500/70",
@@ -1931,7 +1956,7 @@ export default function InlineEdit({
                         performSave(data);
                         setEditingAbout(false);
                       }}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium shadow-lg shadow-blue-600/20 cursor-pointer"
+                      className="flex-1 bg-violet-600 text-white hover:bg-violet-700 text-sm font-medium cursor-pointer"
                     >
                       Save Changes
                     </Button>
@@ -1940,9 +1965,9 @@ export default function InlineEdit({
                       variant="outline"
                       className={cn(
                         "px-4 text-sm font-medium cursor-pointer",
-                        isLight
-                          ? "bg-muted hover:bg-muted/80 border-border text-foreground"
-                          : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
+                            isLight
+                              ? "border-border bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                              : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
                       )}
                     >
                       Cancel
@@ -2037,6 +2062,7 @@ export default function InlineEdit({
               // Auto-save will handle saving to API
             }}
             profileData={data}
+            appearance={appearance}
           />
         </div>
       </div>

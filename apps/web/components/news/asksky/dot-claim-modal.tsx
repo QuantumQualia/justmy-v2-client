@@ -86,6 +86,7 @@ export function DotClaimModal({
   const [listings, setListings] = useState<ClaimListing[]>([]);
   const [scannedName, setScannedName] = useState("");
   const [placeId, setPlaceId] = useState<string | null>(null);
+  const [googleAddress, setGoogleAddress] = useState<string | null>(null);
   const [googleRating, setGoogleRating] = useState<number | null>(null);
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
   const [listingNote, setListingNote] = useState("");
@@ -104,6 +105,7 @@ export function DotClaimModal({
     setListings([]);
     setScannedName("");
     setPlaceId(null);
+    setGoogleAddress(null);
     setGoogleRating(null);
     setGoogleReviewCount(null);
     setListingNote("");
@@ -124,6 +126,7 @@ export function DotClaimModal({
       const nextListings = listingsFromLookup(result);
       setListings(nextListings);
       setPlaceId(null);
+      setGoogleAddress(null);
       setGoogleRating(null);
       setGoogleReviewCount(null);
       if (nextListings.length) {
@@ -153,6 +156,7 @@ export function DotClaimModal({
         phone,
         selectedCategories: selected,
         googlePlaceId: placeId || undefined,
+        googleAddress: googleAddress || undefined,
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
       });
@@ -178,6 +182,7 @@ export function DotClaimModal({
         phone,
         selectedCategories: selected,
         googlePlaceId: placeId || undefined,
+        googleAddress: googleAddress || undefined,
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
       });
@@ -193,6 +198,7 @@ export function DotClaimModal({
 
   function confirmListing(listing: ClaimListing) {
     setPlaceId(listing.placeId);
+    setGoogleAddress(listing.address?.trim() || null);
     setGoogleRating(typeof listing.rating === "number" ? listing.rating : null);
     setGoogleReviewCount(typeof listing.reviewCount === "number" ? listing.reviewCount : null);
     if (listing.name?.trim()) setBusinessName(listing.name.trim());
@@ -203,6 +209,7 @@ export function DotClaimModal({
 
   function skipListing() {
     setPlaceId(null);
+    setGoogleAddress(null);
     setGoogleRating(null);
     setGoogleReviewCount(null);
     if (scannedName) setBusinessName(scannedName);
@@ -468,7 +475,8 @@ export function DotClaimModal({
               <div className="space-y-4">
                 {placeId ? (
                   <p className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs leading-relaxed text-teal-800">
-                    Google listing connected{businessName ? `: ${businessName}` : ""}. Reviews will attach to this Dot.
+                    Google listing connected{businessName ? `: ${businessName}` : ""}.
+                    {googleAddress ? ` Address: ${googleAddress}.` : ""} Reviews will attach to this Dot.
                   </p>
                 ) : listingNote ? (
                   <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">

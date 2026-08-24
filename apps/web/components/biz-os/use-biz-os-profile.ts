@@ -14,6 +14,14 @@ export const bizOsQueryKeys = {
   home: (profileId: number) => ["biz-os", "home", profileId] as const,
 };
 
+export const BIZ_OS_PAGE_DATA_EVENT = "biz-os:page-data";
+export const BIZ_OS_CONNECT_GOOGLE_EVENT = "biz-os:connect-google";
+
+export function bumpBizOsPageData() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(BIZ_OS_PAGE_DATA_EVENT));
+}
+
 function readCachedMe(): User | undefined {
   const stored = tokenStorage.getUserSync<StoredAuthUser>();
   if (!stored?.id) return undefined;
@@ -107,9 +115,16 @@ export function useBizOsFetch<T>(
   const { profileId, ready, isError, me } = useBizOsProfile();
   const [data, setData] = useState<T>(initial);
   const [forKey, setForKey] = useState<string | null>(null);
+  const [refreshTick, setRefreshTick] = useState(0);
   const fetcherRef = useRef(fetcher);
   fetcherRef.current = fetcher;
   const currentKey = ready ? `${profileId ?? "anon"}:${extraKey ?? ""}` : null;
+
+  useEffect(() => {
+    const onBump = () => setRefreshTick((n) => n + 1);
+    window.addEventListener(BIZ_OS_PAGE_DATA_EVENT, onBump);
+    return () => window.removeEventListener(BIZ_OS_PAGE_DATA_EVENT, onBump);
+  }, []);
 
   useEffect(() => {
     if (currentKey == null) return;
@@ -133,7 +148,7 @@ export function useBizOsFetch<T>(
     };
     // `initial` is a stable empty value from the caller ([] / null).
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentKey, profileId]);
+  }, [currentKey, profileId, refreshTick]);
 
   return {
     data,

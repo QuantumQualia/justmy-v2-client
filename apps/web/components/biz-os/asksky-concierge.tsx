@@ -1,37 +1,63 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Sparkles, Send, Loader2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
+import { Input } from "@workspace/ui/components/input";
 import { bizOsService } from "@/lib/services/biz-os";
 import { profilesService } from "@/lib/services/profiles";
 import { useProfileStore, type ProfileData, type SocialType } from "@/lib/store";
-import { useBizOsProfile, useInvalidateBizOsHome } from "./use-biz-os-profile";
+import {
+  addressesMatch,
+  extractAddressFields,
+  formatPostalAddress,
+  normalizePostalAddress,
+  parsePostalAddress,
+} from "@/lib/utils/address-utils";
+import {
+  conciergeStageFromPath,
+  useAskSkyConciergeStore,
+  type AddressDraft,
+  type CardDrafts,
+  type HotlinkDraft,
+  type PhoneDraft,
+  type SocialDraft,
+} from "@/lib/store/asksky-concierge-store";
+import { bumpBizOsPageData, useBizOsProfile, useInvalidateBizOsHome, BIZ_OS_CONNECT_GOOGLE_EVENT } from "./use-biz-os-profile";
 
-const SUPPORT_RE = /support|help|fun\s*crew|team|stuck|upgrade|command\s*os|human/i;
+const SUPPORT_RE =
+  /\b(fun\s*crew|flag\s+(the\s+)?team|talk to (a )?human|need (human )?support|support ticket|i('m| am) stuck|upgrade|command\s*os)\b/i;
 const MAX_HOTLINKS = 3;
 
-/** Survives React Strict Mode remounts so the opening hello is sent once. */
-const helloStarted = new Set<string>();
+function toAddressDraft(raw: AddressDraft): AddressDraft | null {
+  const cleaned = normalizePostalAddress(raw.address);
+  if (!cleaned) return null;
+  const parsed = parsePostalAddress(cleaned);
+  if (!parsed) return null;
+  return {
+    title: raw.title?.trim() || "Office",
+    address: parsed.formatted,
+    line1: parsed.line1,
+    line2: parsed.line2,
+    city: parsed.city,
+    state: parsed.state,
+    zip: parsed.zip,
+  };
+}
 
-type Turn = { role: "user" | "asksky"; text: string };
-type HotlinkDraft = { label: string; url: string };
-type PhoneDraft = { number: string; type?: string };
-type AddressDraft = { title?: string; address: string };
-type SocialDraft = { name: string; url: string };
-type CardDrafts = {
-  about?: string | null;
-  tagline?: string | null;
-  website?: string | null;
-  email?: string | null;
-  calendarLink?: string | null;
-  hotlinks?: HotlinkDraft[];
-  phones?: PhoneDraft[];
-  addresses?: AddressDraft[];
-  socials?: SocialDraft[];
-};
+function recombineAddressDraft(draft: AddressDraft): AddressDraft {
+  const line1 = (draft.line1 || extractAddressFields(draft.address).address || draft.address).trim();
+  const formatted = formatPostalAddress({
+    line1,
+    line2: draft.line2?.trim() || undefined,
+    city: draft.city?.trim() || undefined,
+    state: draft.state?.trim() || undefined,
+    zip: draft.zip?.trim() || undefined,
+  });
+  return { ...draft, line1, address: formatted || line1 };
+}
 
 const SOCIAL_TYPES = new Set<SocialType>([
   "facebook",
@@ -113,7 +139,7 @@ function hasCardDrafts(d: CardDrafts): boolean {
 }
 
 export function AskSkyConcierge({
-  stage = "card",
+  stage,
   onStage,
   compact = false,
   fillViewport = false,
@@ -124,35 +150,38 @@ export function AskSkyConcierge({
   fillViewport?: boolean;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const surface = stage || conciergeStageFromPath(pathname || "");
   const { profileId } = useBizOsProfile();
   const invalidateHome = useInvalidateBizOsHome();
   const setData = useProfileStore((s) => s.setData);
   const website = useProfileStore((s) => s.data.website);
   const hasWebsite = Boolean(website?.trim());
-  const [input, setInput] = useState("");
-  const [turns, setTurns] = useState<Turn[]>([]);
+  const turns = useAskSkyConciergeStore((s) => s.turns);
+  const setTurns = useAskSkyConciergeStore((s) => s.setTurns);
+  const cardDrafts = useAskSkyConciergeStore((s) => s.cardDrafts);
+  const setCardDrafts = useAskSkyConciergeStore((s) => s.setCardDrafts);
+  const input = useAskSkyConciergeStore((s) => s.input);
+  const setInput = useAskSkyConciergeStore((s) => s.setInput);
+  const awaitingWebsite = useAskSkyConciergeStore((s) => s.awaitingWebsite);
+  const setAwaitingWebsite = useAskSkyConciergeStore((s) => s.setAwaitingWebsite);
+  const helloSentFor = useAskSkyConciergeStore((s) => s.helloSentFor);
+  const markHello = useAskSkyConciergeStore((s) => s.markHello);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<{ summary: string; planId?: number } | null>(null);
   const [draftOpen, setDraftOpen] = useState(false);
-  const [cardDrafts, setCardDrafts] = useState<CardDrafts>({});
-  const [awaitingWebsite, setAwaitingWebsite] = useState(false);
   const [applying, setApplying] = useState(false);
   const applyingRef = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!profileId) return;
-    const key = `${profileId}:${compact ? "dock" : "onboard"}`;
-    if (helloStarted.has(key)) return;
-    helloStarted.add(key);
-    void send("hello", stage, true);
-    return () => {
-      window.setTimeout(() => helloStarted.delete(key), 250);
-    };
+    if (!profileId || helloSentFor === profileId) return;
+    markHello(profileId);
+    void send("hello", surface, true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileId, compact]);
+  }, [profileId]);
 
-  async function send(message: string, nextStage = stage, silent = false) {
+  async function send(message: string, nextStage = surface, silent = false) {
     if (!profileId || !message.trim()) return;
     if (!silent) {
       setTurns((t) => [...t, { role: "user", text: message }]);
@@ -211,21 +240,41 @@ export function AskSkyConcierge({
         }
         if (action.type === "draft_phones" && Array.isArray(action.phones)) {
           const existing = useProfileStore.getState().data.phones || [];
-          const phones = (action.phones as PhoneDraft[])
+          const incoming = (action.phones as PhoneDraft[])
             .filter(
               (p) => p?.number && !existing.some((saved) => phoneDigits(saved.number) === phoneDigits(p.number)),
             )
-            .slice(0, 4);
-          if (phones.length) setCardDrafts((d) => ({ ...d, phones }));
+            .map((p) => ({ number: p.number, type: p.type?.trim() || "main" }));
+          if (incoming.length) {
+            setCardDrafts((d) => {
+              const currentDrafts = d.phones || [];
+              const phones = [...currentDrafts];
+              for (const phone of incoming) {
+                if (phones.some((saved) => phoneDigits(saved.number) === phoneDigits(phone.number))) continue;
+                phones.push(phone);
+              }
+              return { ...d, phones: phones.slice(0, 4) };
+            });
+          }
         }
         if (action.type === "draft_addresses" && Array.isArray(action.addresses)) {
           const existing = useProfileStore.getState().data.addresses || [];
-          const addresses = (action.addresses as AddressDraft[])
-            .filter(
-              (a) => a?.address && !existing.some((saved) => sameCopy(saved.address, a.address)),
-            )
-            .slice(0, 3);
-          if (addresses.length) setCardDrafts((d) => ({ ...d, addresses }));
+          const incoming = (action.addresses as AddressDraft[])
+            .filter((a) => a?.address)
+            .map(toAddressDraft)
+            .filter((a): a is AddressDraft => Boolean(a))
+            .filter((a) => !existing.some((saved) => addressesMatch(saved.address, a.address)));
+          if (incoming.length) {
+            setCardDrafts((d) => {
+              const currentDrafts = d.addresses || [];
+              const addresses = [...currentDrafts];
+              for (const address of incoming) {
+                if (addresses.some((saved) => addressesMatch(saved.address, address.address))) continue;
+                addresses.push(address);
+              }
+              return { ...d, addresses: addresses.slice(0, 3) };
+            });
+          }
         }
         if (action.type === "draft_socials" && Array.isArray(action.socials)) {
           const existing = useProfileStore.getState().data.socialLinks;
@@ -242,9 +291,30 @@ export function AskSkyConcierge({
         }
         if (action.type === "open_skyscan") {
           onStage?.("skyscan");
+          if (!onStage) router.push("/biz-os/skyscan");
+          if (action.ran) {
+            await invalidateHome();
+            bumpBizOsPageData();
+          }
         }
         if (action.type === "open_battle_plan") {
           onStage?.("battle_plan");
+          const planId = Number(action.planId);
+          const href = Number.isFinite(planId) && planId > 0 ? `/biz-os/battle-plans/${planId}` : "/biz-os/battle-plans";
+          if (!onStage) router.push(href);
+          if (action.created || (Number.isFinite(planId) && planId > 0)) {
+            await invalidateHome();
+            bumpBizOsPageData();
+          }
+        }
+        if (action.type === "open_reputation") {
+          onStage?.("reputation");
+          const alreadyThere = (pathname || "").includes("/biz-os/reputation");
+          const href = action.connect ? "/biz-os/reputation?connect=1" : "/biz-os/reputation";
+          if (!onStage && !alreadyThere) router.push(href);
+          if (action.connect && alreadyThere && typeof window !== "undefined") {
+            window.dispatchEvent(new Event(BIZ_OS_CONNECT_GOOGLE_EVENT));
+          }
         }
       }
     } finally {
@@ -269,6 +339,7 @@ export function AskSkyConcierge({
         phones?: { type: string; number: string }[];
         locations?: { title: string; address?: string }[];
         socialLinks?: { name: string; link: string }[];
+        appendContacts?: boolean;
       } = {};
       if (cardDrafts.about) {
         patch.about = cardDrafts.about;
@@ -308,35 +379,57 @@ export function AskSkyConcierge({
           .map((h) => ({ label: h.title, link: h.url }));
       }
       if (cardDrafts.phones?.length) {
-        const merged = [...(current.phones || [])];
+        const existing = [...(current.phones || [])];
+        const added: { id: string; number: string; type: string }[] = [];
         for (const phone of cardDrafts.phones) {
-          if (merged.some((saved) => phoneDigits(saved.number) === phoneDigits(phone.number))) continue;
-          merged.push({
+          if (!phone.number?.trim()) continue;
+          if (
+            existing.some((saved) => phoneDigits(saved.number) === phoneDigits(phone.number)) ||
+            added.some((saved) => phoneDigits(saved.number) === phoneDigits(phone.number))
+          ) {
+            continue;
+          }
+          added.push({
             id: crypto.randomUUID(),
             number: phone.number,
-            type: phone.type || "main",
+            type: phone.type?.trim() || "main",
           });
         }
-        storePatch.phones = merged;
-        patch.phones = merged.map((phone) => ({
-          type: phone.type || "main",
-          number: phone.number,
-        }));
+        if (added.length) {
+          storePatch.phones = [...existing, ...added];
+          patch.appendContacts = true;
+          patch.phones = added.map((phone) => ({
+            type: phone.type,
+            number: phone.number,
+          }));
+        }
       }
       if (cardDrafts.addresses?.length) {
-        const merged = [...(current.addresses || [])];
+        const existing = [...(current.addresses || [])];
+        const added: { id: string; title: string; address: string }[] = [];
         for (const address of cardDrafts.addresses) {
-          if (merged.some((saved) => sameCopy(saved.address, address.address))) continue;
-          merged.push({
+          const next = recombineAddressDraft(address);
+          if (!next.address.trim()) continue;
+          if (
+            existing.some((saved) => addressesMatch(saved.address, next.address)) ||
+            added.some((saved) => addressesMatch(saved.address, next.address))
+          ) {
+            continue;
+          }
+          added.push({
             id: crypto.randomUUID(),
-            title: address.title || "Office",
-            address: address.address,
+            title: next.title?.trim() || "Office",
+            address: next.address,
           });
         }
-        storePatch.addresses = merged;
-        patch.locations = merged
-          .filter((addr) => addr.address?.trim())
-          .map((addr) => ({ title: addr.title || "Office", address: addr.address }));
+        if (added.length) {
+          storePatch.addresses = [...existing, ...added];
+          patch.appendContacts = true;
+          patch.locations = added.map((addr) => ({
+            title: addr.title,
+            address: addr.address,
+          }));
+        }
       }
       if (cardDrafts.socials?.length) {
         const merged = [...current.socialLinks];
@@ -398,7 +491,7 @@ export function AskSkyConcierge({
     }
   }
 
-  function submitMessage(raw: string, nextStage = stage) {
+  function submitMessage(raw: string, nextStage = surface) {
     const typed = raw.trim();
     if (!typed) return;
     const url = firstWebsiteUrl(typed);
@@ -429,16 +522,58 @@ export function AskSkyConcierge({
   }
 
   const pending = hasCardDrafts(cardDrafts);
+  const draftInputClass =
+    "mt-1 w-full rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-sm text-slate-800";
   const tipClass =
     "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 transition hover:border-violet-300 hover:text-violet-800";
   const tipPrimaryClass =
     "rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-800 transition hover:border-violet-400 hover:bg-violet-100";
 
+  const chips =
+    surface === "skyscan"
+      ? [
+          { label: "Run SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan"), primary: true },
+          { label: "Explain my score", onClick: () => void send("Explain my SKYSCAN score") },
+          { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
+        ]
+      : surface === "battle_plan"
+        ? [
+            { label: "Start a plan", onClick: () => void send("Start a Battle Plan", "battle_plan"), primary: true },
+            { label: "Next task", onClick: () => void send("What's my next Battle Plan task?") },
+            { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
+          ]
+        : surface === "reputation"
+          ? [
+              { label: "Connect Google", onClick: () => void send("Help me connect my Google listing") , primary: true },
+              { label: "Draft a review ask", onClick: () => void send("Draft a short text asking a customer for a Google review") },
+              { label: "Add contact", onClick: () => void send("Collect phone, address, and email for myCARD") },
+            ]
+          : surface === "home" || surface === "apps"
+            ? [
+                { label: "Polish myCARD", onClick: () => router.push("/biz-os/onboard"), primary: true },
+                { label: "Run SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan") },
+                { label: "Start a plan", onClick: () => void send("Start a Battle Plan", "battle_plan") },
+              ]
+            : [
+                {
+                  label: hasWebsite ? "Refresh from website" : "Scan my website",
+                  onClick: () => scanWebsite(),
+                  primary: true,
+                },
+                { label: "Add socials", onClick: () => void send("Collect my Instagram, Facebook, and other socials for myCARD") },
+                { label: "Add contact", onClick: () => void send("Collect phone, address, and email for myCARD") },
+                { label: "Draft tagline", onClick: () => void send("Write a short tagline for myCARD") },
+                { label: "Draft About", onClick: () => void send("Draft an About statement") },
+                { label: applying ? "Applying…" : "Apply drafts", onClick: () => void applyCardDrafts(), disabled: !pending || applying },
+                { label: "SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan") },
+                { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
+              ];
+
   return (
     <div
       className={cn(
         compact
-          ? "flex h-full flex-col"
+          ? "flex h-full min-h-0 flex-col overflow-hidden"
           : "flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)]",
         !compact &&
           (fillViewport
@@ -446,7 +581,12 @@ export function AskSkyConcierge({
             : "h-[min(70vh,36rem)]"),
       )}
     >
-      <div className="flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3">
+      <div
+        className={cn(
+          "flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3",
+          compact && "pr-12",
+        )}
+      >
         <Sparkles className="h-4 w-4 text-violet-600" />
         <p className="text-sm font-semibold">AskSKY! Concierge</p>
       </div>
@@ -470,67 +610,240 @@ export function AskSkyConcierge({
         ) : null}
         {pending ? (
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-violet-800">Drafts — not on myCARD yet</p>
-            {cardDrafts.website ? (
-              <p className="mt-2 text-sm">
-                <span className="font-medium">Website:</span> {cardDrafts.website}
-              </p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-violet-800">
+              Drafts — edit, then apply
+            </p>
+            {cardDrafts.website != null && cardDrafts.website !== "" ? (
+              <label className="mt-2 block text-xs font-medium text-slate-600">
+                Website
+                <Input
+                  className={draftInputClass}
+                  value={cardDrafts.website}
+                  onChange={(e) => setCardDrafts((d) => ({ ...d, website: e.target.value }))}
+                />
+              </label>
             ) : null}
-            {cardDrafts.email ? (
-              <p className="mt-2 text-sm">
-                <span className="font-medium">Email:</span> {cardDrafts.email}
-              </p>
+            {cardDrafts.email != null && cardDrafts.email !== "" ? (
+              <label className="mt-2 block text-xs font-medium text-slate-600">
+                Email
+                <Input
+                  className={draftInputClass}
+                  value={cardDrafts.email}
+                  onChange={(e) => setCardDrafts((d) => ({ ...d, email: e.target.value }))}
+                />
+              </label>
             ) : null}
-            {cardDrafts.calendarLink ? (
-              <p className="mt-2 text-sm">
-                <span className="font-medium">Calendar:</span> {cardDrafts.calendarLink}
-              </p>
+            {cardDrafts.calendarLink != null && cardDrafts.calendarLink !== "" ? (
+              <label className="mt-2 block text-xs font-medium text-slate-600">
+                Calendar
+                <Input
+                  className={draftInputClass}
+                  value={cardDrafts.calendarLink}
+                  onChange={(e) => setCardDrafts((d) => ({ ...d, calendarLink: e.target.value }))}
+                />
+              </label>
             ) : null}
             {cardDrafts.phones?.length ? (
-              <ul className="mt-2 space-y-1 text-sm">
-                {cardDrafts.phones.map((p) => (
-                  <li key={p.number}>
-                    <span className="font-medium">Phone:</span> {p.number}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-2">
+                <p className="text-xs font-medium text-slate-600">Phone</p>
+                <div className="mt-1 space-y-1.5">
+                  {cardDrafts.phones.map((phone, index) => (
+                    <div key={`phone-${index}`} className="grid gap-1.5">
+                      <Input
+                        className={draftInputClass}
+                        placeholder="Label (e.g. main, mobile)"
+                        value={phone.type || ""}
+                        onChange={(e) =>
+                          setCardDrafts((d) => ({
+                            ...d,
+                            phones: (d.phones || []).map((item, i) =>
+                              i === index ? { ...item, type: e.target.value } : item,
+                            ),
+                          }))
+                        }
+                      />
+                      <Input
+                        className={draftInputClass}
+                        placeholder="Phone number"
+                        value={phone.number}
+                        onChange={(e) =>
+                          setCardDrafts((d) => ({
+                            ...d,
+                            phones: (d.phones || []).map((item, i) =>
+                              i === index ? { ...item, number: e.target.value } : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : null}
             {cardDrafts.addresses?.length ? (
-              <ul className="mt-2 space-y-1 text-sm">
-                {cardDrafts.addresses.map((a) => (
-                  <li key={a.address}>
-                    <span className="font-medium">{a.title || "Address"}:</span> {a.address}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-2">
+                <p className="text-xs font-medium text-slate-600">Locations</p>
+                <div className="mt-1 space-y-1.5">
+                  {cardDrafts.addresses.map((address, index) => (
+                    <div key={`addr-${index}`} className="space-y-1.5 rounded-lg border border-violet-200 bg-white/70 p-2">
+                <Input
+                  className={draftInputClass}
+                  placeholder="Title (e.g. Office, Home)"
+                  value={address.title || ""}
+                  onChange={(e) =>
+                    setCardDrafts((d) => ({
+                      ...d,
+                      addresses: (d.addresses || []).map((item, i) =>
+                        i === index ? { ...item, title: e.target.value } : item,
+                      ),
+                    }))
+                  }
+                />
+                <Input
+                  className={draftInputClass}
+                  placeholder="Street"
+                  value={address.line1 || extractAddressFields(address.address).address}
+                  onChange={(e) =>
+                    setCardDrafts((d) => ({
+                      ...d,
+                      addresses: (d.addresses || []).map((item, i) =>
+                        i === index ? recombineAddressDraft({ ...item, line1: e.target.value }) : item,
+                      ),
+                    }))
+                  }
+                />
+                <Input
+                  className={draftInputClass}
+                  placeholder="Apt / suite"
+                  value={address.line2 || ""}
+                  onChange={(e) =>
+                    setCardDrafts((d) => ({
+                      ...d,
+                      addresses: (d.addresses || []).map((item, i) =>
+                        i === index ? recombineAddressDraft({ ...item, line2: e.target.value }) : item,
+                      ),
+                    }))
+                  }
+                />
+                <div className="grid grid-cols-3 gap-1.5">
+                  <Input
+                    className={draftInputClass}
+                    placeholder="City"
+                    value={address.city || ""}
+                    onChange={(e) =>
+                      setCardDrafts((d) => ({
+                        ...d,
+                        addresses: (d.addresses || []).map((item, i) =>
+                          i === index ? recombineAddressDraft({ ...item, city: e.target.value }) : item,
+                        ),
+                      }))
+                    }
+                  />
+                  <Input
+                    className={draftInputClass}
+                    placeholder="State"
+                    value={address.state || ""}
+                    onChange={(e) =>
+                      setCardDrafts((d) => ({
+                        ...d,
+                        addresses: (d.addresses || []).map((item, i) =>
+                          i === index ? recombineAddressDraft({ ...item, state: e.target.value }) : item,
+                        ),
+                      }))
+                    }
+                  />
+                  <Input
+                    className={draftInputClass}
+                    placeholder="ZIP"
+                    value={address.zip || ""}
+                    onChange={(e) =>
+                      setCardDrafts((d) => ({
+                        ...d,
+                        addresses: (d.addresses || []).map((item, i) =>
+                          i === index ? recombineAddressDraft({ ...item, zip: e.target.value }) : item,
+                        ),
+                      }))
+                    }
+                  />
+                </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : null}
-            {cardDrafts.socials?.length ? (
-              <ul className="mt-2 space-y-1 text-sm">
-                {cardDrafts.socials.map((s) => (
-                  <li key={`${s.name}-${s.url}`}>
-                    <span className="font-medium capitalize">{s.name}:</span> {s.url}
-                  </li>
-                ))}
-              </ul>
+            {cardDrafts.socials?.map((social, index) => (
+              <label key={`social-${index}`} className="mt-2 block text-xs font-medium text-slate-600">
+                <span className="capitalize">{social.name}</span>
+                <Input
+                  className={draftInputClass}
+                  value={social.url}
+                  onChange={(e) =>
+                    setCardDrafts((d) => ({
+                      ...d,
+                      socials: (d.socials || []).map((item, i) =>
+                        i === index ? { ...item, url: e.target.value } : item,
+                      ),
+                    }))
+                  }
+                />
+              </label>
+            ))}
+            {cardDrafts.tagline != null && cardDrafts.tagline !== "" ? (
+              <label className="mt-2 block text-xs font-medium text-slate-600">
+                Tagline
+                <Input
+                  className={draftInputClass}
+                  value={cardDrafts.tagline}
+                  onChange={(e) => setCardDrafts((d) => ({ ...d, tagline: e.target.value }))}
+                />
+              </label>
             ) : null}
-            {cardDrafts.tagline ? (
-              <p className="mt-2 text-sm">
-                <span className="font-medium">Tagline:</span> {cardDrafts.tagline}
-              </p>
-            ) : null}
-            {cardDrafts.about ? (
-              <p className="mt-2 text-sm">
-                <span className="font-medium">About:</span> {cardDrafts.about}
-              </p>
+            {cardDrafts.about != null && cardDrafts.about !== "" ? (
+              <label className="mt-2 block text-xs font-medium text-slate-600">
+                About
+                <textarea
+                  className={`${draftInputClass} min-h-[4.5rem] resize-y`}
+                  value={cardDrafts.about}
+                  onChange={(e) => setCardDrafts((d) => ({ ...d, about: e.target.value }))}
+                />
+              </label>
             ) : null}
             {cardDrafts.hotlinks?.length ? (
-              <ul className="mt-2 space-y-1 text-sm">
-                {cardDrafts.hotlinks.map((h) => (
-                  <li key={`${h.label}-${h.url}`}>
-                    <span className="font-medium">{h.label}:</span> {h.url}
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-2">
+                <p className="text-xs font-medium text-slate-600">Hotlinks</p>
+                <div className="mt-1 space-y-1.5">
+                  {cardDrafts.hotlinks.map((link, index) => (
+                    <div key={`hot-${index}`} className="grid gap-1.5">
+                      <Input
+                        className={draftInputClass}
+                        placeholder="Hotlink label"
+                        value={link.label}
+                        onChange={(e) =>
+                          setCardDrafts((d) => ({
+                            ...d,
+                            hotlinks: (d.hotlinks || []).map((item, i) =>
+                              i === index ? { ...item, label: e.target.value } : item,
+                            ),
+                          }))
+                        }
+                      />
+                      <Input
+                        className={draftInputClass}
+                        placeholder="https://"
+                        value={link.url}
+                        onChange={(e) =>
+                          setCardDrafts((d) => ({
+                            ...d,
+                            hotlinks: (d.hotlinks || []).map((item, i) =>
+                              i === index ? { ...item, url: e.target.value } : item,
+                            ),
+                          }))
+                        }
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
             ) : null}
             <div className="mt-3 flex gap-2">
               <Button
@@ -575,66 +888,17 @@ export function AskSkyConcierge({
       </div>
       <div className="shrink-0 border-t border-slate-100 bg-white p-3">
         <div className="mb-2 flex flex-wrap gap-1">
-          <button
-            type="button"
-            className={tipPrimaryClass}
-            onClick={() => scanWebsite()}
-          >
-            {hasWebsite ? "Refresh from website" : "Scan my website"}
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => void send("Collect my Instagram, Facebook, and other socials for myCARD")}
-          >
-            Add socials
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => void send("Collect phone, address, and email for myCARD")}
-          >
-            Add contact
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => void send("Write a short tagline for myCARD")}
-          >
-            Draft tagline
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => void send("Draft an About statement")}
-          >
-            Draft About
-          </button>
-          <button
-            type="button"
-            className={`${tipClass} disabled:opacity-40`}
-            disabled={!pending || applying}
-            onClick={() => void applyCardDrafts()}
-          >
-            {applying ? "Applying…" : "Apply drafts"}
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => void send("Run SKYSCAN", "skyscan")}
-          >
-            SKYSCAN
-          </button>
-          <button
-            type="button"
-            className={tipClass}
-            onClick={() => {
-              setDraft({ summary: "Owner asked AskSKY for FunCrew help." });
-              setDraftOpen(true);
-            }}
-          >
-            Flag team
-          </button>
+          {chips.map((chip) => (
+            <button
+              key={chip.label}
+              type="button"
+              className={`${chip.primary ? tipPrimaryClass : tipClass} ${chip.disabled ? "disabled:opacity-40" : ""}`}
+              disabled={loading || chip.disabled}
+              onClick={chip.onClick}
+            >
+              {chip.label}
+            </button>
+          ))}
         </div>
         <form
           className="flex items-end gap-2"

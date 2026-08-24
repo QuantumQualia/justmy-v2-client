@@ -116,6 +116,7 @@ export interface UpdateProfileDto {
   hotlinks?: HotlinkDto[];
   phones?: PhoneDto[];
   locations?: LocationDto[];
+  appendContacts?: boolean;
   allowsSubProfiles?: boolean;
   categories?: string[];
   googlePlaceId?: string;

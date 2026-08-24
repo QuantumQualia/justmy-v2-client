@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Lightweight TypeScript definitions for the Web Speech API
 interface SpeechRecognition extends EventTarget {
@@ -165,7 +165,7 @@ export function useSpeechRecognition(
     };
   }, [lang, append]);
 
-  const start = () => {
+  const start = useCallback(() => {
     if (!recognitionRef.current) {
       setError("Speech recognition not available in this browser.");
       return;
@@ -184,18 +184,18 @@ export function useSpeechRecognition(
       console.error("Failed to start speech recognition:", err);
       setError("Failed to start the microphone. Please try again.");
     }
-  };
+  }, [append]);
 
-  const stop = () => {
+  const stop = useCallback(() => {
     if (!recognitionRef.current) return;
     recognitionRef.current.stop();
     setIsRecording(false);
-  };
+  }, []);
 
-  const reset = () => {
+  const reset = useCallback(() => {
     setTranscript("");
     setError(null);
-  };
+  }, []);
 
   return {
     isSupported,

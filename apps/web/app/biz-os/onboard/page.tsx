@@ -45,6 +45,7 @@ function OnboardInner() {
     setStage(next);
     if (next === "skyscan") router.push("/biz-os/skyscan");
     if (next === "battle_plan") router.push("/biz-os/battle-plans");
+    if (next === "reputation") router.push("/biz-os/reputation");
   }
 
   if (!ready || !profileHydrated) return <BizOsSkeleton />;

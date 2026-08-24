@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useLayoutEffect, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { QRCodeSVG } from "qrcode.react";
@@ -22,7 +22,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { bizOsService } from "@/lib/services/biz-os";
 import { profilesService } from "@/lib/services/profiles";
 import { ApiClientError } from "@/lib/api-client";
-import { useInvalidateBizOsHome, useBizOsFetch } from "@/components/biz-os/use-biz-os-profile";
+import { useInvalidateBizOsHome, useBizOsFetch, BIZ_OS_CONNECT_GOOGLE_EVENT } from "@/components/biz-os/use-biz-os-profile";
 import { useProfileStore } from "@/lib/store";
 import { BizOsCard, BizOsHeader, BizOsPage, BizOsProgress, BizOsSkeleton } from "@/components/biz-os/biz-os-ui";
 
@@ -161,9 +161,10 @@ export default function ReputationPage() {
     return `Hi! If you have a minute, would you leave ${who} a Google review? It really helps neighbors find us. ${reviewUrl}`;
   }, [businessName, reviewUrl]);
 
-  async function search() {
+  async function search(termOverride?: string) {
     if (!profileId) return;
-    const term = query.trim();
+    const term = (termOverride ?? query).trim();
+    if (!term) return;
     setSearching(true);
     setSearchError(null);
     setVerifyError(null);
@@ -185,6 +186,29 @@ export default function ReputationPage() {
       setSearching(false);
     }
   }
+
+  useEffect(() => {
+    if (!pageReady || !profileId) return;
+
+    const runConnect = () => {
+      const term =
+        String(useProfileStore.getState().data.name || "").trim() ||
+        String(rep?.name || "").trim();
+      if (!term) return;
+      setQuery(term);
+      void search(term);
+      document.getElementById("gbp-search")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    };
+
+    window.addEventListener(BIZ_OS_CONNECT_GOOGLE_EVENT, runConnect);
+    if (new URLSearchParams(window.location.search).get("connect") === "1") {
+      runConnect();
+      router.replace("/biz-os/reputation", { scroll: false });
+    }
+    return () => window.removeEventListener(BIZ_OS_CONNECT_GOOGLE_EVENT, runConnect);
+    // Keep this bound to profile, not the search box, or Connect Google re-fires on every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageReady, profileId]);
 
   async function verify(place: { placeId?: string; rating?: number; reviewCount?: number }) {
     if (!profileId || !place.placeId) return;
@@ -383,7 +407,9 @@ export default function ReputationPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <BizOsCard>
-            <h2 className="text-sm font-semibold text-slate-500">Google Business Profile</h2>
+            <h2 id="gbp-search" className="text-sm font-semibold text-slate-500">
+              Google Business Profile
+            </h2>
             <div className="relative mt-4">
               <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
