@@ -107,16 +107,16 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
   }, [newsHost, market]);
 
   return (
-    <div className="min-h-screen bg-[#f3f0f8] text-slate-900">
+    <div className="flex min-h-0 flex-1 flex-col bg-[#f3f0f8] text-slate-900">
       {newsHost ? (
         <div
           ref={chromeRef}
-          className="sticky top-[var(--news-header-h,3.5rem)] z-30"
+          className="sticky top-[var(--news-header-h,3.5rem)] z-30 shrink-0"
         >
           <BizOsSubnav />
         </div>
       ) : (
-        <div ref={chromeRef} className="sticky top-0 z-40">
+        <div ref={chromeRef} className="sticky top-0 z-40 shrink-0">
           {market ? (
             <NewsMarketNav
               market={market}
@@ -130,7 +130,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div className="mx-auto max-w-6xl px-4 py-8">{children}</div>
+      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-8">{children}</div>
     </div>
   );
 }

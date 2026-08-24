@@ -156,7 +156,14 @@ export default async function RootLayout({
             <div
               id="site-main"
               className={cn(
-                hideSiteChrome ? cn("min-w-0", embedMyForm ? "min-h-0" : "min-h-screen") : "min-h-0",
+                "min-w-0",
+                embedMyForm
+                  ? "min-h-0"
+                  : hideSiteChrome
+                    ? showNewsStandChrome
+                      ? "flex min-h-[calc(100dvh-var(--news-header-h,3.5rem))] flex-col"
+                      : "flex min-h-dvh flex-col"
+                    : "min-h-0",
                 embedTransparentHost && "bg-transparent",
               )}
             >

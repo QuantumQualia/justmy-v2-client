@@ -27,7 +27,7 @@ export function ForceLightMode({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <div className="light min-h-screen bg-[#f7f6fb] text-slate-900" data-theme="light">
+    <div className="light flex min-h-0 flex-1 flex-col bg-[#f7f6fb] text-slate-900" data-theme="light">
       {children}
     </div>
   );

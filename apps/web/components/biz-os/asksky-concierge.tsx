@@ -442,7 +442,7 @@ export function AskSkyConcierge({
           : "flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)]",
         !compact &&
           (fillViewport
-            ? "h-[min(70vh,36rem)] lg:h-full lg:min-h-0"
+            ? "h-full min-h-0 max-lg:h-[min(70vh,36rem)]"
             : "h-[min(70vh,36rem)]"),
       )}
     >
@@ -450,7 +450,7 @@ export function AskSkyConcierge({
         <Sparkles className="h-4 w-4 text-violet-600" />
         <p className="text-sm font-semibold">AskSKY! Concierge</p>
       </div>
-      <div className="flex-1 space-y-3 overflow-y-auto px-4 py-3 text-sm">
+      <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
         {turns.map((turn, i) => (
           <div
             key={`${turn.role}-${i}`}
