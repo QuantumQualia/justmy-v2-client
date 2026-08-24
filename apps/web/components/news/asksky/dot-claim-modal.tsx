@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, ChevronDown, Loader2, MapPin, X } from "lucide-react";
+import { Check, ChevronDown, Loader2, MapPin, Star, X } from "lucide-react";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -19,7 +19,40 @@ import { bizOsHref } from "@/lib/biz-os/landing";
 import { preloadOauthProviders, requestGoogleIdToken } from "@/lib/auth/oauth-providers";
 import { ApiClientError } from "@/lib/api-client";
 
-type Step = "form" | "scanning" | "chips" | "account";
+type Step = "form" | "scanning" | "listing" | "chips" | "account";
+
+const CHIP_TARGET = 3;
+
+type ClaimListing = {
+  placeId: string;
+  name?: string;
+  address?: string;
+  rating?: number;
+  reviewCount?: number;
+};
+
+function listingsFromLookup(result: {
+  listings?: ClaimListing[] | null;
+  placeId: string | null;
+  businessName?: string;
+  address: string | null;
+  rating: number | null;
+  reviewCount: number | null;
+}): ClaimListing[] {
+  if (Array.isArray(result.listings) && result.listings.length) {
+    return result.listings.filter((item) => item?.placeId);
+  }
+  if (!result.placeId) return [];
+  return [
+    {
+      placeId: result.placeId,
+      name: result.businessName,
+      address: result.address || undefined,
+      rating: result.rating ?? undefined,
+      reviewCount: result.reviewCount ?? undefined,
+    },
+  ];
+}
 
 const inputClass =
   "h-10 rounded-lg border border-slate-200 bg-white text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:border-violet-300 focus-visible:ring-2 focus-visible:ring-violet-200/70 dark:bg-white dark:text-slate-900 dark:placeholder:text-slate-400 [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#fff]";
@@ -50,9 +83,13 @@ export function DotClaimModal({
   const [password, setPassword] = useState("");
   const [categories, setCategories] = useState<string[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
+  const [listings, setListings] = useState<ClaimListing[]>([]);
+  const [scannedName, setScannedName] = useState("");
   const [placeId, setPlaceId] = useState<string | null>(null);
   const [googleRating, setGoogleRating] = useState<number | null>(null);
   const [googleReviewCount, setGoogleReviewCount] = useState<number | null>(null);
+  const [listingNote, setListingNote] = useState("");
+  const [refreshingChips, setRefreshingChips] = useState(false);
 
   useEffect(() => {
     if (defaultZip) setZipCode(defaultZip);
@@ -64,6 +101,13 @@ export function DotClaimModal({
     setError("");
     setLoading(false);
     setEmailOpen(false);
+    setListings([]);
+    setScannedName("");
+    setPlaceId(null);
+    setGoogleRating(null);
+    setGoogleReviewCount(null);
+    setListingNote("");
+    setRefreshingChips(false);
     void preloadOauthProviders();
   }, [open]);
 
@@ -71,14 +115,24 @@ export function DotClaimModal({
     setError("");
     setLoading(true);
     setStep("scanning");
+    const typedName = businessName.trim();
+    setScannedName(typedName);
     try {
-      const result = await bizOsService.lookup(businessName, zipCode);
+      const result = await bizOsService.lookup(typedName, zipCode);
       setCategories(result.categories);
-      setSelected(result.categories);
-      setPlaceId(result.placeId);
-      setGoogleRating(typeof result.rating === "number" ? result.rating : null);
-      setGoogleReviewCount(typeof result.reviewCount === "number" ? result.reviewCount : null);
-      setStep("chips");
+      setSelected(result.categories.slice(0, CHIP_TARGET));
+      const nextListings = listingsFromLookup(result);
+      setListings(nextListings);
+      setPlaceId(null);
+      setGoogleRating(null);
+      setGoogleReviewCount(null);
+      if (nextListings.length) {
+        setListingNote("");
+        setStep("listing");
+      } else {
+        setListingNote("We couldn’t find a Google listing for that name. You can connect reviews later.");
+        setStep("chips");
+      }
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Lookup failed.");
       setStep("form");
@@ -137,6 +191,64 @@ export function DotClaimModal({
     }
   }
 
+  function confirmListing(listing: ClaimListing) {
+    setPlaceId(listing.placeId);
+    setGoogleRating(typeof listing.rating === "number" ? listing.rating : null);
+    setGoogleReviewCount(typeof listing.reviewCount === "number" ? listing.reviewCount : null);
+    if (listing.name?.trim()) setBusinessName(listing.name.trim());
+    setListingNote("");
+    setError("");
+    setStep("chips");
+  }
+
+  function skipListing() {
+    setPlaceId(null);
+    setGoogleRating(null);
+    setGoogleReviewCount(null);
+    if (scannedName) setBusinessName(scannedName);
+    setListingNote("No Google listing connected yet. You can attach reviews later in Reputation.");
+    setError("");
+    setStep("chips");
+  }
+
+  async function refreshCategories() {
+    const needed = Math.max(0, CHIP_TARGET - selected.length);
+    if (!needed) return;
+    setError("");
+    setRefreshingChips(true);
+    try {
+      const result = await bizOsService.claimCategories({
+        businessName: scannedName || businessName,
+        zipCode,
+        address: listings.find((item) => item.placeId === placeId)?.address,
+        exclude: categories,
+        count: needed,
+      });
+      const seen = new Set(categories.map((item) => item.toLowerCase()));
+      const next = (Array.isArray(result.categories) ? result.categories : [])
+        .map((item) => item.trim())
+        .filter((item) => item && !seen.has(item.toLowerCase()))
+        .slice(0, needed);
+      if (!next.length) {
+        setError("Couldn’t suggest more categories. Try Adjust again.");
+        return;
+      }
+      setCategories((prev) => [...prev, ...next]);
+    } catch (err) {
+      setError(err instanceof ApiClientError ? err.message : "Couldn’t suggest more categories. Try again.");
+    } finally {
+      setRefreshingChips(false);
+    }
+  }
+
+  function toggleCategory(chip: string) {
+    setSelected((prev) => {
+      if (prev.includes(chip)) return prev.filter((item) => item !== chip);
+      if (prev.length >= CHIP_TARGET) return prev;
+      return [...prev, chip];
+    });
+  }
+
   const chipRow = useMemo(
     () =>
       categories.map((c) => {
@@ -146,9 +258,7 @@ export function DotClaimModal({
             key={c}
             type="button"
             aria-pressed={on}
-            onClick={() =>
-              setSelected((prev) => (prev.includes(c) ? prev.filter((x) => x !== c) : [...prev, c]))
-            }
+            onClick={() => toggleCategory(c)}
             className={`inline-flex max-w-full items-center gap-1.5 rounded-lg border px-3 py-1.5 text-left text-xs font-medium break-words transition sm:text-sm ${
               on
                 ? "border-violet-600 bg-violet-600 text-white shadow-sm ring-2 ring-violet-600/30 ring-offset-2 ring-offset-white"
@@ -163,19 +273,34 @@ export function DotClaimModal({
     [categories, selected],
   );
 
+  const chipsNeeded = Math.max(0, CHIP_TARGET - selected.length);
+  const chipsReady = selected.length >= CHIP_TARGET;
+
   const title =
-    step === "chips"
-      ? "These categories look spot on?"
-      : step === "account"
-        ? "Create your Biz OS account"
-        : "Claim your free Dot Hub";
+    step === "scanning"
+      ? "Finding your Google listing…"
+      : step === "listing"
+        ? listings.length > 1
+          ? "Which Google listing is yours?"
+          : "Is this your Google listing?"
+        : step === "chips"
+          ? "Pick 3 categories"
+          : step === "account"
+            ? "Create your Biz OS account"
+            : "Claim your free Dot Hub";
 
   const description =
-    step === "chips"
-      ? "Tap to keep or drop a chip, then continue."
-      : step === "account"
-        ? "Continue with Google, or create with email."
-        : "30 seconds. AskSKY scans the web and suggests categories.";
+    step === "scanning"
+      ? "We’ll show matches so you can confirm it’s really yours."
+      : step === "listing"
+        ? "Confirm before we attach reviews. Skip if none match — you can connect later."
+        : step === "chips"
+          ? selected.length >= CHIP_TARGET
+            ? "Looks good. Continue, or tap a chip to swap one out."
+            : `Keep the ones you like (${selected.length} of ${CHIP_TARGET}). Adjust fills the rest.`
+          : step === "account"
+            ? "Continue with Google, or create with email."
+            : "30 seconds. AskSKY finds your listing, then you confirm it’s yours.";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -212,7 +337,7 @@ export function DotClaimModal({
               </div>
             ) : null}
 
-            {step === "form" || step === "scanning" ? (
+            {step === "form" ? (
               <form
                 className="space-y-3.5"
                 onSubmit={(e) => {
@@ -280,8 +405,76 @@ export function DotClaimModal({
               </form>
             ) : null}
 
+            {step === "scanning" ? (
+              <div className="flex flex-col items-center gap-3 py-6">
+                <Loader2 className="h-8 w-8 animate-spin text-violet-600" aria-hidden />
+                <p className="text-sm text-slate-500">Matching Google listings near {zipCode}</p>
+              </div>
+            ) : null}
+
+            {step === "listing" ? (
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  {listings.map((listing) => {
+                    const rating =
+                      typeof listing.rating === "number" && Number.isFinite(listing.rating)
+                        ? listing.rating
+                        : null;
+                    return (
+                      <div
+                        key={listing.placeId}
+                        className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3"
+                      >
+                        <p className="font-semibold text-slate-900">
+                          {listing.name || "Google listing"}
+                        </p>
+                        {listing.address ? (
+                          <p className="mt-0.5 text-sm leading-snug text-slate-500">
+                            {listing.address}
+                          </p>
+                        ) : null}
+                        {rating != null || listing.reviewCount ? (
+                          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
+                            {rating != null ? rating.toFixed(1) : "—"}
+                            <span>· {listing.reviewCount || 0} reviews</span>
+                          </p>
+                        ) : null}
+                        <button
+                          type="button"
+                          className={`${aiButtonClass} mt-3 h-10`}
+                          onClick={() => confirmListing(listing)}
+                        >
+                          This is my business
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button type="button" className={secondaryButtonClass} onClick={skipListing}>
+                  None of these — skip for now
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                  onClick={() => setStep("form")}
+                >
+                  Search again
+                </button>
+              </div>
+            ) : null}
+
             {step === "chips" ? (
               <div className="space-y-4">
+                {placeId ? (
+                  <p className="rounded-lg border border-teal-200 bg-teal-50 px-3 py-2 text-xs leading-relaxed text-teal-800">
+                    Google listing connected{businessName ? `: ${businessName}` : ""}. Reviews will attach to this Dot.
+                  </p>
+                ) : listingNote ? (
+                  <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+                    {listingNote}
+                  </p>
+                ) : null}
                 <div className="flex max-w-full flex-wrap justify-center gap-x-3 gap-y-3">
                   {chipRow}
                 </div>
@@ -289,18 +482,45 @@ export function DotClaimModal({
                   <button
                     type="button"
                     className={`${secondaryButtonClass} order-2 sm:order-1`}
-                    onClick={() => setStep("form")}
+                    disabled={refreshingChips || !chipsNeeded}
+                    onClick={() => void refreshCategories()}
                   >
-                    Adjust
+                    {refreshingChips ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : chipsNeeded === 1 ? (
+                      "Adjust · 1 more"
+                    ) : chipsNeeded ? (
+                      `Adjust · ${chipsNeeded} more`
+                    ) : (
+                      "Adjust"
+                    )}
                   </button>
                   <button
                     type="button"
                     className={`${aiButtonClass} order-1 sm:order-2`}
+                    disabled={refreshingChips || !chipsReady}
                     onClick={() => setStep("account")}
                   >
                     Looks spot on
                   </button>
                 </div>
+                {listings.length ? (
+                  <button
+                    type="button"
+                    className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                    onClick={() => setStep("listing")}
+                  >
+                    Change Google listing
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                    onClick={() => setStep("form")}
+                  >
+                    Edit name or ZIP
+                  </button>
+                )}
               </div>
             ) : null}
 

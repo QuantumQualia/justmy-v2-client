@@ -22,6 +22,8 @@ interface ImageCropModalProps {
   imageSrc: string;
   /** Omit for free-form crop (e.g. lookbook tiles). */
   aspectRatio?: number;
+  /** Explicit crop target; wins over aspect-ratio title inference. */
+  cropKind?: "banner" | "profile";
   /** May be async (e.g. upload); the modal shows progress until it settles. */
   onCrop: (croppedImage: string) => void | Promise<void>;
   onCancel: () => void;
@@ -31,6 +33,7 @@ interface ImageCropModalProps {
 export function ImageCropModal({
   imageSrc,
   aspectRatio,
+  cropKind,
   onCrop,
   onCancel,
   variant = "default",
@@ -175,14 +178,13 @@ export function ImageCropModal({
     }
   };
 
-  const cropTitle =
-    aspectRatio == null
-      ? "Crop image"
-      : aspectRatio > 1.45
-        ? "Crop banner image"
-        : Math.abs(aspectRatio - 1) < 0.02
-          ? "Crop profile image"
-          : "Crop image";
+  const isBannerCrop = cropKind === "banner" || (cropKind == null && aspectRatio != null && aspectRatio > 1.45);
+  const isProfileCrop = cropKind === "profile" || (cropKind == null && aspectRatio != null && Math.abs(aspectRatio - 1) < 0.02);
+  const cropTitle = isProfileCrop
+    ? "Crop profile image"
+    : isBannerCrop
+      ? "Crop banner image"
+      : "Crop image";
 
   return (
     <div className={cn("fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4", isLight ? "bg-slate-900/40" : "bg-black/40")}>
@@ -209,12 +211,8 @@ export function ImageCropModal({
             isApplying && "pointer-events-none opacity-60",
           )}
           style={{
-            height:
-              aspectRatio != null && aspectRatio > 1.45
-                ? "180px"
-                : "300px",
-            maxWidth:
-              aspectRatio != null && aspectRatio > 1.45 ? "100%" : "300px",
+            height: isBannerCrop ? "180px" : "300px",
+            maxWidth: isBannerCrop ? "100%" : "300px",
           }}
         >
           <Cropper
@@ -222,6 +220,8 @@ export function ImageCropModal({
             crop={crop}
             zoom={zoom}
             aspect={aspectRatio}
+            cropShape={isProfileCrop ? "round" : "rect"}
+            showGrid={!isProfileCrop}
             onCropChange={setCrop}
             onZoomChange={setZoom}
             onCropComplete={onCropComplete}

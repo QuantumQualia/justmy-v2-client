@@ -54,6 +54,13 @@ export const bizOsService = {
       businessName: string;
       zipCode: string;
       categories: string[];
+      listings?: Array<{
+        placeId: string;
+        name?: string;
+        address?: string;
+        rating?: number;
+        reviewCount?: number;
+      }>;
       placeId: string | null;
       address: string | null;
       rating: number | null;
@@ -61,6 +68,20 @@ export const bizOsService = {
     }>("biz-os/claim/lookup", {
       method: "POST",
       body: JSON.stringify({ businessName, zipCode }),
+      skipAuth: true,
+    });
+  },
+
+  claimCategories(body: {
+    businessName: string;
+    zipCode: string;
+    address?: string;
+    exclude?: string[];
+    count?: number;
+  }) {
+    return apiRequest<{ categories: string[] }>("biz-os/claim/categories", {
+      method: "POST",
+      body: JSON.stringify(body),
       skipAuth: true,
     });
   },

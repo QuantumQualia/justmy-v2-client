@@ -9,6 +9,7 @@ import {
   ChevronDown,
   Copy,
   Crosshair,
+  Loader2,
   MessageSquare,
   RefreshCw,
   Search,
@@ -106,6 +107,7 @@ export default function ReputationPage() {
   const router = useRouter();
   const invalidateHome = useInvalidateBizOsHome();
   const profile = useProfileStore((s) => s.data);
+  const setProfileData = useProfileStore((s) => s.setData);
   const qrRef = useRef<HTMLDivElement>(null);
   const { data: rep, setData: setRep, pageReady, profileId } = useBizOsFetch(
     (id) => bizOsService.reputation(id),
@@ -114,6 +116,8 @@ export default function ReputationPage() {
 
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<any[]>([]);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [lastSearch, setLastSearch] = useState("");
   const [manualId, setManualId] = useState("");
   const [showPlaceId, setShowPlaceId] = useState(false);
   const [publishAddress, setPublishAddress] = useState(true);
@@ -122,6 +126,9 @@ export default function ReputationPage() {
   const [faq, setFaq] = useState<string | null>(FAQ[0].q);
   const [copied, setCopied] = useState<"link" | "sms" | null>(null);
   const [searching, setSearching] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [verifyError, setVerifyError] = useState<string | null>(null);
   const [savingHours, setSavingHours] = useState(false);
   const [planMsg, setPlanMsg] = useState<string | null>(null);
   const [creatingPlan, setCreatingPlan] = useState(false);
@@ -156,10 +163,24 @@ export default function ReputationPage() {
 
   async function search() {
     if (!profileId) return;
+    const term = query.trim();
     setSearching(true);
+    setSearchError(null);
+    setVerifyError(null);
     try {
-      const res = await bizOsService.reputationSearch(profileId, query);
-      setResults(res.results || []);
+      const res = await bizOsService.reputationSearch(profileId, term);
+      setResults(Array.isArray(res.results) ? res.results : []);
+      setHasSearched(true);
+      setLastSearch(term);
+    } catch (err) {
+      setResults([]);
+      setHasSearched(true);
+      setLastSearch(term);
+      setSearchError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Could not search Google listings. Try again.",
+      );
     } finally {
       setSearching(false);
     }
@@ -167,15 +188,31 @@ export default function ReputationPage() {
 
   async function verify(place: { placeId?: string; rating?: number; reviewCount?: number }) {
     if (!profileId || !place.placeId) return;
-    const data = await bizOsService.reputationVerify(profileId, {
-      googlePlaceId: place.placeId,
-      rating: place.rating,
-      reviewCount: place.reviewCount,
-    });
-    setRep(data);
-    setResults([]);
-    setSyncError(null);
-    await invalidateHome();
+    setVerifyingId(place.placeId);
+    setVerifyError(null);
+    try {
+      const data = await bizOsService.reputationVerify(profileId, {
+        googlePlaceId: place.placeId,
+        rating: place.rating,
+        reviewCount: place.reviewCount,
+      });
+      setRep(data);
+      if (typeof data?.name === "string" && data.name.trim()) {
+        setProfileData({ name: data.name.trim() });
+      }
+      setResults([]);
+      setHasSearched(false);
+      setSyncError(null);
+      await invalidateHome();
+    } catch (err) {
+      setVerifyError(
+        err instanceof ApiClientError
+          ? err.message
+          : "Could not connect that Google listing to this profile.",
+      );
+    } finally {
+      setVerifyingId(null);
+    }
   }
 
   async function syncFromGoogle() {
@@ -185,6 +222,9 @@ export default function ReputationPage() {
     try {
       const data = await bizOsService.reputationSync(profileId);
       setRep(data);
+      if (typeof data?.name === "string" && data.name.trim()) {
+        setProfileData({ name: data.name.trim() });
+      }
       await invalidateHome();
     } catch (err) {
       setSyncError(
@@ -366,27 +406,80 @@ export default function ReputationPage() {
               </Button>
             </div>
             <p className="mt-2 text-xs text-slate-400">
-              Search can use a cached listing. Connecting or Refresh from Google pulls live ratings.
+              Find your Google listing, then tap Verify to attach it to this profile.
             </p>
+
+            {searchError ? (
+              <p className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {searchError}
+              </p>
+            ) : null}
+
+            {hasSearched && !searching && !searchError && results.length === 0 ? (
+              <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
+                <p className="text-sm font-medium text-slate-800">
+                  No matching Google listing
+                  {lastSearch ? (
+                    <>
+                      {" "}
+                      for <span className="text-violet-700">“{lastSearch}”</span>
+                    </>
+                  ) : null}
+                </p>
+                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                  Try another name or add a city. When you find it, Verify attaches that listing to this profile.
+                </p>
+              </div>
+            ) : null}
 
             {results.length ? (
               <div className="mt-3 space-y-2">
-                {results.map((r) => (
-                  <button
-                    key={r.placeId || r.name}
-                    type="button"
-                    className="block w-full rounded-xl border border-slate-200 px-4 py-3 text-left text-sm transition hover:border-violet-400 hover:bg-violet-50/40"
-                    onClick={() => void verify(r)}
-                  >
-                    <span className="font-medium text-slate-900">{r.name}</span>
-                    <span className="mt-0.5 block text-slate-500">{r.address}</span>
-                    {r.rating ? (
-                      <span className="mt-1 block text-xs text-slate-400">
-                        {r.rating} · {r.reviewCount || 0} reviews
-                      </span>
-                    ) : null}
-                  </button>
-                ))}
+                <p className="text-xs text-slate-500">
+                  Tap Verify to attach this listing to {businessName || "this profile"}.
+                </p>
+                {results.map((r) => {
+                  const placeId = String(r.placeId || "");
+                  const isConnected = Boolean(placeId && placeId === String(rep?.googlePlaceId || ""));
+                  const isVerifying = verifyingId === placeId;
+                  return (
+                    <div
+                      key={placeId || r.name}
+                      className="flex flex-col gap-3 rounded-xl border border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                      <div className="min-w-0">
+                        <p className="font-medium text-slate-900">{r.name}</p>
+                        {r.address ? (
+                          <p className="mt-0.5 text-sm text-slate-500">{r.address}</p>
+                        ) : null}
+                        {r.rating ? (
+                          <p className="mt-1 text-xs text-slate-400">
+                            {r.rating} · {r.reviewCount || 0} reviews
+                          </p>
+                        ) : null}
+                      </div>
+                      {isConnected ? (
+                        <span className="inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-teal-200 bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-800 sm:self-center">
+                          <Check className="h-3 w-3" />
+                          Connected
+                        </span>
+                      ) : (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="shrink-0 self-start rounded-lg bg-violet-600 text-white hover:bg-violet-700 sm:self-center"
+                          disabled={!placeId || Boolean(verifyingId)}
+                          onClick={() => void verify(r)}
+                        >
+                          {isVerifying ? (
+                            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                          ) : null}
+                          {isVerifying ? "Connecting…" : "Verify"}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+                {verifyError ? <p className="text-xs text-rose-600">{verifyError}</p> : null}
               </div>
             ) : null}
 
@@ -435,7 +528,7 @@ export default function ReputationPage() {
                 </div>
               ) : (
                 <p className="text-sm text-slate-500">
-                  Search Google to connect your listing. We’ll pull your rating and generate a direct review link.
+                  Search, then tap Verify to attach a Google listing to this profile.
                 </p>
               )}
             </div>
@@ -455,10 +548,17 @@ export default function ReputationPage() {
                   placeholder="ChIJ… Place ID"
                   className="rounded-xl"
                 />
-                <Button variant="outline" onClick={() => void verify({ placeId: manualId })}>
-                  Save Place ID
+                <Button
+                  variant="outline"
+                  disabled={!manualId.trim() || Boolean(verifyingId)}
+                  onClick={() => void verify({ placeId: manualId.trim() })}
+                >
+                  {verifyingId === manualId.trim() ? "Connecting…" : "Verify Place ID"}
                 </Button>
               </div>
+            ) : null}
+            {verifyError && !results.length ? (
+              <p className="mt-2 text-xs text-rose-600">{verifyError}</p>
             ) : null}
 
             <div className="mt-5 space-y-3">

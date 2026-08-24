@@ -771,6 +771,7 @@ export default function InlineEdit({
 
   const openImageInsert = (kind: "banner" | "profile") => {
     pendingImageKindRef.current = kind;
+    setImageUploadType(kind);
     setImageInsertOpen(true);
   };
 
@@ -845,7 +846,7 @@ export default function InlineEdit({
                   <button
                     type="button"
                     onClick={() => openImageInsert("banner")}
-                    className="absolute inset-0 z-[1] flex cursor-pointer items-center justify-center"
+                    className="absolute inset-x-0 top-0 bottom-16 z-[1] flex cursor-pointer items-center justify-center"
                   >
                     <div className="text-center">
                       <ImageIcon className="mx-auto mb-2 h-8 w-8 text-white/70" />
@@ -857,24 +858,33 @@ export default function InlineEdit({
             </div>
 
             {/* Profile Picture */}
-            <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-              <div className="relative group">
-                <div
+            <div className="absolute -bottom-12 left-1/2 z-20 -translate-x-1/2">
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openImageInsert("profile");
+                  }}
                   className={cn(
-                    "h-24 w-24 rounded-full overflow-hidden",
+                    "h-24 w-24 overflow-hidden rounded-full",
                     isLight ? "bg-card border-4 border-border shadow-xl" : "bg-slate-800 border-4 border-slate-900",
                   )}
+                  aria-label="Edit profile photo"
                 >
-                  <button
-                    type="button"
-                    onClick={() => openImageInsert("profile")}
-                    className="absolute inset-0 z-10 flex cursor-pointer items-center justify-center rounded-full bg-black/40 opacity-0 transition-colors touch-manipulation hover:bg-black/60 group-hover:opacity-100"
-                    aria-label="Edit profile photo"
-                  >
-                    <Pencil className="h-5 w-5 text-white" />
-                  </button>
                   <MycardProfileAvatar name={data.name} photo={data.photo} />
-                </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openImageInsert("profile");
+                  }}
+                  className="absolute -bottom-0.5 -right-0.5 z-10 rounded-lg bg-black/50 p-1.5 backdrop-blur-sm transition-colors touch-manipulation hover:bg-black/70"
+                  aria-label="Edit profile photo"
+                >
+                  <Pencil className="h-3.5 w-3.5 text-white" />
+                </button>
               </div>
             </div>
           </div>
@@ -1978,11 +1988,17 @@ export default function InlineEdit({
           <ImageInsertDialog
             variant={isLight ? "light" : "default"}
             open={imageInsertOpen}
-            onOpenChange={setImageInsertOpen}
+            title={imageUploadType === "profile" ? "Choose profile photo" : "Choose banner image"}
+            onOpenChange={(open) => {
+              setImageInsertOpen(open);
+              if (!open && !imagePreview) {
+                pendingImageKindRef.current = null;
+              }
+            }}
             onPick={async (result) => {
-              const kind = pendingImageKindRef.current;
+              const kind = pendingImageKindRef.current ?? imageUploadType;
               if (!kind) return;
-              pendingImageKindRef.current = null;
+              pendingImageKindRef.current = kind;
               let src: string;
               if (result.kind === "url") {
                 src = result.imageSrc;
@@ -2001,6 +2017,7 @@ export default function InlineEdit({
             <ImageCropModal
               variant={isLight ? "light" : "default"}
               imageSrc={imagePreview}
+              cropKind={imageUploadType}
               aspectRatio={imageUploadType === "banner" ? 1200 / 630 : 1}
               onCrop={handleImageCrop}
               onCancel={() => {

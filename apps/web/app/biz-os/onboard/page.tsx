@@ -52,7 +52,7 @@ function OnboardInner() {
   const liveUrl = publicMycardUrl(data.slug);
 
   return (
-    <BizOsPage className="flex min-h-0 flex-1 flex-col gap-6 lg:space-y-0">
+    <BizOsPage className="flex h-[calc(100dvh-var(--biz-os-sticky-top,7rem)-4rem)] max-h-[calc(100dvh-var(--biz-os-sticky-top,7rem)-4rem)] min-h-0 flex-1 flex-col gap-6 space-y-0 overflow-hidden">
       <div className="shrink-0 space-y-6">
         <BizOsHeader
           eyebrow="Studio"
@@ -78,10 +78,10 @@ function OnboardInner() {
         )}
       </div>
 
-      <div className="grid min-h-0 flex-1 items-stretch gap-4 lg:grid-cols-[minmax(0,58%)_minmax(0,42%)] lg:overflow-hidden">
+      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(16rem,1.15fr)] items-stretch gap-4 overflow-hidden lg:grid-cols-[minmax(0,58%)_minmax(0,42%)] lg:grid-rows-none">
         <BizOsCard
           padded={false}
-          className="flex min-h-0 max-h-[min(75vh,44rem)] flex-col overflow-hidden lg:h-full lg:max-h-none"
+          className="flex min-h-0 flex-col overflow-hidden"
         >
           <div className="shrink-0 border-b border-slate-100 px-5 py-3">
             <p className="text-sm font-semibold">Editor</p>
@@ -104,7 +104,7 @@ function OnboardInner() {
             </div>
           </div>
         </BizOsCard>
-        <div className="flex min-h-[20rem] flex-col overflow-hidden max-lg:max-h-[min(70vh,36rem)] lg:h-full lg:min-h-0">
+        <div className="flex min-h-0 flex-col overflow-hidden">
           <AskSkyConcierge fillViewport stage={stage} onStage={goStage} />
         </div>
       </div>

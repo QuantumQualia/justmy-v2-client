@@ -442,11 +442,11 @@ export function AskSkyConcierge({
           : "flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)]",
         !compact &&
           (fillViewport
-            ? "h-full min-h-0 max-lg:h-[min(70vh,36rem)]"
+            ? "h-full min-h-0"
             : "h-[min(70vh,36rem)]"),
       )}
     >
-      <div className="flex items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3">
+      <div className="flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3">
         <Sparkles className="h-4 w-4 text-violet-600" />
         <p className="text-sm font-semibold">AskSKY! Concierge</p>
       </div>
@@ -573,7 +573,7 @@ export function AskSkyConcierge({
           </div>
         ) : null}
       </div>
-      <div className="border-t border-slate-100 p-3">
+      <div className="shrink-0 border-t border-slate-100 bg-white p-3">
         <div className="mb-2 flex flex-wrap gap-1">
           <button
             type="button"

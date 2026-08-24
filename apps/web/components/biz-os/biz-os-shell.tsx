@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useProfileStore } from "@/lib/store";
 import { useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
@@ -14,10 +14,13 @@ import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
 import { BizOsSubnav } from "@/components/biz-os/biz-os-ui";
 import { useNewsHost } from "@/lib/news/news-host-context";
 import type { NewsMarketContext } from "@/components/news/asksky/types";
+import { cn } from "@workspace/ui/lib/utils";
 
 export function BizOsShell({ children }: { children: React.ReactNode }) {
   const newsHost = useNewsHost();
   const router = useRouter();
+  const pathname = usePathname();
+  const lockViewport = pathname === "/biz-os/onboard";
   const { isError } = useBizOsProfile();
   const [market, setMarket] = useState<NewsMarketContext | null>(null);
 
@@ -130,7 +133,14 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <div className="mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-8">{children}</div>
+      <div
+        className={cn(
+          "mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-8",
+          lockViewport && "overflow-hidden",
+        )}
+      >
+        {children}
+      </div>
     </div>
   );
 }
