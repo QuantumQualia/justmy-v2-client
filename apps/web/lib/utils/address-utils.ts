@@ -181,11 +181,14 @@ export function parsePostalAddress(raw: string): ParsedPostalAddress | null {
 
   let zip: string | undefined;
   for (let i = tokens.length - 1; i >= 0; i--) {
-    const match = tokens[i].match(ZIP_RE);
+    const current = tokens[i];
+    if (!current) continue;
+    const match = current.match(ZIP_RE);
     if (!match) continue;
     zip = match[1];
-    tokens[i] = tokens[i].replace(ZIP_RE, "").replace(/\s+/g, " ").trim();
-    if (!tokens[i]) tokens.splice(i, 1);
+    const stripped = current.replace(ZIP_RE, "").replace(/\s+/g, " ").trim();
+    if (!stripped) tokens.splice(i, 1);
+    else tokens[i] = stripped;
     break;
   }
 
@@ -194,6 +197,7 @@ export function parsePostalAddress(raw: string): ParsedPostalAddress | null {
   let cityInStateToken = false;
   for (let i = tokens.length - 1; i >= 0; i--) {
     const token = tokens[i];
+    if (!token) continue;
     const direct = stateFromToken(token);
     if (direct) {
       state = direct;
