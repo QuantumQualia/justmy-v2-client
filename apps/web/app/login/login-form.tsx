@@ -16,7 +16,7 @@ import { tokenStorage } from "@/lib/storage/token-storage";
 import { resolveAppHomePath } from "@/lib/store/app-store";
 import { needsEmailVerification, verifyEmailHref } from "@/lib/auth/email-verification";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
-import { DEFAULT_PROFILE_KIND, profileKindToOsName } from "@/lib/os-types";
+import { DEFAULT_PROFILE_KIND, isBusinessOs, profileKindToOsName } from "@/lib/os-types";
 
 export default function LoginForm() {
   const searchParams = useSearchParams();
@@ -27,7 +27,7 @@ export default function LoginForm() {
 
   const oauth = useOauthSignIn({
     zipCode: newsZip || undefined,
-    profileType: profileKindToOsName(DEFAULT_PROFILE_KIND),
+    osName: profileKindToOsName(DEFAULT_PROFILE_KIND),
     onSuccess: (response) => finishAuthRedirect(router, response, { fallback: redirect }),
   });
 
@@ -38,9 +38,9 @@ export default function LoginForm() {
       const user = await tokenStorage.getUser();
       
       if (accessToken || refreshToken || user) {
-        const stored = user as { profileType?: string; emailVerified?: boolean } | null;
+        const stored = user as { osName?: string; profileType?: string; emailVerified?: boolean } | null;
         let homePath = resolveAppHomePath({ fallback: redirect });
-        if (String(stored?.profileType || "").toUpperCase() === "BIZ" && (homePath === "/dashboard" || homePath.startsWith("/dashboard"))) {
+        if (isBusinessOs(stored?.osName || stored?.profileType) && (homePath === "/dashboard" || homePath.startsWith("/dashboard"))) {
           homePath = "/biz-os";
         }
         if (needsEmailVerification(stored)) {

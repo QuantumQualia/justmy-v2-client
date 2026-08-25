@@ -37,7 +37,7 @@ import { isPlatformAdmin, type StoredAuthUser } from "@/lib/auth/session-user";
 import { tokenStorage } from "@/lib/storage/token-storage";
 import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
 import { publicMycardUrl } from "@/lib/mycard/public-url";
-import { isBusinessProfileKind } from "@/lib/os-types";
+import { isBusinessProfileKind, osNameToProfileKind, canonicalizeOsName, profileKindDisplayOs } from "@/lib/os-types";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
 import { useProfileStore } from "@/lib/store/profile-store";
@@ -122,16 +122,23 @@ export function NewsAccountSidebar({
   const [renameValue, setRenameValue] = useState("");
   const [signingOut, setSigningOut] = useState(false);
   const [isAdmin, setIsAdmin] = useState(() => isPlatformAdmin(user));
+  const [sessionOs, setSessionOs] = useState<string | undefined>();
   const renameRef = useRef<HTMLInputElement>(null);
   const renameLockRef = useRef(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const profileName = useProfileStore((s) => s.data.name);
   const profileKind = useProfileStore((s) => s.data.type);
+  const profileOsName = useProfileStore((s) => s.data.osName);
   const profileSlug = useProfileStore((s) => s.data.slug);
   const liveCardUrl = publicMycardUrl(profileSlug);
   const name = profileName?.trim() || displayName(user);
   const zip = market.zipcode.trim().slice(0, 5);
+  const rawOs = profileOsName || sessionOs || profileKind;
+  const osKind = rawOs
+    ? osNameToProfileKind(canonicalizeOsName(String(rawOs))) || profileKind
+    : profileKind;
+  const osLabel = osKind ? profileKindDisplayOs(osKind) : null;
   const avatarSrc = photoUrl?.trim() || user.avatarUrl?.trim() || "";
   const pathname = usePathname();
   const showBizOsApps = profileKind ? isBusinessProfileKind(profileKind) : pathname.startsWith("/biz-os");
@@ -156,6 +163,7 @@ export function NewsAccountSidebar({
     if (!open) return;
     const stored = tokenStorage.getUserSync<StoredAuthUser>();
     setIsAdmin(isPlatformAdmin(stored) || isPlatformAdmin(user));
+    setSessionOs(stored?.osName || stored?.profileType);
   }, [open, user]);
 
   useEffect(() => {
@@ -384,6 +392,8 @@ export function NewsAccountSidebar({
               <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
             )}
             <p className="mt-0.5 truncate text-xs text-slate-500">
+              {osLabel ? <span className="text-violet-600">{osLabel}</span> : null}
+              {osLabel ? " · " : null}
               {zip ? `${zip} resident` : "Resident"}
               {isVerified ? (
                 <span className="text-violet-600"> · Verified</span>

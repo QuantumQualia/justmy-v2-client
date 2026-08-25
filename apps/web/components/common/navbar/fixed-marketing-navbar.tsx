@@ -6,9 +6,6 @@ import { usePathname } from "next/navigation";
 import { ChevronDown, ChevronRight, LogIn, Menu, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
-import { subscriptionService, type SubscriptionPlan } from "@/lib/services/subscription";
-import { ApiClientError } from "@/lib/services/auth";
-import { toast } from "sonner";
 import { createPortal } from "react-dom";
 
 type MarketingNavbarProps = {
@@ -21,7 +18,7 @@ type MarketingNavbarProps = {
 type DropdownItem = { label: string; href: string };
 
 const OS_DROPDOWN: DropdownItem[] = [
-  { label: "Founders", href: "/#pricing_founder" },
+  { label: "Founders", href: "/login?redirect=/biz-os/pricing" },
   { label: "Personal", href: "/register?type=personal" },
   { label: "Biz", href: "/register?type=biz" },
   { label: "City", href: "/register?type=city" },
@@ -33,11 +30,6 @@ const RESOURCES_DROPDOWN: DropdownItem[] = [
   { label: "Help", href: "/help" },
   { label: "Guides", href: "/guides" },
 ];
-
-async function redirectToCheckout(plan: SubscriptionPlan) {
-  const checkoutUrl = await subscriptionService.createCheckoutSession(plan);
-  window.location.href = checkoutUrl;
-}
 
 export function FixedMarketingNavbar({
   becomeFounderLoading,
@@ -88,18 +80,7 @@ export function FixedMarketingNavbar({
   }, [mobileMenuOpen]);
 
   const handleBecomeFounder = async () => {
-    try {
-      setLocalCheckoutLoading(true);
-      await redirectToCheckout("FOUNDER");
-    } catch (err: unknown) {
-      if (err instanceof ApiClientError) {
-        toast.error(err.message || "Failed to start checkout. Please try again.");
-      } else {
-        toast.error("An error occurred. Please try again.");
-      }
-    } finally {
-      setLocalCheckoutLoading(false);
-    }
+    window.location.href = "/login?redirect=/biz-os/pricing";
   };
 
   // Close dropdowns when clicking outside (desktop)

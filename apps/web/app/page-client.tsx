@@ -1,35 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { ArrowRight, Layout, Briefcase, TrendingUp, Award, Check } from "lucide-react";
-import { subscriptionService, SubscriptionPlan } from "@/lib/services/subscription";
-import { ApiClientError } from "@/lib/services/auth";
 import { DEFAULT_PROFILE_KIND, type ProfileKind } from "@/lib/os-types";
 
 export default function LandingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [loading, setLoading] = useState(false);
 
-  const handleCheckout = async (plan: SubscriptionPlan) => {
-    setLoading(true);
-    try {
-      const checkoutUrl = await subscriptionService.createCheckoutSession(plan);
-      // Redirect to Stripe Checkout
-      window.location.href = checkoutUrl;
-    } catch (err: unknown) {
-      if (err instanceof ApiClientError) {
-        toast.error(err.message || "Failed to start checkout. Please try again.");
-      } else {
-        toast.error("An error occurred. Please try again.");
-      }
-    } finally {
-      setLoading(false);
-    }
+  const goToBizPricing = () => {
+    router.push("/login?redirect=/biz-os/pricing");
   };
 
   const handleFreeSignup = (type: ProfileKind = DEFAULT_PROFILE_KIND) => {
@@ -111,15 +94,14 @@ export default function LandingPage() {
             {/* 3. GROWTH OS ($35/mo) */}
             <PricingCard 
               icon={<TrendingUp className="h-6 w-6 text-purple-400" />}
-              title="Growth OS"
-              price="$35"
-              period="/mo"
-              desc="Advanced tools, AI writing, and local promotion."
-              btnText="Start Growth"
-              btnAction={() => handleCheckout("GROWTH")}
-              features={["AI Content Writer", "Priority Map Rank", "5 Team Cards"]}
+              title="Command OS"
+              price="Paid"
+              period=""
+              desc="Same Biz OS tools. Subscribe after you claim."
+              btnText="See plans"
+              btnAction={goToBizPricing}
+              features={["Everything in Biz OS", "Command OS tag", "Stripe checkout in-app"]}
               isPopular={false}
-              loading={loading}
             />
 
             {/* 4. FOUNDERS GROWTH OS ($350/yr) */}
@@ -131,22 +113,21 @@ export default function LandingPage() {
                 <CardContent className="p-6 flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2 rounded bg-emerald-500/10"><Award className="h-6 w-6 text-emerald-500" /></div>
-                    <div className="text-lg font-medium text-emerald-400">Founders OS</div>
+                    <div className="text-lg font-medium text-emerald-400">Command PRO / Enterprise</div>
                   </div>
-                  <div className="text-3xl font-bold text-foreground mb-1">$350<span className="text-sm font-normal text-muted-foreground">/yr</span></div>
-                  <p className="text-emerald-500/80 text-xs mb-4">Save $70/year vs Monthly</p>
-                  <p className="text-xs mb-6 text-muted-foreground">Full "City Partner" status. VIP Support.</p>
+                  <div className="text-3xl font-bold text-foreground mb-1">Paid</div>
+                  <p className="text-emerald-500/80 text-xs mb-4">Prices live in Stripe</p>
+                  <p className="text-xs mb-6 text-muted-foreground">Claim Biz OS first, then subscribe in-app.</p>
                   
                   <Button 
                     className="cursor-pointer w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold mb-6"
-                    onClick={() => handleCheckout("FOUNDER")}
-                    disabled={loading}
+                    onClick={goToBizPricing}
                   >
-                    {loading ? "Processing..." : "Become a Founder"}
+                    See plans
                   </Button>
 
                   <div className="mt-auto space-y-3">
-                    {["Everything in Growth", "Verified Blue Check", "Early Access Features", "Founder Community Access"].map((item, i) => (
+                    {["Everything in Biz OS", "Command PRO or Enterprise tag", "Annual or monthly Stripe"].map((item, i) => (
                       <div key={i} className="flex gap-2 items-center text-sm text-foreground">
                         <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" /> {item}
                       </div>

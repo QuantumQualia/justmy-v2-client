@@ -20,7 +20,7 @@ function toAuthError(err: unknown, fallback: string): string {
 export function useOauthSignIn(options: {
   zipCode?: string;
   referralCode?: string;
-  profileType: OsName;
+  osName: OsName;
   onSuccess: (response: AuthResponse) => void;
 }) {
   const [loading, setLoading] = useState(false);
@@ -42,7 +42,7 @@ export function useOauthSignIn(options: {
         idToken,
         zipCode: current.zipCode || undefined,
         referralCode: current.referralCode?.trim() || undefined,
-        profileType: current.profileType,
+        osName: current.osName,
       });
       current.onSuccess(response);
     } catch (err) {
@@ -64,7 +64,7 @@ export function useOauthSignIn(options: {
         lastName: apple.lastName,
         zipCode: current.zipCode || undefined,
         referralCode: current.referralCode?.trim() || undefined,
-        profileType: current.profileType,
+        osName: current.osName,
       });
       current.onSuccess(response);
     } catch (err) {

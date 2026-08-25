@@ -3,9 +3,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { subscriptionService } from "@/lib/services/subscription";
-import { tokenStorage } from "@/lib/storage/token-storage";
-import { ApiClientError } from "@/lib/services/auth";
-import { useAppStore, resolveAppHomePath } from "@/lib/store/app-store";
+import { ApiClientError, persistAuthSession } from "@/lib/services/auth";
 
 export default function StripeCallbackHandler() {
   const searchParams = useSearchParams();
@@ -26,26 +24,8 @@ export default function StripeCallbackHandler() {
 
         // If user data is returned, create session
         if (response.user && response.accessToken) {
-          // Save tokens to storage (cookies)
-          tokenStorage.setAccessToken(response.accessToken);
-          if (response.refreshToken) {
-            tokenStorage.setRefreshToken(response.refreshToken);
-          }
-          if (response.user) {
-            tokenStorage.setUser(response.user);
-          }
-
-          // Store welcome app in global state if provided
-          if (response.welcomeApp) {
-            useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
-          }
-
-          // Redirect to current app homepage (or fallback to dashboard)
-          const homePath = resolveAppHomePath({
-            welcomeApp: response.welcomeApp,
-            fallback: "/dashboard?welcome=true",
-          });
-          router.push(homePath);
+          await persistAuthSession(response);
+          router.push("/biz-os");
         } else {
           // If no user data, redirect to login
           router.push("/login?error=verification_failed");

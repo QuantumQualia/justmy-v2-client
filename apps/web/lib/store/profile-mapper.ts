@@ -15,6 +15,8 @@ export interface ApiProfileResponse {
   name: string;
   slug: string;
   type: string;
+  osName?: string;
+  osId?: number;
   zipCode: string;
   tagline?: string;
   about?: string;
@@ -163,27 +165,16 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     }
   }
 
-  // Map type — canonical OS kinds; legacy "business" maps to biz
-  let profileType: ProfileKind | undefined;
-
-  const apiType = apiProfile.type?.toLowerCase();
-
-  if (apiType) {
-    const resolved = normalizeProfileKindInput(apiType);
-    if (resolved) profileType = resolved;
-  }
-  if (profileType === undefined && apiType === "business") {
-    // Legacy: Map old "business" type based on subscription tier
-    // This assumes the API response includes subscription info in a parent object
-    // If subscription tier is available, map accordingly
-    // Otherwise default to "biz" (which was Business-Free)
-    profileType = "biz"; // Default fallback for old business profiles
+  const apiOs = (apiProfile as any).osName || apiProfile.type || "";
+  let profileType: ProfileKind | undefined = normalizeProfileKindInput(String(apiOs));
+  if (profileType === undefined && String(apiProfile.type || "").toLowerCase() === "business") {
+    profileType = "biz";
   }
 
   return {
     id: profileId,
-    osId: (apiProfile as any).osId || undefined, // Add OS ID if available
-    osName: (apiProfile as any).osName || undefined, // Add OS Name if available
+    osId: (apiProfile as any).osId || undefined,
+    osName: (apiProfile as any).osName || apiProfile.type || undefined,
     type: profileType,
     slug: apiProfile.slug,
     photo: apiProfile.photo || "",

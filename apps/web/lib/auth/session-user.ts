@@ -1,4 +1,4 @@
-import type { OsName } from "@/lib/os-types";
+import { type OsName } from "@/lib/os-types";
 
 /** Slim identity kept in the auth_user cookie (must stay well under 4KB). */
 export type StoredAuthUser = {
@@ -9,6 +9,8 @@ export type StoredAuthUser = {
   emailVerified: boolean;
   /** Platform User.role — not ProfileMember.role. */
   role?: "USER" | "ADMIN";
+  osName?: OsName;
+  /** @deprecated read osName; still written so older cookies keep working */
   profileType?: OsName;
   profileId?: number;
 };
@@ -31,6 +33,7 @@ export function slimAuthUser(
     lastName?: string;
     emailVerified?: boolean | null;
     role?: string | null;
+    osName?: string;
     profileType?: string;
     profileId?: number;
     profile?: { id?: string | number; osName?: string; type?: string };
@@ -38,8 +41,14 @@ export function slimAuthUser(
   profile?: { id?: string | number; osName?: string; type?: string } | null,
 ): StoredAuthUser | null {
   if (!user?.id || !user.email) return null;
-  const profileType = String(
-    profile?.osName || profile?.type || user.profileType || user.profile?.osName || user.profile?.type || "",
+  const osName = String(
+    profile?.osName ||
+      profile?.type ||
+      user.osName ||
+      user.profileType ||
+      user.profile?.osName ||
+      user.profile?.type ||
+      "",
   ).toUpperCase();
   const profileId = parseProfileId(profile?.id ?? user.profileId ?? user.profile?.id);
   return {
@@ -49,7 +58,8 @@ export function slimAuthUser(
     lastName: user.lastName || "",
     emailVerified: Boolean(user.emailVerified),
     role: String(user.role || "").toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
-    profileType: (profileType || undefined) as OsName | undefined,
+    osName: (osName || undefined) as OsName | undefined,
+    profileType: (osName || undefined) as OsName | undefined,
     profileId,
   };
 }

@@ -26,8 +26,11 @@ export function MyCardDesktopView(props: MyCardDesktopViewProps) {
     case OS_NAME.BIZ:
       return <MyCardDesktopBizView {...props} />;
     case OS_NAME.FOUNDER:
+    case OS_NAME.COMMAND_PRO:
+    case OS_NAME.ENTERPRISE:
       return <MyCardDesktopFounderView {...props} />;
     case OS_NAME.GROWTH:
+    case OS_NAME.COMMAND:
       return <MyCardDesktopCommandView {...props} />;
     case OS_NAME.CITY:
       return <MyCardDesktopCityView {...props} />;

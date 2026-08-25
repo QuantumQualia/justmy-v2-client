@@ -4,6 +4,8 @@
  * Google/Apple OAuth is treated as verified by the API.
  */
 
+import { isBusinessOs } from "@/lib/os-types";
+
 export const VERIFY_EMAIL_PATH = "/verify-email";
 export const DEFAULT_POST_VERIFY_PATH = "/dashboard";
 
@@ -49,11 +51,12 @@ export function safeInternalPath(
 
 export function continueAfterVerification(options: {
   redirect?: string | null;
+  osName?: string | null;
   profileType?: string | null;
   /** True when this request reused an already-verified account (same email link again). */
   alreadyVerified?: boolean;
 }): string {
-  const isBiz = String(options.profileType || "").toUpperCase() === "BIZ";
+  const isBiz = isBusinessOs(options.osName || options.profileType);
   const redirect = safeInternalPath(options.redirect, isBiz ? "/biz-os/onboard" : DEFAULT_POST_VERIFY_PATH);
   const looksBiz = isBiz || redirect === "/biz-os" || redirect.startsWith("/biz-os/");
   if (looksBiz) {

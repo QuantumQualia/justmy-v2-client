@@ -33,7 +33,8 @@ function readCachedMe(): User | undefined {
     lastName: stored.lastName,
     emailVerified: stored.emailVerified,
     role: stored.role,
-    profileType: stored.profileType,
+    osName: stored.osName || stored.profileType,
+    profileType: stored.osName || stored.profileType,
     profileId,
     profile: profileId != null ? { id: profileId } : undefined,
   };

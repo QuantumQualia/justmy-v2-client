@@ -111,7 +111,7 @@ export function AuthDialog({
   });
 
   const isRegister = mode === "register";
-  const profileType = profileKindToOsName(profileKind);
+  const osName = profileKindToOsName(profileKind);
   const [coords, setCoords] = useState<PanelCoords | null>(null);
 
   useLayoutEffect(() => {
@@ -161,7 +161,7 @@ export function AuthDialog({
         idToken,
         zipCode: formData.zipCode || defaultZip,
         referralCode: formData.referralCode.trim() || undefined,
-        profileType,
+        osName,
       });
       closeAndSucceed(response);
     } catch (err) {
@@ -182,7 +182,7 @@ export function AuthDialog({
         lastName: apple.lastName,
         zipCode: formData.zipCode || defaultZip,
         referralCode: formData.referralCode.trim() || undefined,
-        profileType,
+        osName,
       });
       closeAndSucceed(response);
     } catch (err) {
@@ -205,7 +205,7 @@ export function AuthDialog({
           email: formData.email,
           password: formData.password,
           zipCode: formData.zipCode,
-          profileType,
+          osName,
           ...(formData.referralCode.trim() && {
             referralCode: formData.referralCode.trim(),
           }),

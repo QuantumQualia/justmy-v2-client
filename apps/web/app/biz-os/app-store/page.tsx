@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { Button } from "@workspace/ui/components/button";
-import { bizOsService } from "@/lib/services/biz-os";
-import { useBizOsHome, useInvalidateBizOsHome } from "@/components/biz-os/use-biz-os-profile";
 import { BizOsCard, BizOsHeader, BizOsPage, BizOsSkeleton } from "@/components/biz-os/biz-os-ui";
+import { useBizOsHome } from "@/components/biz-os/use-biz-os-profile";
 import { Lock, Sparkles } from "lucide-react";
 
 const HREF: Record<string, string> = {
@@ -19,24 +16,7 @@ const HREF: Record<string, string> = {
 };
 
 export default function AppStorePage() {
-  const { data, profileId, ready } = useBizOsHome();
-  const invalidateHome = useInvalidateBizOsHome();
-  const [flagged, setFlagged] = useState<string | null>(null);
-  const [upgrading, setUpgrading] = useState<string | null>(null);
-
-  async function upgrade(name: string) {
-    if (!profileId || upgrading) return;
-    setUpgrading(name);
-    try {
-      const res = await bizOsService.requestUpgrade(profileId, name);
-      await invalidateHome();
-      setFlagged(
-        `${name} was sent to the JustMy team as a Command OS upgrade request (plan #${res.planId}).`,
-      );
-    } finally {
-      setUpgrading(null);
-    }
-  }
+  const { data, ready } = useBizOsHome();
 
   if (!ready) return <BizOsSkeleton />;
 
@@ -49,11 +29,8 @@ export default function AppStorePage() {
       <BizOsHeader
         eyebrow="Catalog"
         title="APP Store"
-        description="Included with Biz OS, or locked behind Command OS when you’re ready to grow the stack."
+        description="Included with Biz OS. Paid OS plans are on Pricing — every plan keeps these tools."
       />
-      {flagged ? (
-        <p className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{flagged}</p>
-      ) : null}
       <section>
         <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Included</h2>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -73,29 +50,28 @@ export default function AppStorePage() {
           ))}
         </div>
       </section>
-      <section>
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Command OS</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {locked.map((app: { id: string; name: string; description?: string }) => (
-            <BizOsCard key={app.id} className="border-dashed bg-slate-50/80">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-200 text-slate-600">
-                <Lock className="h-4 w-4" />
-              </span>
-              <p className="mt-3 font-semibold">{app.name}</p>
-              <p className="mt-1 text-sm text-slate-500">{app.description}</p>
-              <Button
-                className="mt-4"
-                size="sm"
-                variant="outline"
-                disabled={upgrading != null}
-                onClick={() => void upgrade(app.name)}
-              >
-                {upgrading === app.name ? "Sending…" : "Request upgrade"}
-              </Button>
-            </BizOsCard>
-          ))}
-        </div>
-      </section>
+      {locked.length > 0 ? (
+        <section>
+          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Coming soon</h2>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {locked.map((app: { id: string; name: string; description?: string }) => (
+              <BizOsCard key={app.id} className="border-dashed bg-slate-50/80">
+                <span className="inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-slate-200 text-slate-600">
+                  <Lock className="h-4 w-4" />
+                </span>
+                <p className="mt-3 font-semibold">{app.name}</p>
+                <p className="mt-1 text-sm text-slate-500">{app.description}</p>
+                <Link
+                  href="/biz-os/pricing"
+                  className="mt-4 inline-flex text-sm font-semibold text-violet-700 hover:underline"
+                >
+                  See plans
+                </Link>
+              </BizOsCard>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </BizOsPage>
   );
 }

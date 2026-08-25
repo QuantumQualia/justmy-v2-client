@@ -7,7 +7,6 @@ import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/com
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
-import { PROFILE_KIND } from "@/lib/os-types";
 
 interface MyCardDesktopDefaultViewProps {
   data: ProfileData;
@@ -170,7 +169,7 @@ export function MyCardDesktopCommandView({
             </div>
           ) : null}
 
-          {selectedDynamicTab && data.type === PROFILE_KIND.GROWTH ? (
+          {selectedDynamicTab ? (
             <MyCardContentDesktopView
               profileType={data.type}
               profileSlug={data.slug}

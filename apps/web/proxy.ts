@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { isNewsHost } from "@/lib/hosts";
 import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
 import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
+import { isBusinessOs } from "@/lib/os-types";
 
 /**
  * Public routes that don't require authentication
@@ -79,12 +80,12 @@ function isEmailVerified(request: NextRequest): boolean {
 
 function isBizCookieUser(request: NextRequest): boolean {
   const user = readAuthUser(request);
-  const t = String(user?.profileType || "").toUpperCase();
-  return t === "BIZ";
+  return isBusinessOs(user?.osName || user?.profileType);
 }
 
 function readAuthUser(request: NextRequest): {
   emailVerified?: boolean;
+  osName?: string;
   profileType?: string;
 } | null {
   const raw = request.cookies.get("auth_user")?.value;

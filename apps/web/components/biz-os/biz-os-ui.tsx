@@ -11,6 +11,7 @@ import {
   Sparkles,
   Star,
   Store,
+  Tag,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useBizOsHome, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
@@ -23,6 +24,7 @@ export const BIZ_OS_NAV = [
   { href: "/biz-os/skyscan", label: "SKYSCAN", icon: Radar },
   { href: "/biz-os/reputation", label: "Reputation", icon: Star },
   { href: "/biz-os/app-store", label: "Apps", icon: Store },
+  { href: "/biz-os/pricing", label: "Pricing", icon: Tag },
 ] as const;
 
 export function navIsActive(pathname: string, href: string, exact?: boolean) {

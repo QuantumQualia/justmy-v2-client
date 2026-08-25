@@ -32,6 +32,8 @@ export function registerTypeFromProfile(
   if (raw.includes("founder")) return "founder";
   if (raw.includes("network")) return "network";
   if (raw.includes("city")) return "city";
+  if (raw.includes("command_pro") || raw.includes("command-pro")) return "command_pro";
+  if (raw.includes("enterprise")) return "enterprise";
   if (raw.includes("command")) return "growth";
   if (raw.includes("growth")) return "growth";
   if (raw.includes("biz") || raw.includes("business")) return "biz";

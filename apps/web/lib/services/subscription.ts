@@ -1,32 +1,42 @@
 /**
- * Subscription Service
- * Handles Stripe subscription checkout and management
- * All Stripe price IDs are managed on the backend
+ * Subscription service — Stripe catalog and checkout for Biz OS plans.
  */
 
 import { apiRequest, ApiClientError } from "../api-client";
 import type { AuthResponse } from "./auth";
 
 export interface CheckoutResponse {
-  url: string; // Stripe Checkout Session URL
+  url: string;
+  sessionId?: string;
 }
 
-export type SubscriptionPlan = "GROWTH" | "FOUNDER";
+export interface SubscriptionPlanPrice {
+  priceId: string;
+  interval: "month" | "year" | string;
+  amount: number;
+  currency: string;
+}
 
-/**
- * Subscription Service
- */
+export interface SubscriptionPlan {
+  osName: string;
+  productName: string;
+  prices: SubscriptionPlanPrice[];
+}
+
 export const subscriptionService = {
-  /**
-   * Create a Stripe checkout session for a subscription plan
-   * @param plan - The subscription plan identifier (GROWTH or FOUNDER)
-   * @returns Checkout session URL to redirect user to Stripe
-   */
-  async createCheckoutSession(plan: SubscriptionPlan): Promise<string> {
+  async listPlans(): Promise<SubscriptionPlan[]> {
+    const response = await apiRequest<{ plans: SubscriptionPlan[] }>("subscriptions/plans", {
+      method: "GET",
+      skipAuth: true,
+    });
+    return response.plans || [];
+  },
+
+  async createCheckoutSession(priceId: string): Promise<string> {
     try {
       const response = await apiRequest<CheckoutResponse>("subscriptions/checkout", {
         method: "POST",
-        body: JSON.stringify({ plan }),
+        body: JSON.stringify({ priceId }),
       });
 
       if (!response.url) {
@@ -38,22 +48,16 @@ export const subscriptionService = {
       if (error instanceof ApiClientError) {
         throw error;
       }
-      throw new ApiClientError("Failed to create checkout session. Please try again.");
+      throw new ApiClientError("Failed to start checkout. Please try again.");
     }
   },
 
-  /**
-   * Verify a Stripe checkout session and get user/auth data
-   * Called after user completes payment on Stripe
-   * @param sessionId - The Stripe Checkout Session ID from the callback
-   * @returns User data and authentication tokens
-   */
   async verifyCheckoutSession(sessionId: string): Promise<AuthResponse> {
     try {
       const response = await apiRequest<AuthResponse>("subscriptions/verify-checkout", {
         method: "POST",
         body: JSON.stringify({ sessionId }),
-        skipAuth: true, // Don't require auth for this endpoint
+        skipAuth: true,
       });
 
       if (!response.user || !response.accessToken) {
@@ -69,4 +73,3 @@ export const subscriptionService = {
     }
   },
 };
-

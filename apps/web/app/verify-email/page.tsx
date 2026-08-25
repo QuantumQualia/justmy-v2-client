@@ -13,7 +13,7 @@ import { bizOsQueryKeys } from "@/components/biz-os/use-biz-os-profile";
 import { continueAfterVerification } from "@/lib/auth/email-verification";
 import { hydrateNewsStoresAfterAuth } from "@/lib/news/hydrate-after-auth";
 
-type StoredUser = { emailVerified?: boolean; profileType?: string };
+type StoredUser = { emailVerified?: boolean; osName?: string; profileType?: string };
 
 function VerifyEmailInner() {
   const router = useRouter();
@@ -51,11 +51,11 @@ function VerifyEmailInner() {
           if (ignore) return;
         }
 
-        const profileType =
-          me?.profileType || me?.profile?.osName || me?.profile?.type || stored?.profileType;
+        const osName =
+          me?.osName || me?.profileType || me?.profile?.osName || me?.profile?.type || stored?.osName || stored?.profileType;
         const next = continueAfterVerification({
           redirect: redirectParam,
-          profileType,
+          osName,
           alreadyVerified,
         });
         setContinueHref(next);
@@ -92,16 +92,16 @@ function VerifyEmailInner() {
     void (async () => {
       const stored = await tokenStorage.getUser<StoredUser>();
       if (stored?.emailVerified === true) {
-        let profileType = stored.profileType;
+        let osName = stored.osName || stored.profileType;
         try {
           const me = await authService.getCurrentUser();
-          profileType = me.profileType || me.profile?.osName || me.profile?.type || profileType;
+          osName = me.osName || me.profileType || me.profile?.osName || me.profile?.type || osName;
         } catch {
           /* fall through */
         }
         const next = continueAfterVerification({
           redirect: redirectParam,
-          profileType,
+          osName,
           alreadyVerified: true,
         });
         if (!cancelled) router.replace(next);
@@ -114,7 +114,7 @@ function VerifyEmailInner() {
         if (me.emailVerified === true) {
           const next = continueAfterVerification({
             redirect: redirectParam,
-            profileType: me.profileType || me.profile?.osName || me.profile?.type,
+            osName: me.osName || me.profileType || me.profile?.osName || me.profile?.type,
             alreadyVerified: true,
           });
           router.replace(next);

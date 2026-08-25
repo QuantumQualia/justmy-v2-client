@@ -1,4 +1,4 @@
-import type { OsName } from "@/lib/os-types";
+import { isBusinessOs, type OsName } from "@/lib/os-types";
 import { verifyEmailHref } from "@/lib/auth/email-verification";
 
 /** Same-origin path so newsstand hosts keep /verify-email and /biz-os. */
@@ -7,8 +7,7 @@ export function bizOsHref(path: string): string {
 }
 
 export function isBizProfile(profile?: { type?: string; osName?: string } | null): boolean {
-  const t = (profile?.type || profile?.osName || "").toString().toUpperCase();
-  return t === "BIZ";
+  return isBusinessOs(profile?.osName || profile?.type);
 }
 
 /** Claim-only cards (name/zip/phone) still need onboard. */
@@ -54,7 +53,7 @@ export function resolveBizAuthPath(options: {
   if (!isDefault && explicit !== "/dashboard?welcome=true") {
     return explicit;
   }
-  if (!isBizProfile(options.profile) && options.profile?.type !== "biz") {
+  if (!isBizProfile(options.profile)) {
     return options.fallback || "/dashboard";
   }
   if (options.emailVerified === false) {
@@ -67,6 +66,7 @@ export function profileIdFromMe(me: {
   profile?: { id?: string | number };
   profileId?: number;
   profileType?: OsName;
+  osName?: OsName;
 }): number | null {
   const raw = me.profile?.id ?? me.profileId;
   if (raw == null) return null;

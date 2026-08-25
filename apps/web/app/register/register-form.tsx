@@ -32,7 +32,7 @@ export default function RegisterForm() {
     searchParams.get("type"),
     DEFAULT_PROFILE_KIND
   );
-  const profileType = profileKindToOsName(profileKind);
+  const osName = profileKindToOsName(profileKind);
   const isBusiness = isBusinessProfileKind(profileKind);
   
   // 2. Get referral code from URL (supports both ?ref= and ?referral=)
@@ -54,7 +54,7 @@ export default function RegisterForm() {
   const oauth = useOauthSignIn({
     zipCode: formData.zipCode || newsZip || undefined,
     referralCode: formData.referralCode,
-    profileType,
+    osName,
     onSuccess: (response) =>
       finishAuthRedirect(router, response, {
         fallback: afterRegisterPath,
@@ -70,7 +70,7 @@ export default function RegisterForm() {
     try {
       await authService.register({
         ...formData,
-        profileType: profileType,
+        osName,
         ...(formData.referralCode && { referralCode: formData.referralCode.trim() }),
       });
 

@@ -32,7 +32,9 @@ export interface RegisterData {
   password: string;
   zipCode: string;
   businessName?: string;
-  profileType: OsName;
+  osName: OsName;
+  /** @deprecated send osName */
+  profileType?: OsName;
   referralCode?: string;
 }
 
@@ -78,6 +80,7 @@ export interface User {
   avatarUrl?: string | null;
   emailVerified?: boolean;
   role?: string;
+  osName?: OsName;
   profileType?: OsName;
   profileId?: number;
   businessName?: string;
@@ -103,6 +106,7 @@ export interface OauthGoogleData {
   idToken: string;
   zipCode?: string;
   referralCode?: string;
+  osName?: OsName;
   profileType?: OsName;
 }
 
@@ -112,6 +116,7 @@ export interface OauthAppleData {
   lastName?: string;
   zipCode?: string;
   referralCode?: string;
+  osName?: OsName;
   profileType?: OsName;
 }
 
@@ -179,7 +184,10 @@ export const authService = {
     try {
       const response = await apiRequest<AuthResponse>("auth/register", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          osName: data.osName || data.profileType,
+        }),
         skipAuth: true, // Don't send token for registration
       });
 
@@ -273,7 +281,8 @@ export const authService = {
         const user: User = {
           ...nested,
           profile,
-          profileType: nested.profileType || profile?.osName || profile?.type,
+          osName: nested.osName || nested.profileType || profile?.osName || profile?.type,
+          profileType: nested.osName || nested.profileType || profile?.osName || profile?.type,
           profileId: Number(profile?.id) || undefined,
           emailVerified: Boolean(nested.emailVerified),
           role: String(nested.role || "").toUpperCase() === "ADMIN" ? "ADMIN" : "USER",
