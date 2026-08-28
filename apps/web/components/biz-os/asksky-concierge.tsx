@@ -21,11 +21,14 @@ import {
   useAskSkyConciergeStore,
   type AddressDraft,
   type CardDrafts,
+  type ConciergeAction,
   type HotlinkDraft,
   type PhoneDraft,
   type SocialDraft,
 } from "@/lib/store/asksky-concierge-store";
 import { bumpBizOsPageData, useBizOsProfile, useInvalidateBizOsHome, BIZ_OS_CONNECT_GOOGLE_EVENT } from "./use-biz-os-profile";
+import { subscriptionService } from "@/lib/services/subscription";
+import { OS_NAME } from "@/lib/os-types";
 
 const SUPPORT_RE =
   /\b(fun\s*crew|flag\s+(the\s+)?team|talk to (a )?human|need (human )?support|support ticket|i('m| am) stuck|upgrade|command\s*os)\b/i;
@@ -165,23 +168,25 @@ export function AskSkyConcierge({
   const setInput = useAskSkyConciergeStore((s) => s.setInput);
   const awaitingWebsite = useAskSkyConciergeStore((s) => s.awaitingWebsite);
   const setAwaitingWebsite = useAskSkyConciergeStore((s) => s.setAwaitingWebsite);
-  const helloSentFor = useAskSkyConciergeStore((s) => s.helloSentFor);
-  const markHello = useAskSkyConciergeStore((s) => s.markHello);
+  const beginPageHello = useAskSkyConciergeStore((s) => s.beginPageHello);
   const [loading, setLoading] = useState(false);
   const [draft, setDraft] = useState<{ summary: string; planId?: number } | null>(null);
   const [draftOpen, setDraftOpen] = useState(false);
   const [applying, setApplying] = useState(false);
   const applyingRef = useRef(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const pageSession = useRef(0);
 
   useEffect(() => {
-    if (!profileId || helloSentFor === profileId) return;
-    markHello(profileId);
-    void send("hello", surface, true);
+    if (!profileId) return;
+    const key = `${profileId}:${pathname}:${surface}`;
+    if (!beginPageHello(key)) return;
+    const seq = ++pageSession.current;
+    void send("hello", surface, true, seq);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profileId]);
+  }, [profileId, pathname, surface]);
 
-  async function send(message: string, nextStage = surface, silent = false) {
+  async function send(message: string, nextStage = surface, silent = false, session = pageSession.current) {
     if (!profileId || !message.trim()) return;
     if (!silent) {
       setTurns((t) => [...t, { role: "user", text: message }]);
@@ -193,8 +198,10 @@ export function AskSkyConcierge({
         setDraftOpen(true);
       }
       const res = await bizOsService.onboardingMessage(profileId, nextStage, message);
+      if (session !== pageSession.current) return;
       setTurns((t) => {
-        if (silent && t.some((turn) => turn.role === "asksky" && turn.text === res.reply)) {
+        if (silent) return t.length ? t : [{ role: "asksky", text: res.reply }];
+        if (t.some((turn) => turn.role === "asksky" && turn.text === res.reply)) {
           return t;
         }
         return [...t, { role: "asksky", text: res.reply }];
@@ -491,6 +498,113 @@ export function AskSkyConcierge({
     }
   }
 
+  async function runTurnAction(action: ConciergeAction) {
+    if (!profileId || loading) return;
+    setLoading(true);
+    try {
+      if (action.kind === "diy") {
+        const plan = await bizOsService.createPlan(profileId, "skyscan-diy");
+        setTurns((t) => [
+          ...t,
+          { role: "asksky", text: `DIY BattlePlan is on your dashboard: ${plan.title}. Tasks you already finished were skipped; the rest have a short how-to.` },
+        ]);
+        router.push(`/biz-os/battle-plans/${plan.id}`);
+        await invalidateHome();
+        return;
+      }
+      if (action.kind === "upgrade") {
+        const plans = await subscriptionService.listPlans();
+        const command = plans.find((p) => p.osName === OS_NAME.COMMAND);
+        const monthly = command?.prices.find((p) => p.interval === "month") || command?.prices[0];
+        if (!monthly) {
+          router.push("/biz-os/pricing");
+          return;
+        }
+        const url = await subscriptionService.createCheckoutSession(monthly.priceId);
+        setTurns((t) => [
+          ...t,
+          {
+            role: "asksky",
+            text: "Command OS checkout is opening. After you subscribe I’ll lock GEO schema and set up SmartHandoff on this account.",
+          },
+        ]);
+        window.location.href = url;
+        return;
+      }
+      if (action.kind === "command_plan") {
+        const plan = await bizOsService.createPlan(profileId, "skyscan-command");
+        setTurns((t) => [
+          ...t,
+          { role: "asksky", text: `Custom Command BattlePlan attached: ${plan.title}. Finished tasks were skipped; each remaining step has a short how-to.` },
+        ]);
+        router.push(`/biz-os/battle-plans/${plan.id}`);
+        await invalidateHome();
+        return;
+      }
+      if (action.kind === "funcrew" || action.kind === "funcrew_ent" || action.kind === "funcrew_manual") {
+        const res = await bizOsService.funCrew(profileId);
+        setTurns((t) => [
+          ...t,
+          {
+            role: "asksky",
+            text:
+              action.kind === "funcrew_ent"
+                ? "#FunCREW Squad has your competitive targets. Zero extra credits on this handoff."
+                : "#FunCREW has received your task! We are on it.",
+          },
+        ]);
+        await invalidateHome();
+        if (res.planId) router.push(`/biz-os/battle-plans/${res.planId}`);
+        return;
+      }
+      if (action.kind === "attach_campaign" || action.kind === "new_campaign") {
+        const latest = await bizOsService.listSkyscans(profileId);
+        const audit = latest[0]?.auditData as {
+          extractedTargets?: Array<{ label?: string }>;
+        } | undefined;
+        const keywords = (audit?.extractedTargets || []).map((t) => t.label).filter(Boolean) as string[];
+        const campaigns = await bizOsService.listCampaigns(profileId);
+        const active = campaigns.find((c) => c.status === "active");
+        const res = await bizOsService.attachScanToCampaign(profileId, {
+          campaignId: action.kind === "attach_campaign" ? active?.id : undefined,
+          newCampaignName:
+            action.kind === "new_campaign" ? "New SkySCAN campaign" : active?.name,
+          keywords,
+          extractedTargets: audit?.extractedTargets,
+        });
+        setTurns((t) => [
+          ...t,
+          { role: "asksky", text: `Mapped keyword gaps into ${res.plan?.title || "your BattlePlan"}.` },
+        ]);
+        if (res.plan?.id) router.push(`/biz-os/battle-plans/${res.plan.id}`);
+        await invalidateHome();
+        return;
+      }
+      if (action.kind === "polish") {
+        void send("Polish this SkySCAN strategy with the latest gaps");
+        return;
+      }
+      if (action.kind === "broadcast") {
+        const syn = await bizOsService.runSyndication(profileId, false);
+        const lines = (syn.receipt || [])
+          .map((r) => `${r.status === "published" ? "🟢" : "🔴"} ${r.label}`)
+          .join("\n");
+        setTurns((t) => [
+          ...t,
+          {
+            role: "asksky",
+            text: `${syn.message}\n${lines}${syn.bundleNote ? `\n${syn.bundleNote}` : ""}`,
+            actions: syn.bundleNote
+              ? [{ id: "funcrew_manual", label: "Send to #FunCREW for Manual Posting", kind: "funcrew_manual" }]
+              : undefined,
+          },
+        ]);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function submitMessage(raw: string, nextStage = surface) {
     const typed = raw.trim();
     if (!typed) return;
@@ -532,8 +646,8 @@ export function AskSkyConcierge({
   const chips =
     surface === "skyscan"
       ? [
-          { label: "Run SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan"), primary: true },
-          { label: "Explain my score", onClick: () => void send("Explain my SKYSCAN score") },
+          { label: "Run SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan"), primary: true },
+          { label: "Explain my score", onClick: () => void send("Explain my SkySCAN score") },
           { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
         ]
       : surface === "battle_plan"
@@ -551,9 +665,21 @@ export function AskSkyConcierge({
           : surface === "home" || surface === "apps"
             ? [
                 { label: "Polish myCARD", onClick: () => router.push("/biz-os/onboard"), primary: true },
-                { label: "Run SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan") },
+                { label: "Run SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan") },
                 { label: "Start a plan", onClick: () => void send("Start a Battle Plan", "battle_plan") },
               ]
+            : surface === "pricing"
+              ? [
+                  { label: "See Command OS", onClick: () => router.push("/biz-os/pricing"), primary: true },
+                  { label: "Start a plan", onClick: () => void send("Start a Battle Plan", "battle_plan") },
+                  { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
+                ]
+              : surface === "settings"
+                ? [
+                    { label: "Polish myCARD", onClick: () => router.push("/biz-os/onboard"), primary: true },
+                    { label: "Run SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan") },
+                    { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
+                  ]
             : [
                 {
                   label: hasWebsite ? "Refresh from website" : "Scan my website",
@@ -565,7 +691,7 @@ export function AskSkyConcierge({
                 { label: "Draft tagline", onClick: () => void send("Write a short tagline for myCARD") },
                 { label: "Draft About", onClick: () => void send("Draft an About statement") },
                 { label: applying ? "Applying…" : "Apply drafts", onClick: () => void applyCardDrafts(), disabled: !pending || applying },
-                { label: "SKYSCAN", onClick: () => void send("Run SKYSCAN", "skyscan") },
+                { label: "SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan") },
                 { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
               ];
 
@@ -601,6 +727,22 @@ export function AskSkyConcierge({
             }
           >
             {turn.text}
+            {turn.role === "asksky" && turn.actions?.length ? (
+              <div className="mt-2 flex flex-col gap-1.5">
+                {turn.actions.map((action) => (
+                  <Button
+                    key={action.id}
+                    size="sm"
+                    variant={action.id.endsWith("b") || action.kind === "upgrade" ? "outline" : "default"}
+                    className="h-auto whitespace-normal py-1.5 text-left text-xs"
+                    disabled={loading}
+                    onClick={() => void runTurnAction(action)}
+                  >
+                    {action.label}
+                  </Button>
+                ))}
+              </div>
+            ) : null}
           </div>
         ))}
         {loading ? (

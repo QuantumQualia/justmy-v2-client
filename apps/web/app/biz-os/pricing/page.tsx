@@ -35,7 +35,7 @@ const TIER_META: Record<
   { blurb: string; icon: LucideIcon; featured?: boolean }
 > = {
   BIZ: {
-    blurb: "Verified card, profile, and a baseline SKYSCAN.",
+    blurb: "Verified card, profile, and a baseline SkySCAN.",
     icon: Briefcase,
   },
   COMMAND: {

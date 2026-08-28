@@ -50,7 +50,7 @@ export default function BizOsHomePage() {
       icon: Star,
     },
     {
-      label: "SKYSCAN",
+      label: "SkySCAN",
       href: "/biz-os/skyscan",
       value: scan ? `${scan.overallScore}/100 visibility` : "Run first audit",
       icon: Radar,
@@ -152,7 +152,7 @@ export default function BizOsHomePage() {
               </span>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Weekly Battle Plan check-ins and monthly SKYSCAN stats will email this profile once we have live activity data.
+              Weekly Battle Plan check-ins and monthly SkySCAN stats will email this profile once we have live activity data.
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-sm text-slate-400">

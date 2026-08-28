@@ -8,7 +8,7 @@ import { Lock, Sparkles } from "lucide-react";
 const HREF: Record<string, string> = {
   myCARD: "/biz-os/onboard",
   "Battle Plans": "/biz-os/battle-plans",
-  SKYSCAN: "/biz-os/skyscan",
+  SkySCAN: "/biz-os/skyscan",
   Reputation: "/biz-os/reputation",
   "App Store": "/biz-os/app-store",
   NewsSTAND: "/news",

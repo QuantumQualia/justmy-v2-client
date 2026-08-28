@@ -839,7 +839,7 @@ export default function ReputationPage() {
               href="/biz-os/skyscan"
               className="mt-4 inline-flex text-sm font-semibold text-violet-600 hover:text-violet-800"
             >
-              See how reviews score on SKYSCAN →
+              See how reviews score on SkySCAN →
             </Link>
           </BizOsCard>
         </aside>

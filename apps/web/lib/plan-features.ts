@@ -90,7 +90,7 @@ export const PLAN_FEATURES: readonly PlanFeature[] = [
   },
   {
     id: "skyscan",
-    label: "SKYSCAN 30/30/40 baseline audit",
+    label: "SkySCAN 30/30/40 baseline audit",
     kind: "access",
     minTier: ACCOUNT_TIER.FREE,
   },

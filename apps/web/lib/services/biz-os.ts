@@ -4,6 +4,68 @@ function withProfile(profileId: number | string) {
   return { profileId: String(profileId) };
 }
 
+export type SkyScanCheck = {
+  key: string;
+  label: string;
+  status: "pass" | "fail" | "gap" | "unavailable";
+  points: number;
+  max: number;
+  detail: string;
+};
+
+export type SkyScanAuditData = {
+  engineVersion?: string;
+  heuristic?: boolean;
+  durationMs?: number;
+  searchProvider?: string;
+  reviewProvider?: string;
+  geoProvider?: string;
+  header?: {
+    name?: string;
+    address?: string | null;
+    website?: string | null;
+    category?: string | null;
+    city?: string | null;
+    zipCode?: string | null;
+  };
+  checks?: SkyScanCheck[];
+  places?: { rating?: number; reviewCount?: number; lastReviewAt?: string | null };
+  geoAnswers?: Array<{ query: string; summary: string; cited: boolean }>;
+  flags?: { geoLocked?: boolean; kbSynced?: boolean; smartHandoff?: boolean };
+  shareOfVoice?: {
+    clientName: string;
+    clientShare: number;
+    competitors: Array<{ name: string; share: number; cited: boolean }>;
+    rank: number;
+  };
+  extractedTargets?: Array<{ kind: string; label: string; detail: string }>;
+};
+
+export type SkyScanReport = {
+  id: number;
+  overallScore: number;
+  scores: { search_indexing?: number; review_authority?: number; ai_presence?: number };
+  auditData?: SkyScanAuditData | null;
+  scannedAt: string;
+};
+
+export type BizOsCampaign = {
+  id: number;
+  name: string;
+  status: string;
+  targetKeywords?: string[] | null;
+  competitor1Name?: string | null;
+  competitor1Url?: string | null;
+  competitor2Name?: string | null;
+  competitor2Url?: string | null;
+};
+
+export type OAuthConnection = {
+  provider: string;
+  status: "connected" | "not_connected" | string;
+  accountName?: string | null;
+};
+
 export type BizOsQueueRow = {
   id: number;
   title: string;
@@ -114,20 +176,77 @@ export const bizOsService = {
   },
 
   runSkyscan(profileId: number | string) {
-    return apiRequest<any>("biz-os/skyscan/run", {
+    return apiRequest<SkyScanReport>("biz-os/skyscan/run", {
       method: "POST",
       params: withProfile(profileId),
     });
   },
 
   listSkyscans(profileId: number | string) {
-    return apiRequest<any[]>("biz-os/skyscan", { params: withProfile(profileId) });
+    return apiRequest<SkyScanReport[]>("biz-os/skyscan", { params: withProfile(profileId) });
   },
 
   funCrew(profileId: number | string) {
-    return apiRequest<any>("biz-os/skyscan/funcrew", {
+    return apiRequest<{ ok: boolean; planId: number; supportDraft?: { summary?: string } }>(
+      "biz-os/skyscan/funcrew",
+      {
+        method: "POST",
+        params: withProfile(profileId),
+      },
+    );
+  },
+
+  listCampaigns(profileId: number | string) {
+    return apiRequest<BizOsCampaign[]>("biz-os/campaigns", { params: withProfile(profileId) });
+  },
+
+  upsertCampaign(
+    profileId: number | string,
+    body: Partial<BizOsCampaign> & { name: string; makeActive?: boolean; targetKeywords?: string[] },
+  ) {
+    return apiRequest<BizOsCampaign>("biz-os/campaigns", {
       method: "POST",
       params: withProfile(profileId),
+      body: JSON.stringify(body),
+    });
+  },
+
+  attachScanToCampaign(
+    profileId: number | string,
+    body: { campaignId?: number; newCampaignName?: string; keywords?: string[]; extractedTargets?: unknown },
+  ) {
+    return apiRequest<{ campaignId: number; plan: { id: number; title: string } }>("biz-os/campaigns/attach-scan", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify(body),
+    });
+  },
+
+  listOAuthConnections(profileId: number | string) {
+    return apiRequest<OAuthConnection[]>("biz-os/oauth-connections", { params: withProfile(profileId) });
+  },
+
+  setOAuthConnection(
+    profileId: number | string,
+    body: { provider: string; connect: boolean; accountName?: string },
+  ) {
+    return apiRequest<OAuthConnection>("biz-os/oauth-connections", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify(body),
+    });
+  },
+
+  runSyndication(profileId: number | string, funCrewFallback = false) {
+    return apiRequest<{
+      jobId: number;
+      receipt: Array<{ provider: string; status: string; label: string }>;
+      bundleNote: string | null;
+      message: string;
+    }>("biz-os/syndication/run", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ funCrewFallback }),
     });
   },
 

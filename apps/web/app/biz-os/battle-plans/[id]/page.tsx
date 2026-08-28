@@ -15,6 +15,69 @@ import {
 } from "@/components/biz-os/biz-os-ui";
 import { cn } from "@workspace/ui/lib/utils";
 
+type PlanTask = {
+  id: number;
+  status: string;
+  taskText: string;
+  description?: string | null;
+  actionHref?: string | null;
+  targetDate?: string;
+};
+
+function TaskRow({
+  task,
+  onToggle,
+}: {
+  task: PlanTask;
+  onToggle: (task: PlanTask) => void;
+}) {
+  const done = task.status === "completed";
+  return (
+    <li>
+      <label
+        className={cn(
+          "flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2.5 text-sm transition",
+          done ? "border-emerald-100 bg-emerald-50/50" : "border-slate-200 hover:border-violet-200",
+        )}
+      >
+        <input
+          type="checkbox"
+          className="mt-0.5"
+          checked={done}
+          onChange={() => onToggle(task)}
+        />
+        <span className="min-w-0 flex-1">
+          <span className={done ? "text-slate-400 line-through" : "text-slate-800"}>
+            {task.taskText}
+            {task.targetDate ? (
+              <span className="ml-2 text-xs text-slate-400">
+                {new Date(task.targetDate).toLocaleDateString()}
+              </span>
+            ) : null}
+          </span>
+          {task.description ? (
+            <span className="mt-1 block text-xs font-normal text-slate-500 no-underline">
+              {task.description}
+              {task.actionHref ? (
+                <>
+                  {" "}
+                  <Link
+                    href={task.actionHref}
+                    className="font-medium text-violet-600 hover:text-violet-800"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Open
+                  </Link>
+                </>
+              ) : null}
+            </span>
+          ) : null}
+        </span>
+      </label>
+    </li>
+  );
+}
+
 export default function BattlePlanWorkspacePage() {
   const params = useParams<{ id: string }>();
   const planId = Number(params.id);
@@ -57,6 +120,8 @@ export default function BattlePlanWorkspacePage() {
 
   const done = plan.tasks?.filter((t: { status: string }) => t.status === "completed").length || 0;
   const total = plan.tasks?.length || 0;
+  const openTasks = (plan.tasks || []).filter((t: { status: string }) => t.status !== "completed");
+  const doneTasks = (plan.tasks || []).filter((t: { status: string }) => t.status === "completed");
 
   return (
     <BizOsPage>
@@ -82,34 +147,26 @@ export default function BattlePlanWorkspacePage() {
             <BizOsProgress value={plan.progress} />
           </div>
           <ul className="mt-5 space-y-2">
-            {plan.tasks?.map((t: { id: number; status: string; taskText: string; targetDate?: string }) => (
-              <li key={t.id}>
-                <label
-                  className={cn(
-                    "flex cursor-pointer items-start gap-3 rounded-2xl border px-3 py-2.5 text-sm transition",
-                    t.status === "completed"
-                      ? "border-emerald-100 bg-emerald-50/50"
-                      : "border-slate-200 hover:border-violet-200",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5"
-                    checked={t.status === "completed"}
-                    onChange={() => void toggle(t)}
-                  />
-                  <span className={t.status === "completed" ? "text-slate-400 line-through" : "text-slate-800"}>
-                    {t.taskText}
-                    {t.targetDate ? (
-                      <span className="ml-2 text-xs text-slate-400">
-                        {new Date(t.targetDate).toLocaleDateString()}
-                      </span>
-                    ) : null}
-                  </span>
-                </label>
+            {openTasks.length ? (
+              openTasks.map((t: PlanTask) => <TaskRow key={t.id} task={t} onToggle={(task) => void toggle(task)} />)
+            ) : (
+              <li className="rounded-2xl border border-emerald-100 bg-emerald-50/50 px-3 py-2.5 text-sm text-emerald-800">
+                Everything on this plan is already done.
               </li>
-            ))}
+            )}
           </ul>
+          {doneTasks.length ? (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                Already done ({doneTasks.length})
+              </summary>
+              <ul className="mt-2 space-y-2">
+                {doneTasks.map((t: PlanTask) => (
+                  <TaskRow key={t.id} task={t} onToggle={(task) => void toggle(task)} />
+                ))}
+              </ul>
+            </details>
+          ) : null}
           <div className="mt-5 flex flex-wrap items-center gap-3">
             <Button variant="outline" onClick={() => void requestTeam()}>
               Request Team

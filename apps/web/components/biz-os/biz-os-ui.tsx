@@ -12,19 +12,22 @@ import {
   Star,
   Store,
   Tag,
+  Settings,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useBizOsHome, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { isPlatformAdmin } from "@/lib/auth/session-user";
+import { isBusinessOs } from "@/lib/os-types";
 
 export const BIZ_OS_NAV = [
   { href: "/biz-os", label: "Home", icon: Home, exact: true },
   { href: "/biz-os/onboard", label: "myCARD", icon: CreditCard },
   { href: "/biz-os/battle-plans", label: "Battle Plans", icon: Crosshair },
-  { href: "/biz-os/skyscan", label: "SKYSCAN", icon: Radar },
+  { href: "/biz-os/skyscan", label: "SkySCAN", icon: Radar },
   { href: "/biz-os/reputation", label: "Reputation", icon: Star },
   { href: "/biz-os/app-store", label: "Apps", icon: Store },
   { href: "/biz-os/pricing", label: "Pricing", icon: Tag },
+  { href: "/biz-os/settings", label: "Settings", icon: Settings },
 ] as const;
 
 export function navIsActive(pathname: string, href: string, exact?: boolean) {
@@ -36,6 +39,10 @@ export function BizOsSubnav() {
   const pathname = usePathname();
   const { me } = useBizOsProfile();
   const showQueue = isPlatformAdmin(me);
+  const navItems =
+    me && !isBusinessOs(me.osName || me.profileType)
+      ? BIZ_OS_NAV.filter((item) => item.href !== "/biz-os/skyscan")
+      : BIZ_OS_NAV;
 
   return (
     <nav
@@ -43,7 +50,7 @@ export function BizOsSubnav() {
       aria-label="Biz OS"
     >
       <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2">
-        {BIZ_OS_NAV.map((item) => {
+        {navItems.map((item) => {
           const active = navIsActive(pathname, item.href, "exact" in item ? Boolean(item.exact) : false);
           const Icon = item.icon;
           return (
@@ -84,11 +91,11 @@ export function BizOsSubnav() {
 export const BIZ_OS_STEPS = [
   { id: "claim", label: "Claim", href: "/biz-os/onboard" },
   { id: "card", label: "Card", href: "/biz-os/onboard" },
-  { id: "skyscan", label: "SKYSCAN", href: "/biz-os/skyscan" },
+  { id: "skyscan", label: "SkySCAN", href: "/biz-os/skyscan" },
   { id: "battle_plan", label: "Battle Plan", href: "/biz-os/battle-plans" },
 ] as const;
 
-/** First-time Claim → Card → SKYSCAN → Battle Plan. Hidden once scan + plan exist. */
+/** First-time Claim → Card → SkySCAN → Battle Plan. Hidden once scan + plan exist. */
 export function BizOsSetupSteps() {
   const { data, ready } = useBizOsHome();
   const hasScan = Boolean(data?.latestScan);
@@ -97,8 +104,8 @@ export function BizOsSetupSteps() {
   if (!ready || (hasScan && hasPlan)) return null;
 
   const next = !hasScan
-    ? "Run SKYSCAN next, then start a Battle Plan."
-    : "SKYSCAN is done. Start a Battle Plan to finish setup.";
+    ? "Run SkySCAN next, then start a Battle Plan."
+    : "SkySCAN is done. Start a Battle Plan to finish setup.";
 
   return (
     <div>
@@ -207,7 +214,7 @@ export function BizOsSetupNotice() {
     !hasScan
       ? {
           href: "/biz-os/skyscan",
-          label: "Run SKYSCAN",
+          label: "Run SkySCAN",
           body: "See how you show up in search, reviews, and conversational AI.",
         }
       : null,
