@@ -1949,6 +1949,7 @@ export function ProfileAgentsPanel({
         header: "Agent",
         cell: ({ row }) => {
           const agent = row.original;
+          const liveSearchDomainCount = agent.liveSearchDomains?.length ?? 0;
           return (
             <div className="min-w-[220px] space-y-1">
               <p className="font-medium text-foreground">{agent.name}</p>
@@ -1962,9 +1963,9 @@ export function ProfileAgentsPanel({
                   variant="outline"
                   className="border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-500/40 dark:bg-sky-500/15 dark:text-sky-300"
                 >
-                  {(agent.liveSearchDomains?.length ?? 0) > 0
-                    ? `Live search · ${agent.liveSearchDomains.length} domain${
-                        agent.liveSearchDomains.length === 1 ? "" : "s"
+                  {liveSearchDomainCount > 0
+                    ? `Live search · ${liveSearchDomainCount} domain${
+                        liveSearchDomainCount === 1 ? "" : "s"
                       }`
                     : "Live search"}
                 </Badge>
