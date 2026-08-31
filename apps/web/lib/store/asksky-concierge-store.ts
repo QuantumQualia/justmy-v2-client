@@ -13,7 +13,8 @@ export type ConciergeAction = {
     | "funcrew_ent"
     | "polish"
     | "broadcast"
-    | "funcrew_manual";
+    | "funcrew_manual"
+    | "voice_recap";
 };
 
 export type ConciergeTurn = {

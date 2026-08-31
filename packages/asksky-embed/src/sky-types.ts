@@ -36,8 +36,8 @@ export interface SkyResolveResponse {
   greetingMessage?: string | null;
   hasKnowledgeBase: boolean;
   /**
-   * True only when the agent has live search enabled and a non-empty domain allowlist.
-   * Domains themselves are admin-only and are not returned on resolve.
+   * True when the agent has live search enabled. An empty allowlist means open web;
+   * domains themselves are admin-only and are not returned on resolve.
    */
   liveSearchEnabled?: boolean;
   /**

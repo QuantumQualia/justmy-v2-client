@@ -85,6 +85,10 @@ const KNOWLEDGE_PAGE_SIZE = 5;
 const AGENTS_PAGE_SIZE = 10;
 /** Poll individual ingesting knowledge sources (GET by id) so progress bars stay current. */
 const KNOWLEDGE_INGESTION_POLL_MS = 5_000;
+/** `--accent` is a saturated orange; do not use it as a hover fill on management chrome. */
+const outlineControlClass =
+  "border-input bg-background text-foreground hover:bg-secondary hover:text-foreground";
+const insetSurfaceClass = "border-border bg-background dark:bg-muted/40";
 
 type IngestingPollTarget = {
   id: string;
@@ -339,14 +343,14 @@ function statusBadgeClass(status: KnowledgeIngestionStatus): string {
     case "completed":
     case "ready":
     case "indexed":
-      return "border-emerald-500/30 bg-emerald-500/10 text-emerald-300";
+      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300";
     case "failed":
-      return "border-red-500/30 bg-red-500/10 text-red-300";
+      return "border-red-200 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/15 dark:text-red-300";
     case "pending":
     case "queued":
-      return "border-amber-500/30 bg-amber-500/10 text-amber-300";
+      return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300";
     case "processing":
-      return "border-blue-500/30 bg-blue-500/10 text-blue-300";
+      return "border-blue-200 bg-blue-50 text-blue-800 dark:border-blue-500/40 dark:bg-blue-500/15 dark:text-blue-300";
     default:
       return "border-border bg-muted text-muted-foreground";
   }
@@ -409,7 +413,7 @@ function StatCard({
   description: string;
 }) {
   return (
-    <Card className="min-w-0 max-w-full rounded-br-none border-border bg-card py-0">
+    <Card className="min-w-0 max-w-full rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card">
       <CardHeader className="gap-1 border-b border-border/80 py-4">
         <CardDescription className="text-muted-foreground">{title}</CardDescription>
         <CardTitle className="text-2xl text-foreground">{value}</CardTitle>
@@ -440,7 +444,7 @@ function AgentFormDialog({
   const [isActive, setIsActive] = React.useState(true);
   const [isPublic, setIsPublic] = React.useState(true);
   const [contactFormKey, setContactFormKey] = React.useState<string>("__none__");
-  const [liveSearchEnabled, setLiveSearchEnabled] = React.useState(false);
+  const [liveSearchEnabled, setLiveSearchEnabled] = React.useState(true);
   const [liveSearchDomains, setLiveSearchDomains] = React.useState<string[]>([]);
   const [shareTrayEnabled, setShareTrayEnabled] = React.useState(false);
   const [shareTrayReadyLabel, setShareTrayReadyLabel] = React.useState("");
@@ -464,7 +468,7 @@ function AgentFormDialog({
     setIsPublic(state.agent?.isPublic ?? true);
     const cf = state.agent?.contactFormId;
     setContactFormKey(typeof cf === "number" && Number.isFinite(cf) ? String(cf) : "__none__");
-    setLiveSearchEnabled(state.agent?.liveSearchEnabled === true);
+    setLiveSearchEnabled(state.agent?.liveSearchEnabled ?? true);
     setLiveSearchDomains(
       Array.isArray(state.agent?.liveSearchDomains) ? [...state.agent.liveSearchDomains] : [],
     );
@@ -526,10 +530,6 @@ function AgentFormDialog({
       );
       return;
     }
-    if (liveSearchEnabled && normalizedDomains.length === 0) {
-      setError("Add at least one domain when live web search is enabled.");
-      return;
-    }
 
     let shareTrayPayload: ReturnType<typeof buildShareTrayPayload>;
     try {
@@ -577,7 +577,7 @@ function AgentFormDialog({
       }}
     >
       <DialogContent
-        className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-2xl"
+        className="max-h-[90vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-2xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -598,7 +598,7 @@ function AgentFormDialog({
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {error ? (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           ) : null}
@@ -623,7 +623,7 @@ function AgentFormDialog({
               <Label htmlFor="agent-active" className="text-foreground">
                 Status
               </Label>
-              <div className="flex h-10 items-center justify-between rounded-lg border border-border bg-card px-3">
+              <div className="flex h-10 items-center justify-between rounded-lg border border-border bg-background px-3">
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden="true"
@@ -711,7 +711,8 @@ function AgentFormDialog({
                   Enable live web search when knowledge base has no answer
                 </Label>
                 <p className="text-xs text-muted-foreground">
-                  Sky will only search these sites when your uploaded knowledge has no match. Off by default.
+                  Sky searches the web when your uploaded knowledge has no match. On by default for new agents. Leave
+                  domains empty for the open web, or add hosts to restrict the search.
                 </p>
               </div>
               <Switch
@@ -726,16 +727,17 @@ function AgentFormDialog({
             <div className={cn("space-y-2", !liveSearchEnabled && "opacity-60")}>
               <TagInput
                 id="agent-live-search-domains"
-                label={`Allowed domains${liveSearchEnabled ? " (required)" : ""}`}
+                label={`Allowed domains${liveSearchEnabled ? " (optional filter)" : ""}`}
                 value={liveSearchDomains}
                 onChange={handleLiveSearchDomainsChange}
                 placeholder="justmy.com, electionshelbytn.gov"
                 disabled={submitting}
                 splitPaste
-                inputClassName="border-border bg-card"
+                inputClassName="border-border bg-background"
               />
               <p className="text-xs text-muted-foreground">
-                Paste URLs or hostnames (max {LIVE_SEARCH_DOMAINS_MAX}). Wildcards like{" "}
+                Optional. Paste URLs or hostnames (max {LIVE_SEARCH_DOMAINS_MAX}) to limit search to those sites.
+                Leave empty to search the open web. Wildcards like{" "}
                 <span className="font-mono">*.com</span> are rejected. Examples:{" "}
                 <span className="font-mono">justmy.com</span>,{" "}
                 <span className="font-mono">justmymemphis.com</span>,{" "}
@@ -865,11 +867,11 @@ function AgentFormDialog({
           </div>
 
           {publicIdentifier ? (
-            <div className="rounded-lg border border-border bg-card px-4 py-3">
+            <div className="rounded-lg border border-border bg-background px-4 py-3">
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Public identifier
               </p>
-              <p className="mt-1 font-mono text-sm text-emerald-300">{publicIdentifier}</p>
+              <p className="mt-1 font-mono text-sm text-emerald-700 dark:text-emerald-300">{publicIdentifier}</p>
             </div>
           ) : null}
 
@@ -879,7 +881,7 @@ function AgentFormDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="border-input bg-background text-foreground hover:bg-accent"
+              className={outlineControlClass}
             >
               Cancel
             </Button>
@@ -1006,7 +1008,7 @@ function KnowledgeSourceDialog({
       }}
     >
       <DialogContent
-        className="border-border bg-background text-foreground sm:max-w-xl"
+        className="border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -1027,7 +1029,7 @@ function KnowledgeSourceDialog({
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           {error && error !== documentRequiredError ? (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           ) : null}
@@ -1088,15 +1090,15 @@ function KnowledgeSourceDialog({
               <div
                 className={`flex min-h-11 items-center gap-3 rounded-lg border px-3 py-2 ${
                   error === documentRequiredError
-                    ? "border-red-500/60 bg-card"
-                    : "border-border bg-card"
+                    ? "border-destructive bg-background"
+                    : "border-border bg-background"
                 }`}
               >
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="shrink-0 border-border bg-muted text-foreground hover:bg-accent"
+                  className="shrink-0 border-border bg-secondary text-foreground hover:bg-secondary/80 hover:text-foreground"
                   disabled={submitting}
                   onClick={() => fileInputRef.current?.click()}
                 >
@@ -1107,7 +1109,7 @@ function KnowledgeSourceDialog({
                 </span>
               </div>
               {error === documentRequiredError ? (
-                <p className="text-xs text-red-400">{documentRequiredError}</p>
+                <p className="text-xs text-destructive">{documentRequiredError}</p>
               ) : (
                 <p className="text-xs text-muted-foreground">PDF only (application/pdf).</p>
               )}
@@ -1120,7 +1122,7 @@ function KnowledgeSourceDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={submitting}
-              className="border-input bg-background text-foreground hover:bg-accent"
+              className={outlineControlClass}
             >
               Cancel
             </Button>
@@ -1199,8 +1201,8 @@ function KnowledgeSourcesCard({
       id={scope === "agent" ? "agent-knowledge-panel" : undefined}
       className={
         scope === "agent"
-          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0"
-          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0"
+          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card"
+          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card"
       }
     >
       <CardHeader className="min-w-0 gap-3 border-b border-border/80 px-4 py-5 sm:px-6">
@@ -1212,8 +1214,8 @@ function KnowledgeSourcesCard({
                 variant="outline"
                 className={
                   scope === "shared"
-                    ? "border-violet-500/30 bg-violet-500/10 text-violet-300"
-                    : "border-cyan-500/30 bg-cyan-500/10 text-cyan-300"
+                    ? "border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-300"
+                    : "border-cyan-200 bg-cyan-50 text-cyan-800 dark:border-cyan-500/40 dark:bg-cyan-500/15 dark:text-cyan-300"
                 }
               >
                 {scope === "shared" ? "Shared" : "Agent-specific"}
@@ -1223,11 +1225,11 @@ function KnowledgeSourcesCard({
               {description}
             </CardDescription>
             {scope === "agent" && selectedAgent ? (
-              <div className="rounded-lg border border-border bg-muted px-3 py-2 text-xs text-muted-foreground">
+              <div className={`rounded-lg ${insetSurfaceClass} px-3 py-2 text-xs text-muted-foreground`}>
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="font-medium text-foreground">{selectedAgent.name}</span>
                   {resolveAgentPublicIdentifier(selectedAgent) ? (
-                    <span className="break-all font-mono text-emerald-300">
+                    <span className="break-all font-mono text-emerald-700 dark:text-emerald-300">
                       {resolveAgentPublicIdentifier(selectedAgent)}
                     </span>
                   ) : null}
@@ -1247,7 +1249,7 @@ function KnowledgeSourcesCard({
                   <SelectTrigger className="border-input bg-background text-foreground">
                     <SelectValue placeholder="Select an agent" />
                   </SelectTrigger>
-                  <SelectContent className="border-border bg-card text-foreground">
+                  <SelectContent className="border-border bg-white text-foreground dark:bg-popover">
                     {availableAgents.map((agent) => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.name}
@@ -1262,7 +1264,7 @@ function KnowledgeSourcesCard({
               <Button
                 type="button"
                 variant="outline"
-                className="w-full justify-center border-input bg-background text-foreground hover:bg-accent"
+                className={`w-full justify-center ${outlineControlClass}`}
                 onClick={onAddWebsite}
                 disabled={scope === "agent" && !selectedAgent}
               >
@@ -1286,18 +1288,18 @@ function KnowledgeSourcesCard({
 
       <CardContent className="min-w-0 space-y-3 px-4 py-5 sm:px-6">
         {error ? (
-          <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
             {error}
           </div>
         ) : null}
 
         {loading ? (
-          <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin" />
             Loading knowledge sources...
           </div>
         ) : sources.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-border bg-muted px-4 py-6 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-dashed border-border px-4 py-6 text-sm text-muted-foreground">
             {scope === "shared"
               ? "No shared knowledge sources yet."
               : selectedAgent
@@ -1319,7 +1321,7 @@ function KnowledgeSourcesCard({
               return (
                 <div
                   key={source.id}
-                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-border bg-muted p-3 sm:p-4"
+                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-border bg-white p-3 dark:bg-muted/30 sm:p-4"
                 >
                   <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
@@ -1354,7 +1356,7 @@ function KnowledgeSourcesCard({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full shrink-0 border-input bg-background text-foreground hover:bg-accent sm:w-auto"
+                          className={`w-full shrink-0 ${outlineControlClass} sm:w-auto`}
                           onClick={() => onDownloadDocument(source)}
                           disabled={!canDownloadDocumentKnowledgeSource(source, busy)}
                         >
@@ -1370,7 +1372,7 @@ function KnowledgeSourcesCard({
                           type="button"
                           variant="outline"
                           size="sm"
-                          className="w-full shrink-0 border-input bg-background text-foreground hover:bg-accent sm:w-auto"
+                          className={`w-full shrink-0 ${outlineControlClass} sm:w-auto`}
                           onClick={() => onReindex(source)}
                           disabled={!canReindexKnowledgeSource(source, busy)}
                         >
@@ -1418,7 +1420,7 @@ function KnowledgeSourcesCard({
             })}
 
             {totalPages > 1 ? (
-              <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+              <div className="flex min-w-0 flex-col gap-3 border-t border-border px-1 pt-3 sm:flex-row sm:items-center sm:justify-between">
                 <p className="min-w-0 text-xs text-muted-foreground">
                   Showing {rangeStart}-{rangeEnd} of {total}
                 </p>
@@ -1427,7 +1429,7 @@ function KnowledgeSourcesCard({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-input bg-background text-foreground hover:bg-accent"
+                    className={outlineControlClass}
                     onClick={() => onPageChange(page - 1)}
                     disabled={loading || page <= 1}
                   >
@@ -1440,7 +1442,7 @@ function KnowledgeSourcesCard({
                     type="button"
                     variant="outline"
                     size="sm"
-                    className="border-input bg-background text-foreground hover:bg-accent"
+                    className={outlineControlClass}
                     onClick={() => onPageChange(page + 1)}
                     disabled={loading || page >= totalPages}
                   >
@@ -1958,16 +1960,19 @@ export function ProfileAgentsPanel({
               {agent.liveSearchEnabled ? (
                 <Badge
                   variant="outline"
-                  className="border-sky-500/30 bg-sky-500/10 text-sky-300"
+                  className="border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-500/40 dark:bg-sky-500/15 dark:text-sky-300"
                 >
-                  Live search · {agent.liveSearchDomains?.length ?? 0} domain
-                  {(agent.liveSearchDomains?.length ?? 0) === 1 ? "" : "s"}
+                  {(agent.liveSearchDomains?.length ?? 0) > 0
+                    ? `Live search · ${agent.liveSearchDomains.length} domain${
+                        agent.liveSearchDomains.length === 1 ? "" : "s"
+                      }`
+                    : "Live search"}
                 </Badge>
               ) : null}
               {agent.shareTray?.enabled ? (
                 <Badge
                   variant="outline"
-                  className="border-violet-500/30 bg-violet-500/10 text-violet-300"
+                  className="border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-300"
                 >
                   Share tray
                 </Badge>
@@ -1984,7 +1989,7 @@ export function ProfileAgentsPanel({
             variant="outline"
             className={
               row.original.isActive
-                ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300"
                 : "border-border bg-muted text-muted-foreground"
             }
           >
@@ -2025,7 +2030,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-input bg-background text-foreground hover:bg-accent"
+                className={outlineControlClass}
                 onClick={() =>
                   setAgentDialogState({
                     open: true,
@@ -2041,7 +2046,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-input bg-background text-foreground hover:bg-accent"
+                className={outlineControlClass}
                 disabled={typeof agent.contactFormId !== "number"}
                 title={
                   typeof agent.contactFormId === "number"
@@ -2057,7 +2062,7 @@ export function ProfileAgentsPanel({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-input bg-background text-foreground hover:bg-accent"
+                className={outlineControlClass}
                 disabled={!agent.isActive}
                 title={
                   agent.isActive
@@ -2246,7 +2251,7 @@ export function ProfileAgentsPanel({
 
       <div className="min-w-0 space-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-300">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
             <Bot className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -2280,7 +2285,7 @@ export function ProfileAgentsPanel({
         />
       </div>
 
-      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0">
+      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card">
         <CardHeader className="border-b border-border/80 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">
@@ -2317,7 +2322,7 @@ export function ProfileAgentsPanel({
             emptyMessage="No agents yet. Create the first one to start configuring multi-agent behavior."
           />
           {agentsTotalPages > 1 ? (
-            <div className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-muted px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+            <div className="flex min-w-0 flex-col gap-3 border-t border-border px-1 pt-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="min-w-0 text-xs text-muted-foreground">
                 Showing {agentsRangeStart}-{agentsRangeEnd} of {agentsTotal}
               </p>
@@ -2326,7 +2331,7 @@ export function ProfileAgentsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-input bg-background text-foreground hover:bg-accent"
+                  className={outlineControlClass}
                   onClick={() => setAgentsPage((current) => Math.max(1, current - 1))}
                   disabled={agentsQuery.isPending || agentsPage <= 1}
                 >
@@ -2339,7 +2344,7 @@ export function ProfileAgentsPanel({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-input bg-background text-foreground hover:bg-accent"
+                  className={outlineControlClass}
                   onClick={() => setAgentsPage((current) => current + 1)}
                   disabled={agentsQuery.isPending || agentsPage >= agentsTotalPages}
                 >

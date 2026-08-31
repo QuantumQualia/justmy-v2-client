@@ -87,7 +87,7 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-red-400">
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
@@ -96,7 +96,7 @@ export function DataTable<TData, TValue>({
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="border-border bg-muted">
+              <TableRow key={headerGroup.id} className="border-border bg-secondary/70 hover:bg-secondary/70">
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id} className="text-muted-foreground">
                     {header.isPlaceholder
@@ -125,7 +125,7 @@ export function DataTable<TData, TValue>({
                 <TableRow
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
-                  className="border-border hover:bg-accent"
+                  className="border-border hover:bg-muted/60"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
@@ -161,7 +161,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage - 1)}
               disabled={currentPage === 1}
-              className="bg-card border-border text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-border bg-background text-foreground hover:bg-secondary hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <ChevronLeft className="h-4 w-4" />
               Previous
@@ -187,7 +187,7 @@ export function DataTable<TData, TValue>({
                     className={
                       currentPage === pageNum
                         ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                        : "bg-card border-border text-foreground hover:bg-accent"
+                        : "border-border bg-background text-foreground hover:bg-secondary hover:text-foreground"
                     }
                   >
                     {pageNum}
@@ -200,7 +200,7 @@ export function DataTable<TData, TValue>({
               size="sm"
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage === displayTotalPages}
-              className="bg-card border-border text-foreground hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed"
+              className="border-border bg-background text-foreground hover:bg-secondary hover:text-foreground disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Next
               <ChevronRight className="h-4 w-4" />

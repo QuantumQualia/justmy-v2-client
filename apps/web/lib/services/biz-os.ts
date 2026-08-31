@@ -39,6 +39,8 @@ export type SkyScanAuditData = {
     rank: number;
   };
   extractedTargets?: Array<{ kind: string; label: string; detail: string }>;
+  voiceRecapUrl?: string;
+  voiceRecapScript?: string;
 };
 
 export type SkyScanReport = {
@@ -64,6 +66,18 @@ export type OAuthConnection = {
   provider: string;
   status: "connected" | "not_connected" | string;
   accountName?: string | null;
+  configured?: boolean;
+};
+
+export type SyndicationJob = {
+  jobId: number;
+  receipt: Array<{ provider: string; status: string; label: string }>;
+  bundleNote: string | null;
+  bundleUrl?: string | null;
+  voiceRecapUrl?: string | null;
+  message?: string;
+  status?: string;
+  createdAt?: string;
 };
 
 export type BizOsQueueRow = {
@@ -226,6 +240,21 @@ export const bizOsService = {
     return apiRequest<OAuthConnection[]>("biz-os/oauth-connections", { params: withProfile(profileId) });
   },
 
+  startOAuthConnection(profileId: number | string, provider: string) {
+    return apiRequest<{ authUrl: string }>("biz-os/oauth-connections/start", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ provider }),
+    });
+  },
+
+  completeOAuthConnection(body: { code: string; state: string }) {
+    return apiRequest<OAuthConnection & { profileId?: number }>("biz-os/oauth-connections/complete", {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+
   setOAuthConnection(
     profileId: number | string,
     body: { provider: string; connect: boolean; accountName?: string },
@@ -238,15 +267,23 @@ export const bizOsService = {
   },
 
   runSyndication(profileId: number | string, funCrewFallback = false) {
-    return apiRequest<{
-      jobId: number;
-      receipt: Array<{ provider: string; status: string; label: string }>;
-      bundleNote: string | null;
-      message: string;
-    }>("biz-os/syndication/run", {
+    return apiRequest<SyndicationJob>("biz-os/syndication/run", {
       method: "POST",
       params: withProfile(profileId),
       body: JSON.stringify({ funCrewFallback }),
+    });
+  },
+
+  latestSyndication(profileId: number | string) {
+    return apiRequest<SyndicationJob | null>("biz-os/syndication/latest", {
+      params: withProfile(profileId),
+    });
+  },
+
+  createVoiceRecap(profileId: number | string) {
+    return apiRequest<{ audioUrl: string; script: string; scanId: number }>("biz-os/skyscan/voice-recap", {
+      method: "POST",
+      params: withProfile(profileId),
     });
   },
 

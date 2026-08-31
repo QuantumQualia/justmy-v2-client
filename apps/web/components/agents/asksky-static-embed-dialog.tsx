@@ -111,10 +111,10 @@ export function AskSkyStaticEmbedDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Link2 className="h-5 w-5 text-emerald-400" />
+            <Link2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             AskSKY! static embed
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -126,24 +126,24 @@ export function AskSkyStaticEmbedDialog({
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
+          <div className="rounded-lg border border-border bg-background px-3 py-2 text-sm text-muted-foreground">
             <span className="text-muted-foreground">Agent:</span>{" "}
             <span className="font-medium text-foreground">{agent?.name ?? "—"}</span>
           </div>
 
           {!slugOk ? (
-            <p className="text-sm text-amber-200">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
               Your active profile has no slug. Open a profile with a slug, then try again.
             </p>
           ) : null}
           {!tokenOk ? (
-            <p className="text-sm text-amber-200">
+            <p className="text-sm text-amber-800 dark:text-amber-200">
               This agent has no public token or identifier yet. Make the agent public or set a public identifier, then
               try again.
             </p>
           ) : null}
 
-          <div className="rounded-lg border border-border bg-card p-4">
+          <div className="rounded-lg border border-border bg-background p-4">
             <div className="min-w-0 space-y-2">
               <Label htmlFor="asksky-embed-variant" className="text-foreground">
                 Interface style
@@ -190,7 +190,7 @@ export function AskSkyStaticEmbedDialog({
                 type="button"
                 variant="outline"
                 size="sm"
-                className="border-border bg-card text-foreground"
+                className="border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
                 disabled={!embedUrl}
                 onClick={() => copy(embedUrl, "Preview URL")}
               >
@@ -202,7 +202,7 @@ export function AskSkyStaticEmbedDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-border bg-card text-foreground"
+                  className="border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
                   asChild
                 >
                   <a href={embedUrl} target="_blank" rel="noopener noreferrer">
@@ -215,7 +215,7 @@ export function AskSkyStaticEmbedDialog({
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="border-border bg-card text-foreground"
+                  className="border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
                   disabled
                 >
                   <ExternalLink className="mr-2 h-4 w-4" />
@@ -246,7 +246,7 @@ export function AskSkyStaticEmbedDialog({
               type="button"
               variant="outline"
               size="sm"
-              className="border-border bg-card text-foreground"
+              className="border-input bg-background text-foreground hover:bg-secondary hover:text-foreground"
               disabled={!scriptSnippet}
               onClick={() => copy(scriptSnippet, "Script embed")}
             >

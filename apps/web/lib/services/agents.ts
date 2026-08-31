@@ -52,9 +52,9 @@ export interface AgentResponseDto {
   isPublic?: boolean;
   publicIdentifier?: string | null;
   publicConfig?: AgentPublicConfigDto | null;
-  /** Opt-in curated live web search when KB has no match. Default false. */
+  /** Live web search when KB has no match. Default true for new agents. */
   liveSearchEnabled?: boolean;
-  /** Hostname allowlist for live search (e.g. `justmy.com`). */
+  /** Optional hostname allowlist for live search (e.g. `justmy.com`). Empty = open web. */
   liveSearchDomains?: string[];
   /** Opt-in Ready CTA + share tray; null when disabled / unset. */
   shareTray?: AgentShareTrayDto | null;

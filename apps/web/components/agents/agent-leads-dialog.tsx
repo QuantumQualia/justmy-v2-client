@@ -113,7 +113,7 @@ export function AgentLeadsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{selected ? `Submission #${selected.id}` : title}</DialogTitle>
           <DialogDescription className="text-muted-foreground">
@@ -161,7 +161,7 @@ export function AgentLeadsDialog({
                 <Button
                   type="button"
                   size="sm"
-                  className="bg-muted text-foreground hover:bg-accent"
+                  className="bg-secondary text-foreground hover:bg-secondary/80 hover:text-foreground"
                   onClick={() => setAppliedQ(qDraft.trim())}
                 >
                   Search
@@ -183,7 +183,7 @@ export function AgentLeadsDialog({
             </div>
 
             {submissionsQuery.isError ? (
-              <div className="mx-1 rounded-xl border border-red-500/30 bg-red-950/30 px-4 py-3 text-sm text-red-200">
+              <div className="mx-1 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                 {submissionsQuery.error instanceof Error ? submissionsQuery.error.message : "Failed to load."}
               </div>
             ) : (
@@ -195,7 +195,7 @@ export function AgentLeadsDialog({
                 ) : (
                   <div className="overflow-x-auto rounded-lg border border-border">
                     <table className="w-full min-w-[480px] text-left text-sm">
-                      <thead className="border-b border-border bg-card text-xs uppercase text-muted-foreground">
+                      <thead className="border-b border-border bg-secondary/70 text-xs uppercase text-muted-foreground">
                         <tr>
                           <th className="px-3 py-2">Submitted</th>
                           <th className="max-w-[200px] px-3 py-2">{col0?.label ?? "Field 1"}</th>
@@ -218,7 +218,7 @@ export function AgentLeadsDialog({
                             return (
                               <tr
                                 key={r.id}
-                                className="cursor-pointer border-b border-border/80 hover:bg-accent"
+                                className="cursor-pointer border-b border-border/80 hover:bg-muted/60"
                                 onClick={() => setSelected(r)}
                               >
                                 <td className="whitespace-nowrap px-3 py-2 text-muted-foreground">
@@ -248,7 +248,7 @@ export function AgentLeadsDialog({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-8 border-border bg-card px-2"
+                      className="h-8 border-input bg-background px-2 text-foreground hover:bg-secondary hover:text-foreground"
                       disabled={!canPrev || submissionsQuery.isFetching}
                       onClick={() => setSkip((s) => Math.max(0, s - PAGE_SIZE))}
                     >
@@ -258,7 +258,7 @@ export function AgentLeadsDialog({
                       type="button"
                       variant="outline"
                       size="sm"
-                      className="h-8 border-border bg-card px-2"
+                      className="h-8 border-input bg-background px-2 text-foreground hover:bg-secondary hover:text-foreground"
                       disabled={!canNext || submissionsQuery.isFetching}
                       onClick={() => setSkip((s) => s + PAGE_SIZE)}
                     >

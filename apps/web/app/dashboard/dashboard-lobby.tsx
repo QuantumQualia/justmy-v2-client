@@ -91,7 +91,7 @@ export default function DashboardLobby() {
 
   return (
     <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground font-sans relative">
-      <div className="pt-20">
+      <div className="px-4 py-8 sm:px-6">
         {/* <WelcomeMessage />
         <DayInHistory /> */}
         {/* <div className="w-full max-w-3xl mx-auto px-4 mb-6">

@@ -59,7 +59,7 @@ export function ConfirmDeletionModal({
         onOpenChange(nextOpen);
       }}
     >
-      <AlertDialogContent className="rounded-2xl rounded-br-none border-border bg-card shadow-2xl shadow-black/40">
+      <AlertDialogContent className="rounded-2xl rounded-br-none border-border bg-white text-foreground shadow-xl dark:bg-card">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-foreground">{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">
@@ -70,7 +70,7 @@ export function ConfirmDeletionModal({
         <AlertDialogFooter>
           <AlertDialogCancel
             disabled={loading}
-            className="rounded-lg rounded-br-none border-border text-foreground hover:bg-accent hover:text-foreground"
+            className="rounded-lg rounded-br-none border-border text-foreground hover:bg-secondary hover:text-foreground"
           >
             {cancelText}
           </AlertDialogCancel>

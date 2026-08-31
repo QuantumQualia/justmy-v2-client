@@ -584,21 +584,34 @@ export function AskSkyConcierge({
         void send("Polish this SkySCAN strategy with the latest gaps");
         return;
       }
+      if (action.kind === "voice_recap") {
+        const recap = await bizOsService.createVoiceRecap(profileId);
+        setTurns((t) => [
+          ...t,
+          {
+            role: "asksky",
+            text: `Voice recap is ready. Play it on SkySCAN or open this audio link:\n${recap.audioUrl}`,
+          },
+        ]);
+        bumpBizOsPageData();
+        return;
+      }
       if (action.kind === "broadcast") {
         const syn = await bizOsService.runSyndication(profileId, false);
         const lines = (syn.receipt || [])
-          .map((r) => `${r.status === "published" ? "🟢" : "🔴"} ${r.label}`)
+          .map((r) => `${r.status === "published" || r.status === "assets_ready" ? "🟢" : "🔴"} ${r.label}`)
           .join("\n");
         setTurns((t) => [
           ...t,
           {
             role: "asksky",
-            text: `${syn.message}\n${lines}${syn.bundleNote ? `\n${syn.bundleNote}` : ""}`,
+            text: `${syn.message}\n${lines}${syn.bundleUrl ? `\nDownload pack: ${syn.bundleUrl}` : ""}${syn.bundleNote ? `\n${syn.bundleNote}` : ""}`,
             actions: syn.bundleNote
               ? [{ id: "funcrew_manual", label: "Send to #FunCREW for Manual Posting", kind: "funcrew_manual" }]
               : undefined,
           },
         ]);
+        bumpBizOsPageData();
       }
     } finally {
       setLoading(false);

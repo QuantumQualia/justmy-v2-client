@@ -151,7 +151,7 @@ export function FormSubmissionDetailContent(props: {
           type="button"
           variant="ghost"
           size="sm"
-          className="-ml-2 h-8 text-xs text-muted-foreground hover:text-foreground"
+          className="-ml-2 h-8 text-xs text-muted-foreground hover:bg-secondary hover:text-foreground"
           onClick={onBack}
         >
           {backLabel}
@@ -171,7 +171,7 @@ export function FormSubmissionDetailDialog({
 }: FormSubmissionDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{submission ? `Submission #${submission.id}` : "Submission"}</DialogTitle>
           <DialogDescription className="text-muted-foreground">

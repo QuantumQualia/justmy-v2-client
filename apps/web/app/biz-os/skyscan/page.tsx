@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import {
   bizOsService,
+  type OAuthConnection,
   type SkyScanCheck,
   type SkyScanReport,
+  type SyndicationJob,
 } from "@/lib/services/biz-os";
 import { useBizOsFetch, useBizOsProfile, useInvalidateBizOsHome } from "@/components/biz-os/use-biz-os-profile";
 import {
@@ -65,8 +67,19 @@ export default function SkyScanPage() {
     [] as Awaited<ReturnType<typeof bizOsService.listCampaigns>>,
     "campaigns",
   );
+  const { data: connections } = useBizOsFetch(
+    (id) => bizOsService.listOAuthConnections(id),
+    [] as OAuthConnection[],
+    "oauth",
+  );
+  const { data: lastSyn } = useBizOsFetch(
+    (id) => bizOsService.latestSyndication(id).catch(() => null),
+    null as SyndicationJob | null,
+    "syn",
+  );
   const [running, setRunning] = useState(false);
   const [savingCampaign, setSavingCampaign] = useState(false);
+  const [recapBusy, setRecapBusy] = useState(false);
   const [comp1, setComp1] = useState("");
   const [comp2, setComp2] = useState("");
   const setDockOpen = useAskSkyConciergeStore((s) => s.setDockOpen);
@@ -102,20 +115,30 @@ export default function SkyScanPage() {
       { id: "a", label: "Option A: Generate Free DIY BattlePlan", kind: "diy" },
       { id: "b", label: "Option B: Upgrade to Command OS to Auto-Fix", kind: "upgrade" },
     ];
+    if (isCommand) {
+      const flags = audit.flags || {};
+      text = `${text}\n${flags.geoLocked ? "🟢" : "🟡"} GEO locking · ${flags.kbSynced ? "🟢" : "🟡"} Knowledge Base sync`;
+    }
     if (isEnterprise) {
       text = `${text}\nI extracted entity and topical targets so we can route them into a campaign.`;
       actions = [
-        { id: "a", label: 'Option A: Attach to active BattlePlan', kind: "attach_campaign" },
+        { id: "a", label: "Option A: Attach to active BattlePlan", kind: "attach_campaign" },
         { id: "b", label: "Option B: Start a New Separate Campaign", kind: "new_campaign" },
         { id: "c", label: "Option C: Have #FunCREW Squad Execute Hands-Free", kind: "funcrew_ent" },
+        { id: "d", label: "Play SkySCAN voice recap", kind: "voice_recap" },
       ];
-    } else if (isCommand) {
-      const flags = audit.flags || {};
-      // When Twilio is ready, append: · ${flags.smartHandoff ? "🟢" : "🟡"} SmartHandoff
-      text = `${text}\n${flags.geoLocked ? "🟢" : "🟡"} GEO locking · ${flags.kbSynced ? "🟢" : "🟡"} Knowledge Base sync`;
+    } else if (isCommandPro) {
       actions = [
         { id: "a", label: "Create My Custom BattlePlan", kind: "command_plan" },
         { id: "b", label: "Request #FunCREW Execution", kind: "funcrew" },
+        { id: "c", label: "Play SkySCAN voice recap", kind: "voice_recap" },
+        { id: "d", label: "Approve & Broadcast", kind: "broadcast" },
+      ];
+    } else if (isCommand) {
+      actions = [
+        { id: "a", label: "Create My Custom BattlePlan", kind: "command_plan" },
+        { id: "b", label: "Request #FunCREW Execution", kind: "funcrew" },
+        { id: "c", label: "Play SkySCAN voice recap", kind: "voice_recap" },
       ];
     }
     setDockOpen(true);
@@ -123,6 +146,36 @@ export default function SkyScanPage() {
       ...prev.filter((t) => !t.text.startsWith("Your SkySCAN is")),
       { role: "asksky", text, actions },
     ]);
+  }
+
+  async function generateRecap() {
+    if (!profileId || recapBusy) return;
+    setRecapBusy(true);
+    try {
+      const recap = await bizOsService.createVoiceRecap(profileId);
+      setScans((prev) => {
+        if (!prev[0]) return prev;
+        const first = prev[0];
+        return [
+          {
+            ...first,
+            auditData: {
+              ...(first.auditData || {}),
+              voiceRecapUrl: recap.audioUrl,
+              voiceRecapScript: recap.script,
+            },
+          },
+          ...prev.slice(1),
+        ];
+      });
+      setDockOpen(true);
+      setTurns((t) => [
+        ...t,
+        { role: "asksky", text: `Voice recap is ready. Play it on this page or open ${recap.audioUrl}` },
+      ]);
+    } finally {
+      setRecapBusy(false);
+    }
   }
 
   async function saveCompetitors() {
@@ -227,9 +280,6 @@ export default function SkyScanPage() {
               <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
                 {flags.kbSynced ? "🟢" : "🟡"} Knowledge Base sync
               </span>
-              {/* <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
-                {flags.smartHandoff ? "🟢" : "🟡"} SmartHandoff
-              </span> */}
             </div>
           ) : null}
         </BizOsCard>
@@ -275,6 +325,21 @@ export default function SkyScanPage() {
             );
           })}
         </div>
+      ) : null}
+
+      {isCommand && latest ? (
+        <BizOsCard>
+          <h2 className="text-sm font-semibold">Voice recap</h2>
+          <p className="mt-1 text-sm text-slate-600">
+            ElevenLabs reads your latest SkySCAN. SmartHandoff is a JustMy text line to JR — you do not connect it here.
+          </p>
+          {latest.auditData?.voiceRecapUrl ? (
+            <audio className="mt-3 w-full" controls src={latest.auditData.voiceRecapUrl} />
+          ) : null}
+          <Button className="mt-3" variant="outline" disabled={recapBusy || !profileId} onClick={() => void generateRecap()}>
+            {recapBusy ? "Generating…" : latest.auditData?.voiceRecapUrl ? "Regenerate recap" : "Generate voice recap"}
+          </Button>
+        </BizOsCard>
       ) : null}
 
       {isCommand && latest ? (
@@ -397,15 +462,33 @@ export default function SkyScanPage() {
         <BizOsCard>
           <h2 className="text-sm font-semibold">Approve & broadcast</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Connected networks publish automatically. Unconnected accounts get a download bundle or FunCREW handoff.
+            Broadcast publishes your listing on JustMy and builds a caption pack on S3. Connect YouTube / Meta / TikTok / GBP on Connections (real OAuth). Unconnected networks stay in the pack for FunCREW.
           </p>
+          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            {connections.map((c) => (
+                <li key={c.provider}>
+                  {c.status === "connected" ? "🟢" : "🔴"} {c.provider === "gbp" ? "Google Business Profile" : c.provider}{" "}
+                  {c.status === "connected" ? "linked — assets ready" : "not connected — pack / FunCREW"}
+                </li>
+              ))}
+          </ul>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
               className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
               href="/biz-os/settings"
             >
-              OAuth connections
+              Connections
             </Link>
+            {lastSyn?.bundleUrl ? (
+              <a
+                className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+                href={lastSyn.bundleUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Download last pack
+              </a>
+            ) : null}
             <Button
               variant="outline"
               onClick={() => {

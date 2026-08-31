@@ -116,7 +116,7 @@ export function TagInput({
         className={cn(
           // Match Input background, border, and focus styles
           "flex min-h-9 w-full flex-wrap items-center gap-2 rounded-md border border-input px-3 py-1 text-base text-foreground shadow-xs transition-[color,box-shadow] outline-none md:text-sm",
-          "bg-muted dark:bg-input/30",
+          "bg-background dark:bg-input/30",
           "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
           "disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50",
           inputClassName
@@ -127,7 +127,7 @@ export function TagInput({
             key={`${tag}-${index}`}
             variant="secondary"
             className={cn(
-              "gap-1 pr-1 font-normal border border-border bg-muted text-foreground hover:bg-accent"
+              "gap-1 pr-1 font-normal border border-border bg-secondary text-foreground hover:bg-secondary"
             )}
           >
             {tag}
@@ -135,7 +135,7 @@ export function TagInput({
               type="button"
               variant="ghost"
               size="icon"
-              className="h-4 w-4 min-w-4 rounded-full p-0 text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="h-4 w-4 min-w-4 rounded-full p-0 text-muted-foreground hover:bg-secondary hover:text-foreground"
               onClick={() => removeTag(index)}
               aria-label={`Remove ${tag}`}
             >
