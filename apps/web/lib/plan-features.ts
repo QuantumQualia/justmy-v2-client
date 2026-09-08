@@ -73,11 +73,13 @@ export type PlanFeature =
       label: string;
       kind: "access";
       minTier: AccountTier;
+      comingSoon?: boolean;
     }
   | {
       id: string;
       label: string;
       kind: "tokens";
+      comingSoon?: boolean;
       tokens: Record<PlanOsName, string>;
     };
 
@@ -90,26 +92,40 @@ export const PLAN_FEATURES: readonly PlanFeature[] = [
   },
   {
     id: "skyscan",
-    label: "SkySCAN 30/30/40 baseline audit",
+    label: "SkySCAN 30/30/40 live audit",
     kind: "access",
     minTier: ACCOUNT_TIER.FREE,
   },
   {
     id: "asksky",
-    label: "AskSKY AI assistant",
+    label: "AskSKY concierge",
+    kind: "access",
+    minTier: ACCOUNT_TIER.FREE,
+  },
+  {
+    id: "voice-recap",
+    label: "SkySCAN voice recap",
+    kind: "access",
+    minTier: ACCOUNT_TIER.COMMAND,
+  },
+  {
+    id: "command-battleplan",
+    label: "Custom BattlePlan & FunCREW handoff",
     kind: "access",
     minTier: ACCOUNT_TIER.COMMAND,
   },
   {
     id: "smarthandoff",
-    label: "Live SmartHandoff SMS bridge",
+    label: "SmartHandoff SMS bridge",
     kind: "access",
     minTier: ACCOUNT_TIER.COMMAND,
+    comingSoon: true,
   },
   {
     id: "myagent-tokens",
     label: "Monthly myAGENT tokens",
     kind: "tokens",
+    comingSoon: true,
     tokens: {
       BIZ: "0",
       COMMAND: "250k",
@@ -118,16 +134,37 @@ export const PLAN_FEATURES: readonly PlanFeature[] = [
     },
   },
   {
+    id: "social-oauth",
+    label: "YouTube & Google Business Profile OAuth",
+    kind: "access",
+    minTier: ACCOUNT_TIER.COMMAND_PRO,
+  },
+  {
+    id: "broadcast-pack",
+    label: "Approve & broadcast pack (JustMy + S3)",
+    kind: "access",
+    minTier: ACCOUNT_TIER.COMMAND_PRO,
+  },
+  {
+    id: "auto-post",
+    label: "Auto-post to YouTube, Meta, TikTok, GBP",
+    kind: "access",
+    minTier: ACCOUNT_TIER.COMMAND_PRO,
+    comingSoon: true,
+  },
+  {
     id: "media-engine",
     label: "Bi-weekly article & video engine",
     kind: "access",
     minTier: ACCOUNT_TIER.COMMAND_PRO,
+    comingSoon: true,
   },
   {
     id: "voice-schema",
     label: "Omni-assistant voice schema (Siri)",
     kind: "access",
     minTier: ACCOUNT_TIER.COMMAND_PRO,
+    comingSoon: true,
   },
   {
     id: "war-room",
@@ -156,6 +193,11 @@ export function previousPlanOs(osName: PlanOsName): PlanOsName | null {
 
 export function planOsLabel(osName: PlanOsName): string {
   return accountTierLabel(osNameToAccountTier(osName));
+}
+
+/** Display name for the listing's current OS (Biz OS, Command OS, Command PRO, Enterprise). */
+export function currentOsLabel(raw?: string | null): string {
+  return accountTierLabel(osNameToAccountTier(raw));
 }
 
 /** Features this tier adds on top of the previous plan (including token upgrades). */

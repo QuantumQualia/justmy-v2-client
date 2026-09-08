@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -18,6 +18,7 @@ import {
   BizOsPage,
   BizOsProgress,
   BizOsSkeleton,
+  ComingSoonBadge,
 } from "@/components/biz-os/biz-os-ui";
 import { useAskSkyConciergeStore, type ConciergeAction } from "@/lib/store/asksky-concierge-store";
 import { hasAccess, osNameToAccountTier, accountTierLabel } from "@/lib/plan-features";
@@ -84,6 +85,13 @@ export default function SkyScanPage() {
   const [comp2, setComp2] = useState("");
   const setDockOpen = useAskSkyConciergeStore((s) => s.setDockOpen);
   const setTurns = useAskSkyConciergeStore((s) => s.setTurns);
+
+  useEffect(() => {
+    const active = campaigns.find((c) => c.status === "active");
+    if (!active) return;
+    setComp1(active.competitor1Name || "");
+    setComp2(active.competitor2Name || "");
+  }, [campaigns]);
 
   const osName = canonicalizeOsName(me?.osName || me?.profileType);
   const isCommand = hasAccess(osName, "command");
@@ -211,8 +219,8 @@ export default function SkyScanPage() {
           description="Live 30 / 30 / 40 audit of search, reviews, and conversational AI."
         />
         <BizOsEmpty
-          title="Biz OS listing required"
-          body="SkySCAN is only available after you sign in with a Biz OS profile. Personal and newsstand accounts cannot run it. Claim or open a business listing to continue."
+          title="Business listing required"
+          body="SkySCAN is only available after you sign in with a business listing. Personal and newsstand accounts cannot run it. Claim or open a listing to continue."
           action={
             <Button asChild>
               <Link href="/biz-os/onboard">Open myCARD / claim</Link>
@@ -280,6 +288,10 @@ export default function SkyScanPage() {
               <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
                 {flags.kbSynced ? "🟢" : "🟡"} Knowledge Base sync
               </span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
+                SmartHandoff
+                <ComingSoonBadge />
+              </span>
             </div>
           ) : null}
         </BizOsCard>
@@ -331,7 +343,7 @@ export default function SkyScanPage() {
         <BizOsCard>
           <h2 className="text-sm font-semibold">Voice recap</h2>
           <p className="mt-1 text-sm text-slate-600">
-            ElevenLabs reads your latest SkySCAN. SmartHandoff is a JustMy text line to JR — you do not connect it here.
+            ElevenLabs reads your latest SkySCAN. SmartHandoff SMS is coming soon — FunCREW handoff works today.
           </p>
           {latest.auditData?.voiceRecapUrl ? (
             <audio className="mt-3 w-full" controls src={latest.auditData.voiceRecapUrl} />
@@ -370,7 +382,12 @@ export default function SkyScanPage() {
 
       {isEnterprise ? (
         <BizOsCard>
-          <h2 className="text-sm font-semibold">Enterprise war room</h2>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 className="text-sm font-semibold">Enterprise war room</h2>
+            <Link className="text-sm font-medium text-violet-700 hover:underline" href="/biz-os/campaigns">
+              Open Campaigns
+            </Link>
+          </div>
           {sov ? (
             <div className="mt-3">
               <p className="text-sm text-slate-600">
@@ -462,7 +479,8 @@ export default function SkyScanPage() {
         <BizOsCard>
           <h2 className="text-sm font-semibold">Approve & broadcast</h2>
           <p className="mt-1 text-sm text-slate-600">
-            Broadcast publishes your listing on JustMy and builds a caption pack on S3. Connect YouTube / Meta / TikTok / GBP on Connections (real OAuth). Unconnected networks stay in the pack for FunCREW.
+            Broadcast publishes your listing on JustMy and builds a caption pack on S3. Auto-post to YouTube / Meta /
+            TikTok / GBP is coming soon — unconnected networks stay in the pack for FunCREW.
           </p>
           <ul className="mt-3 space-y-1 text-sm text-slate-600">
             {connections.map((c) => (
@@ -478,6 +496,12 @@ export default function SkyScanPage() {
               href="/biz-os/settings"
             >
               Connections
+            </Link>
+            <Link
+              className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+              href="/biz-os/media-engine"
+            >
+              Media engine
             </Link>
             {lastSyn?.bundleUrl ? (
               <a

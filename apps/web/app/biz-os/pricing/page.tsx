@@ -11,6 +11,7 @@ import {
   BizOsEmpty,
   BizOsHeader,
   BizOsPage,
+  ComingSoonBadge,
 } from "@/components/biz-os/biz-os-ui";
 import { useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { useSubscriptionPlans } from "@/components/biz-os/use-subscription-plans";
@@ -18,6 +19,7 @@ import { ApiClientError } from "@/lib/services/auth";
 import { subscriptionService, type SubscriptionPlan, type SubscriptionPlanPrice } from "@/lib/services/subscription";
 import { canonicalizeOsName, isBusinessOs, OS_NAME, osNameToProfileKind, profileKindDisplayOs } from "@/lib/os-types";
 import {
+  currentOsLabel,
   featureLabelOnPlan,
   featuresIntroducedOnPlan,
   PLAN_OS_ORDER,
@@ -39,16 +41,16 @@ const TIER_META: Record<
     icon: Briefcase,
   },
   COMMAND: {
-    blurb: "AskSKY, SmartHandoff, and 250k myAGENT tokens.",
+    blurb: "Voice recap, custom BattlePlan, FunCREW. SmartHandoff is coming soon.",
     icon: Compass,
   },
   COMMAND_PRO: {
-    blurb: "Media engine, Siri schema, and 750k tokens.",
+    blurb: "Social OAuth and a JustMy + S3 broadcast pack. Auto-post and media engine are coming soon.",
     icon: Sparkles,
     featured: true,
   },
   ENTERPRISE: {
-    blurb: "War room, competitor tracking, and 1.5M tokens.",
+    blurb: "War room, competitor share of voice, and campaign BattlePlans.",
     icon: Award,
   },
 };
@@ -163,7 +165,11 @@ export default function BizOsPricingPage() {
       <BizOsHeader
         eyebrow="Plans"
         title="Choose your OS"
-        description="You already have Biz OS. Subscribe to unlock the next rung — Command, Command PRO, or Enterprise. Amounts come from Stripe; tools flip from locked to active as they ship."
+        description={
+          signedInBusiness
+            ? `You're on ${currentOsLabel(currentOs)}. This same listing can switch to Command, Command PRO, or Enterprise. Amounts come from Stripe. Coming soon tools stay labeled until they ship.`
+            : "Claim a free Biz OS listing first, then subscribe to Command, Command PRO, or Enterprise. Amounts come from Stripe."
+        }
         actions={
           <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
             {(["month", "year"] as const).map((value) => {
@@ -276,7 +282,12 @@ export default function BizOsPricingPage() {
                 {introduced.map((feature) => (
                   <li key={feature.id} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <span className="text-slate-700">{featureLabelOnPlan(feature, planOs)}</span>
+                    <span className="text-slate-700">
+                      {featureLabelOnPlan(feature, planOs)}
+                      {feature.comingSoon ? (
+                        <ComingSoonBadge className="ml-2 align-middle" />
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -317,7 +328,7 @@ export default function BizOsPricingPage() {
       </div>
 
       {signedInBusiness ? null : (
-        <p className="text-sm text-slate-500">Sign in with a Biz OS profile to subscribe.</p>
+        <p className="text-sm text-slate-500">Sign in with a business listing to subscribe.</p>
       )}
     </BizOsPage>
   );

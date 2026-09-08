@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { bizOsService } from "@/lib/services/biz-os";
 import { BizOsCard, BizOsHeader, BizOsPage } from "@/components/biz-os/biz-os-ui";
+import { BizOsPlanGate } from "@/components/biz-os/plan-gate";
 
 export default function SocialOauthCallbackPage() {
   const [message, setMessage] = useState("Finishing connection…");
@@ -36,6 +37,11 @@ export default function SocialOauthCallbackPage() {
   }, []);
 
   return (
+    <BizOsPlanGate
+      minTier="command_pro"
+      title="Social connections"
+      body="Connect social accounts on Command PRO and Enterprise."
+    >
     <BizOsPage>
       <BizOsHeader eyebrow="Command PRO" title="Social connections" />
       <BizOsCard>
@@ -47,5 +53,6 @@ export default function SocialOauthCallbackPage() {
         ) : null}
       </BizOsCard>
     </BizOsPage>
+    </BizOsPlanGate>
   );
 }

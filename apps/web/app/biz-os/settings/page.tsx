@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
 import { bizOsService, type OAuthConnection } from "@/lib/services/biz-os";
-import { useBizOsFetch, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
+import { useBizOsFetch } from "@/components/biz-os/use-biz-os-profile";
 import {
   BizOsCard,
-  BizOsEmpty,
   BizOsHeader,
   BizOsPage,
   BizOsSkeleton,
+  ComingSoonBadge,
 } from "@/components/biz-os/biz-os-ui";
-import { hasAccess } from "@/lib/plan-features";
-import { canonicalizeOsName } from "@/lib/os-types";
+import { BizOsPlanGate } from "@/components/biz-os/plan-gate";
 
 const LABELS: Record<string, string> = {
   youtube: "YouTube",
@@ -24,27 +22,24 @@ const LABELS: Record<string, string> = {
 
 const HINTS: Record<string, { ready: string; waiting: string }> = {
   youtube: {
-    ready: "Google OAuth with YouTube upload access. You still post from the broadcast pack until auto-post is wired.",
-    waiting: "Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET and this redirect URI in Google Cloud.",
+    ready: "Google OAuth with YouTube upload access. Auto-post is coming soon — use the broadcast pack until then.",
+    waiting: "Add GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET and the callback URI in Google Cloud.",
   },
   gbp: {
-    ready: "Google OAuth with Business Profile access. You still post from the broadcast pack until auto-post is wired.",
+    ready: "Google OAuth with Business Profile access. Auto-post is coming soon — use the broadcast pack until then.",
     waiting: "Same Google Cloud OAuth client as YouTube. Enable Business Profile APIs on that project.",
   },
   meta: {
     ready: "Meta OAuth for Facebook Pages and Instagram.",
-    waiting: "Not configured. Add META_APP_ID and META_APP_SECRET, or send the pack to FunCREW.",
+    waiting: "Meta app keys are not on this API yet.",
   },
   tiktok: {
     ready: "TikTok OAuth for business posting.",
-    waiting: "Not configured. Add TIKTOK_CLIENT_KEY and TIKTOK_CLIENT_SECRET, or send the pack to FunCREW.",
+    waiting: "TikTok app keys are not on this API yet.",
   },
 };
 
 export default function BizOsSettingsPage() {
-  const { me } = useBizOsProfile();
-  const osName = canonicalizeOsName(me?.osName || me?.profileType);
-  const isCommandPro = hasAccess(osName, "command_pro");
   const { data: connections, setData: setConnections, pageReady, profileId } = useBizOsFetch(
     (id) => bizOsService.listOAuthConnections(id),
     [] as OAuthConnection[],
@@ -86,33 +81,17 @@ export default function BizOsSettingsPage() {
 
   if (!pageReady) return <BizOsSkeleton />;
 
-  if (!isCommandPro) {
-    return (
-      <BizOsPage>
-        <BizOsHeader
-          eyebrow="Connections"
-          title="Social connections"
-          description="Command PRO owners connect YouTube, Meta, TikTok, and Google Business Profile. SmartHandoff is a JustMy text line to JR — you do not connect Twilio."
-        />
-        <BizOsEmpty
-          title="Command PRO required"
-          body="Upgrade to Command PRO to connect your social accounts for SkySCAN broadcast packs."
-          action={
-            <Button asChild>
-              <Link href="/biz-os/pricing">View plans</Link>
-            </Button>
-          }
-        />
-      </BizOsPage>
-    );
-  }
-
   return (
+    <BizOsPlanGate
+      minTier="command_pro"
+      title="Social connections"
+      body="Connect YouTube, Meta, TikTok, and Google Business Profile on Command PRO and Enterprise."
+    >
     <BizOsPage>
       <BizOsHeader
         eyebrow="Command PRO"
         title="Social connections"
-        description="Connect the accounts you own. SmartHandoff is not listed here — JustMy texts JR, then FunCREW. You do not OAuth Twilio."
+        description="Connect the accounts you own. Auto-post is coming soon. SmartHandoff is not listed here."
       />
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       <div className="grid gap-3">
@@ -123,13 +102,16 @@ export default function BizOsSettingsPage() {
             <BizOsCard key={row.provider}>
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold">{LABELS[row.provider] || row.provider}</p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <p className="font-semibold">{LABELS[row.provider] || row.provider}</p>
+                    {!row.configured ? <ComingSoonBadge /> : null}
+                  </div>
                   <p className="text-sm text-slate-500">
                     {connected
                       ? `🟢 Connected${row.accountName ? ` · ${row.accountName}` : ""}`
                       : row.configured
                         ? "🔴 Not connected"
-                        : "⚪ App not configured"}
+                        : "Coming soon — FunCREW can post from the pack"}
                   </p>
                   <p className="mt-1 text-xs text-slate-500">{row.configured ? hint?.ready : hint?.waiting}</p>
                 </div>
@@ -146,7 +128,7 @@ export default function BizOsSettingsPage() {
                     disabled={!row.configured || busy === row.provider || !profileId}
                     onClick={() => void connect(row)}
                   >
-                    {busy === row.provider ? "Redirecting…" : row.configured ? "Connect with OAuth" : "Unavailable"}
+                    {busy === row.provider ? "Redirecting…" : row.configured ? "Connect with OAuth" : "Coming soon"}
                   </Button>
                 )}
               </div>
@@ -155,5 +137,6 @@ export default function BizOsSettingsPage() {
         })}
       </div>
     </BizOsPage>
+    </BizOsPlanGate>
   );
 }

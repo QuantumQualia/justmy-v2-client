@@ -17,9 +17,10 @@ import {
   BizOsSetupNotice,
   BizOsSkeleton,
 } from "@/components/biz-os/biz-os-ui";
+import { currentOsLabel } from "@/lib/plan-features";
 
 export default function BizOsHomePage() {
-  const { data, ready } = useBizOsHome();
+  const { data, ready, me } = useBizOsHome();
 
   if (!ready) return <BizOsSkeleton />;
 
@@ -27,6 +28,7 @@ export default function BizOsHomePage() {
   const scan = data?.latestScan;
   const profile = data?.profile;
   const firstName = String(profile?.name || "").split(" ")[0];
+  const osLabel = currentOsLabel(profile?.osName || me?.osName || me?.profileType);
 
   const modules = [
     {
@@ -60,7 +62,7 @@ export default function BizOsHomePage() {
   return (
     <BizOsPage>
       <BizOsHeader
-        eyebrow={profile?.zipCode ? `${profile.zipCode} · Biz OS` : "Biz OS"}
+        eyebrow={profile?.zipCode ? `${profile.zipCode} · ${osLabel}` : osLabel}
         title={firstName ? `Welcome back, ${firstName}.` : "Let’s grow today."}
         description="Polish your card, run visibility, and work a 30-day plan — AskSKY stays with you."
         actions={

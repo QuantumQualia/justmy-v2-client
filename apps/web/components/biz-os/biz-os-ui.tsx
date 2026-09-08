@@ -13,21 +13,30 @@ import {
   Store,
   Tag,
   Settings,
+  Target,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useBizOsHome, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { isPlatformAdmin } from "@/lib/auth/session-user";
 import { isBusinessOs } from "@/lib/os-types";
+import { ACCOUNT_TIER, currentOsLabel, hasAccess } from "@/lib/plan-features";
 
 export const BIZ_OS_NAV = [
   { href: "/biz-os", label: "Home", icon: Home, exact: true },
   { href: "/biz-os/onboard", label: "myCARD", icon: CreditCard },
   { href: "/biz-os/battle-plans", label: "Battle Plans", icon: Crosshair },
-  { href: "/biz-os/skyscan", label: "SkySCAN", icon: Radar },
+  { href: "/biz-os/skyscan", label: "SkySCAN", icon: Radar, businessOnly: true },
+  {
+    href: "/biz-os/campaigns",
+    label: "Campaigns",
+    icon: Target,
+    businessOnly: true,
+    minTier: ACCOUNT_TIER.ENTERPRISE,
+  },
   { href: "/biz-os/reputation", label: "Reputation", icon: Star },
   { href: "/biz-os/app-store", label: "Apps", icon: Store },
   { href: "/biz-os/pricing", label: "Pricing", icon: Tag },
-  { href: "/biz-os/settings", label: "Settings", icon: Settings },
+  { href: "/biz-os/settings", label: "Settings", icon: Settings, minTier: ACCOUNT_TIER.COMMAND_PRO },
 ] as const;
 
 export function navIsActive(pathname: string, href: string, exact?: boolean) {
@@ -39,15 +48,18 @@ export function BizOsSubnav() {
   const pathname = usePathname();
   const { me } = useBizOsProfile();
   const showQueue = isPlatformAdmin(me);
-  const navItems =
-    me && !isBusinessOs(me.osName || me.profileType)
-      ? BIZ_OS_NAV.filter((item) => item.href !== "/biz-os/skyscan")
-      : BIZ_OS_NAV;
+  const osName = me?.osName || me?.profileType;
+  const isBusiness = isBusinessOs(osName);
+  const navItems = BIZ_OS_NAV.filter((item) => {
+    if ("businessOnly" in item && item.businessOnly && (!me || !isBusiness)) return false;
+    if ("minTier" in item && item.minTier && !hasAccess(osName, item.minTier)) return false;
+    return true;
+  });
 
   return (
     <nav
       className="border-b border-violet-100/80 bg-white/90 backdrop-blur-md"
-      aria-label="Biz OS"
+      aria-label={currentOsLabel(osName)}
     >
       <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2">
         {navItems.map((item) => {
@@ -309,5 +321,18 @@ export function BizOsEmpty({
       <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">{body}</p>
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </BizOsCard>
+  );
+}
+
+export function ComingSoonBadge({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500",
+        className,
+      )}
+    >
+      Coming soon
+    </span>
   );
 }
