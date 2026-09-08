@@ -78,6 +78,10 @@ function isEmailVerified(request: NextRequest): boolean {
   return readAuthUser(request)?.emailVerified === true;
 }
 
+function isImpersonating(request: NextRequest): boolean {
+  return Boolean(readAuthUser(request)?.impersonatedBy);
+}
+
 function isBizCookieUser(request: NextRequest): boolean {
   const user = readAuthUser(request);
   return isBusinessOs(user?.osName || user?.profileType);
@@ -87,6 +91,7 @@ function readAuthUser(request: NextRequest): {
   emailVerified?: boolean;
   osName?: string;
   profileType?: string;
+  impersonatedBy?: unknown;
 } | null {
   const raw = request.cookies.get("auth_user")?.value;
   if (!raw) return null;
@@ -205,7 +210,7 @@ export function proxy(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const token = getAuthToken(request);
-  const unverified = Boolean(token) && !isEmailVerified(request);
+  const unverified = Boolean(token) && !isEmailVerified(request) && !isImpersonating(request);
 
   if (unverified && !isPublicRoute(pathname) && !isEmailVerificationExemptPath(pathname)) {
     return redirectToVerifyEmail(request);

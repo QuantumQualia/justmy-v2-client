@@ -17,7 +17,9 @@ const EXEMPT_PREFIXES = [
 
 export function needsEmailVerification(user: {
   emailVerified?: boolean | null;
+  impersonatedBy?: unknown;
 } | null | undefined): boolean {
+  if (user?.impersonatedBy) return false;
   return user?.emailVerified !== true;
 }
 

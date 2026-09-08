@@ -334,7 +334,7 @@ export function NewsMarketNav({
         ref={headerRef}
         className={
           sticky
-            ? "sticky top-0 z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
+            ? "sticky top-[var(--impersonation-banner-h,0px)] z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
             : "border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
         }
       >

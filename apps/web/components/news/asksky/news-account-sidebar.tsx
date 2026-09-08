@@ -340,7 +340,11 @@ export function NewsAccountSidebar({
     if (signingOut) return;
     setSigningOut(true);
     try {
-      await authService.logout();
+      const result = await authService.logout();
+      if (result?.impersonationEnded) {
+        window.location.assign("/admin/users");
+        return;
+      }
       resetFavorites();
       resetRecents();
       onSignedOut();
@@ -360,7 +364,7 @@ export function NewsAccountSidebar({
     <>
       {open ? (
         <div
-          className="fixed inset-0 z-60 bg-slate-900/30 backdrop-blur-[2px]"
+          className="fixed inset-x-0 bottom-0 top-[var(--impersonation-banner-h,0px)] z-60 bg-slate-900/30 backdrop-blur-[2px]"
           onClick={onClose}
           aria-hidden
         />
@@ -368,7 +372,7 @@ export function NewsAccountSidebar({
 
       <aside
         className={cn(
-          "fixed top-0 right-0 z-70 flex h-full w-[min(22rem,100vw)] flex-col border-l border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10 transition-transform duration-300 ease-in-out",
+          "fixed top-[var(--impersonation-banner-h,0px)] right-0 z-70 flex h-[calc(100dvh-var(--impersonation-banner-h,0px))] w-[min(22rem,100vw)] flex-col border-l border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10 transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}

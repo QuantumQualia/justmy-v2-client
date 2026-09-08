@@ -90,7 +90,7 @@ export default function AdminLayout({
   return (
     <div className="min-h-screen bg-background">
       {/* Sidebar Navigation */}
-      <aside className="fixed left-0 top-0 h-screen w-64 border-r border-border bg-sidebar backdrop-blur-sm">
+      <aside className="fixed left-0 top-[var(--impersonation-banner-h,0px)] h-[calc(100dvh-var(--impersonation-banner-h,0px))] w-64 border-r border-border bg-sidebar backdrop-blur-sm">
         <div className="flex h-full flex-col">
           {/* Logo/Header */}
           <div className="border-b border-border p-6">

@@ -6,6 +6,14 @@
 import { tokenStorage } from "./storage/token-storage";
 import { buildApiUrl } from "./config";
 
+function restoreOrClearSession(): void {
+  if (tokenStorage.hasStashedSession()) {
+    tokenStorage.restoreStashedSession();
+    return;
+  }
+  tokenStorage.clear();
+}
+
 function currentAppOrigin(): string | undefined {
   if (typeof window === "undefined") return undefined;
   return window.location.origin;
@@ -82,16 +90,16 @@ async function attemptTokenRefresh(): Promise<string | null> {
           tokenStorage.setRefreshToken(data.refreshToken);
         }
         if (data.user) {
-          const { slimAuthUser } = await import("./auth/session-user");
+          const { slimAuthUser, withImpersonation } = await import("./auth/session-user");
           const stored = slimAuthUser(data.user, data.profile);
-          if (stored) tokenStorage.setUser(stored);
+          if (stored) tokenStorage.setUser(withImpersonation(stored, data.impersonation));
         }
         return accessToken;
       }
       return null;
     } catch (error) {
-      // Refresh failed, clear tokens
-      tokenStorage.clear();
+      // Refresh failed, restore admin session if we were impersonating
+      restoreOrClearSession();
       return null;
     } finally {
       isRefreshing = false;
@@ -216,7 +224,7 @@ export async function apiRequest<T>(
         if (!retryResponse.ok) {
           // If retry still fails, clear tokens and throw error
           if (retryResponse.status === 401) {
-            tokenStorage.clear();
+            restoreOrClearSession();
           }
           throw new ApiClientError(
             retryData.message || retryData.error || "Authentication failed",
@@ -228,7 +236,7 @@ export async function apiRequest<T>(
         return retryData as T;
       } else {
         // Refresh failed, clear tokens
-        tokenStorage.clear();
+        restoreOrClearSession();
         throw new ApiClientError(
           data.message || data.error || "Authentication failed. Please login again.",
           401,

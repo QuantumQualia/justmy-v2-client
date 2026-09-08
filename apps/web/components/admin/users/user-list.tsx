@@ -8,9 +8,12 @@ import { Badge } from "@workspace/ui/components/badge"
 import { Input } from "@workspace/ui/components/input"
 import { Switch } from "@workspace/ui/components/switch"
 import { Label } from "@workspace/ui/components/label"
-import { Search, Loader2, Ban, Unlock, Trash2, RotateCcw, Edit } from "lucide-react"
+import { Search, Loader2, Ban, Unlock, Trash2, RotateCcw, Edit, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usersService, UserResponseDto, ApiClientError } from "@/lib/services/users"
+import { authService } from "@/lib/services/auth"
+import { resolveAuthHomePath } from "@/lib/auth/finish-auth-redirect"
+import { tokenStorage } from "@/lib/storage/token-storage"
 import { DataTable } from "@/components/ui/data-table"
 
 const ITEMS_PER_PAGE = 20
@@ -131,6 +134,30 @@ export function UserList() {
     }
   }
 
+  const handleLoginAs = async (user: UserResponseDto) => {
+    const name = getUserDisplayName(user)
+    if (
+      !confirm(
+        `View the site as ${name} (${user.email})?\n\nYou can return to your admin account from the banner at the top of the page.`,
+      )
+    ) {
+      return
+    }
+
+    setActionLoading(user.id)
+    try {
+      const response = await authService.impersonate(user.id)
+      window.location.assign(resolveAuthHomePath(response, { skipEmailVerification: true }))
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiClientError
+          ? err.message
+          : "Failed to log in as this user. Please try again."
+      alert(errorMessage)
+      setActionLoading(null)
+    }
+  }
+
   const getUserDisplayName = (user: UserResponseDto) => {
     if (user.firstName || user.lastName) {
       return `${user.firstName || ""} ${user.lastName || ""}`.trim()
@@ -228,6 +255,8 @@ export function UserList() {
           const isLoading = actionLoading === user.id
           const isDeleted = !!user.deletedAt
           const isBlocked = user.isBlocked
+          const currentUserId = tokenStorage.getUserSync<{ id?: string }>()?.id
+          const isSelf = currentUserId != null && String(currentUserId) === String(user.id)
 
           return (
             <div className="flex items-center justify-end gap-2">
@@ -242,6 +271,22 @@ export function UserList() {
                     <Edit className="h-4 w-4" />
                   </Button>
                 </Link>
+              )}
+              {!isDeleted && !isSelf && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleLoginAs(user)}
+                  disabled={isLoading}
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-400 hover:bg-accent disabled:opacity-50"
+                  title="Log in as user"
+                >
+                  {isLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <LogIn className="h-4 w-4" />
+                  )}
+                </Button>
               )}
               {isDeleted ? (
                 <Button

@@ -6,7 +6,7 @@ import { authService, type User } from "@/lib/services/auth";
 import { bizOsService } from "@/lib/services/biz-os";
 import { tokenStorage } from "@/lib/storage/token-storage";
 import { useProfileStore } from "@/lib/store";
-import type { StoredAuthUser } from "@/lib/auth/session-user";
+import { isImpersonating, type StoredAuthUser } from "@/lib/auth/session-user";
 import { profileIdFromMe } from "@/lib/biz-os/landing";
 
 export const bizOsQueryKeys = {
@@ -25,19 +25,25 @@ export function bumpBizOsPageData() {
 function readCachedMe(): User | undefined {
   const stored = tokenStorage.getUserSync<StoredAuthUser>();
   if (!stored?.id) return undefined;
-  const profileId = stored.profileId ?? useProfileStore.getState().data.id;
+  const profile = useProfileStore.getState().data;
+  const profileId = stored.profileId ?? profile.id;
+  const osName = stored.osName || stored.profileType || profile.osName || profile.type;
   return {
     id: stored.id,
     email: stored.email,
     firstName: stored.firstName,
     lastName: stored.lastName,
     emailVerified: stored.emailVerified,
-    role: stored.role,
-    osName: stored.osName || stored.profileType,
-    profileType: stored.osName || stored.profileType,
+    role: userRole(stored.role),
+    osName: osName as User["osName"],
+    profileType: osName as User["profileType"],
     profileId,
-    profile: profileId != null ? { id: profileId } : undefined,
+    profile: profileId != null ? { id: profileId, osName, type: profile.type } : undefined,
   };
+}
+
+function userRole(role?: string | null): User["role"] {
+  return String(role || "").toUpperCase() === "ADMIN" ? "ADMIN" : "USER";
 }
 
 /** Cookie reads happen after mount so SSR HTML matches the first client paint. */
@@ -47,8 +53,10 @@ function useBizOsSession() {
 
   useEffect(() => {
     const hasToken = Boolean(tokenStorage.getAccessTokenSync());
+    const stored = tokenStorage.getUserSync<StoredAuthUser>();
     const cached = hasToken ? readCachedMe() : undefined;
-    if (cached && !queryClient.getQueryData(bizOsQueryKeys.me)) {
+    // Impersonation must hit /auth/me so plan/osName come from the target profile, not a stale cookie.
+    if (cached && !isImpersonating(stored) && !queryClient.getQueryData(bizOsQueryKeys.me)) {
       queryClient.setQueryData(bizOsQueryKeys.me, cached);
     }
     setSession({ seeded: true, hasToken });
@@ -59,11 +67,12 @@ function useBizOsSession() {
 
 export function useBizOsMeQuery() {
   const session = useBizOsSession();
+  const impersonating = isImpersonating(tokenStorage.getUserSync<StoredAuthUser>());
   const query = useQuery({
     queryKey: bizOsQueryKeys.me,
     queryFn: () => authService.getCurrentUser(),
     enabled: session.seeded && session.hasToken,
-    staleTime: 5 * 60_000,
+    staleTime: impersonating ? 0 : 5 * 60_000,
     retry: false,
   });
   return { ...query, session };

@@ -7,6 +7,7 @@ import { GlobalShareHost } from "@/components/common/share/share-host"
 import { AIChatbot } from "@/components/common/chatbot/ai-chatbot"
 import { ChatbotButton } from "@/components/common/chatbot/chatbot-button"
 import { QueryProvider } from "@/components/providers/query-provider"
+import { ImpersonationBanner } from "@/components/auth/impersonation-banner"
 
 /**
  * Sync localStorage tokens to cookies on app load
@@ -35,6 +36,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     >
       <QueryProvider>
         <AuthSync />
+        <ImpersonationBanner />
         {children}
         <GlobalShareHost />
         <AIChatbot />

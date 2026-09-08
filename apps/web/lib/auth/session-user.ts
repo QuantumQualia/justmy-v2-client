@@ -1,6 +1,13 @@
 import { type OsName } from "@/lib/os-types";
 
 /** Slim identity kept in the auth_user cookie (must stay well under 4KB). */
+export type ImpersonationActor = {
+  id: string;
+  email: string;
+  firstName?: string | null;
+  lastName?: string | null;
+};
+
 export type StoredAuthUser = {
   id: string;
   email: string;
@@ -13,10 +20,28 @@ export type StoredAuthUser = {
   /** @deprecated read osName; still written so older cookies keep working */
   profileType?: OsName;
   profileId?: number;
+  /** Present while a site admin is viewing the site as this user. */
+  impersonatedBy?: ImpersonationActor;
 };
 
 export function isPlatformAdmin(user?: { role?: string | null } | null): boolean {
   return String(user?.role || "").toUpperCase() === "ADMIN";
+}
+
+export function isImpersonating(
+  user?: { impersonatedBy?: ImpersonationActor | null } | null,
+): boolean {
+  return Boolean(user?.impersonatedBy?.id);
+}
+
+export function withImpersonation<T extends StoredAuthUser>(
+  user: T,
+  impersonation?: { active?: boolean; impersonatedBy?: ImpersonationActor | null } | null,
+): T {
+  if (impersonation?.active && impersonation.impersonatedBy?.id) {
+    return { ...user, impersonatedBy: impersonation.impersonatedBy };
+  }
+  return user;
 }
 
 export function parseProfileId(value: unknown): number | undefined {
@@ -36,6 +61,7 @@ export function slimAuthUser(
     osName?: string;
     profileType?: string;
     profileId?: number;
+    impersonatedBy?: ImpersonationActor;
     profile?: { id?: string | number; osName?: string; type?: string };
   } | null | undefined,
   profile?: { id?: string | number; osName?: string; type?: string } | null,
@@ -61,5 +87,6 @@ export function slimAuthUser(
     osName: (osName || undefined) as OsName | undefined,
     profileType: (osName || undefined) as OsName | undefined,
     profileId,
+    impersonatedBy: user.impersonatedBy?.id ? user.impersonatedBy : undefined,
   };
 }

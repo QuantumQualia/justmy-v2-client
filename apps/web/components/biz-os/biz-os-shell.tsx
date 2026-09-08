@@ -115,12 +115,12 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
       {newsHost ? (
         <div
           ref={chromeRef}
-          className="sticky top-[var(--news-header-h,3.5rem)] z-30 shrink-0"
+          className="sticky top-[calc(var(--impersonation-banner-h,0px)+var(--news-header-h,3.5rem))] z-30 shrink-0"
         >
           <BizOsSubnav />
         </div>
       ) : (
-        <div ref={chromeRef} className="sticky top-0 z-40 shrink-0">
+        <div ref={chromeRef} className="sticky top-[var(--impersonation-banner-h,0px)] z-40 shrink-0">
           {market ? (
             <NewsMarketNav
               market={market}

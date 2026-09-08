@@ -5,7 +5,7 @@
 
 import { apiRequest, ApiClientError } from "../api-client";
 import { tokenStorage } from "../storage/token-storage";
-import { slimAuthUser } from "../auth/session-user";
+import { slimAuthUser, withImpersonation } from "../auth/session-user";
 import type { OsName } from "@/lib/os-types";
 
 export { ApiClientError };
@@ -47,6 +47,9 @@ export interface AuthResponse {
     avatarUrl?: string | null;
     emailVerified?: boolean;
     role?: string;
+    osName?: OsName;
+    profileType?: OsName;
+    profileId?: number;
   };
   profile?: any; // Profile response from formatProfileResponse
   // Default app based on user's OS
@@ -70,6 +73,15 @@ export interface AuthResponse {
   token?: string; // Fallback for compatibility
   refreshToken?: string;
   isFirstLogin?: boolean;
+  impersonation?: {
+    active: boolean;
+    impersonatedBy: {
+      id: string;
+      email: string;
+      firstName?: string | null;
+      lastName?: string | null;
+    };
+  };
 }
 
 export interface User {
@@ -120,7 +132,10 @@ export interface OauthAppleData {
   profileType?: OsName;
 }
 
-export async function persistAuthSession(response: AuthResponse): Promise<void> {
+export async function persistAuthSession(
+  response: AuthResponse,
+  options?: { resetClientStores?: boolean },
+): Promise<void> {
   const accessToken = response.accessToken || response.token;
   if (accessToken) {
     tokenStorage.setAccessToken(accessToken);
@@ -130,23 +145,35 @@ export async function persistAuthSession(response: AuthResponse): Promise<void> 
   }
   if (response.user) {
     const stored = slimAuthUser(response.user, response.profile);
-    if (stored) tokenStorage.setUser(stored);
+    if (stored) tokenStorage.setUser(withImpersonation(stored, response.impersonation));
   }
 
   if (response.profile) {
     const { mapApiProfileToProfileData } = await import("../store/profile-mapper");
     const { useProfileStore } = await import("../store/profile-store");
     const profileData = mapApiProfileToProfileData(response.profile);
+    if (options?.resetClientStores) {
+      useProfileStore.getState().reset();
+    }
     useProfileStore.getState().setData(profileData);
-    void import("../news/seed-newsstand-market").then(
-      ({ seedNewsstandMarketFromProfileIfUnset }) =>
-        seedNewsstandMarketFromProfileIfUnset(profileData),
-    );
+    if (options?.resetClientStores) {
+      const { seedNewsstandMarketFromProfile } = await import("../news/seed-newsstand-market");
+      await seedNewsstandMarketFromProfile(profileData, { overwrite: true });
+    } else {
+      void import("../news/seed-newsstand-market").then(({ seedNewsstandMarketFromProfile }) =>
+        seedNewsstandMarketFromProfile(profileData),
+      );
+    }
   }
 
-  if (response.welcomeApp && typeof window !== "undefined") {
+  if (typeof window !== "undefined") {
     const { useAppStore } = await import("../store/app-store");
-    useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
+    if (options?.resetClientStores) {
+      useAppStore.getState().clear();
+    }
+    if (response.welcomeApp) {
+      useAppStore.getState().setFromWelcomeApp(response.welcomeApp);
+    }
   }
 }
 
@@ -247,7 +274,21 @@ export const authService = {
    * Logout the current user
    * Clears tokens and user data from storage
    */
-  async logout(): Promise<void> {
+  async logout(): Promise<{ impersonationEnded?: boolean }> {
+    const stored = tokenStorage.getUserSync<{ impersonatedBy?: { id?: string } }>();
+    if (tokenStorage.hasStashedSession() || stored?.impersonatedBy?.id) {
+      try {
+        await this.stopImpersonation();
+        return { impersonationEnded: true };
+      } catch (error) {
+        if (tokenStorage.hasStashedSession()) {
+          tokenStorage.restoreStashedSession();
+          return { impersonationEnded: true };
+        }
+        console.error("Stop impersonation error:", error);
+      }
+    }
+
     try {
       await apiRequest("auth/logout", {
         method: "POST",
@@ -265,6 +306,7 @@ export const authService = {
       const { useAppStore } = await import("../store/app-store");
       useAppStore.getState().clear();
     }
+    return {};
   },
 
   /**
@@ -293,14 +335,15 @@ export const authService = {
           const { useProfileStore } = await import("../store/profile-store");
           const profileData = mapApiProfileToProfileData(profile);
           useProfileStore.getState().setData(profileData);
-          void import("../news/seed-newsstand-market").then(
-            ({ seedNewsstandMarketFromProfileIfUnset }) =>
-              seedNewsstandMarketFromProfileIfUnset(profileData),
+          void import("../news/seed-newsstand-market").then(({ seedNewsstandMarketFromProfile }) =>
+            seedNewsstandMarketFromProfile(profileData, {
+              overwrite: Boolean(response.impersonation?.active),
+            }),
           );
         }
 
         const stored = slimAuthUser(user, profile);
-        if (stored) tokenStorage.setUser(stored);
+        if (stored) tokenStorage.setUser(withImpersonation(stored, response.impersonation));
 
         return user;
       } catch (error) {
@@ -470,6 +513,50 @@ export const authService = {
         throw error;
       }
       throw new ApiClientError("Failed to resend verification email.");
+    }
+  },
+
+  /**
+   * Site admin: view the site as another user.
+   */
+  async impersonate(userId: number | string): Promise<AuthResponse> {
+    tokenStorage.stashCurrentSession();
+    try {
+      const response = await apiRequest<AuthResponse>("auth/impersonate", {
+        method: "POST",
+        body: JSON.stringify({ userId: Number(userId) }),
+      });
+      await persistAuthSession(response, { resetClientStores: true });
+      tokenStorage.clearRefreshToken();
+      return response;
+    } catch (error) {
+      tokenStorage.restoreStashedSession();
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to log in as this user.");
+    }
+  },
+
+  /**
+   * Restore the original admin session after impersonation.
+   */
+  async stopImpersonation(): Promise<AuthResponse> {
+    try {
+      const response = await apiRequest<AuthResponse>("auth/stop-impersonation", {
+        method: "POST",
+      });
+      await persistAuthSession(response, { resetClientStores: true });
+      tokenStorage.clearStashedSession();
+      return response;
+    } catch (error) {
+      if (tokenStorage.hasStashedSession()) {
+        tokenStorage.restoreStashedSession();
+      }
+      if (error instanceof ApiClientError) {
+        throw error;
+      }
+      throw new ApiClientError("Failed to stop impersonation.");
     }
   },
 };

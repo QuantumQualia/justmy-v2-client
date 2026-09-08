@@ -8,6 +8,9 @@
 const ACCESS_TOKEN_KEY = "auth_access_token";
 const REFRESH_TOKEN_KEY = "auth_refresh_token";
 const USER_KEY = "auth_user";
+const IMPERSONATOR_ACCESS_KEY = "auth_impersonator_access_token";
+const IMPERSONATOR_REFRESH_KEY = "auth_impersonator_refresh_token";
+const IMPERSONATOR_USER_KEY = "auth_impersonator_user";
 /** Browsers typically reject a single cookie over ~4KB. */
 const COOKIE_MAX_BYTES = 3500;
 
@@ -161,12 +164,59 @@ export const tokenStorage = {
   },
 
   /**
+   * Clear the current refresh token without touching the access session.
+   * Used while impersonating so a leftover admin refresh cannot take over.
+   */
+  clearRefreshToken(): void {
+    deleteCookie(REFRESH_TOKEN_KEY);
+  },
+
+  /**
+   * Stash the signed-in admin session so it can be restored after impersonation.
+   */
+  stashCurrentSession(): void {
+    const access = readBrowserCookie(ACCESS_TOKEN_KEY);
+    const refresh = readBrowserCookie(REFRESH_TOKEN_KEY);
+    const user = readBrowserCookie(USER_KEY);
+    if (access) setCookie(IMPERSONATOR_ACCESS_KEY, access);
+    if (refresh) setCookie(IMPERSONATOR_REFRESH_KEY, refresh);
+    if (user) setCookie(IMPERSONATOR_USER_KEY, user);
+  },
+
+  hasStashedSession(): boolean {
+    return Boolean(readBrowserCookie(IMPERSONATOR_ACCESS_KEY));
+  },
+
+  restoreStashedSession(): boolean {
+    const access = readBrowserCookie(IMPERSONATOR_ACCESS_KEY);
+    const refresh = readBrowserCookie(IMPERSONATOR_REFRESH_KEY);
+    const user = readBrowserCookie(IMPERSONATOR_USER_KEY);
+    if (!access) return false;
+    setCookie(ACCESS_TOKEN_KEY, access);
+    if (refresh) {
+      setCookie(REFRESH_TOKEN_KEY, refresh);
+    } else {
+      deleteCookie(REFRESH_TOKEN_KEY);
+    }
+    if (user) setCookie(USER_KEY, user);
+    this.clearStashedSession();
+    return true;
+  },
+
+  clearStashedSession(): void {
+    deleteCookie(IMPERSONATOR_ACCESS_KEY);
+    deleteCookie(IMPERSONATOR_REFRESH_KEY);
+    deleteCookie(IMPERSONATOR_USER_KEY);
+  },
+
+  /**
    * Clear all tokens and user data (deletes cookies)
    */
   clear(): void {
     deleteCookie(ACCESS_TOKEN_KEY);
     deleteCookie(REFRESH_TOKEN_KEY);
     deleteCookie(USER_KEY);
+    this.clearStashedSession();
   },
 
   /**

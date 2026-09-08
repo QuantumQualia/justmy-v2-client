@@ -140,7 +140,11 @@ export function MobileSidebar({
 
   const handleLogout = async () => {
     try {
-      await authService.logout();
+      const result = await authService.logout();
+      if (result?.impersonationEnded) {
+        window.location.assign("/admin/users");
+        return;
+      }
       router.push("/login");
       onClose();
     } catch (error) {
@@ -284,7 +288,7 @@ export function MobileSidebar({
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 transition-opacity"
+          className="fixed inset-x-0 bottom-0 top-[var(--impersonation-banner-h,0px)] bg-black/60 backdrop-blur-sm z-60 transition-opacity"
           onClick={onClose}
           aria-hidden="true"
         />
@@ -293,7 +297,7 @@ export function MobileSidebar({
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-card border-l border-border z-70 transform transition-transform duration-300 ease-in-out flex flex-col",
+          "fixed top-[var(--impersonation-banner-h,0px)] right-0 h-[calc(100dvh-var(--impersonation-banner-h,0px))] w-80 max-w-[85vw] bg-card border-l border-border z-70 transform transition-transform duration-300 ease-in-out flex flex-col",
           isOpen ? "translate-x-0" : "translate-x-full"
         )}
       >

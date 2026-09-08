@@ -4,9 +4,11 @@ import { useState, useEffect, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
 import { UserEditForm } from "@/components/admin/users/user-edit-form"
-import { ArrowLeft, Save, Loader2 } from "lucide-react"
+import { ArrowLeft, Save, Loader2, LogIn } from "lucide-react"
 import Link from "next/link"
 import { usersService, ApiClientError } from "@/lib/services/users"
+import { authService } from "@/lib/services/auth"
+import { resolveAuthHomePath } from "@/lib/auth/finish-auth-redirect"
 
 export default function EditUserPage() {
   const router = useRouter()
@@ -16,6 +18,7 @@ export default function EditUserPage() {
   const [formData, setFormData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [impersonating, setImpersonating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fetchedUserIdRef = useRef<string | null>(null)
   const fetchingRef = useRef<string | null>(null)
@@ -116,6 +119,32 @@ export default function EditUserPage() {
     }
   }
 
+  const handleLoginAs = async () => {
+    if (!formData) return
+    const name = `${formData.firstName || ""} ${formData.lastName || ""}`.trim() || formData.email
+    if (
+      !confirm(
+        `View the site as ${name} (${formData.email})?\n\nYou can return to your admin account from the banner at the top of the page.`,
+      )
+    ) {
+      return
+    }
+
+    setImpersonating(true)
+    setError(null)
+    try {
+      const response = await authService.impersonate(userId)
+      window.location.assign(resolveAuthHomePath(response, { skipEmailVerification: true }))
+    } catch (err) {
+      const errorMessage =
+        err instanceof ApiClientError
+          ? err.message
+          : "Failed to log in as this user. Please try again."
+      setError(errorMessage)
+      setImpersonating(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background p-10 text-foreground">
@@ -160,11 +189,30 @@ export default function EditUserPage() {
                   Back
                 </Button>
               </Link>
-              <Button
-                onClick={handleSave}
-                disabled={saving || !formData}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
-              >
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={handleLoginAs}
+                  disabled={saving || impersonating || !formData}
+                  className="border-emerald-700 text-emerald-400 hover:bg-emerald-950 disabled:opacity-50"
+                >
+                  {impersonating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Switching...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Log in as user
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  disabled={saving || impersonating || !formData}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                >
                 {saving ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -177,6 +225,7 @@ export default function EditUserPage() {
                   </>
                 )}
               </Button>
+              </div>
             </div>
 
             <div>
