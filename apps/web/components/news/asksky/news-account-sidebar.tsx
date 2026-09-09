@@ -38,6 +38,7 @@ import { tokenStorage } from "@/lib/storage/token-storage";
 import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
 import { publicMycardUrl } from "@/lib/mycard/public-url";
 import { isBusinessProfileKind, osNameToProfileKind, canonicalizeOsName, profileKindDisplayOs } from "@/lib/os-types";
+import { currentOsLabel } from "@/lib/plan-features";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
 import { useProfileStore } from "@/lib/store/profile-store";
@@ -626,7 +627,7 @@ export function NewsAccountSidebar({
                       : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
                   )}
                 >
-                  Biz OS
+                  {currentOsLabel(rawOs)}
                 </Link>
               ) : null}
               {isAdmin ? (
