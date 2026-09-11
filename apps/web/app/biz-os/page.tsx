@@ -40,7 +40,7 @@ export default function BizOsHomePage() {
     {
       label: "Battle Plan",
       href: plan ? `/biz-os/battle-plans/${plan.id}` : "/biz-os/battle-plans",
-      value: plan ? `${plan.progress}% complete` : "Start a 30-day plan",
+      value: plan ? `${plan.progress}% complete` : "Start a plan",
       icon: Crosshair,
     },
     {
@@ -64,7 +64,7 @@ export default function BizOsHomePage() {
       <BizOsHeader
         eyebrow={profile?.zipCode ? `${profile.zipCode} · ${osLabel}` : osLabel}
         title={firstName ? `Welcome back, ${firstName}.` : "Let’s grow today."}
-        description="Polish your card, run visibility, and work a 30-day plan — AskSKY stays with you."
+        description="Polish your card, run visibility, and keep a Battle Plan next to Sky — AskSKY stays with you."
         actions={
           <>
             <Link

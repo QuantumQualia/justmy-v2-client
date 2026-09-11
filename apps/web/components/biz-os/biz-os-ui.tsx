@@ -234,7 +234,7 @@ export function BizOsSetupNotice() {
       ? {
           href: "/biz-os/battle-plans",
           label: "Start a Battle Plan",
-          body: "Pick a 30-day goal and AskSKY will turn it into a checklist.",
+          body: "Tell Sky what you’re working on. She drafts a plan you can shape, then approve.",
         }
       : null,
   ].filter(Boolean) as Array<{ href: string; label: string; body: string }>;

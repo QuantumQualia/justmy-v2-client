@@ -127,6 +127,17 @@ function firstWebsiteUrl(text: string): string | null {
   return `https://${host}`;
 }
 
+function inputPlaceholder(surface: string, awaitingWebsite: boolean): string {
+  if (awaitingWebsite) return "https://your-site.com";
+  if (surface === "skyscan") return "Ask about your score, gaps, or what to fix next…";
+  if (surface === "battle_plan") return "Tell Sky what you’re working on, or ask for the next task…";
+  if (surface === "reputation") return "Ask about Google reviews, or draft a review request…";
+  if (surface === "pricing") return "Ask about Command OS, FunCREW, or what’s on your plan…";
+  if (surface === "settings") return "Ask about connected accounts or publishing…";
+  if (surface === "home" || surface === "apps") return "Ask about myCARD, SkySCAN, or starting a Battle Plan…";
+  return "Paste a website, phone, address, or Instagram…";
+}
+
 function hasCardDrafts(d: CardDrafts): boolean {
   return Boolean(
     d.about ||
@@ -503,10 +514,10 @@ export function AskSkyConcierge({
     setLoading(true);
     try {
       if (action.kind === "diy") {
-        const plan = await bizOsService.createPlan(profileId, "skyscan-diy");
+        const plan = await bizOsService.createPlan(profileId, { trigger: "skyscan-diy" });
         setTurns((t) => [
           ...t,
-          { role: "asksky", text: `DIY BattlePlan is on your dashboard: ${plan.title}. Tasks you already finished were skipped; the rest have a short how-to.` },
+          { role: "asksky", text: `I drafted a DIY Battle Plan: ${plan.title}. Open it, shape the checklist, then approve when it’s real.` },
         ]);
         router.push(`/biz-os/battle-plans/${plan.id}`);
         await invalidateHome();
@@ -532,10 +543,10 @@ export function AskSkyConcierge({
         return;
       }
       if (action.kind === "command_plan") {
-        const plan = await bizOsService.createPlan(profileId, "skyscan-command");
+        const plan = await bizOsService.createPlan(profileId, { trigger: "skyscan-command" });
         setTurns((t) => [
           ...t,
-          { role: "asksky", text: `Custom Command BattlePlan attached: ${plan.title}. Finished tasks were skipped; each remaining step has a short how-to.` },
+          { role: "asksky", text: `I drafted a Command Battle Plan: ${plan.title}. Open it to revise, then approve when you’re ready to track it.` },
         ]);
         router.push(`/biz-os/battle-plans/${plan.id}`);
         await invalidateHome();
@@ -574,7 +585,7 @@ export function AskSkyConcierge({
         });
         setTurns((t) => [
           ...t,
-          { role: "asksky", text: `Mapped keyword gaps into ${res.plan?.title || "your BattlePlan"}.` },
+          { role: "asksky", text: `Mapped keyword gaps into a draft: ${res.plan?.title || "your Battle Plan"}. Approve it when the checklist looks right.` },
         ]);
         if (res.plan?.id) router.push(`/biz-os/battle-plans/${res.plan.id}`);
         await invalidateHome();
@@ -1072,11 +1083,7 @@ export function AskSkyConcierge({
                 : "border-slate-200",
             )}
             rows={2}
-            placeholder={
-              awaitingWebsite
-                ? "https://your-site.com"
-                : "Paste a website, phone, address, or Instagram…"
-            }
+            placeholder={inputPlaceholder(surface, awaitingWebsite)}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => {

@@ -124,6 +124,46 @@ export type BizOsQueueTicket = BizOsQueueRow & {
   };
 };
 
+export type BattlePlanTask = {
+  id: number;
+  taskText: string;
+  description?: string | null;
+  status: string;
+  assignee?: string | null;
+  assigneeUserId?: number | null;
+  assigneeName?: string | null;
+  targetDate?: string | null;
+};
+
+export type BattlePlanLog = {
+  id: number;
+  senderType: string;
+  senderName?: string | null;
+  messageText: string;
+  createdAt: string;
+};
+
+export type BattlePlanMember = {
+  userId: number;
+  name: string;
+};
+
+export type BattlePlan = {
+  id: number;
+  title: string;
+  description?: string | null;
+  primaryGoal?: string | null;
+  campaignId?: number | null;
+  status: string;
+  needsSupport?: boolean;
+  supportStatus?: string | null;
+  targetDate?: string | null;
+  progress: number;
+  members?: BattlePlanMember[];
+  tasks?: BattlePlanTask[];
+  logs?: BattlePlanLog[];
+};
+
 export const bizOsService = {
   lookup(businessName: string, zipCode: string) {
     return apiRequest<{
@@ -296,23 +336,49 @@ export const bizOsService = {
   },
 
   listPlans(profileId: number | string) {
-    return apiRequest<any[]>("biz-os/battle-plans", { params: withProfile(profileId) });
+    return apiRequest<BattlePlan[]>("biz-os/battle-plans", { params: withProfile(profileId) });
   },
 
-  createPlan(profileId: number | string, primaryGoal: string, customGoal?: string) {
-    return apiRequest<any>("biz-os/battle-plans", {
+  createPlan(
+    profileId: number | string,
+    body: {
+      message?: string;
+      trigger?: string;
+      context?: string;
+      campaignId?: number;
+      primaryGoal?: string;
+      customGoal?: string;
+    } = {},
+  ) {
+    return apiRequest<BattlePlan>("biz-os/battle-plans", {
       method: "POST",
       params: withProfile(profileId),
-      body: JSON.stringify({ primaryGoal, customGoal }),
+      body: JSON.stringify(body),
     });
   },
 
   getPlan(profileId: number | string, id: number) {
-    return apiRequest<any>(`biz-os/battle-plans/${id}`, { params: withProfile(profileId) });
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${id}`, { params: withProfile(profileId) });
+  },
+
+  approvePlan(profileId: number | string, planId: number) {
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/approve`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({}),
+    });
+  },
+
+  keepEditingPlan(profileId: number | string, planId: number) {
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/keep-editing`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({}),
+    });
   },
 
   patchTask(profileId: number | string, planId: number, taskId: number, status: string) {
-    return apiRequest<any>(`biz-os/battle-plans/${planId}/tasks/${taskId}`, {
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/tasks/${taskId}`, {
       method: "PATCH",
       params: withProfile(profileId),
       body: JSON.stringify({ status }),
@@ -320,7 +386,7 @@ export const bizOsService = {
   },
 
   addMessage(profileId: number | string, planId: number, messageText: string) {
-    return apiRequest<any>(`biz-os/battle-plans/${planId}/messages`, {
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/messages`, {
       method: "POST",
       params: withProfile(profileId),
       body: JSON.stringify({ messageText }),

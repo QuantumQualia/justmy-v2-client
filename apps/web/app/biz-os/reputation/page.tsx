@@ -386,9 +386,9 @@ export default function ReputationPage() {
     if (!profileId) return;
     setCreatingPlan(true);
     try {
-      const plan = await bizOsService.createPlan(profileId, "reviews");
+      const plan = await bizOsService.createPlan(profileId, { trigger: "reviews" });
       await invalidateHome();
-      setPlanMsg(`Reviews goal added to Battle Plan #${plan.id}.`);
+      setPlanMsg(`Drafted a reviews Battle Plan. Shape it with Sky, then approve.`);
       router.push(`/biz-os/battle-plans/${plan.id}`);
     } finally {
       setCreatingPlan(false);
