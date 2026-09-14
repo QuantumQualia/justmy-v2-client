@@ -128,7 +128,9 @@ function redirectToVerifyEmail(request: NextRequest, explicitRedirect?: string |
 function nextWithPathname(request: NextRequest, pathname = request.nextUrl.pathname) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
-  return NextResponse.next({ request: { headers: requestHeaders } });
+  const next = NextResponse.next({ request: { headers: requestHeaders } });
+  next.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
+  return next;
 }
 
 function rewriteWithPathname(request: NextRequest, internalPath: string) {

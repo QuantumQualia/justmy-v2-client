@@ -172,9 +172,9 @@ export function DotClaimModal({
 
   async function finishGoogle() {
     setError("");
-    setLoading(true);
     try {
-      const idToken = await requestGoogleIdToken();
+      const idToken = await requestGoogleIdToken({ click: false });
+      setLoading(true);
       const response = await bizOsService.claimGoogle({
         idToken,
         businessName,

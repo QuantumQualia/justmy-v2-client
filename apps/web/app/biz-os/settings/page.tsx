@@ -95,7 +95,7 @@ export default function BizOsSettingsPage() {
       />
       {error ? <p className="text-sm text-rose-600">{error}</p> : null}
       <div className="grid gap-3">
-        {connections.map((row) => {
+        {connections.filter((row) => row.provider !== "google_docs").map((row) => {
           const connected = row.status === "connected";
           const hint = HINTS[row.provider];
           return (

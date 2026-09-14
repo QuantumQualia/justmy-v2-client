@@ -154,9 +154,9 @@ export function AuthDialog({
 
   async function handleGoogle() {
     setError("");
-    setLoading(true);
     try {
-      const idToken = await requestGoogleIdToken();
+      const idToken = await requestGoogleIdToken({ click: false });
+      setLoading(true);
       const response = await authService.oauthGoogle({
         idToken,
         zipCode: formData.zipCode || defaultZip,

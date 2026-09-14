@@ -17,6 +17,9 @@ type GoogleAccountsId = {
     cancel_on_tap_outside?: boolean;
     ux_mode?: "popup" | "redirect";
     context?: "signin" | "signup" | "use";
+    use_fedcm_for_prompt?: boolean;
+    use_fedcm_for_button?: boolean;
+    itp_support?: boolean;
   }) => void;
   prompt: (listener?: (notification: {
     isNotDisplayed: () => boolean;
@@ -30,6 +33,7 @@ type GoogleAccountsId = {
       size?: string;
       theme?: string;
       ux_mode?: string;
+      width?: number | string;
     },
   ) => void;
 };
@@ -67,6 +71,8 @@ type Pending<T> = {
 let googlePending: Pending<string> | null = null;
 let googleButton: HTMLElement | null = null;
 let googleReady: Promise<void> | null = null;
+let googleInitialized = false;
+let googleInFlight: Promise<string> | null = null;
 
 function loadScript(src: string, id: string): Promise<void> {
   const existing = document.getElementById(id) as HTMLScriptElement | null;
@@ -104,7 +110,7 @@ function loadScript(src: string, id: string): Promise<void> {
 async function ensureGoogle(): Promise<void> {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
   if (!clientId) return;
-  if (googleButton) return;
+  if (googleInitialized && window.google?.accounts.id) return;
 
   await loadScript(GSI_SRC, "google-gis-client");
   const googleId = window.google?.accounts.id;
@@ -115,6 +121,9 @@ async function ensureGoogle(): Promise<void> {
     ux_mode: "popup",
     auto_select: false,
     cancel_on_tap_outside: true,
+    use_fedcm_for_prompt: false,
+    use_fedcm_for_button: false,
+    itp_support: true,
     callback: (response) => {
       const pending = googlePending;
       googlePending = null;
@@ -123,24 +132,24 @@ async function ensureGoogle(): Promise<void> {
       else pending.reject(new Error("Google did not return a credential."));
     },
   });
+  googleInitialized = true;
+}
 
-  const host = document.createElement("div");
-  host.setAttribute("aria-hidden", "true");
-  host.style.position = "fixed";
-  host.style.left = "-9999px";
-  host.style.width = "1px";
-  host.style.height = "1px";
-  host.style.overflow = "hidden";
-  document.body.appendChild(host);
-
+/** Render the official GIS control over a custom button so Continue can post back to this tab. */
+export async function mountGoogleButton(host: HTMLElement | null) {
+  if (!host) return;
+  await ensureGoogle();
+  const googleId = window.google?.accounts.id;
+  if (!googleId) throw new Error("Google sign-in failed to load.");
+  host.replaceChildren();
+  const width = Math.max(host.offsetWidth || host.parentElement?.offsetWidth || 320, 200);
   googleId.renderButton(host, {
     type: "standard",
     size: "large",
     ux_mode: "popup",
+    width,
   });
-
-  googleButton =
-    host.querySelector<HTMLElement>("div[role=button]") ?? host;
+  googleButton = host.querySelector<HTMLElement>("div[role=button]") ?? host;
 }
 
 async function ensureApple(): Promise<void> {
@@ -156,14 +165,30 @@ export async function preloadOauthProviders(): Promise<void> {
   await Promise.allSettled(jobs);
 }
 
-export function requestGoogleIdToken(): Promise<string> {
+export function requestGoogleIdToken(opts?: { click?: boolean }): Promise<string> {
   const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID?.trim();
   if (!clientId) {
     return Promise.reject(new Error("Google sign-in is not configured."));
   }
+  if (googleInFlight) return googleInFlight;
 
-  return new Promise((resolve, reject) => {
-    googlePending = { resolve, reject };
+  googleInFlight = new Promise((resolve, reject) => {
+    const timer = window.setTimeout(() => {
+      googlePending = null;
+      reject(new Error("Google sign-in timed out. Try again."));
+    }, 120_000);
+    googlePending = {
+      resolve: (value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      },
+      reject: (error) => {
+        window.clearTimeout(timer);
+        reject(error);
+      },
+    };
+
+    if (opts?.click === false) return;
 
     const click = () => {
       const prompt = window.google?.accounts.id.prompt;
@@ -202,7 +227,11 @@ export function requestGoogleIdToken(): Promise<string> {
         googlePending = null;
         reject(err instanceof Error ? err : new Error("Google sign-in failed to load."));
       });
+  }).finally(() => {
+    googleInFlight = null;
   });
+
+  return googleInFlight;
 }
 
 export function requestAppleIdentityToken(): Promise<{

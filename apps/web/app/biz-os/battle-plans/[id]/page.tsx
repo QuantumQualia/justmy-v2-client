@@ -2,11 +2,18 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Send, Sparkles } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { bizOsService, type BattlePlan, type BattlePlanLog, type BattlePlanTask } from "@/lib/services/biz-os";
 import { useBizOsFetch } from "@/components/biz-os/use-biz-os-profile";
+import { PlanFunctionsMenu } from "@/components/biz-os/plan-functions-menu";
+import { copyText, downloadConversationPdf, draftInGmail } from "@/lib/functions/output";
+import { conversationThrough, formatTranscript, transcriptLines } from "@/lib/functions/transcript";
+import type { FunctionId } from "@/lib/functions/registry";
+import { ApiClientError } from "@/lib/api-client";
+import { ACCOUNT_TIER, hasAccess } from "@/lib/plan-features";
 import {
   BizOsCard,
   BizOsHeader,
@@ -18,19 +25,62 @@ import { cn } from "@workspace/ui/lib/utils";
 
 const OWNER_APPROVE_LINE = "Approved this plan.";
 const OWNER_KEEP_EDITING_LINE = "Try another draft.";
+const MESSAGE_LINK =
+  /(\/biz-os\/battle-plans\/\d+|https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+(?:\/edit)?)/g;
 
-type BusyKind = "send" | "approve" | "keep_editing";
+type BusyKind = "send" | "approve" | "keep_editing" | "spawn" | "export_doc";
 
 function busyStatus(kind: BusyKind) {
   if (kind === "approve") return "Sky is making this live…";
   if (kind === "keep_editing") return "Sky is trying another draft…";
+  if (kind === "spawn") return "Sky is starting a new plan…";
+  if (kind === "export_doc") return "Sky is making a Google Doc…";
   return "Sky is drafting…";
+}
+
+function paidRequired(err: unknown) {
+  return err instanceof ApiClientError && err.statusCode === 403;
 }
 
 function isSky(senderType: string, senderName?: string | null) {
   const type = senderType.toLowerCase();
   const name = (senderName || "").toLowerCase();
   return type === "asksky" || type === "system" || name.includes("sky");
+}
+
+function PlanMessageText({ text }: { text: string }) {
+  const parts = text.split(MESSAGE_LINK);
+  return (
+    <p className="min-w-0 flex-1 whitespace-pre-wrap">
+      {parts.map((part, i) => {
+        if (/^\/biz-os\/battle-plans\/\d+$/.test(part)) {
+          return (
+            <Link
+              key={`${part}-${i}`}
+              href={part}
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              {part}
+            </Link>
+          );
+        }
+        if (/^https:\/\/docs\.google\.com\/document\/d\//.test(part)) {
+          return (
+            <a
+              key={`${part}-${i}`}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-violet-700 underline underline-offset-2"
+            >
+              Open Google Doc
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </p>
+  );
 }
 
 function formatTaskDate(value?: string | null) {
@@ -151,12 +201,14 @@ function TaskRow({
 
 export default function BattlePlanWorkspacePage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const planId = Number(params.id);
-  const { data: plan, setData: setPlan, pageReady, profileId } = useBizOsFetch(
+  const { data: plan, setData: setPlan, pageReady, profileId, me } = useBizOsFetch(
     (id) => bizOsService.getPlan(id, planId),
     null as BattlePlan | null,
     planId,
   );
+  const paidOs = hasAccess(me?.osName, ACCOUNT_TIER.COMMAND);
   const [note, setNote] = useState("");
   const [busyKind, setBusyKind] = useState<BusyKind | null>(null);
   const [taskWorking, setTaskWorking] = useState(0);
@@ -279,6 +331,108 @@ export default function BattlePlanWorkspacePage() {
     );
   }
 
+  async function spawnFrom(log: BattlePlanLog) {
+    if (!profileId || !plan || busy || log.id < 1) return;
+    setBusyKind("spawn");
+    setHint(null);
+    try {
+      const result = await bizOsService.spawnPlan(profileId, planId, log.id);
+      setPlan((current) =>
+        mergeFetchedPlan(current, result.sourcePlan, inflightTasks.current),
+      );
+      toast.success("New draft started.", {
+        description: result.newPlan.title,
+        action: {
+          label: "Open",
+          onClick: () => router.push(`/biz-os/battle-plans/${result.newPlan.id}`),
+        },
+      });
+    } catch (err) {
+      if (paidRequired(err)) {
+        router.push("/biz-os/pricing");
+        return;
+      }
+      setHint("Sky couldn’t start that plan. Try again.");
+    } finally {
+      setBusyKind(null);
+    }
+  }
+
+  async function exportToDocs(log: BattlePlanLog) {
+    if (!profileId || !plan || busy || log.id < 1) return;
+    setBusyKind("export_doc");
+    setHint(null);
+    try {
+      const returnTo = `/biz-os/battle-plans/${planId}?exportDoc=${log.id}`;
+      const result = await bizOsService.exportPlanDoc(profileId, planId, log.id, returnTo);
+      if (result.status === "auth_required" && result.authUrl) {
+        window.location.href = result.authUrl;
+        return;
+      }
+      if (result.status === "created" && result.sourcePlan) {
+        setPlan((current) => mergeFetchedPlan(current, result.sourcePlan!, inflightTasks.current));
+      }
+    } catch (err) {
+      if (paidRequired(err)) {
+        router.push("/biz-os/pricing");
+        return;
+      }
+      setHint(err instanceof Error ? err.message : "Sky couldn’t make that Doc. Try again.");
+    } finally {
+      setBusyKind((kind) => (kind === "export_doc" ? null : kind));
+    }
+  }
+
+  async function runFunction(log: BattlePlanLog, id: FunctionId) {
+    const title = plan?.title || "Battle Plan";
+    const thread = conversationThrough(plan?.logs || [], log.id);
+    const lines = transcriptLines(thread);
+    const transcript = formatTranscript(title, lines);
+    try {
+      if (id === "copy") {
+        await copyText(log.messageText || "");
+        toast.success("Copied Sky’s answer");
+        return;
+      }
+      if (id === "convert_pdf") {
+        await downloadConversationPdf(title, lines);
+        toast.success("PDF downloaded");
+        return;
+      }
+      if (id === "export_docs") {
+        await exportToDocs(log);
+        return;
+      }
+      if (id === "draft_gmail") {
+        await draftInGmail(`${title} — conversation`, transcript);
+        toast.success("Copied the conversation — Gmail draft is open");
+        return;
+      }
+      if (id === "convert_battle_plan") {
+        await spawnFrom(log);
+      }
+    } catch {
+      toast.error("Couldn’t run that function.");
+    }
+  }
+
+  useEffect(() => {
+    if (!pageReady || !profileId || !plan || !paidOs) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("oauth") === "failed") {
+      window.history.replaceState({}, "", window.location.pathname);
+      setHint("Google Docs didn’t connect. In Google Cloud, add this Authorized redirect URI, then try Export again: your API origin + /biz-os/oauth-callback (locally http://localhost:3001/biz-os/oauth-callback).");
+      return;
+    }
+    const logId = Number(params.get("exportDoc"));
+    if (!Number.isFinite(logId) || logId < 1) return;
+    window.history.replaceState({}, "", window.location.pathname);
+    const log = (plan.logs || []).find((row) => row.id === logId);
+    if (log) void exportToDocs(log);
+    // Retry once after Google Docs OAuth returns to this plan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageReady, profileId, plan, paidOs, planId]);
+
   if (!pageReady) return <BizOsSkeleton />;
   if (!plan) {
     return (
@@ -326,13 +480,23 @@ export default function BattlePlanWorkspacePage() {
                   <div
                     key={l.id}
                     className={cn(
-                      "whitespace-pre-wrap rounded-2xl px-3 py-2 text-sm",
+                      "rounded-2xl px-3 py-2 text-sm",
                       sky
                         ? "mr-4 bg-slate-50 text-slate-800"
                         : "ml-8 bg-violet-600 text-white",
                     )}
                   >
-                    <p>{l.messageText}</p>
+                    <div className="flex items-start gap-1">
+                      <PlanMessageText text={l.messageText} />
+                      {sky && l.id > 0 ? (
+                        <PlanFunctionsMenu
+                          disabled={Boolean(busyKind)}
+                          paid={paidOs}
+                          onLocked={() => router.push("/biz-os/pricing")}
+                          onRun={(id) => runFunction(l, id)}
+                        />
+                      ) : null}
+                    </div>
                   </div>
                 );
               })

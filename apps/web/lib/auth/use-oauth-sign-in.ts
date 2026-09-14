@@ -35,9 +35,9 @@ export function useOauthSignIn(options: {
   async function handleGoogle() {
     const current = optionsRef.current;
     setError("");
-    setLoading(true);
     try {
-      const idToken = await requestGoogleIdToken();
+      const idToken = await requestGoogleIdToken({ click: false });
+      setLoading(true);
       const response = await authService.oauthGoogle({
         idToken,
         zipCode: current.zipCode || undefined,

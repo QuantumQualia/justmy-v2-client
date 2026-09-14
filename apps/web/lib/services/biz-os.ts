@@ -280,19 +280,22 @@ export const bizOsService = {
     return apiRequest<OAuthConnection[]>("biz-os/oauth-connections", { params: withProfile(profileId) });
   },
 
-  startOAuthConnection(profileId: number | string, provider: string) {
+  startOAuthConnection(profileId: number | string, provider: string, returnTo?: string) {
     return apiRequest<{ authUrl: string }>("biz-os/oauth-connections/start", {
       method: "POST",
       params: withProfile(profileId),
-      body: JSON.stringify({ provider }),
+      body: JSON.stringify({ provider, returnTo }),
     });
   },
 
   completeOAuthConnection(body: { code: string; state: string }) {
-    return apiRequest<OAuthConnection & { profileId?: number }>("biz-os/oauth-connections/complete", {
-      method: "POST",
-      body: JSON.stringify(body),
-    });
+    return apiRequest<OAuthConnection & { profileId?: number; returnTo?: string | null }>(
+      "biz-os/oauth-connections/complete",
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
   },
 
   setOAuthConnection(
@@ -390,6 +393,30 @@ export const bizOsService = {
       method: "POST",
       params: withProfile(profileId),
       body: JSON.stringify({ messageText }),
+    });
+  },
+
+  spawnPlan(profileId: number | string, planId: number, logId?: number) {
+    return apiRequest<{ sourcePlan: BattlePlan; newPlan: BattlePlan }>(
+      `biz-os/battle-plans/${planId}/spawn`,
+      {
+        method: "POST",
+        params: withProfile(profileId),
+        body: JSON.stringify({ logId }),
+      },
+    );
+  },
+
+  exportPlanDoc(profileId: number | string, planId: number, logId: number, returnTo?: string) {
+    return apiRequest<{
+      status: "auth_required" | "created";
+      authUrl?: string;
+      sourcePlan?: BattlePlan;
+      docUrl?: string;
+    }>(`biz-os/battle-plans/${planId}/export-doc`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ logId, returnTo }),
     });
   },
 

@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
+import { mountGoogleButton } from "@/lib/auth/oauth-providers";
+import { cn } from "@workspace/ui/lib/utils";
 
 type AuthSocialButtonsProps = {
   loading: boolean;
@@ -15,21 +18,42 @@ export function AuthSocialButtons({
   onApple,
   showApple = false,
 }: AuthSocialButtonsProps) {
+  const googleSlotRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    void mountGoogleButton(googleSlotRef.current);
+  }, []);
+
   return (
     <div className="flex flex-col gap-2.5">
-      <button
-        type="button"
-        onClick={onGoogle}
-        disabled={loading}
-        className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+      <div
+        className="relative"
+        onPointerDownCapture={() => {
+          if (!loading) onGoogle();
+        }}
       >
-        {loading ? (
-          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-        ) : (
-          <GoogleMark />
-        )}
-        Continue with Google
-      </button>
+        <button
+          type="button"
+          onClick={() => onGoogle()}
+          disabled={loading}
+          className="inline-flex h-11 w-full items-center justify-center gap-3 rounded-full border border-slate-200 bg-white text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : (
+            <GoogleMark />
+          )}
+          Continue with Google
+        </button>
+        <div
+          ref={googleSlotRef}
+          aria-hidden
+          className={cn(
+            "absolute inset-0 z-10 overflow-hidden opacity-0 [&>div]:h-full [&>div]:w-full [&_iframe]:h-full [&_iframe]:w-full",
+            loading && "pointer-events-none",
+          )}
+        />
+      </div>
       {showApple && onApple ? (
         <button
           type="button"

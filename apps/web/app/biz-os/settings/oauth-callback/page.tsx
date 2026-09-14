@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { bizOsService } from "@/lib/services/biz-os";
 import { BizOsCard, BizOsHeader, BizOsPage } from "@/components/biz-os/biz-os-ui";
-import { BizOsPlanGate } from "@/components/biz-os/plan-gate";
+
+function safeReturnTo(value?: string | null) {
+  const next = String(value || "").trim();
+  if (!next.startsWith("/biz-os/")) return "/biz-os/settings";
+  if (next.includes("://") || next.includes("\\")) return "/biz-os/settings";
+  return next;
+}
 
 export default function SocialOauthCallbackPage() {
   const [message, setMessage] = useState("Finishing connection…");
@@ -27,8 +33,8 @@ export default function SocialOauthCallbackPage() {
     }
     void bizOsService
       .completeOAuthConnection({ code, state })
-      .then(() => {
-        window.location.replace("/biz-os/settings");
+      .then((res) => {
+        window.location.replace(safeReturnTo(res.returnTo));
       })
       .catch((caught: unknown) => {
         setFailed(true);
@@ -37,13 +43,8 @@ export default function SocialOauthCallbackPage() {
   }, []);
 
   return (
-    <BizOsPlanGate
-      minTier="command_pro"
-      title="Social connections"
-      body="Connect social accounts on Command PRO and Enterprise."
-    >
     <BizOsPage>
-      <BizOsHeader eyebrow="Command PRO" title="Social connections" />
+      <BizOsHeader eyebrow="Biz OS" title="Account connection" />
       <BizOsCard>
         <p className={failed ? "text-sm text-rose-600" : "text-sm text-slate-600"}>{message}</p>
         {failed ? (
@@ -53,6 +54,5 @@ export default function SocialOauthCallbackPage() {
         ) : null}
       </BizOsCard>
     </BizOsPage>
-    </BizOsPlanGate>
   );
 }
