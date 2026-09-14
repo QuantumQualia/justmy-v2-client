@@ -91,7 +91,7 @@ export default function LandingPage() {
               features={["Verified Business Node", "Basic Listing Info", "Receive Reviews"]}
             />
 
-            {/* 3. GROWTH OS ($35/mo) */}
+            {/* 3. Command OS */}
             <PricingCard 
               icon={<TrendingUp className="h-6 w-6 text-purple-400" />}
               title="Command OS"
@@ -104,7 +104,7 @@ export default function LandingPage() {
               isPopular={false}
             />
 
-            {/* 4. FOUNDERS GROWTH OS ($350/yr) */}
+            {/* 4. Command PRO / Enterprise */}
             <div className="relative transform md:-translate-y-4" id="pricing_founder">
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-black px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide z-10">
                 Best Value

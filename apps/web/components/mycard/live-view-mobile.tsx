@@ -35,11 +35,11 @@ export function MyCardMobileView(props: MyCardMobileViewProps) {
     // Future: add OS-specific mobile views here.
     case OS_NAME.BIZ:
        return <MyCardMobileBizView {...props} />;
-    case OS_NAME.FOUNDER:
+    case "FOUNDER":
     case OS_NAME.COMMAND_PRO:
     case OS_NAME.ENTERPRISE:
        return <MyCardMobileFounderView {...props} />;
-    case OS_NAME.GROWTH:
+    case "GROWTH":
     case OS_NAME.COMMAND:
        return <MyCardMobileCommandView {...props} />;
     case OS_NAME.CITY:

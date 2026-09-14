@@ -4,7 +4,8 @@
  * **Backend contract:** OS.name codes (uppercase) on `osName`. Profile.type is a synced copy.
  * Register/OAuth send `osName`.
  *
- * **Frontend kinds:** lowercase slugs for URLs (`?type=command`). `growth` is Command OS.
+ * **Frontend kinds:** lowercase slugs for URLs (`?type=command`). `growth` is the Command OS slug.
+ * Growth OS and Founder OS are retired catalog rows — do not alias them to Command plans.
  */
 
 export const PROFILE_KINDS = [
@@ -26,8 +27,6 @@ export const OS_NAMES = [
   "COMMAND",
   "COMMAND_PRO",
   "ENTERPRISE",
-  "GROWTH",
-  "FOUNDER",
   "CITY",
   "NETWORK",
 ] as const;
@@ -42,7 +41,7 @@ const PROFILE_TO_OS: Record<ProfileKind, OsName> = {
   growth: "COMMAND",
   command_pro: "COMMAND_PRO",
   enterprise: "ENTERPRISE",
-  founder: "FOUNDER",
+  founder: "COMMAND_PRO",
   city: "CITY",
   network: "NETWORK",
 };
@@ -53,8 +52,6 @@ const OS_TO_PROFILE: Record<OsName, ProfileKind> = {
   COMMAND: "growth",
   COMMAND_PRO: "command_pro",
   ENTERPRISE: "enterprise",
-  GROWTH: "growth",
-  FOUNDER: "founder",
   CITY: "city",
   NETWORK: "network",
 };
@@ -76,8 +73,6 @@ export const OS_NAME = {
   COMMAND: "COMMAND",
   COMMAND_PRO: "COMMAND_PRO",
   ENTERPRISE: "ENTERPRISE",
-  GROWTH: "GROWTH",
-  FOUNDER: "FOUNDER",
   CITY: "CITY",
   NETWORK: "NETWORK",
 } as const satisfies Record<string, OsName>;
@@ -90,26 +85,49 @@ export const BUSINESS_OS_FAMILY: readonly string[] = [
   "COMMAND",
   "COMMAND_PRO",
   "ENTERPRISE",
-  "GROWTH",
-  "FOUNDER",
 ];
 
 const OS_ALIASES: Record<string, OsName> = {
-  GROWTH: "COMMAND",
-  FOUNDER: "COMMAND_PRO",
   COMMAND: "COMMAND",
+  "COMMAND OS": "COMMAND",
   COMMAND_PRO: "COMMAND_PRO",
+  "COMMAND PRO": "COMMAND_PRO",
+  "COMMAND PRO OS": "COMMAND_PRO",
   ENTERPRISE: "ENTERPRISE",
+  "ENTERPRISE OS": "ENTERPRISE",
   BIZ: "BIZ",
+  "BIZ OS": "BIZ",
+  BUSINESS: "BIZ",
+  "BUSINESS OS": "BIZ",
   PERSONAL: "PERSONAL",
+  "PERSONAL OS": "PERSONAL",
   CITY: "CITY",
+  "CITY OS": "CITY",
   NETWORK: "NETWORK",
+  "NETWORK OS": "NETWORK",
 };
 
+function foldOsLabel(raw?: string | null): string {
+  return String(raw || "")
+    .replace(/[\u2122\u00AE\u00A9]/g, "")
+    .normalize("NFKD")
+    .replace(/[^a-zA-Z0-9]+/g, " ")
+    .trim()
+    .toUpperCase()
+    .replace(/\bTM\b/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 export function canonicalizeOsName(raw?: string | null): string {
-  const u = String(raw || "").trim().toUpperCase();
-  if (!u) return OS_NAME.PERSONAL;
-  return OS_ALIASES[u] || u;
+  const original = String(raw || "").trim();
+  if (!original) return OS_NAME.PERSONAL;
+  const folded = foldOsLabel(original);
+  if (OS_ALIASES[folded]) return OS_ALIASES[folded];
+  const underscored = folded.replace(/ /g, "_");
+  if (OS_ALIASES[underscored]) return OS_ALIASES[underscored];
+  if (isOsName(underscored)) return underscored;
+  return original.toUpperCase();
 }
 
 export function isBusinessOs(raw?: string | null): boolean {
@@ -210,6 +228,8 @@ export function profileKindToOsName(kind: ProfileKind): OsName {
 
 export function osNameToProfileKind(name: string): ProfileKind | undefined {
   const u = name.trim().toUpperCase();
+  if (u === "GROWTH") return "growth";
+  if (u === "FOUNDER" || u === "FOUNDERS") return "founder";
   if (isOsName(u)) return OS_TO_PROFILE[u];
   const canonical = canonicalizeOsName(u);
   if (isOsName(canonical)) return OS_TO_PROFILE[canonical];
