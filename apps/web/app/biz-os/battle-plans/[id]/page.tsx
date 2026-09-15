@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Send, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
@@ -22,24 +22,41 @@ import {
   BizOsSkeleton,
 } from "@/components/biz-os/biz-os-ui";
 import { cn } from "@workspace/ui/lib/utils";
+import { useRealtime, type RealtimeEvent } from "@/lib/realtime";
 
 const OWNER_APPROVE_LINE = "Approved this plan.";
 const OWNER_KEEP_EDITING_LINE = "Try another draft.";
 const MESSAGE_LINK =
-  /(\/biz-os\/battle-plans\/\d+|https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+(?:\/edit)?)/g;
+  /(\/biz-os\/battle-plans\/\d+(?:\?handoff=\d+)?|https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+(?:\/edit)?)/g;
 
-type BusyKind = "send" | "approve" | "keep_editing" | "spawn" | "export_doc";
+type BusyKind = "send" | "approve" | "keep_editing" | "spawn" | "export_doc" | "handoff";
 
 function busyStatus(kind: BusyKind) {
   if (kind === "approve") return "Sky is making this live…";
   if (kind === "keep_editing") return "Sky is trying another draft…";
   if (kind === "spawn") return "Sky is starting a new plan…";
   if (kind === "export_doc") return "Sky is making a Google Doc…";
+  if (kind === "handoff") return "Sky is looping in #FunCREW…";
   return "Sky is drafting…";
 }
 
 function paidRequired(err: unknown) {
   return err instanceof ApiClientError && err.statusCode === 403;
+}
+
+function applyFunCrewRealtime(plan: BattlePlan, event: RealtimeEvent): BattlePlan {
+  const log = event.payload?.log as BattlePlanLog | undefined;
+  const handoffId = Number(event.payload?.handoffId);
+  const status = typeof event.payload?.status === "string" ? event.payload.status : null;
+  const logs = plan.logs || [];
+  const nextLogs =
+    log?.id && !logs.some((row) => row.id === log.id)
+      ? [...logs, { ...log, createdAt: String(log.createdAt) }]
+      : logs;
+  const handoffs = (plan.handoffs || []).map((h) =>
+    h.id === handoffId && status ? { ...h, status } : h,
+  );
+  return { ...plan, logs: nextLogs, handoffs };
 }
 
 function isSky(senderType: string, senderName?: string | null) {
@@ -48,12 +65,18 @@ function isSky(senderType: string, senderName?: string | null) {
   return type === "asksky" || type === "system" || name.includes("sky");
 }
 
+function logSpeaker(log: BattlePlanLog) {
+  if (log.senderType === "team") return "#FunCREW";
+  if (isSky(log.senderType, log.senderName)) return "Sky";
+  return log.senderName || "You";
+}
+
 function PlanMessageText({ text }: { text: string }) {
   const parts = text.split(MESSAGE_LINK);
   return (
     <p className="min-w-0 flex-1 whitespace-pre-wrap">
       {parts.map((part, i) => {
-        if (/^\/biz-os\/battle-plans\/\d+$/.test(part)) {
+        if (/^\/biz-os\/battle-plans\/\d+(?:\?handoff=\d+)?$/.test(part)) {
           return (
             <Link
               key={`${part}-${i}`}
@@ -202,7 +225,9 @@ function TaskRow({
 export default function BattlePlanWorkspacePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const planId = Number(params.id);
+  const handoffId = Number(searchParams.get("handoff") || 0) || null;
   const { data: plan, setData: setPlan, pageReady, profileId, me } = useBizOsFetch(
     (id) => bizOsService.getPlan(id, planId),
     null as BattlePlan | null,
@@ -213,6 +238,7 @@ export default function BattlePlanWorkspacePage() {
   const [busyKind, setBusyKind] = useState<BusyKind | null>(null);
   const [taskWorking, setTaskWorking] = useState(0);
   const [hint, setHint] = useState<string | null>(null);
+  const [streamStatus, setStreamStatus] = useState<"connecting" | "open" | "closed">("closed");
   const logEndRef = useRef<HTMLDivElement>(null);
   const taskPatchSeq = useRef(new Map<number, number>());
   const inflightTasks = useRef(new Set<number>());
@@ -229,10 +255,46 @@ export default function BattlePlanWorkspacePage() {
     logEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [plan?.logs, busyKind, taskWorking]);
 
+  useRealtime({
+    topics: [handoffId ? `funcrew.handoff.${handoffId}` : null],
+    enabled: Boolean(handoffId),
+    onStatus: setStreamStatus,
+    onEvent: (event) => {
+      if (event.type !== "funcrew.message") return;
+      setPlan((current) => (current ? applyFunCrewRealtime(current, event) : current));
+    },
+  });
+
+  useEffect(() => {
+    if (!pageReady || !profileId || !planId || !handoffId) return;
+    if (streamStatus === "open") return;
+    let cancelled = false;
+    let inFlight = false;
+    const tick = async () => {
+      if (inFlight) return;
+      inFlight = true;
+      try {
+        const next = await bizOsService.getPlan(profileId, planId);
+        if (cancelled) return;
+        setPlan((current) => mergeFetchedPlan(current, next, inflightTasks.current));
+      } catch {
+        /* keep showing the last plan */
+      } finally {
+        inFlight = false;
+      }
+    };
+    const timer = window.setInterval(() => void tick(), 10_000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [pageReady, profileId, planId, handoffId, streamStatus, setPlan]);
+
   function pushOwnerLine(messageText: string) {
     if (!plan) return;
     const optimistic: BattlePlanLog = {
       id: -Date.now(),
+      threadId: handoffId,
       senderType: "client",
       senderName: "Owner",
       messageText,
@@ -246,7 +308,7 @@ export default function BattlePlanWorkspacePage() {
     ownerText: string,
     request: () => Promise<BattlePlan>,
   ) {
-    if (!profileId || !plan || busy) return false;
+    if (!profileId || !plan || busy) return null;
     const snapshot = plan;
     pushOwnerLine(ownerText);
     setBusyKind(kind);
@@ -254,7 +316,7 @@ export default function BattlePlanWorkspacePage() {
     try {
       const server = await request();
       setPlan((current) => mergeFetchedPlan(current, server, inflightTasks.current));
-      return true;
+      return server;
     } catch {
       setPlan((current) => {
         if (!current) return snapshot;
@@ -265,7 +327,7 @@ export default function BattlePlanWorkspacePage() {
         };
       });
       setHint("Sky couldn’t finish that. Try again.");
-      return false;
+      return null;
     } finally {
       setBusyKind(null);
     }
@@ -305,8 +367,41 @@ export default function BattlePlanWorkspacePage() {
     const text = note.trim();
     if (!profileId || !text || busy) return;
     setNote("");
-    const ok = await runWithOwnerTurn("send", text, () => bizOsService.addMessage(profileId, planId, text));
-    if (!ok) setNote(text);
+    const server = await runWithOwnerTurn("send", text, () =>
+      bizOsService.addMessage(profileId, planId, text, handoffId || undefined),
+    );
+    if (!server) {
+      setNote(text);
+      return;
+    }
+    const created = server.handoffs?.[0]?.id;
+    if (!handoffId && created) {
+      router.push(`/biz-os/battle-plans/${planId}?handoff=${created}`);
+    }
+  }
+
+  async function askFunCrew() {
+    if (!profileId || !plan || busy) return;
+    if (!paidOs) {
+      router.push("/biz-os/pricing");
+      return;
+    }
+    setBusyKind("handoff");
+    setHint(null);
+    try {
+      const server = await bizOsService.startFunCrewHandoff(profileId, planId);
+      setPlan((current) => mergeFetchedPlan(current, server, inflightTasks.current));
+      const created = server.handoffs?.[0]?.id;
+      if (created) router.push(`/biz-os/battle-plans/${planId}?handoff=${created}`);
+    } catch (err) {
+      if (paidRequired(err)) {
+        router.push("/biz-os/pricing");
+        return;
+      }
+      setHint("Couldn’t loop in #FunCREW. Try again.");
+    } finally {
+      setBusyKind(null);
+    }
   }
 
   async function approve() {
@@ -448,7 +543,11 @@ export default function BattlePlanWorkspacePage() {
   const draft = plan.status === "draft";
   const live = plan.status === "active";
   const tasks = plan.tasks || [];
-  const logs = plan.logs || [];
+  const activeHandoff = handoffId ? plan.handoffs?.find((h) => h.id === handoffId) : null;
+  const logs = (plan.logs || []).filter((l) =>
+    activeHandoff ? l.threadId === activeHandoff.id : l.threadId == null,
+  );
+  const latestHandoff = plan.handoffs?.[0] || null;
   const done = live ? tasks.filter((t) => t.status === "completed").length : 0;
   const total = tasks.length;
 
@@ -470,25 +569,59 @@ export default function BattlePlanWorkspacePage() {
         <BizOsCard padded={false} className="order-2 flex min-h-0 flex-col overflow-hidden lg:order-1">
           <div className="flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3">
             <Sparkles className="h-4 w-4 text-violet-600" />
-            <p className="text-sm font-semibold">{draft ? "Start a plan" : "Plan conversation"}</p>
+            <p className="text-sm font-semibold">
+              {activeHandoff ? "#FunCREW assist" : draft ? "Start a plan" : "Plan conversation"}
+            </p>
+            <div className="ml-auto flex items-center gap-2">
+              {activeHandoff ? (
+                <Link
+                  className="text-xs font-medium text-violet-700 hover:text-violet-900"
+                  href={`/biz-os/battle-plans/${plan.id}`}
+                >
+                  Back to main chat
+                </Link>
+              ) : latestHandoff ? (
+                <Link
+                  className="text-xs font-medium text-violet-700 hover:text-violet-900"
+                  href={`/biz-os/battle-plans/${plan.id}?handoff=${latestHandoff.id}`}
+                >
+                  Join #FunCREW
+                </Link>
+              ) : live && paidOs ? (
+                <button
+                  type="button"
+                  className="text-xs font-medium text-violet-700 hover:text-violet-900 disabled:opacity-50"
+                  disabled={busy}
+                  onClick={() => void askFunCrew()}
+                >
+                  Ask #FunCREW
+                </button>
+              ) : null}
+            </div>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
             {logs.length ? (
               logs.map((l) => {
                 const sky = isSky(l.senderType, l.senderName);
+                const funCrew = l.senderType === "team";
                 return (
                   <div
                     key={l.id}
                     className={cn(
                       "rounded-2xl px-3 py-2 text-sm",
-                      sky
-                        ? "mr-4 bg-slate-50 text-slate-800"
-                        : "ml-8 bg-violet-600 text-white",
+                      funCrew
+                        ? "mr-4 border border-emerald-200 bg-emerald-50 text-emerald-950"
+                        : sky
+                          ? "mr-4 bg-slate-50 text-slate-800"
+                          : "ml-8 bg-violet-600 text-white",
                     )}
                   >
+                    {funCrew ? (
+                      <p className="mb-1 text-[11px] font-semibold text-emerald-700">{logSpeaker(l)}</p>
+                    ) : null}
                     <div className="flex items-start gap-1">
                       <PlanMessageText text={l.messageText} />
-                      {sky && l.id > 0 ? (
+                      {sky && l.id > 0 && !activeHandoff ? (
                         <PlanFunctionsMenu
                           disabled={Boolean(busyKind)}
                           paid={paidOs}
@@ -535,9 +668,11 @@ export default function BattlePlanWorkspacePage() {
                 placeholder={
                   busy
                     ? "Sky is working…"
-                    : draft
-                      ? "Tell Sky what you’re working on…"
-                      : "Ask about a task, or what to do next…"
+                    : activeHandoff
+                      ? "Talk with Sky and #FunCREW in this thread…"
+                      : draft
+                        ? "Tell Sky what you’re working on…"
+                        : "Ask about a task, or what to do next…"
                 }
                 disabled={busy}
               />

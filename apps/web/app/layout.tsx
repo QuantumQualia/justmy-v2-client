@@ -122,7 +122,11 @@ export default async function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(embedAskSky && "embed-asksky-host", embedMyForm && "embed-myform-host")}
+      className={cn(
+        embedAskSky && "embed-asksky-host",
+        embedMyForm && "embed-myform-host",
+        pathname.startsWith("/admin") && "admin-shell",
+      )}
     >
       <body
         className={cn(

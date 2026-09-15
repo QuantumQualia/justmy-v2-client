@@ -13,3 +13,6 @@ export default function SmartHandoffComingSoonPage() {
     />
   );
 }
+
+// TODO(phase-6+): apply the 30s FunCREW wait (`shouldPostFunCrewFallback` in battle-plan-handoff.ts)
+// to other SmartHandoff queues, not only Battle Plan handoffs.

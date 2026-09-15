@@ -38,6 +38,7 @@
   --chart-5: oklch(0.769 0.188 70.08);
   --radius: 1rem;
   --impersonation-banner-h: 0px;
+  --admin-sidebar-w: 16rem;
   --sidebar: oklch(0.97 0.006 75);
   --sidebar-foreground: oklch(0.22 0.01 60);
   --sidebar-primary: oklch(0.22 0.01 60);
@@ -186,6 +187,14 @@
   body.news-light-body {
     color-scheme: light;
     overflow-x: clip;
+  }
+
+  /*
+   * Admin: full-height sidebar, site navbar sits in the remaining column.
+   */
+  html.admin-shell [data-site-chrome] {
+    margin-left: var(--admin-sidebar-w, 16rem);
+    width: calc(100% - var(--admin-sidebar-w, 16rem));
   }
   html.news-light-html::-webkit-scrollbar {
     width: 10px;

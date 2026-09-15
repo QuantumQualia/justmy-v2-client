@@ -493,14 +493,26 @@ export function AskSkyConcierge({
         setDraft({ ...draft, planId, summary: flagged.supportDraft?.summary || draft.summary });
         await invalidateHome();
       } else {
-        await bizOsService.requestSupport(profileId, planId, draft.summary);
+        const flagged = await bizOsService.requestSupport(profileId, planId, draft.summary);
+        if (flagged?.handoffId) {
+          setDraftOpen(false);
+          setTurns((t) => [
+            ...t,
+            {
+              role: "asksky",
+              text: "Flagged for #FunCREW. Join that assist thread from the Battle Plan — I’ll stay with you there.",
+            },
+          ]);
+          router.push(`/biz-os/battle-plans/${planId}?handoff=${flagged.handoffId}`);
+          return;
+        }
       }
       setDraftOpen(false);
       setTurns((t) => [
         ...t,
         {
           role: "asksky",
-          text: "Flagged for the FunCrew. They’ll pick this up on your Battle Plan — no extra ticket queue.",
+          text: "Flagged for #FunCREW. Join that assist thread from the Battle Plan — I’ll stay with you there.",
         },
       ]);
       if (planId) router.push(`/biz-os/battle-plans/${planId}`);

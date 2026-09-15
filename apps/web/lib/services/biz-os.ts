@@ -82,10 +82,13 @@ export type SyndicationJob = {
 
 export type BizOsQueueRow = {
   id: number;
+  planId?: number;
   title: string;
   description?: string | null;
   primaryGoal?: string | null;
+  skyOverview?: string | null;
   supportStatus: string;
+  handoffStatus?: string;
   needsSupport: boolean;
   businessName: string;
   profileId: number;
@@ -137,10 +140,21 @@ export type BattlePlanTask = {
 
 export type BattlePlanLog = {
   id: number;
+  threadId?: number | null;
   senderType: string;
   senderName?: string | null;
   messageText: string;
   createdAt: string;
+};
+
+export type BattlePlanHandoff = {
+  id: number;
+  status: string;
+  skyOverview?: string | null;
+  openedAt?: string;
+  fallbackPostedAt?: string | null;
+  firstFunCrewAt?: string | null;
+  lastFunCrewAt?: string | null;
 };
 
 export type BattlePlanMember = {
@@ -162,6 +176,7 @@ export type BattlePlan = {
   members?: BattlePlanMember[];
   tasks?: BattlePlanTask[];
   logs?: BattlePlanLog[];
+  handoffs?: BattlePlanHandoff[];
 };
 
 export const bizOsService = {
@@ -388,11 +403,19 @@ export const bizOsService = {
     });
   },
 
-  addMessage(profileId: number | string, planId: number, messageText: string) {
+  addMessage(profileId: number | string, planId: number, messageText: string, threadId?: number) {
     return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/messages`, {
       method: "POST",
       params: withProfile(profileId),
-      body: JSON.stringify({ messageText }),
+      body: JSON.stringify({ messageText, threadId }),
+    });
+  },
+
+  startFunCrewHandoff(profileId: number | string, planId: number, summary?: string) {
+    return apiRequest<BattlePlan>(`biz-os/battle-plans/${planId}/handoffs`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ summary }),
     });
   },
 
@@ -483,6 +506,13 @@ export const bizOsService = {
     return apiRequest<BizOsQueueTicket>(`biz-os/admin/queue/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
+    });
+  },
+
+  adminQueueBrief(id: number) {
+    return apiRequest<BizOsQueueTicket>(`biz-os/admin/queue/${id}/brief`, {
+      method: "POST",
+      body: JSON.stringify({}),
     });
   },
 };

@@ -93,6 +93,7 @@ export function NewsStandChrome() {
   if (!market) {
     return (
       <header
+        data-site-chrome
         className={cn(
           "sticky top-[var(--impersonation-banner-h,0px)] z-40 h-14 border-b border-slate-200/80 bg-[#f3f4f6]/90",
           hideOnMobile && "max-lg:hidden",
@@ -102,7 +103,10 @@ export function NewsStandChrome() {
   }
 
   return (
-    <div className={cn("sticky top-[var(--impersonation-banner-h,0px)] z-40", hideOnMobile && "max-lg:hidden")}>
+    <div
+      data-site-chrome
+      className={cn("sticky top-[var(--impersonation-banner-h,0px)] z-40", hideOnMobile && "max-lg:hidden")}
+    >
       <NewsMarketNav
         market={market}
         sticky={false}

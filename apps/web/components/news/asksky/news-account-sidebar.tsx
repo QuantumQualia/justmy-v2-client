@@ -642,7 +642,7 @@ export function NewsAccountSidebar({
                         : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
                     )}
                   >
-                    Biz OS queue
+                    [#FunCREW] SmartHandoff
                   </Link>
                   <Link
                     href="/admin/users"

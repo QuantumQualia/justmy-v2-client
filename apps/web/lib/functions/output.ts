@@ -104,7 +104,9 @@ export async function downloadConversationPdf(title: string, lines: TranscriptLi
   }
 
   const bytes = await doc.save();
-  downloadBlob(new Blob([bytes], { type: "application/pdf" }), `${fileStem(title)}.pdf`);
+  const copy = new ArrayBuffer(bytes.byteLength);
+  new Uint8Array(copy).set(bytes);
+  downloadBlob(new Blob([copy], { type: "application/pdf" }), `${fileStem(title)}.pdf`);
 }
 
 export async function downloadConversationDocx(title: string, lines: TranscriptLine[]) {

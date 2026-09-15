@@ -172,7 +172,7 @@ export function requestGoogleIdToken(opts?: { click?: boolean }): Promise<string
   }
   if (googleInFlight) return googleInFlight;
 
-  googleInFlight = new Promise((resolve, reject) => {
+  const pending = new Promise<string>((resolve, reject) => {
     const timer = window.setTimeout(() => {
       googlePending = null;
       reject(new Error("Google sign-in timed out. Try again."));
@@ -202,9 +202,9 @@ export function requestGoogleIdToken(opts?: { click?: boolean }): Promise<string
           notification.isSkippedMoment() ||
           notification.isDismissedMoment()
         ) {
-          const pending = googlePending;
+          const waiting = googlePending;
           googlePending = null;
-          pending?.reject(new Error("Google sign-in was cancelled."));
+          waiting?.reject(new Error("Google sign-in was cancelled."));
         }
       });
     };
@@ -227,11 +227,13 @@ export function requestGoogleIdToken(opts?: { click?: boolean }): Promise<string
         googlePending = null;
         reject(err instanceof Error ? err : new Error("Google sign-in failed to load."));
       });
-  }).finally(() => {
-    googleInFlight = null;
   });
 
-  return googleInFlight;
+  const tracked = pending.finally(() => {
+    if (googleInFlight === tracked) googleInFlight = null;
+  });
+  googleInFlight = tracked;
+  return tracked;
 }
 
 export function requestAppleIdentityToken(): Promise<{

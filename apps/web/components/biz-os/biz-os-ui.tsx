@@ -92,7 +92,7 @@ export function BizOsSubnav() {
             )}
           >
             <Inbox className="h-3.5 w-3.5" />
-            Queue
+            [#FunCREW]
           </Link>
         ) : null}
       </div>
