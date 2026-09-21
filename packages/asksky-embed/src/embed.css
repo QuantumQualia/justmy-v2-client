@@ -4,6 +4,7 @@
 @source "../../ui/src/**/*.{ts,tsx}";
 
 @import "tw-animate-css";
+@import "../../ui/src/styles/asksky-sky.css";
 @import "./asksky-glass.css";
 @import "./embed-base.css";
 

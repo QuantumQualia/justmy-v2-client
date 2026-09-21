@@ -1,8 +1,8 @@
 import * as React from "react";
-import { Bot, ChevronDown, ChevronUp, Loader2, MessageCircle, Mic, RefreshCw, Send, Vote } from "lucide-react";
+import { ArrowRight, Loader2, RefreshCw, Vote } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@workspace/ui/components/card";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { SkyAvatar, SkyPoweredBy } from "@workspace/ui/components/sky-avatar";
 import type {
   AskSkySkyTransport,
   SkyConversationMessage,
@@ -24,6 +24,7 @@ import {
   buildShareTrayLinks,
   isShareTrayActive,
 } from "./share-tray-links";
+import { useResolvedAskSkyTheme, type AskSkyThemeOption } from "./asksky-theme";
 import "./asksky-glass.css";
 
 export type AskSkyVariant = "inline" | "voice" | "chatbot";
@@ -45,9 +46,9 @@ function useAskSkyRuntime(): AskSkyRuntimeValue {
   return v;
 }
 
-function AgentAvatarThumb({ src, alt }: { src: string; alt: string }) {
+function UserAvatarThumb({ src, alt }: { src: string; alt: string }) {
   return (
-    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-blue-600">
+    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-200">
       <img src={src} alt={alt} width={32} height={32} className="h-full w-full object-cover" />
     </div>
   );
@@ -148,12 +149,10 @@ function mapHistoryMessage(m: SkyConversationMessage): AskSkyChatMessage {
 
 function AskSkyMessageCitations({
   docs,
-  isEmbedInline,
-  isGlassChrome,
 }: {
   docs: SkyRetrievedDoc[] | undefined;
-  isEmbedInline: boolean;
-  isGlassChrome: boolean;
+  isEmbedInline?: boolean;
+  isGlassChrome?: boolean;
 }) {
   const links = citationLinksFromRetrievedDocs(docs);
   if (links.length === 0) {
@@ -161,22 +160,8 @@ function AskSkyMessageCitations({
   }
   const preferLiveLabel = links.some((l) => l.live);
   return (
-    <div
-      className={cn(
-        "mt-2 border-t pt-2",
-        isEmbedInline
-          ? "border-zinc-600/50"
-          : isGlassChrome
-            ? "border-white/10"
-            : "border-slate-600/60",
-      )}
-    >
-      <p
-        className={cn(
-          "mb-1 text-[10px] font-medium uppercase tracking-wide",
-          isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-400" : "text-slate-400",
-        )}
-      >
+    <div className="mt-2.5 border-t border-white/30 pt-2">
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-white/85">
         {preferLiveLabel ? "Sources" : "References"}
       </p>
       <ul className="space-y-1">
@@ -186,14 +171,7 @@ function AskSkyMessageCitations({
               href={link.url}
               target="_blank"
               rel="noopener noreferrer"
-              className={cn(
-                "block truncate text-xs underline underline-offset-2",
-                isEmbedInline
-                  ? "text-zinc-300 decoration-zinc-500/70 hover:text-white"
-                  : isGlassChrome
-                    ? "text-sky-300/90 decoration-sky-400/50 hover:text-sky-200"
-                    : "text-blue-300 decoration-blue-400/60 hover:text-white",
-              )}
+              className="block truncate text-xs font-medium text-white underline decoration-white/70 underline-offset-2 hover:text-cyan-50"
             >
               {link.label}
             </a>
@@ -206,26 +184,21 @@ function AskSkyMessageCitations({
 
 function AskSkyLiveSearchBadge({
   model,
-  isEmbedInline,
-  isGlassChrome,
 }: {
   model?: string | null;
-  isEmbedInline: boolean;
-  isGlassChrome: boolean;
+  isEmbedInline?: boolean;
+  isGlassChrome?: boolean;
 }) {
   if (model !== "openai-live-search") {
     return null;
   }
   return (
     <span
-      className={cn(
-        "mt-1.5 inline-flex rounded px-1.5 py-0.5 text-[10px] font-medium",
-        isEmbedInline
-          ? "bg-zinc-700/80 text-zinc-300"
-          : isGlassChrome
-            ? "bg-white/10 text-slate-300"
-            : "bg-slate-700/80 text-slate-300",
-      )}
+      className="mt-1.5 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-medium"
+      style={{
+        background: "rgba(255,255,255,0.18)",
+        color: "var(--asksky-bubble-assistant-fg)",
+      }}
     >
       From recent sources
     </span>
@@ -277,22 +250,12 @@ function suggestedQuestionsFromResolve(resolve: SkyResolveResponse): string[] {
     .filter((s) => s.length > 0);
 }
 
-const chatScrollClasses =
-  "[&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-slate-800 [&::-webkit-scrollbar-thumb]:bg-slate-600 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-slate-500";
+const chatScrollClasses = "asksky-sky-scroll-gutter";
 
-function AskSkyTypingIndicator({
-  isEmbedInline,
-  isGlassChrome,
-}: {
-  isEmbedInline: boolean;
-  isGlassChrome: boolean;
-}) {
+function AskSkyTypingIndicator() {
   return (
     <div
-      className={cn(
-        "flex items-center gap-1.5 py-1",
-        isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-300" : "text-slate-400",
-      )}
+      className="flex items-center gap-1.5 py-1 text-white/80"
       role="status"
       aria-live="polite"
       aria-label="Assistant is replying"
@@ -340,8 +303,6 @@ function AskSkyConversationView({
   const [suggestedQuestions, setSuggestedQuestions] = React.useState<string[]>(() =>
     suggestedQuestionsFromResolve(resolve),
   );
-  const [suggestionsOpen, setSuggestionsOpen] = React.useState(true);
-  /** Ready CTA opened the closing message + share tray (shareTray-enabled agents only). */
   const [shareTrayOpen, setShareTrayOpen] = React.useState(false);
   /** Background refresh of suggested questions after Ask Another (does not block the UI). */
   const [suggestionsRefreshing, setSuggestionsRefreshing] = React.useState(false);
@@ -401,7 +362,6 @@ function AskSkyConversationView({
     setVisitorToken(null);
     setVisitorContactCaptured(false);
     setSuggestedQuestions(suggestedQuestionsFromResolve(resolveLatest.current));
-    setSuggestionsOpen(true);
     setShareTrayOpen(false);
     setSuggestionsRefreshing(false);
     askAnotherRequestIdRef.current += 1;
@@ -455,7 +415,15 @@ function AskSkyConversationView({
 
   React.useEffect(() => {
     scrollThreadToBottom();
-  }, [messages, streamingText, phase, shareTrayOpen, scrollThreadToBottom]);
+  }, [
+    messages,
+    streamingText,
+    phase,
+    shareTrayOpen,
+    suggestedQuestions,
+    suggestionsRefreshing,
+    scrollThreadToBottom,
+  ]);
 
   React.useLayoutEffect(() => {
     const el = textareaRef.current;
@@ -697,7 +665,6 @@ function AskSkyConversationView({
     setVisitorToken(null);
     setVisitorContactCaptured(false);
     setMessages(initialGreetingMessages(resolveLatest.current));
-    setSuggestionsOpen(true);
     setInput("");
     focusMessageInput();
 
@@ -722,7 +689,6 @@ function AskSkyConversationView({
         const sq = suggestedQuestionsFromResolve(refreshed);
         if (sq.length > 0) {
           setSuggestedQuestions(sq);
-          setSuggestionsOpen(true);
         }
       } catch {
         /* keep chips from the previous turn */
@@ -752,23 +718,14 @@ function AskSkyConversationView({
   const isGlassChrome = isGlassPanel;
   const leadVisualVariant = isEmbedInline ? "embed-inline" : isGlassChrome ? "glass" : "default";
 
-  const askAnotherCtaClass = cn(
-    "inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors",
-    isEmbedInline
-      ? "border border-white/18 bg-zinc-800/80 text-zinc-50 hover:bg-zinc-700/90"
-      : isGlassChrome
-        ? "border border-white/16 bg-slate-900/65 text-slate-50 hover:bg-slate-800/80"
-        : "border border-slate-500/70 bg-slate-800/95 text-slate-50 hover:bg-slate-700",
-  );
-
-  const readyCtaClass = cn(
-    "inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-2xl px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors",
-    isEmbedInline
-      ? "border border-emerald-400/50 bg-emerald-500/25 text-emerald-50 hover:bg-emerald-500/40"
-      : isGlassChrome
-        ? "border border-emerald-400/45 bg-emerald-500/25 text-emerald-50 hover:bg-emerald-500/35"
-        : "border border-emerald-400/50 bg-emerald-600/30 text-emerald-50 hover:bg-emerald-600/45",
-  );
+  const askAnotherCtaClass =
+    "asksky-sky-cta inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors";
+  const readyCtaClass =
+    "asksky-sky-ready inline-flex w-full min-h-11 items-center justify-center gap-2 rounded-full px-4 py-2.5 text-center text-sm font-semibold leading-snug transition-colors";
+  const assistantLinkClass =
+    "break-all font-medium text-sky-50 underline decoration-white/55 underline-offset-2 hover:text-white";
+  const userLinkClass =
+    "break-all font-medium underline decoration-current/40 underline-offset-2 hover:opacity-80";
 
   const renderContactInThread = React.useCallback(
     (m: AskSkyChatMessage) => {
@@ -835,30 +792,12 @@ function AskSkyConversationView({
       className={cn("flex min-h-0 min-w-0 flex-col", fillsParent && "flex-1 overflow-hidden")}
     >
       {banner ? (
-        <div
-          className={cn(
-            "mx-4 mb-3 shrink-0 px-3 py-2 text-sm",
-            isEmbedInline
-              ? "mx-3 rounded-xl rounded-br-none border border-amber-500/30 bg-amber-500/15 text-amber-100"
-              : isGlassChrome
-                ? "asksky-glass-banner"
-                : "rounded-lg rounded-br-none border border-amber-500/30 bg-amber-500/10 text-amber-200",
-          )}
-        >
+        <div className="asksky-sky-banner mx-3 mb-3 shrink-0 px-3 py-2 text-sm">
           {banner}
         </div>
       ) : null}
       {!knowledgeReady ? (
-        <div
-          className={cn(
-            "mx-4 mb-3 shrink-0 px-3 py-2 text-sm",
-            isEmbedInline
-              ? "mx-3 rounded-xl rounded-br-none border border-slate-600/50 bg-slate-800/80 text-slate-200"
-              : isGlassChrome
-                ? "asksky-glass-banner border-slate-600/40"
-                : "rounded-lg rounded-br-none border border-slate-600/50 bg-slate-800/60 text-slate-200",
-          )}
-        >
+        <div className="asksky-sky-banner mx-3 mb-3 shrink-0 px-3 py-2 text-sm">
           Chat is not available yet — the knowledge base for this agent is not set up. You can still read the greeting
           above; contact the business for other ways to reach them.
         </div>
@@ -867,15 +806,7 @@ function AskSkyConversationView({
       <div
         ref={scrollRef}
         className={cn(
-          "flex-1 overflow-y-auto",
-          isEmbedInline
-            ? "asksky-embed-messages asksky-glass-scroll-gutter space-y-3 px-3.5 py-3.5"
-            : cn(
-                "space-y-4 p-4",
-                isGlassChrome
-                  ? "asksky-glass-body asksky-glass-scroll asksky-glass-scroll-gutter"
-                  : cn("bg-slate-900", chatScrollClasses),
-              ),
+          "asksky-sky-scroll-gutter flex-1 overflow-y-auto space-y-3 px-3.5 py-3.5",
           fillsParent ? "flex min-h-0 flex-col" : "max-h-[min(420px,55vh)] min-h-[360px]",
         )}
       >
@@ -885,34 +816,9 @@ function AskSkyConversationView({
               fillsParent ? "min-h-0 flex-1" : "h-full min-h-[300px]"
             }`}
           >
-            <div
-              className={cn(
-                "mb-3 flex h-12 w-12 items-center justify-center rounded-full",
-                isEmbedInline
-                  ? "asksky-embed-empty-icon"
-                  : isGlassChrome
-                    ? "asksky-glass-empty-icon"
-                    : "bg-blue-600/20",
-              )}
-            >
-              <MessageCircle
-                className={cn(
-                  "h-6 w-6",
-                  isEmbedInline ? "text-zinc-300" : isGlassChrome ? "text-blue-400" : "text-blue-500",
-                )}
-              />
-            </div>
-            <h4
-              className={cn(
-                "mb-1 text-sm font-semibold",
-                isEmbedInline
-                  ? "asksky-embed-empty-title"
-                  : isGlassChrome
-                    ? "asksky-glass-empty-title"
-                    : "text-white",
-              )}
-            >
-              How can I help you?
+            <SkyAvatar size={48} className="mb-3" />
+            <h4 className="mb-1 text-sm font-semibold" style={{ color: "var(--asksky-text)" }}>
+              Got questions? Ask away.
             </h4>
           </div>
         ) : null}
@@ -925,49 +831,18 @@ function AskSkyConversationView({
                 ref={isLastContactFormMessage ? contactFormAnchorRef : undefined}
                 className="flex w-full min-w-0 flex-col gap-2"
               >
-                <div className={`flex ${isEmbedInline ? "" : "gap-2"} justify-start`}>
-                  {!isEmbedInline ? (
-                    resolve.photo ? (
-                      <AgentAvatarThumb src={resolve.photo} alt="" />
-                    ) : (
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
-                        <Bot className="h-4 w-4 text-white" />
-                      </div>
-                    )
-                  ) : null}
-                  <div
-                    className={cn(
-                      isEmbedInline
-                        ? "asksky-embed-bubble-assistant"
-                        : cn(
-                            "max-w-[75%] px-4 py-2 text-slate-100",
-                            isGlassChrome
-                              ? "asksky-glass-bubble-assistant"
-                              : "rounded-2xl rounded-br-none bg-slate-800",
-                          ),
-                    )}
-                  >
+                <div className="flex items-start gap-2 justify-start">
+                  <SkyAvatar size={32} className="mt-0.5" />
+                  <div className="asksky-sky-bubble-assistant">
                     <LinkifiedMessage
                       text={m.content}
-                      className={isEmbedInline ? "text-zinc-50" : "text-slate-100"}
-                      linkClassName={
-                        isEmbedInline
-                          ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
-                          : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
-                      }
+                      className="text-white"
+                      linkClassName={assistantLinkClass}
                     />
-                    <AskSkyLiveSearchBadge
-                      model={m.model}
-                      isEmbedInline={isEmbedInline}
-                      isGlassChrome={isGlassChrome}
-                    />
-                    <AskSkyMessageCitations
-                      docs={m.retrievedDocs}
-                      isEmbedInline={isEmbedInline}
-                      isGlassChrome={isGlassChrome}
-                    />
+                    <AskSkyLiveSearchBadge model={m.model} />
+                    <AskSkyMessageCitations docs={m.retrievedDocs} />
                     {!isEmbedInline && typeof m.at === "number" ? (
-                      <span className="mt-1 block text-[10px] text-slate-400">
+                      <span className="mt-1 block text-[10px] text-white/70">
                         {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                       </span>
                     ) : null}
@@ -981,179 +856,71 @@ function AskSkyConversationView({
           return (
             <div
               key={i}
-              className={`flex ${isEmbedInline ? "" : "gap-2"} ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              className={cn(
+                "flex items-start gap-2",
+                m.role === "user" ? "justify-end" : "justify-start",
+              )}
             >
-              {!isEmbedInline && m.role === "assistant" ? (
-                resolve.photo ? (
-                  <AgentAvatarThumb src={resolve.photo} alt="" />
-                ) : (
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
-                    <Bot className="h-4 w-4 text-white" />
-                  </div>
-                )
-              ) : null}
+              {m.role === "assistant" ? <SkyAvatar size={32} className="mt-0.5" /> : null}
               <div
-                className={cn(
-                  isEmbedInline
-                    ? m.role === "user"
-                      ? "asksky-embed-bubble-user"
-                      : "asksky-embed-bubble-assistant"
-                    : cn(
-                        "max-w-[75%] px-4 py-2",
-                        m.role === "user"
-                          ? isGlassChrome
-                            ? "asksky-glass-bubble-user text-white"
-                            : "rounded-2xl rounded-br-none bg-blue-600 text-white"
-                          : isGlassChrome
-                            ? "asksky-glass-bubble-assistant text-slate-100"
-                            : "rounded-2xl rounded-br-none bg-slate-800 text-slate-100",
-                      ),
-                )}
+                className={
+                  m.role === "user" ? "asksky-sky-bubble-user" : "asksky-sky-bubble-assistant"
+                }
               >
                 <LinkifiedMessage
                   text={m.content}
-                  className={
-                    isEmbedInline
-                      ? m.role === "user"
-                        ? "text-zinc-300"
-                        : "text-zinc-50"
-                      : m.role === "user"
-                        ? "text-white"
-                        : "text-slate-100"
-                  }
-                  linkClassName={
-                    isEmbedInline
-                      ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
-                      : m.role === "user"
-                        ? "break-all font-medium text-blue-50 underline decoration-blue-200/70 underline-offset-2 hover:text-white"
-                        : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
-                  }
+                  className={m.role === "user" ? undefined : "text-white"}
+                  linkClassName={m.role === "user" ? userLinkClass : assistantLinkClass}
                 />
                 {m.role === "assistant" ? (
                   <>
-                    <AskSkyLiveSearchBadge
-                      model={m.model}
-                      isEmbedInline={isEmbedInline}
-                      isGlassChrome={isGlassChrome}
-                    />
-                    <AskSkyMessageCitations
-                      docs={m.retrievedDocs}
-                      isEmbedInline={isEmbedInline}
-                      isGlassChrome={isGlassChrome}
-                    />
+                    <AskSkyLiveSearchBadge model={m.model} />
+                    <AskSkyMessageCitations docs={m.retrievedDocs} />
                   </>
                 ) : null}
                 {!isEmbedInline && typeof m.at === "number" ? (
                   <span
-                    className={`mt-1 block text-[10px] ${
-                      m.role === "user" ? "text-blue-100" : "text-slate-400"
-                    }`}
+                    className={cn(
+                      "mt-1 block text-[10px]",
+                      m.role === "user" ? "opacity-60" : "text-white/70",
+                    )}
                   >
                     {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </span>
                 ) : null}
               </div>
-              {!isEmbedInline && m.role === "user" ? (
-                <div
-                  className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full",
-                    isGlassChrome
-                      ? "asksky-glass-avatar text-slate-200"
-                      : "border border-slate-600 bg-slate-700 text-slate-200",
-                  )}
-                >
-                  {profile?.photo ? (
-                    <img
-                      src={profile?.photo}
-                      alt={profile?.name || "You"}
-                      width={32}
-                      height={32}
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-xs font-semibold text-slate-200">
-                      {((profile?.name || "U")[0] || "U").toUpperCase()}
-                    </span>
-                  )}
-                </div>
+              {m.role === "user" && profile?.photo ? (
+                <UserAvatarThumb src={profile.photo} alt={profile.name || "You"} />
               ) : null}
             </div>
           );
         })}
         {phase === "streaming" ? (
-          <div className={`flex ${isEmbedInline ? "justify-start" : "gap-2 justify-start"}`}>
-            {!isEmbedInline ? (
-              resolve.photo ? (
-                <AgentAvatarThumb src={resolve.photo} alt="" />
-              ) : (
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-blue-600">
-                  <Bot className="h-4 w-4 text-white" />
-                </div>
-              )
-            ) : null}
-            <div
-              className={cn(
-                isEmbedInline
-                  ? "asksky-embed-bubble-assistant"
-                  : cn(
-                      "max-w-[75%] px-4 py-2 text-slate-100",
-                      isGlassChrome ? "asksky-glass-bubble-assistant" : "rounded-2xl rounded-br-none bg-slate-800",
-                    ),
-              )}
-            >
+          <div className="flex items-start gap-2 justify-start">
+            <SkyAvatar size={32} className="mt-0.5" />
+            <div className="asksky-sky-bubble-assistant">
               {streamingText.trim() ? (
                 <span className="inline-flex flex-wrap items-end gap-x-1.5">
                   <LinkifiedMessage
                     text={streamingText}
-                    className={isEmbedInline ? "min-w-0 text-zinc-50" : "min-w-0 text-slate-100"}
-                    linkClassName={
-                      isEmbedInline
-                        ? "break-all font-medium text-zinc-200 underline decoration-zinc-400/60 underline-offset-2 hover:text-white"
-                        : "break-all font-medium text-blue-300 underline decoration-blue-400/60 underline-offset-2 hover:text-white"
-                    }
+                    className="min-w-0 text-white"
+                    linkClassName={assistantLinkClass}
                   />
-                  <span
-                    className={cn(
-                      "inline-flex shrink-0 items-center gap-0.5 pb-0.5",
-                      isEmbedInline ? "text-zinc-400" : isGlassChrome ? "text-slate-300" : "text-slate-400",
-                    )}
-                    aria-hidden
-                  >
+                  <span className="inline-flex shrink-0 items-center gap-0.5 pb-0.5 text-white/80" aria-hidden>
                     <span className="asksky-typing-dot asksky-typing-dot-sm" />
                     <span className="asksky-typing-dot asksky-typing-dot-sm" />
                     <span className="asksky-typing-dot asksky-typing-dot-sm" />
                   </span>
                 </span>
               ) : (
-                <AskSkyTypingIndicator isEmbedInline={isEmbedInline} isGlassChrome={isGlassChrome} />
+                <AskSkyTypingIndicator />
               )}
             </div>
           </div>
         ) : null}
-      </div>
 
-      <form
-        className={cn(
-          isEmbedInline ? "asksky-embed-composer" : "border-t p-4",
-          !isEmbedInline && isGlassChrome
-            ? "asksky-glass-footer"
-            : !isEmbedInline
-              ? "border-slate-800 bg-slate-950"
-              : undefined,
-        )}
-        onSubmit={(e) => {
-          e.preventDefault();
-          void send();
-          focusMessageInput();
-        }}
-      >
         {hasCompletedExchange ? (
-          <div
-            className={cn(
-              "min-w-0 space-y-4",
-              isEmbedInline ? "-mx-3.5 mb-3 px-3.5" : "-mx-4 mb-3 px-4",
-            )}
-          >
+          <div className="min-w-0 space-y-3 pt-1">
             {shareTrayOpen && shareTrayConfig ? (
               <AskSkyShareTrayPanel
                 closingMessage={closingMessage}
@@ -1183,134 +950,61 @@ function AskSkyConversationView({
             )}
           </div>
         ) : null}
+
         {knowledgeReady &&
         (suggestedQuestions.length > 0 || suggestionsRefreshing) &&
         phase === "idle" ? (
-          <div
-            role="region"
-            aria-label="Try asking"
-            className={cn(
-              "min-w-0",
-              suggestionsOpen ? "mb-3" : "mb-2",
-              isEmbedInline ? "-mx-3.5 px-3.5" : "-mx-4 px-4",
-            )}
-          >
-            <div className="flex min-h-8 min-w-0 items-center gap-2.5">
-              <div className="flex min-h-8 min-w-0 flex-1 items-center gap-2.5">
-                <div
-                  className={cn(
-                    "h-px min-h-px min-w-0 flex-1 rounded-full",
-                    isEmbedInline
-                      ? "bg-white/40"
-                      : isGlassChrome
-                        ? "bg-white/38"
-                        : "bg-slate-400/65",
-                  )}
-                  aria-hidden
-                />
-                <span
-                  className={cn(
-                    "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-medium leading-none tracking-normal",
-                    isEmbedInline
-                      ? "text-zinc-100"
-                      : isGlassChrome
-                        ? "text-slate-50"
-                        : "text-slate-50",
-                  )}
-                >
-                  {suggestionsRefreshing ? (
-                    <Loader2 className="h-3 w-3 animate-spin opacity-80" aria-hidden />
-                  ) : null}
-                  {suggestionsRefreshing ? "Finding new questions" : "Try asking"}
-                </span>
-                <div
-                  className={cn(
-                    "h-px min-h-px min-w-0 flex-1 rounded-full",
-                    isEmbedInline
-                      ? "bg-white/40"
-                      : isGlassChrome
-                        ? "bg-white/38"
-                        : "bg-slate-400/65",
-                  )}
-                  aria-hidden
-                />
+          <div role="region" aria-label="Suggested questions" className="min-w-0 pt-1">
+            {!suggestionsRefreshing ? (
+              <div id="asksky-suggested-questions" className="flex flex-wrap gap-2">
+                {suggestedQuestions.map((q, i) => (
+                  <button
+                    key={`${i}-${q.slice(0, 48)}`}
+                    type="button"
+                    className="asksky-sky-pill"
+                    onClick={() => void sendMessage(q)}
+                  >
+                    <span className="line-clamp-2">{q}</span>
+                  </button>
+                ))}
               </div>
-              <button
-                type="button"
-                className={cn(
-                  "flex h-6 w-6 shrink-0 self-center items-center justify-center rounded-full border outline-none transition-colors focus-visible:ring-2 focus-visible:ring-offset-0",
-                  isEmbedInline
-                    ? "border-zinc-500/55 bg-zinc-800/75 text-zinc-200 hover:bg-zinc-700/90 focus-visible:ring-zinc-400/50"
-                    : isGlassChrome
-                      ? "border-white/18 bg-slate-900/55 text-slate-100 hover:bg-slate-800/75 focus-visible:ring-white/30"
-                      : "border-slate-500/70 bg-slate-800/80 text-slate-100 hover:bg-slate-700 focus-visible:ring-slate-400/45",
-                )}
-                aria-expanded={suggestionsOpen}
-                aria-controls="asksky-suggested-questions"
-                aria-label={suggestionsOpen ? "Hide suggested questions" : "Show suggested questions"}
-                onClick={() => setSuggestionsOpen((o) => !o)}
-              >
-                {suggestionsOpen ? (
-                  <ChevronDown className="h-3 w-3 shrink-0" aria-hidden />
-                ) : (
-                  <ChevronUp className="h-3 w-3 shrink-0" aria-hidden />
-                )}
-              </button>
-            </div>
-            <div
-              id="asksky-suggested-questions"
-              className="flex flex-wrap gap-2"
-              hidden={!suggestionsOpen || suggestionsRefreshing}
-            >
-              {suggestedQuestions.map((q, i) => (
-                <button
-                  key={`${i}-${q.slice(0, 48)}`}
-                  type="button"
-                  className={cn(
-                    "max-w-full rounded-full border px-3 py-1.5 text-left text-xs font-medium leading-snug text-white transition-colors",
-                    isEmbedInline
-                      ? "border-zinc-500/50 bg-zinc-800/85 hover:border-zinc-400/60 hover:bg-zinc-700/90"
-                      : isGlassChrome
-                        ? "border-white/14 bg-slate-900/65 hover:border-white/22 hover:bg-slate-800/80"
-                        : "border-slate-500/60 bg-slate-800/90 hover:border-slate-400/70 hover:bg-slate-700/95",
-                  )}
-                  onClick={() => void sendMessage(q)}
-                >
-                  <span className="line-clamp-2">{q}</span>
-                </button>
-              ))}
-            </div>
-            {suggestionsRefreshing && suggestionsOpen ? (
+            ) : null}
+            {suggestionsRefreshing ? (
               <p
-                className={cn(
-                  "mt-2 text-center text-[11px] leading-snug",
-                  isEmbedInline ? "text-zinc-400" : "text-slate-400",
-                )}
+                className="text-center text-[11px] leading-snug"
+                style={{ color: "var(--asksky-muted)" }}
                 role="status"
                 aria-live="polite"
               >
+                <Loader2 className="mr-1 inline h-3 w-3 animate-spin" aria-hidden />
                 Pulling fresh follow-ups from your last chat…
               </p>
             ) : null}
           </div>
         ) : null}
+      </div>
+
+      <form
+        className="asksky-embed-composer shrink-0"
+        onSubmit={(e) => {
+          e.preventDefault();
+          void send();
+          focusMessageInput();
+        }}
+      >
         <div className="flex items-end gap-2">
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder={knowledgeReady ? "Type your message..." : "Chat unavailable until knowledge base is configured"}
+            placeholder={knowledgeReady ? "Type your question..." : "Chat unavailable until knowledge base is configured"}
             rows={1}
             disabled={!knowledgeReady}
             aria-disabled={phase === "streaming" || !knowledgeReady}
             className={cn(
-              phase === "streaming" || !knowledgeReady ? "opacity-80" : "",
-              isEmbedInline
-                ? "asksky-embed-input min-h-[42px] max-h-[120px] min-w-0 flex-1 resize-none px-4 py-2.5 transition-colors scrollbar-hide"
-                : isGlassChrome
-                  ? "asksky-glass-input min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none px-4 py-2.5 transition-colors scrollbar-hide"
-                  : "min-h-[46px] max-h-[120px] min-w-0 flex-1 resize-none rounded-3xl rounded-br-none border-slate-700 bg-slate-800 px-4 py-2.5 text-white shadow-sm transition-colors placeholder:text-slate-500 focus-visible:border-blue-500",
-              !isEmbedInline && !isGlassChrome ? chatScrollClasses : undefined,
+              "asksky-sky-input min-h-[44px] max-h-[120px] min-w-0 flex-1 resize-none px-4 py-2.5 transition-colors scrollbar-hide",
+              (phase === "streaming" || !knowledgeReady) && "opacity-80",
+              chatScrollClasses,
             )}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
@@ -1323,15 +1017,10 @@ function AskSkyConversationView({
           <Button
             type="submit"
             disabled={phase === "streaming" || !input.trim() || !knowledgeReady}
-            className={cn(
-              "h-11 w-11 shrink-0 rounded-full p-0",
-              isEmbedInline
-                ? "asksky-embed-send"
-                : "bg-blue-600 text-white hover:bg-blue-700",
-            )}
+            className="asksky-sky-send h-11 w-11 shrink-0 rounded-full p-0"
             aria-label="Send message"
           >
-            {phase === "streaming" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            {phase === "streaming" ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
       </form>
@@ -1344,9 +1033,7 @@ function AskSkyResolvedCard({
   profileSlug,
   agentToken,
   embedKey,
-  compactHeader,
   embedFill,
-  glassChrome,
   renderContactLeadCapture,
   embedAppOrigin,
 }: {
@@ -1366,53 +1053,9 @@ function AskSkyResolvedCard({
         embedFill ? "flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden" : "flex flex-col"
       }
     >
-      {glassChrome ? null : compactHeader ? (
-        <div className="flex min-w-0 items-center gap-2 pb-3">
-          {resolve.photo ? (
-            <AgentAvatarThumb src={resolve.photo} alt="" />
-          ) : (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600">
-              <MessageCircle className="h-4 w-4 text-white" />
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-white">
-              {resolve.agentName.trim() || resolve.name}
-            </h3>
-            <p className="truncate text-xs text-slate-400">
-              {resolve.tagline || resolve.name}
-            </p>
-          </div>
-        </div>
-      ) : (
-        <div
-          className={cn(
-            "flex shrink-0 items-center gap-2 border-b px-4 py-3 sm:px-6",
-            glassChrome ? "asksky-glass-header" : "border-slate-800 bg-slate-950",
-          )}
-        >
-          {resolve.photo ? (
-            <AgentAvatarThumb src={resolve.photo} alt="" />
-          ) : (
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-600">
-              <MessageCircle className="h-4 w-4 text-white" />
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-sm font-semibold text-white">
-              {resolve.agentName.trim() || resolve.name}
-            </h3>
-            <p
-              className={cn(
-                "truncate text-xs",
-                glassChrome ? "asksky-glass-muted" : "text-slate-400",
-              )}
-            >
-              {resolve.tagline || resolve.name}
-            </p>
-          </div>
-        </div>
-      )}
+      <div className="flex shrink-0 items-center px-4 pb-1 pt-3 sm:px-5">
+        <p className="asksky-sky-header">Ask about this business</p>
+      </div>
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AskSkyConversationView
           resolve={resolve}
@@ -1423,6 +1066,9 @@ function AskSkyResolvedCard({
           renderContactLeadCapture={renderContactLeadCapture}
           embedAppOrigin={embedAppOrigin}
         />
+      </div>
+      <div className="shrink-0 px-4 pb-3 pt-1 sm:px-5">
+        <SkyPoweredBy />
       </div>
     </div>
   );
@@ -1474,7 +1120,6 @@ function AskSkyResolveShell({
   profileSlug,
   agentToken,
   embedKey,
-  compactHeader,
   embedFill,
   renderContactLeadCapture,
   embedAppOrigin,
@@ -1531,11 +1176,10 @@ function AskSkyResolveShell({
     return (
       <div
         className={cn(
-          embedFill
-            ? "flex flex-1 items-center justify-center gap-2 px-6 py-16 text-sm"
-            : "flex items-center justify-center gap-2 px-6 py-16 text-sm",
-          embedFill ? "asksky-glass-empty-title" : "text-slate-400",
+          "flex items-center justify-center gap-2 px-6 py-16 text-sm",
+          embedFill && "flex-1",
         )}
+        style={{ color: "var(--asksky-muted)" }}
       >
         <Loader2 className="h-5 w-5 animate-spin" />
         Connecting to AskSKY!…
@@ -1547,10 +1191,8 @@ function AskSkyResolveShell({
     return (
       <div
         className={cn(
-          embedFill
-            ? "m-4 flex flex-1 items-center justify-center rounded-lg rounded-br-none border px-3 py-2 text-sm"
-            : "m-4 rounded-lg rounded-br-none border px-3 py-2 text-sm",
-          "border-red-500/30 bg-red-500/10 text-red-200",
+          "asksky-sky-error m-4 px-3 py-2 text-sm",
+          embedFill && "flex flex-1 items-center justify-center",
         )}
       >
         {resolveError || "AskSKY! is unavailable."}
@@ -1564,7 +1206,7 @@ function AskSkyResolveShell({
       profileSlug={profileSlug}
       agentToken={agentToken}
       embedKey={embedKey}
-      compactHeader={compactHeader}
+      compactHeader={false}
       embedFill={embedFill}
       glassChrome={Boolean(embedFill)}
       renderContactLeadCapture={renderContactLeadCapture}
@@ -1575,19 +1217,19 @@ function AskSkyResolveShell({
 
 function AskSkyVoicePlaceholder() {
   return (
-    <Card className="mx-auto min-w-0 w-full max-w-2xl border-slate-700 bg-slate-900/60">
-      <CardHeader className="pb-2">
-        <div className="flex items-center gap-2">
-          <Mic className="h-5 w-5 text-violet-400" />
-          <CardTitle className="text-base text-white">Voice line</CardTitle>
+    <div className="asksky-sky-panel mx-auto min-w-0 w-full max-w-2xl p-5">
+      <div className="flex items-center gap-2">
+        <SkyAvatar size={32} />
+        <div>
+          <p className="text-sm font-semibold">Voice line</p>
+          <p className="text-xs" style={{ color: "var(--asksky-muted)" }}>Coming soon</p>
         </div>
-        <CardDescription className="text-slate-400">Coming soon</CardDescription>
-      </CardHeader>
-      <CardContent className="text-sm text-slate-500">
+      </div>
+      <p className="mt-3 text-sm" style={{ color: "var(--asksky-muted)" }}>
         Voice-style AskSKY! will let visitors speak naturally with your agent. Audio capture and playback are not
         available in this build.
-      </CardContent>
-    </Card>
+      </p>
+    </div>
   );
 }
 
@@ -1598,6 +1240,8 @@ export interface AskSkyWidgetCoreProps {
   embedKey: string;
   /** Full width + flex height for `/embed/asksky` iframes. */
   embedFill?: boolean;
+  /** light | dark | auto (host luminance, then prefers-color-scheme). */
+  theme?: AskSkyThemeOption;
   sky: AskSkySkyTransport;
   visitorUserBubble?: VisitorBubble;
   /** Optional myFORM lead capture UI when `sky/resolve` returns `contactForm`. */
@@ -1617,18 +1261,16 @@ function AskSkyWidgetInner({
   embedFill,
   renderContactLeadCapture,
   embedAppOrigin,
-}: Omit<AskSkyWidgetCoreProps, "sky" | "visitorUserBubble">) {
+}: Omit<AskSkyWidgetCoreProps, "sky" | "visitorUserBubble" | "theme">) {
   const [chatOpen, setChatOpen] = React.useState(false);
   /** After first open, keep the panel mounted while closed so conversation state + `getConversation` are not re-run. */
   const [chatShellMounted, setChatShellMounted] = React.useState(false);
 
   if (!profileSlug.trim() || !agentToken.trim()) {
     return (
-      <Card className="mx-auto min-w-0 w-full max-w-2xl border-amber-500/30 bg-amber-500/5">
-        <CardContent className="py-4 text-sm text-amber-200">
-          Configure profile slug and agent token for this AskSKY! block.
-        </CardContent>
-      </Card>
+      <div className="asksky-sky-banner mx-auto min-w-0 w-full max-w-2xl px-4 py-4 text-sm">
+        Configure profile slug and agent token for this AskSKY! block.
+      </div>
     );
   }
 
@@ -1656,7 +1298,7 @@ function AskSkyWidgetInner({
         ) : null}
         <button
           type="button"
-          className="asksky-chatbot-launcher pointer-events-auto relative pl-2.5 pr-3.5"
+          className="asksky-sky-launcher pointer-events-auto"
           onClick={() => {
             setChatOpen((wasOpen) => {
               if (!wasOpen) {
@@ -1666,12 +1308,12 @@ function AskSkyWidgetInner({
             });
           }}
           aria-expanded={chatOpen}
-          aria-label={chatOpen ? "Close AskSKY!" : "Open AskSKY!"}
+          aria-label={chatOpen ? "Close AskSKY!" : "Got Questions?"}
         >
-          <MessageCircle className="h-5 w-5 shrink-0 opacity-95" aria-hidden />
-          <span className="text-sm font-semibold tracking-wide">AskSKY!</span>
+          <SkyAvatar size={28} />
+          <span>Got Questions?</span>
           {!chatOpen ? (
-            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full border-2 border-white/25 bg-emerald-400" />
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full border-2 border-white bg-emerald-400" />
           ) : null}
         </button>
       </div>
@@ -1694,28 +1336,42 @@ function AskSkyWidgetInner({
   }
 
   return (
-    <Card className="mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden rounded-2xl rounded-br-none border border-slate-800 bg-slate-900 py-0 shadow-2xl">
-      <CardContent className="min-w-0 p-0">
-        <AskSkyResolveShell
-          profileSlug={profileSlug}
-          agentToken={agentToken}
-          embedKey={embedKey}
-          renderContactLeadCapture={renderContactLeadCapture}
-          embedAppOrigin={embedAppOrigin}
-        />
-      </CardContent>
-    </Card>
+    <div className="asksky-sky-panel mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden py-0">
+      <AskSkyResolveShell
+        profileSlug={profileSlug}
+        agentToken={agentToken}
+        embedKey={embedKey}
+        renderContactLeadCapture={renderContactLeadCapture}
+        embedAppOrigin={embedAppOrigin}
+      />
+    </div>
   );
 }
 
-export function AskSkyWidgetCore({ sky, visitorUserBubble, ...rest }: AskSkyWidgetCoreProps) {
+export function AskSkyWidgetCore({
+  sky,
+  visitorUserBubble,
+  theme = "auto",
+  ...rest
+}: AskSkyWidgetCoreProps) {
   const value = React.useMemo(
     () => ({ sky, visitorUserBubble: visitorUserBubble ?? null }),
     [sky, visitorUserBubble],
   );
+  const resolvedTheme = useResolvedAskSkyTheme(theme);
   return (
     <AskSkyRuntimeContext.Provider value={value}>
-      <AskSkyWidgetInner {...rest} />
+      <div
+        data-asksky-theme={resolvedTheme}
+        className={cn(
+          "asksky-theme-root min-h-0 min-w-0",
+          resolvedTheme === "dark" && "dark",
+          rest.embedFill && "flex h-full min-h-0 flex-1 flex-col",
+          rest.variant === "chatbot" && "h-full min-h-0 min-w-0",
+        )}
+      >
+        <AskSkyWidgetInner {...rest} />
+      </div>
     </AskSkyRuntimeContext.Provider>
   );
 }

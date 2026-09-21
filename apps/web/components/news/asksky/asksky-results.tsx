@@ -18,6 +18,8 @@ import {
   Share2,
   Sparkles,
 } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import dynamic from "next/dynamic";
 import {
   useEffect,
@@ -231,10 +233,11 @@ export function AskSkyConversation({
           <button
             type="submit"
             disabled={disabled}
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-3 py-2 text-xs font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:px-5 sm:py-2.5 sm:text-sm"
+            className="asksky-sky-send inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full disabled:cursor-not-allowed sm:h-11 sm:w-auto sm:gap-1.5 sm:px-4"
+            aria-label="Ask SKY"
           >
-            <span className="sm:hidden">Ask →</span>
-            <span className="hidden sm:inline">Ask SKY →</span>
+            <span className="hidden sm:inline">Ask SKY</span>
+            <ArrowRight className="h-4 w-4" aria-hidden />
           </button>
         </div>
       </form>
@@ -283,32 +286,30 @@ function ConversationTurn({
   return (
     <div className="min-w-0 space-y-3.5 sm:space-y-4">
       <div className="flex min-w-0 justify-end">
-        <div className="min-w-0 max-w-[min(92%,100%)] break-words rounded-2xl rounded-br-md bg-violet-600 px-3.5 py-2.5 text-sm font-medium text-white shadow-md shadow-violet-500/20 sm:max-w-[70%] sm:px-4">
+        <div className="min-w-0 max-w-[min(92%,100%)] break-words asksky-sky-bubble-user sm:max-w-[70%]">
           {turn.query}
         </div>
       </div>
 
       {turn.status === "loading" ? (
         <div className="flex items-start gap-2 sm:gap-3">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 shadow-md shadow-violet-500/25 sm:h-9 sm:w-9">
-            <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden />
-          </div>
+          <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
           <div
-            className="inline-flex items-center gap-1.5 rounded-2xl rounded-bl-md border border-slate-200 bg-slate-50/80 px-4 py-3 shadow-sm sm:bg-white"
+            className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5"
             role="status"
             aria-live="polite"
             aria-label="SKY is typing"
           >
             <span
-              className="h-2 w-2 rounded-full bg-violet-400 animate-bounce"
+              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
               style={{ animationDelay: "0ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-violet-400 animate-bounce"
+              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
               style={{ animationDelay: "160ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-violet-400 animate-bounce"
+              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
               style={{ animationDelay: "320ms", animationDuration: "1.2s" }}
             />
           </div>
@@ -317,9 +318,7 @@ function ConversationTurn({
 
       {turn.status === "error" ? (
         <div className="flex items-start gap-2 sm:gap-3">
-          <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-rose-500 to-violet-600 shadow-md sm:h-9 sm:w-9">
-            <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden />
-          </div>
+          <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
           <div className="min-w-0 flex-1 rounded-[1.25rem] border border-rose-200 bg-rose-50/80 p-3.5 sm:p-5">
             <p className="text-sm leading-relaxed text-rose-800 sm:text-[15px]">
               {turn.errorMessage?.trim() ||
@@ -332,11 +331,9 @@ function ConversationTurn({
       {turn.status === "ready" && turn.answer ? (
         <>
           <div className="flex items-start gap-2 sm:gap-3">
-            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-violet-600 shadow-md shadow-violet-500/25 sm:h-9 sm:w-9">
-              <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1 rounded-[1.25rem] border border-slate-200 bg-slate-50/80 p-3.5 shadow-[0_12px_32px_-20px_rgba(15,23,42,0.2)] sm:bg-white sm:p-5">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-800 sm:text-[15px]">
+            <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
+            <div className="asksky-sky-bubble-assistant min-w-0 flex-1 sm:p-5">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed text-white sm:text-[15px]">
                 {answerWithZipHighlight}
               </p>
             </div>
@@ -411,7 +408,7 @@ function ConversationTurn({
                   type="button"
                   disabled={followUpsDisabled}
                   onClick={() => onFollowUp(followUp)}
-                  className="inline-flex max-w-full items-center rounded-full border border-violet-200 bg-violet-50/80 px-3 py-1.5 text-left text-xs font-medium text-violet-700 transition hover:border-violet-300 hover:bg-violet-100 disabled:cursor-not-allowed disabled:opacity-50 sm:px-3.5 sm:py-2 sm:text-sm"
+                  className="asksky-sky-pill sm:px-3.5 sm:py-2 sm:text-sm"
                 >
                   <span className="line-clamp-2 sm:truncate">{followUp}</span>
                 </button>
@@ -432,7 +429,7 @@ function highlightZipInAnswer(answer: string, zipcode: string) {
     <span key={i}>
       {part}
       {i < parts.length - 1 ? (
-        <span className="font-semibold text-violet-600">{zipcode}</span>
+        <span className="font-semibold text-cyan-100">{zipcode}</span>
       ) : null}
     </span>
   ));

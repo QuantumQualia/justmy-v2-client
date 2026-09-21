@@ -6,7 +6,6 @@ import type {
 } from "@workspace/asksky-embed";
 import { DynamicForm } from "@/components/forms/dynamic-form";
 import { formsService } from "@/lib/services/forms";
-import { cn } from "@workspace/ui/lib/utils";
 
 type LeadCtx = {
   contactForm: SkyResolveContactForm;
@@ -60,21 +59,11 @@ function AskSkyContactLeadCaptureInner({
     };
   }, [contactForm.slug]);
 
-  const frame = cn(
-    "rounded-xl rounded-br-none border px-3 py-3",
-    embedChrome
-      ? "border-white/10 bg-black/25 shadow-inner"
-      : "border-border bg-card shadow-sm",
-  );
+  const frame = "asksky-sky-form px-3 py-3";
 
   if (done) {
     return (
-      <p
-        className={cn(
-          "text-xs",
-          embedChrome ? "text-emerald-300" : "text-emerald-400",
-        )}
-      >
+      <p className="text-xs" style={{ color: "var(--asksky-ready-fg)" }}>
         Thanks — we received your details and will follow up.
       </p>
     );
@@ -83,28 +72,22 @@ function AskSkyContactLeadCaptureInner({
   return (
     <div className={frame}>
       <p
-        className={cn(
-          "mb-2 text-xs font-medium",
-          embedChrome ? "text-zinc-200" : "text-foreground",
-        )}
+        className="mb-2 text-xs font-medium"
+        style={{ color: "var(--asksky-text)" }}
       >
         Need a human? Share your contact details below.
       </p>
       {loadError ? (
         <p className="text-xs text-red-300">{loadError}</p>
       ) : !schema ? (
-        <p className={cn("text-xs", embedChrome ? "text-zinc-400" : "text-muted-foreground")}>Loading form…</p>
+        <p className="text-xs" style={{ color: "var(--asksky-muted)" }}>Loading form…</p>
       ) : (
         <DynamicForm
           schema={schema}
           variant={formVariant}
           submitting={submitting}
           submitLabel="Submit"
-          submitButtonClassName={
-            embedChrome
-              ? "h-11 rounded-full asksky-embed-send text-sm font-medium"
-              : "h-11 rounded-2xl rounded-br-none bg-blue-600 text-sm font-medium text-white hover:bg-blue-700"
-          }
+          submitButtonClassName="h-11 rounded-full asksky-sky-send text-sm font-medium"
           onSubmit={async (answers) => {
             setSubmitting(true);
             try {

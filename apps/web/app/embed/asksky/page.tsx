@@ -4,6 +4,7 @@ import * as React from "react";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AskSkyWidget, type AskSkyVariant } from "@/components/asksky/asksky-widget";
+import { parseAskSkyThemeAttr } from "@workspace/asksky-embed";
 
 function normalizeVariant(raw: string | null): AskSkyVariant {
   const v = String(raw ?? "inline").toLowerCase();
@@ -18,6 +19,7 @@ function AskSkyEmbedInner() {
   const profileSlug = searchParams.get("profileSlug")?.trim() ?? "";
   const agentToken = searchParams.get("agentToken")?.trim() ?? "";
   const variant = normalizeVariant(searchParams.get("variant"));
+  const theme = parseAskSkyThemeAttr(searchParams.get("theme")) ?? "auto";
   const embedKey = React.useMemo(
     () => `static-embed:${profileSlug || "x"}:${agentToken.slice(0, 16)}`,
     [profileSlug, agentToken],
@@ -31,6 +33,7 @@ function AskSkyEmbedInner() {
         variant={variant}
         embedKey={embedKey}
         embedFill
+        theme={theme}
       />
     </div>
   );

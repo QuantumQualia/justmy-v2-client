@@ -4,6 +4,13 @@ export {
   type AskSkyVariant,
   type AskSkyWidgetCoreProps,
 } from "./asksky-widget-core";
+export {
+  parseAskSkyThemeAttr,
+  resolveAskSkyTheme,
+  useResolvedAskSkyTheme,
+  type AskSkyTheme,
+  type AskSkyThemeOption,
+} from "./asksky-theme";
 export type { AskSkyLeadFormSubmittedPayload, AskSkyPersistLeadCaptureArgs } from "./format-lead-answers-summary";
 export type {
   AskSkySkyTransport,

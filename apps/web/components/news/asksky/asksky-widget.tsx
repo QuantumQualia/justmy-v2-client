@@ -1,8 +1,8 @@
 "use client";
 
-import { MessageCircle } from "lucide-react";
-import Image from "next/image";
+import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
+import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 
 import { AskSkyConversation } from "@/components/news/asksky/asksky-results";
 import type { AskSkyTurn, NewsMarketContext } from "@/components/news/asksky/types";
@@ -108,20 +108,14 @@ export function AskSkyWidget({
   return (
     <section
       className={`relative mx-auto flex w-full min-w-0 flex-col items-center px-3 pb-10 pt-12 sm:px-6 sm:pb-12 sm:pt-16 max-w-6xl`}
+      data-asksky-theme="light"
     >
       <div className="relative z-10 -mb-8 flex h-16 w-16 items-center justify-center sm:-mb-10 sm:h-20 sm:w-20">
         <div
           aria-hidden
-          className="absolute inset-0 rounded-2xl bg-violet-400/25 blur-xl"
+          className="absolute inset-0 rounded-full bg-violet-400/25 blur-xl"
         />
-        <Image
-          src="/images/logo.png"
-          alt="AskSKY!"
-          width={64}
-          height={64}
-          className="relative h-14 w-14 rounded-2xl object-contain shadow-[0_0_36px_rgba(139,92,246,0.45)] sm:h-16 sm:w-16"
-          priority
-        />
+        <SkyAvatar size={64} className="relative drop-shadow-[0_0_36px_rgba(139,92,246,0.45)]" />
       </div>
 
       <div
@@ -174,7 +168,7 @@ export function AskSkyWidget({
               <label htmlFor="asksky-query" className="sr-only">
                 Ask SKY
               </label>
-              <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-2 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:flex-row sm:items-center sm:rounded-full sm:py-1.5 sm:pl-4 sm:pr-1.5">
+              <div className="flex flex-col gap-2 rounded-full border border-slate-200 bg-white p-1.5 pl-4 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:flex-row sm:items-center">
                 <input
                   id="asksky-query"
                   type="text"
@@ -187,9 +181,10 @@ export function AskSkyWidget({
                 <button
                   type="submit"
                   disabled={disabled}
-                  className="inline-flex w-full shrink-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-5"
+                  className="asksky-sky-send inline-flex h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-semibold disabled:cursor-not-allowed sm:w-auto sm:px-5"
                 >
-                  Ask SKY →
+                  Ask SKY
+                  <ArrowRight className="h-4 w-4" aria-hidden />
                 </button>
               </div>
             </form>
@@ -234,9 +229,8 @@ export function AskSkyWidget({
               type="button"
               disabled={disabled}
               onClick={() => submit(chip.query)}
-              className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium text-violet-600 shadow-sm transition hover:border-violet-300 hover:bg-violet-50 disabled:cursor-not-allowed disabled:opacity-50 sm:gap-2 sm:px-3.5 sm:text-sm"
+              className="asksky-sky-pill inline-flex max-w-full items-center sm:px-3.5 sm:text-sm"
             >
-              <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
               <span className="min-w-0">{chip.label}</span>
             </button>
           ))}

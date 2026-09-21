@@ -4,6 +4,7 @@ import { createRoot } from "react-dom/client";
 import { AskSkyWidgetCore } from "./asksky-widget-core";
 import { createEmbedSkyTransport } from "./embed-sky-transport";
 import type { AskSkyVariant } from "./asksky-widget-core";
+import { parseAskSkyThemeAttr } from "./asksky-theme";
 
 function normalizeVariant(raw: string): AskSkyVariant {
   const v = raw.toLowerCase();
@@ -88,7 +89,7 @@ function mountAskSkyFromScript(): void {
   shadow.appendChild(styleEl);
 
   const rootEl = document.createElement("div");
-  rootEl.className = "asksky-shadow-app dark";
+  rootEl.className = "asksky-shadow-app";
   rootEl.style.cssText =
     variant === "inline"
       ? "display:flex;flex:1;flex-direction:column;min-height:0;height:100%;width:100%;box-sizing:border-box;"
@@ -99,6 +100,7 @@ function mountAskSkyFromScript(): void {
 
   const sky = createEmbedSkyTransport(origin);
   const embedFill = variant === "inline";
+  const theme = parseAskSkyThemeAttr(script.dataset.theme) ?? "auto";
 
   createRoot(rootEl).render(
     <StrictMode>
@@ -108,6 +110,7 @@ function mountAskSkyFromScript(): void {
         variant={variant}
         embedKey={embedKey}
         embedFill={embedFill}
+        theme={theme}
         sky={sky}
         visitorUserBubble={null}
         embedAppOrigin={origin}

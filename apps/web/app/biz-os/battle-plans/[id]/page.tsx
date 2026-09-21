@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Send, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
 import { bizOsService, type BattlePlan, type BattlePlanLog, type BattlePlanTask } from "@/lib/services/biz-os";
@@ -71,7 +72,13 @@ function logSpeaker(log: BattlePlanLog) {
   return log.senderName || "You";
 }
 
-function PlanMessageText({ text }: { text: string }) {
+function PlanMessageText({
+  text,
+  linkClassName = "font-medium text-violet-700 underline underline-offset-2",
+}: {
+  text: string;
+  linkClassName?: string;
+}) {
   const parts = text.split(MESSAGE_LINK);
   return (
     <p className="min-w-0 flex-1 whitespace-pre-wrap">
@@ -81,7 +88,7 @@ function PlanMessageText({ text }: { text: string }) {
             <Link
               key={`${part}-${i}`}
               href={part}
-              className="font-medium text-violet-700 underline underline-offset-2"
+              className={linkClassName}
             >
               {part}
             </Link>
@@ -567,8 +574,8 @@ export default function BattlePlanWorkspacePage() {
       </div>
       <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(16rem,1.15fr)] items-stretch gap-4 overflow-hidden lg:grid-cols-2 lg:grid-rows-none">
         <BizOsCard padded={false} className="order-2 flex min-h-0 flex-col overflow-hidden lg:order-1">
-          <div className="flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3">
-            <Sparkles className="h-4 w-4 text-violet-600" />
+          <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--asksky-panel-border)" }} data-asksky-theme="light">
+            <SkyAvatar size={28} />
             <p className="text-sm font-semibold">
               {activeHandoff ? "#FunCREW assist" : draft ? "Start a plan" : "Plan conversation"}
             </p>
@@ -608,28 +615,43 @@ export default function BattlePlanWorkspacePage() {
                   <div
                     key={l.id}
                     className={cn(
-                      "rounded-2xl px-3 py-2 text-sm",
+                      "text-sm",
                       funCrew
-                        ? "mr-4 border border-emerald-200 bg-emerald-50 text-emerald-950"
+                        ? "mr-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-950"
                         : sky
-                          ? "mr-4 bg-slate-50 text-slate-800"
-                          : "ml-8 bg-violet-600 text-white",
+                          ? "mr-4 flex items-end gap-2"
+                          : "ml-8 asksky-sky-bubble-user",
                     )}
+                    data-asksky-theme="light"
                   >
                     {funCrew ? (
                       <p className="mb-1 text-[11px] font-semibold text-emerald-700">{logSpeaker(l)}</p>
                     ) : null}
-                    <div className="flex items-start gap-1">
-                      <PlanMessageText text={l.messageText} />
-                      {sky && l.id > 0 && !activeHandoff ? (
-                        <PlanFunctionsMenu
-                          disabled={Boolean(busyKind)}
-                          paid={paidOs}
-                          onLocked={() => router.push("/biz-os/pricing")}
-                          onRun={(id) => runFunction(l, id)}
-                        />
-                      ) : null}
-                    </div>
+                    {sky ? (
+                      <>
+                        <SkyAvatar size={28} className="mb-0.5" />
+                        <div className="asksky-sky-bubble-assistant min-w-0 flex-1">
+                          <div className="flex items-start gap-1">
+                            <PlanMessageText
+                              text={l.messageText}
+                              linkClassName="font-medium text-cyan-100 underline underline-offset-2"
+                            />
+                            {l.id > 0 && !activeHandoff ? (
+                              <PlanFunctionsMenu
+                                disabled={Boolean(busyKind)}
+                                paid={paidOs}
+                                onLocked={() => router.push("/biz-os/pricing")}
+                                onRun={(id) => runFunction(l, id)}
+                              />
+                            ) : null}
+                          </div>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="flex items-start gap-1">
+                        <PlanMessageText text={l.messageText} />
+                      </div>
+                    )}
                   </div>
                 );
               })
@@ -637,14 +659,19 @@ export default function BattlePlanWorkspacePage() {
               <p className="text-sm text-slate-500">Tell Sky what you’re working on.</p>
             )}
             {skyWorkingText ? (
-              <div className="mr-4 rounded-2xl bg-slate-50 px-3 py-2 text-sm text-slate-500">
-                {skyWorkingText}
+              <div className="mr-4 flex items-end gap-2" data-asksky-theme="light">
+                <SkyAvatar size={28} className="mb-0.5" />
+                <div className="asksky-sky-bubble-assistant text-sm text-white/90">
+                  {skyWorkingText}
+                </div>
               </div>
             ) : null}
             <div ref={logEndRef} />
           </div>
           <form
-            className="shrink-0 border-t border-slate-100 bg-white p-3"
+            className="shrink-0 p-3"
+            style={{ borderTop: "1px solid var(--asksky-panel-border)" }}
+            data-asksky-theme="light"
             onSubmit={(e) => {
               e.preventDefault();
               void sendNote();
@@ -652,7 +679,7 @@ export default function BattlePlanWorkspacePage() {
           >
             <div className="flex items-end gap-2">
               <textarea
-                className="max-h-36 min-h-11 flex-1 resize-y rounded-2xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-violet-400"
+                className="asksky-sky-input max-h-36 min-h-11 flex-1 resize-y px-4 py-2 text-sm outline-none"
                 rows={2}
                 value={note}
                 onChange={(e) => {
@@ -676,8 +703,8 @@ export default function BattlePlanWorkspacePage() {
                 }
                 disabled={busy}
               />
-              <Button type="submit" size="icon" className="mb-0.5 shrink-0" disabled={busy || !note.trim()}>
-                <Send className="h-4 w-4" />
+              <Button type="submit" size="icon" className="asksky-sky-send mb-0.5 h-11 w-11 shrink-0 rounded-full" disabled={busy || !note.trim()}>
+                <ArrowRight className="h-4 w-4" />
               </Button>
             </div>
             {hint ? <p className="mt-2 text-xs text-amber-700">{hint}</p> : null}

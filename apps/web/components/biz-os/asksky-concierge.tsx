@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
-import { Sparkles, Send, Loader2 } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
+import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { Input } from "@workspace/ui/components/input";
@@ -674,10 +675,8 @@ export function AskSkyConcierge({
   const pending = hasCardDrafts(cardDrafts);
   const draftInputClass =
     "mt-1 w-full rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-sm text-slate-800";
-  const tipClass =
-    "rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[11px] font-medium text-slate-600 transition hover:border-violet-300 hover:text-violet-800";
-  const tipPrimaryClass =
-    "rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1 text-[11px] font-semibold text-violet-800 transition hover:border-violet-400 hover:bg-violet-100";
+  const tipClass = "asksky-sky-pill";
+  const tipPrimaryClass = "asksky-sky-pill font-semibold";
 
   const chips =
     surface === "skyscan"
@@ -736,20 +735,22 @@ export function AskSkyConcierge({
       className={cn(
         compact
           ? "flex h-full min-h-0 flex-col overflow-hidden"
-          : "flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)]",
+          : "asksky-sky-panel flex flex-col overflow-hidden",
         !compact &&
           (fillViewport
             ? "h-full min-h-0"
             : "h-[min(70vh,36rem)]"),
       )}
+      data-asksky-theme="light"
     >
       <div
         className={cn(
-          "flex shrink-0 items-center gap-2 border-b border-violet-50 bg-linear-to-r from-violet-50/80 to-cyan-50/40 px-4 py-3",
+          "flex shrink-0 items-center gap-2 border-b px-4 py-3",
           compact && "pr-12",
         )}
+        style={{ borderColor: "var(--asksky-panel-border)" }}
       >
-        <Sparkles className="h-4 w-4 text-violet-600" />
+        <SkyAvatar size={28} />
         <p className="text-sm font-semibold">AskSKY! Concierge</p>
       </div>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
@@ -758,27 +759,41 @@ export function AskSkyConcierge({
             key={`${turn.role}-${i}`}
             className={
               turn.role === "user"
-                ? "ml-8 rounded-2xl bg-violet-600 px-3 py-2 text-white"
-                : "mr-4 rounded-2xl bg-slate-50 px-3 py-2 text-slate-800 whitespace-pre-wrap"
+                ? "ml-8 asksky-sky-bubble-user"
+                : "mr-4 flex items-end gap-2"
             }
           >
-            {turn.text}
-            {turn.role === "asksky" && turn.actions?.length ? (
-              <div className="mt-2 flex flex-col gap-1.5">
-                {turn.actions.map((action) => (
-                  <Button
-                    key={action.id}
-                    size="sm"
-                    variant={action.id.endsWith("b") || action.kind === "upgrade" ? "outline" : "default"}
-                    className="h-auto whitespace-normal py-1.5 text-left text-xs"
-                    disabled={loading}
-                    onClick={() => void runTurnAction(action)}
-                  >
-                    {action.label}
-                  </Button>
-                ))}
-              </div>
-            ) : null}
+            {turn.role === "asksky" ? (
+              <>
+                <SkyAvatar size={28} className="mb-0.5" />
+                <div className="asksky-sky-bubble-assistant min-w-0 flex-1 whitespace-pre-wrap">
+                  {turn.text}
+                  {turn.actions?.length ? (
+                    <div className="mt-2 flex flex-col gap-1.5">
+                      {turn.actions.map((action) => (
+                        <Button
+                          key={action.id}
+                          size="sm"
+                          variant={action.id.endsWith("b") || action.kind === "upgrade" ? "outline" : "default"}
+                          className={cn(
+                            "h-auto whitespace-normal py-1.5 text-left text-xs",
+                            action.id.endsWith("b") || action.kind === "upgrade"
+                              ? "border-white/40 bg-white/10 text-white hover:bg-white/20"
+                              : "bg-white text-violet-700 hover:bg-violet-50",
+                          )}
+                          disabled={loading}
+                          onClick={() => void runTurnAction(action)}
+                        >
+                          {action.label}
+                        </Button>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              turn.text
+            )}
           </div>
         ))}
         {loading ? (
@@ -1064,7 +1079,7 @@ export function AskSkyConcierge({
           </div>
         ) : null}
       </div>
-      <div className="shrink-0 border-t border-slate-100 bg-white p-3">
+      <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--asksky-panel-border)" }}>
         <div className="mb-2 flex flex-wrap gap-1">
           {chips.map((chip) => (
             <button
@@ -1089,10 +1104,8 @@ export function AskSkyConcierge({
           <textarea
             ref={inputRef}
             className={cn(
-              "max-h-36 min-h-11 flex-1 resize-y rounded-2xl border px-3 py-2 text-sm",
-              awaitingWebsite
-                ? "border-violet-300 ring-2 ring-violet-200/70"
-                : "border-slate-200",
+              "asksky-sky-input max-h-36 min-h-11 flex-1 resize-y px-4 py-2 text-sm",
+              awaitingWebsite && "ring-2 ring-violet-200/70",
             )}
             rows={2}
             placeholder={inputPlaceholder(surface, awaitingWebsite)}
@@ -1106,8 +1119,8 @@ export function AskSkyConcierge({
               }
             }}
           />
-          <Button type="submit" size="icon" className="mb-0.5" disabled={loading || !input.trim()}>
-            <Send className="h-4 w-4" />
+          <Button type="submit" size="icon" className="asksky-sky-send mb-0.5 h-11 w-11 rounded-full" disabled={loading || !input.trim()}>
+            <ArrowRight className="h-4 w-4" />
           </Button>
         </form>
       </div>

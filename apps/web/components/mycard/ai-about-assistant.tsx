@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Mic, Sparkles, Loader2, Check, Wand2, Send } from "lucide-react";
+import { X, Mic, Loader2, Check, Wand2, ArrowRight } from "lucide-react";
+import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { aiService, ApiClientError } from "@/lib/services/ai";
@@ -52,7 +53,7 @@ const lightChipBtn =
 const lightStyleCard =
   "w-full p-4 rounded-xl border text-left transition-all cursor-pointer bg-slate-50 border-slate-200 hover:bg-violet-50 hover:border-violet-400";
 const skyPrimaryBtn =
-  "text-white bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-slate-100 disabled:to-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed";
+  "asksky-sky-send text-white disabled:opacity-45 disabled:cursor-not-allowed";
 
 export function AIAboutAssistant({
   isOpen,
@@ -318,22 +319,19 @@ export function AIAboutAssistant({
     >
       <div
         className={cn(
-          "p-6 rounded-2xl border shadow-2xl w-full max-w-lg animate-in zoom-in-95 max-h-[90vh] overflow-y-auto",
-          isLight
-            ? `bg-white border-slate-200 text-slate-900 ${LIGHT_SCROLL}`
-            : "bg-card border-border",
+          "asksky-sky-panel p-6 w-full max-w-lg animate-in zoom-in-95 max-h-[90vh] overflow-y-auto",
+          isLight && LIGHT_SCROLL,
         )}
+        data-asksky-theme={isLight ? "light" : "dark"}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
-              <Sparkles className="h-5 w-5 text-white" />
-            </div>
+            <SkyAvatar size={40} />
             <div>
-              <h3 className={cn("text-lg font-bold", isLight ? "text-slate-900" : "text-foreground")}>AskSKY!</h3>
-              <p className={cn("text-xs", isLight ? "text-slate-500" : "text-muted-foreground")}>Draft and refine your About</p>
+              <h3 className="text-lg font-bold" style={{ color: "var(--asksky-text)" }}>AskSKY!</h3>
+              <p className="text-xs" style={{ color: "var(--asksky-muted)" }}>Draft and refine your About</p>
             </div>
           </div>
           <button
@@ -449,7 +447,7 @@ export function AIAboutAssistant({
                     </>
                   ) : (
                     <>
-                      <Sparkles className="h-4 w-4" />
+                      <Wand2 className="h-4 w-4" />
                       Magic Start
                     </>
                   )}
@@ -462,8 +460,8 @@ export function AIAboutAssistant({
               <div className="space-y-2">
                 <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-slate-100" : "bg-muted")}>
                   <div
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    className="h-full transition-all duration-300"
+                    style={{ width: `${progress}%`, background: "var(--asksky-gradient)" }}
                   />
                 </div>
                 <p className={cn("text-xs text-center", isLight ? "text-slate-500" : "text-muted-foreground")}>Synthesizing your greatness...</p>
@@ -612,7 +610,7 @@ export function AIAboutAssistant({
                     skyPrimaryBtn,
                   )}
                 >
-                  {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                  {isLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ArrowRight className="h-3.5 w-3.5" />}
                   AskSKY!
                 </button>
               </div>
@@ -643,8 +641,8 @@ export function AIAboutAssistant({
               <div className="space-y-2">
                 <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-slate-100" : "bg-muted")}>
                   <div
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-full transition-all duration-300"
-                    style={{ width: `${progress}%` }}
+                    className="h-full transition-all duration-300"
+                    style={{ width: `${progress}%`, background: "var(--asksky-gradient)" }}
                   />
                 </div>
                 <p className={cn("text-xs text-center", isLight ? "text-slate-500" : "text-muted-foreground")}>Refining your text...</p>

@@ -1,0 +1,346 @@
+/**
+ * AskSKY character chrome — light campaign look + a Sky-tinted dark variant.
+ * Scope with [data-asksky-theme="light"|"dark"]. Unscoped :root defaults to light.
+ */
+
+:root,
+:host,
+[data-asksky-theme="light"] {
+  --asksky-violet: #7c3aed;
+  --asksky-cyan: #22d3ee;
+  --asksky-fuchsia: #d946ef;
+  --asksky-gradient: linear-gradient(105deg, #a855f7 0%, #6366f1 48%, #38bdf8 100%);
+  --asksky-brand-gradient: linear-gradient(90deg, #7c3aed 0%, #22d3ee 55%, #34d399 100%);
+  --asksky-panel-bg: #ffffff;
+  --asksky-panel-border: #e2e8f0;
+  --asksky-panel-shadow: 0 18px 50px -24px rgba(76, 29, 149, 0.28),
+    0 0 0 1px rgba(226, 232, 240, 0.9);
+  --asksky-header: #94a3b8;
+  --asksky-text: #0f172a;
+  --asksky-muted: #64748b;
+  --asksky-bubble-user-bg: #f1f5f9;
+  --asksky-bubble-user-fg: #334155;
+  --asksky-bubble-user-link: #4f46e5;
+  --asksky-bubble-assistant-fg: #ffffff;
+  --asksky-bubble-assistant-link: #e0f2fe;
+  --asksky-pill-bg: #ffffff;
+  --asksky-pill-border: #e2e8f0;
+  --asksky-pill-fg: #475569;
+  --asksky-pill-hover-border: #c4b5fd;
+  --asksky-pill-hover-bg: #f5f3ff;
+  --asksky-input-bg: #ffffff;
+  --asksky-input-border: #e2e8f0;
+  --asksky-input-fg: #0f172a;
+  --asksky-input-placeholder: #94a3b8;
+  --asksky-footer: #94a3b8;
+  --asksky-link: #6d28d9;
+  --asksky-banner-bg: #fff7ed;
+  --asksky-banner-border: #fdba74;
+  --asksky-banner-fg: #9a3412;
+  --asksky-error-bg: #fef2f2;
+  --asksky-error-border: #fca5a5;
+  --asksky-error-fg: #b91c1c;
+  --asksky-cite-border: #e2e8f0;
+  --asksky-cite-fg: #64748b;
+  --asksky-cite-link: #6d28d9;
+  --asksky-launcher-bg: #ffffff;
+  --asksky-launcher-fg: #4c1d95;
+  --asksky-launcher-border: #e2e8f0;
+  --asksky-launcher-shadow: 0 12px 32px -12px rgba(76, 29, 149, 0.45);
+  --asksky-cta-border: #ddd6fe;
+  --asksky-cta-bg: #f5f3ff;
+  --asksky-cta-fg: #5b21b6;
+  --asksky-ready-border: #6ee7b7;
+  --asksky-ready-bg: #ecfdf5;
+  --asksky-ready-fg: #047857;
+  --asksky-share-bg: #f8fafc;
+  --asksky-share-border: #e2e8f0;
+  --asksky-form-bg: #f8fafc;
+  --asksky-form-border: #e2e8f0;
+  --asksky-scroll-thumb: #c4b5fd;
+}
+
+[data-asksky-theme="dark"] {
+  --asksky-panel-bg: rgba(24, 18, 52, 0.96);
+  --asksky-panel-border: rgba(167, 139, 250, 0.32);
+  --asksky-panel-shadow: 0 22px 50px -16px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(167, 139, 250, 0.28);
+  --asksky-header: #c4b5fd;
+  --asksky-text: #f8fafc;
+  --asksky-muted: #cbd5e1;
+  --asksky-bubble-user-bg: rgba(51, 65, 85, 0.72);
+  --asksky-bubble-user-fg: #e2e8f0;
+  --asksky-bubble-user-link: #c4b5fd;
+  --asksky-bubble-assistant-fg: #ffffff;
+  --asksky-bubble-assistant-link: #e0f2fe;
+  --asksky-pill-bg: rgba(49, 39, 92, 0.72);
+  --asksky-pill-border: rgba(196, 181, 253, 0.32);
+  --asksky-pill-fg: #e2e8f0;
+  --asksky-pill-hover-border: rgba(196, 181, 253, 0.55);
+  --asksky-pill-hover-bg: rgba(76, 29, 149, 0.45);
+  --asksky-input-bg: rgba(15, 12, 36, 0.82);
+  --asksky-input-border: rgba(196, 181, 253, 0.28);
+  --asksky-input-fg: #f8fafc;
+  --asksky-input-placeholder: #94a3b8;
+  --asksky-footer: #a5b4fc;
+  --asksky-link: #c4b5fd;
+  --asksky-banner-bg: rgba(120, 53, 15, 0.45);
+  --asksky-banner-border: rgba(251, 191, 36, 0.4);
+  --asksky-banner-fg: #fde68a;
+  --asksky-error-bg: rgba(127, 29, 29, 0.45);
+  --asksky-error-border: rgba(248, 113, 113, 0.4);
+  --asksky-error-fg: #fecaca;
+  --asksky-cite-border: rgba(255, 255, 255, 0.12);
+  --asksky-cite-fg: #cbd5e1;
+  --asksky-cite-link: #a5b4fc;
+  --asksky-launcher-bg: rgba(36, 24, 72, 0.96);
+  --asksky-launcher-fg: #f5f3ff;
+  --asksky-launcher-border: rgba(196, 181, 253, 0.35);
+  --asksky-launcher-shadow: 0 12px 32px -10px rgba(0, 0, 0, 0.55);
+  --asksky-cta-border: rgba(196, 181, 253, 0.35);
+  --asksky-cta-bg: rgba(76, 29, 149, 0.45);
+  --asksky-cta-fg: #f5f3ff;
+  --asksky-ready-border: rgba(52, 211, 153, 0.45);
+  --asksky-ready-bg: rgba(6, 95, 70, 0.45);
+  --asksky-ready-fg: #d1fae5;
+  --asksky-share-bg: rgba(30, 22, 58, 0.88);
+  --asksky-share-border: rgba(196, 181, 253, 0.28);
+  --asksky-form-bg: rgba(30, 22, 58, 0.72);
+  --asksky-form-border: rgba(196, 181, 253, 0.28);
+  --asksky-scroll-thumb: rgba(167, 139, 250, 0.55);
+}
+
+.asksky-sky-panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--asksky-panel-bg);
+  color: var(--asksky-text);
+  border: 1px solid var(--asksky-panel-border);
+  border-radius: 1.5rem;
+  box-shadow: var(--asksky-panel-shadow);
+}
+
+.asksky-sky-header {
+  color: var(--asksky-header);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.asksky-sky-bubble-assistant {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.35rem;
+  background: var(--asksky-gradient);
+  color: var(--asksky-bubble-assistant-fg);
+  padding: 0.7rem 1rem;
+  box-shadow: 0 10px 24px -16px rgba(99, 102, 241, 0.7);
+}
+
+.asksky-sky-bubble-user {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 0.35rem 1.25rem;
+  background: var(--asksky-bubble-user-bg);
+  color: var(--asksky-bubble-user-fg);
+  padding: 0.7rem 1rem;
+}
+
+.asksky-sky-pill {
+  max-width: 100%;
+  border-radius: 9999px;
+  border: 1px solid var(--asksky-pill-border);
+  background: var(--asksky-pill-bg);
+  color: var(--asksky-pill-fg);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: left;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.asksky-sky-pill:hover:not(:disabled) {
+  border-color: var(--asksky-pill-hover-border);
+  background: var(--asksky-pill-hover-bg);
+}
+
+.asksky-sky-pill:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.asksky-sky-input {
+  background: var(--asksky-input-bg) !important;
+  border: 1px solid var(--asksky-input-border) !important;
+  border-radius: 9999px !important;
+  color: var(--asksky-input-fg) !important;
+  box-shadow: none !important;
+  min-height: 2.75rem !important;
+}
+
+.asksky-sky-input::placeholder {
+  color: var(--asksky-input-placeholder);
+}
+
+.asksky-sky-input:focus-visible {
+  outline: none;
+  border-color: #c4b5fd !important;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.28) !important;
+}
+
+.asksky-sky-send {
+  background: var(--asksky-gradient) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px -10px rgba(99, 102, 241, 0.8);
+}
+
+.asksky-sky-send:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.asksky-sky-send:disabled {
+  opacity: 0.45;
+}
+
+.asksky-sky-cta {
+  border: 1px solid var(--asksky-cta-border);
+  background: var(--asksky-cta-bg);
+  color: var(--asksky-cta-fg);
+}
+
+.asksky-sky-cta:hover:not(:disabled) {
+  filter: brightness(0.98);
+}
+
+.asksky-sky-ready {
+  border: 1px solid var(--asksky-ready-border);
+  background: var(--asksky-ready-bg);
+  color: var(--asksky-ready-fg);
+}
+
+.asksky-sky-banner {
+  background: var(--asksky-banner-bg);
+  border: 1px solid var(--asksky-banner-border);
+  color: var(--asksky-banner-fg);
+  border-radius: 0.85rem;
+}
+
+.asksky-sky-error {
+  background: var(--asksky-error-bg);
+  border: 1px solid var(--asksky-error-border);
+  color: var(--asksky-error-fg);
+  border-radius: 0.85rem;
+}
+
+.asksky-sky-powered {
+  color: var(--asksky-footer);
+  font-size: 0.6875rem;
+}
+
+.asksky-sky-brand {
+  background: var(--asksky-brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  font-weight: 700;
+}
+
+.asksky-sky-launcher {
+  display: inline-flex;
+  align-items: center;
+  width: max-content;
+  max-width: calc(100vw - 2rem);
+  flex-shrink: 0;
+  gap: 0.5rem;
+  padding: 0.4rem 0.95rem 0.4rem 0.4rem;
+  background: var(--asksky-launcher-bg);
+  color: var(--asksky-launcher-fg);
+  border-radius: 9999px;
+  border: 1px solid var(--asksky-launcher-border);
+  box-shadow: var(--asksky-launcher-shadow);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.asksky-sky-launcher:hover {
+  filter: brightness(1.03);
+}
+
+.asksky-sky-launcher:focus-visible {
+  outline: none;
+  box-shadow:
+    var(--asksky-launcher-shadow),
+    0 0 0 2px rgba(124, 58, 237, 0.45);
+}
+
+.asksky-sky-scroll-gutter {
+  scrollbar-color: var(--asksky-scroll-thumb) transparent;
+}
+
+.asksky-sky-scroll-gutter::-webkit-scrollbar {
+  width: 6px;
+}
+
+.asksky-sky-scroll-gutter::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.asksky-sky-scroll-gutter::-webkit-scrollbar-thumb {
+  background: var(--asksky-scroll-thumb);
+  border-radius: 9999px;
+}
+
+.asksky-sky-form {
+  background: var(--asksky-form-bg);
+  border: 1px solid var(--asksky-form-border);
+  border-radius: 1rem;
+}
+
+.asksky-sky-share {
+  background: var(--asksky-share-bg);
+  border: 1px solid var(--asksky-share-border);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+@keyframes asksky-typing-dot {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.35;
+  }
+  30% {
+    transform: translateY(-3px);
+    opacity: 1;
+  }
+}
+
+.asksky-typing-dot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: currentColor;
+  animation: asksky-typing-dot 1s ease-in-out infinite;
+}
+
+.asksky-typing-dot:nth-child(1) {
+  animation-delay: 0ms;
+}
+
+.asksky-typing-dot:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.asksky-typing-dot:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.asksky-typing-dot-sm {
+  width: 0.3rem;
+  height: 0.3rem;
+}

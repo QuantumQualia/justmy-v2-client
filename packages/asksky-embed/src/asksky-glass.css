@@ -1,53 +1,50 @@
 /**
- * AskSKY! glass — dark-tinted frosted chrome so text stays readable on light
- * and dark host pages. Header/footer use navy (#121a31 family); body is lighter glass.
+ * AskSKY embed chrome — maps legacy glass/embed class names onto the Sky
+ * character tokens in asksky-sky.css so one skin covers inline, iframe, and chatbot.
  */
 
-.asksky-glass {
-  background: rgba(27, 35, 58, 0.25);
-  backdrop-filter: blur(30px) saturate(160%);
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
-  color: #f8fafc;
-}
-
-.asksky-glass-panel {
+.asksky-glass,
+.asksky-glass-panel,
+.asksky-embed-inline {
+  position: relative;
   overflow: hidden;
-  border-radius: 1rem 1rem 0 1rem;
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+  background: var(--asksky-panel-bg);
+  color: var(--asksky-text);
+  border-radius: 1.5rem;
 }
 
-/* Navy chrome — matches brand embed reference */
-.asksky-glass-header {
-  background: rgba(27, 35, 58, 0.72);
-  backdrop-filter: blur(30px) saturate(160%);
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  color: #fff;
+.asksky-embed-inline {
+  border: 1px solid var(--asksky-panel-border);
+  box-shadow: var(--asksky-panel-shadow);
 }
 
-.asksky-glass-footer {
-  background: rgba(27, 35, 58, 0.72);
-  backdrop-filter: blur(30px) saturate(160%);
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom-right-radius: 0;
-  color: #fff;
+.asksky-embed-inline::before {
+  display: none;
 }
 
-.asksky-glass-body {
-  background: rgba(15, 23, 42, 0.55);
-  backdrop-filter: blur(24px) saturate(150%);
-  -webkit-backdrop-filter: blur(24px) saturate(150%);
-  color: #f1f5f9;
+.asksky-glass-header,
+.asksky-glass-footer,
+.asksky-glass-body,
+.asksky-embed-messages,
+.asksky-embed-composer {
+  background: transparent;
+  color: inherit;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
-.asksky-glass-scroll {
-  color: #f1f5f9;
+.asksky-glass-scroll,
+.asksky-embed-empty-title {
+  color: var(--asksky-text);
+}
+
+.asksky-glass-muted {
+  color: var(--asksky-muted);
 }
 
 .asksky-glass-scroll-gutter {
-  scrollbar-color: rgba(148, 163, 184, 0.5) transparent;
+  scrollbar-color: var(--asksky-scroll-thumb) transparent;
 }
 
 .asksky-glass-scroll-gutter::-webkit-scrollbar {
@@ -59,303 +56,139 @@
 }
 
 .asksky-glass-scroll-gutter::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.45);
+  background: var(--asksky-scroll-thumb);
   border-radius: 9999px;
 }
 
-.asksky-glass-scroll-gutter::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.65);
+.asksky-glass-bubble-user,
+.asksky-embed-bubble-user {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 0.35rem 1.25rem;
+  background: var(--asksky-bubble-user-bg);
+  color: var(--asksky-bubble-user-fg);
+  padding: 0.7rem 1rem;
+  border: none;
 }
 
-.asksky-glass-bubble-user {
-  background: rgba(37, 99, 235, 0.92);
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  border-radius: 1rem 1rem 0rem 1rem;
-  color: #fff;
-}
-
-.asksky-glass-bubble-assistant {
-  background: rgba(30, 41, 59, 0.88);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 1rem 1rem 0 1rem;
-  color: #f1f5f9;
+.asksky-glass-bubble-assistant,
+.asksky-embed-bubble-assistant {
+  max-width: 88%;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.35rem;
+  background: var(--asksky-gradient);
+  color: var(--asksky-bubble-assistant-fg);
+  padding: 0.7rem 1rem;
+  border: none;
+  box-shadow: 0 10px 24px -16px rgba(99, 102, 241, 0.7);
 }
 
 .asksky-glass-avatar {
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: rgba(51, 65, 85, 0.9);
-  color: #e2e8f0;
+  border: none;
+  background: transparent;
+  color: inherit;
 }
 
-.asksky-glass-input {
-  background: rgba(30, 41, 59, 0.95) !important;
-  border: 1px solid rgba(255, 255, 255, 0.14) !important;
-  border-radius: 1.5rem 1.5rem 0 1.5rem !important;
-  color: #fff !important;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+.asksky-glass-input,
+.asksky-embed-input {
+  background: var(--asksky-input-bg) !important;
+  border: 1px solid var(--asksky-input-border) !important;
+  border-radius: 9999px !important;
+  color: var(--asksky-input-fg) !important;
+  box-shadow: none !important;
+  min-height: 2.75rem !important;
+}
+
+.asksky-glass-input::placeholder,
+.asksky-embed-input::placeholder {
+  color: var(--asksky-input-placeholder);
 }
 
 .dark .asksky-glass-input,
 .asksky-glass-input.dark\:bg-input\/30 {
-  background: rgba(30, 41, 59, 0.95) !important;
+  background: var(--asksky-input-bg) !important;
 }
 
-.asksky-glass-input::placeholder {
-  color: rgba(148, 163, 184, 0.9);
-}
-
-.asksky-glass-input:focus-visible {
+.asksky-glass-input:focus-visible,
+.asksky-embed-input:focus-visible {
   outline: none;
-  border-color: rgba(96, 165, 250, 0.55) !important;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25) !important;
+  border-color: #c4b5fd !important;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.28) !important;
 }
 
-.asksky-glass-empty-icon {
-  border: 1px solid rgba(96, 165, 250, 0.35);
-  background: rgba(37, 99, 235, 0.25);
+.asksky-glass-empty-icon,
+.asksky-embed-empty-icon {
+  border: none;
+  background: transparent;
 }
 
 .asksky-glass-empty-title {
-  color: #f8fafc;
-}
-
-.asksky-glass-muted {
-  color: rgba(203, 213, 225, 0.95);
+  color: var(--asksky-text);
 }
 
 .asksky-glass-banner {
-  background: rgba(120, 53, 15, 0.75);
-  border: 1px solid rgba(251, 191, 36, 0.4);
-  color: #fef3c7;
-  border-radius: 0.75rem 0.75rem 0 0.75rem;
+  background: var(--asksky-banner-bg);
+  border: 1px solid var(--asksky-banner-border);
+  color: var(--asksky-banner-fg);
+  border-radius: 0.85rem;
 }
 
 .asksky-glass-error {
-  background: rgba(127, 29, 29, 0.75);
-  border: 1px solid rgba(248, 113, 113, 0.4);
-  color: #fecaca;
-  border-radius: 0.75rem 0.75rem 0 0.75rem;
+  background: var(--asksky-error-bg);
+  border: 1px solid var(--asksky-error-border);
+  color: var(--asksky-error-fg);
+  border-radius: 0.85rem;
 }
 
-.asksky-glass-launcher {
-  background: rgba(37, 99, 235, 0.92);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow:
-    0 12px 28px -8px rgba(37, 99, 235, 0.5),
-    0 8px 24px -6px rgba(0, 0, 0, 0.35);
-}
-
-.asksky-glass-launcher:hover {
-  background: rgba(29, 78, 216, 0.95);
-}
-
-/* Chatbot floater — pill + “speech” tail + AskSKY! label (matches brand reference) */
+.asksky-glass-launcher,
 .asksky-chatbot-launcher {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.55rem 1rem 0.55rem 0.65rem;
-  background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 100%);
-  color: #fafafa;
+  padding: 0.4rem 0.95rem 0.4rem 0.4rem;
+  background: var(--asksky-launcher-bg);
+  color: var(--asksky-launcher-fg);
   border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+  border: 1px solid var(--asksky-launcher-border);
+  box-shadow: var(--asksky-launcher-shadow);
   cursor: pointer;
   font: inherit;
+  font-size: 0.875rem;
+  font-weight: 650;
 }
 
+.asksky-glass-launcher:hover,
 .asksky-chatbot-launcher:hover {
-  background: linear-gradient(180deg, #242424 0%, #141414 100%);
+  filter: brightness(1.03);
 }
 
-.asksky-chatbot-launcher:focus-visible {
-  outline: none;
-  box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.5),
-    0 0 0 2px rgba(59, 130, 246, 0.45);
-}
-
-/* Small tail bottom-right (bubble “pointer”) */
 .asksky-chatbot-launcher::after {
-  content: "";
-  position: absolute;
-  right: 1.1rem;
-  bottom: -5px;
-  width: 10px;
-  height: 10px;
-  background: #0a0a0a;
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 0 0 2px 0;
-  transform: rotate(45deg);
+  display: none;
 }
 
 .asksky-glass-close {
-  color: rgba(226, 232, 240, 0.9);
+  color: var(--asksky-muted);
 }
 
 .asksky-glass-close:hover {
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-}
-
-/* Embedded inline iframe — minimal chat (no header, grey bubbles, pill input) */
-.asksky-embed-inline {
-  position: relative;
-  border-radius: 1.75rem 1.75rem 0 1.75rem;
-  overflow: hidden;
-  color: #f8fafc;
-}
-
-.asksky-embed-inline::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  -webkit-backdrop-filter: blur(30px) saturate(160%);
-  backdrop-filter: blur(30px) saturate(160%);
-  background: rgba(27, 35, 58, 0.72);
-}
-
-.asksky-embed-inline > * {
-  position: relative;
-  z-index: 1;
-}
-
-.asksky-embed-messages {
-  background: transparent;
-  color: #fafafa;
-}
-
-.asksky-embed-empty-icon {
-  border: 1px solid rgba(161, 161, 170, 0.35);
-  background: rgba(82, 82, 91, 0.55);
-}
-
-.asksky-embed-empty-title {
-  color: #fafafa;
-}
-
-.asksky-embed-bubble-assistant {
-  max-width: 88%;
-  border-radius: 1.25rem 1.25rem 1.25rem 0;
-  background: rgba(82, 82, 91, 0.8);
-  color: #fafafa;
-  padding: 0.625rem 1rem;
-}
-
-.asksky-embed-bubble-user {
-  max-width: 88%;
-  border-radius: 1.25rem 1.25rem 0 1.25rem;
-  background: rgba(63, 63, 70, 0.8);
-  color: #d4d4d8;
-  padding: 0.625rem 1rem;
+  background: var(--asksky-pill-hover-bg);
+  color: var(--asksky-text);
 }
 
 .asksky-embed-composer {
   background: transparent;
   border: none;
-  border-bottom-right-radius: 0;
-  padding: 0.625rem 0.875rem 0.875rem;
-}
-
-.asksky-embed-input {
-  border: none !important;
-  border-radius: 21px 21px 0 21px !important;
-  color: #e4e4e7 !important;
-  box-shadow: none !important;
-  min-height: 2.75rem !important;
-}
-
-.asksky-embed-input::placeholder {
-  color: rgba(161, 161, 170, 0.95);
-}
-
-.asksky-embed-input:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(113, 113, 122, 0.45) !important;
+  padding: 0.5rem 0.875rem 0.35rem;
 }
 
 .asksky-embed-send {
-  background: rgba(82, 82, 91, 0.95) !important;
-  color: #e4e4e7 !important;
+  background: var(--asksky-gradient) !important;
+  color: #fff !important;
 }
 
 .asksky-embed-send:hover:not(:disabled) {
-  background: rgba(113, 113, 122, 0.95) !important;
-  color: #fafafa !important;
+  filter: brightness(1.06);
 }
 
 .asksky-embed-send:disabled {
   opacity: 0.45;
-}
-
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .asksky-glass {
-    background: rgba(15, 23, 42, 0.95);
-  }
-
-  .asksky-embed-inline::before {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-    background: rgba(27, 35, 58, 0.96);
-  }
-
-  .asksky-glass-header,
-  .asksky-glass-footer {
-    background: rgba(18, 26, 49, 0.88);
-  }
-
-  .asksky-glass-body {
-    background: rgba(15, 23, 42, 0.9);
-  }
-}
-
-/* Assistant “typing” indicator while waiting for streamed tokens */
-@keyframes asksky-typing-dot {
-  0%,
-  60%,
-  100% {
-    transform: translateY(0);
-    opacity: 0.35;
-  }
-  30% {
-    transform: translateY(-3px);
-    opacity: 1;
-  }
-}
-
-.asksky-typing-dot {
-  display: inline-block;
-  width: 0.45rem;
-  height: 0.45rem;
-  border-radius: 9999px;
-  background: currentColor;
-  animation: asksky-typing-dot 1s ease-in-out infinite;
-}
-
-.asksky-typing-dot:nth-child(1) {
-  animation-delay: 0ms;
-}
-
-.asksky-typing-dot:nth-child(2) {
-  animation-delay: 150ms;
-}
-
-.asksky-typing-dot:nth-child(3) {
-  animation-delay: 300ms;
-}
-
-.asksky-typing-dot-sm {
-  width: 0.3rem;
-  height: 0.3rem;
 }

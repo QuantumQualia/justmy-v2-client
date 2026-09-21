@@ -45,14 +45,12 @@ const channelAccent: Record<SkyShareTrayChannel, string> = {
 export function AskSkyShareTrayPanel({
   closingMessage,
   links,
-  isEmbedInline,
-  isGlassChrome,
   onClose,
 }: {
   closingMessage: string;
   links: AskSkyShareLink[];
-  isEmbedInline: boolean;
-  isGlassChrome: boolean;
+  isEmbedInline?: boolean;
+  isGlassChrome?: boolean;
   onClose: () => void;
 }) {
   const [lastShared, setLastShared] = React.useState<AskSkyShareLink["label"] | null>(null);
@@ -72,40 +70,24 @@ export function AskSkyShareTrayPanel({
     <div
       role="region"
       aria-label="Share"
-      className={cn(
-        "overflow-hidden rounded-2xl border",
-        isEmbedInline
-          ? "border-white/12 bg-zinc-900/80"
-          : isGlassChrome
-            ? "border-white/14 bg-slate-950/55 backdrop-blur-md"
-            : "border-slate-600/70 bg-gradient-to-b from-slate-800 to-slate-900",
-      )}
+      className="asksky-sky-share"
     >
-      <div className="flex items-start gap-2 border-b border-white/10 px-3 py-3 sm:px-4">
+      <div className="flex items-start gap-2 px-3 py-3 sm:px-4" style={{ borderBottom: "1px solid var(--asksky-share-border)" }}>
         <div className="min-w-0 flex-1 space-y-1">
           <p
-            className={cn(
-              "text-[10px] font-semibold uppercase tracking-[0.14em]",
-              isEmbedInline ? "text-emerald-300/90" : "text-emerald-300",
-            )}
+            className="text-[10px] font-semibold uppercase tracking-[0.14em]"
+            style={{ color: "var(--asksky-ready-fg)" }}
           >
             Pass it on
           </p>
-          <p className={cn("text-sm leading-relaxed", isEmbedInline ? "text-zinc-50" : "text-slate-100")}>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--asksky-text)" }}>
             {closingMessage}
           </p>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className={cn(
-            "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-colors",
-            isEmbedInline
-              ? "border-zinc-500/50 bg-zinc-800/80 text-zinc-200 hover:bg-zinc-700 hover:text-white"
-              : isGlassChrome
-                ? "border-white/16 bg-slate-900/70 text-slate-200 hover:bg-slate-800 hover:text-white"
-                : "border-slate-500/60 bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white",
-          )}
+          className="asksky-sky-pill mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center p-0"
           aria-label="Close share tray"
         >
           <X className="h-3.5 w-3.5" aria-hidden />
@@ -137,10 +119,8 @@ export function AskSkyShareTrayPanel({
       </div>
       {shareHint ? (
         <p
-          className={cn(
-            "border-t border-white/10 px-3 py-2 text-center text-[11px] leading-snug",
-            isEmbedInline ? "text-emerald-200/95" : "text-emerald-200",
-          )}
+          className="px-3 py-2 text-center text-[11px] leading-snug"
+          style={{ borderTop: "1px solid var(--asksky-share-border)", color: "var(--asksky-ready-fg)" }}
           role="status"
           aria-live="polite"
         >
@@ -148,10 +128,8 @@ export function AskSkyShareTrayPanel({
         </p>
       ) : (
         <p
-          className={cn(
-            "border-t border-white/10 px-3 py-2 text-center text-[11px] leading-snug",
-            isEmbedInline ? "text-zinc-400" : "text-slate-400",
-          )}
+          className="px-3 py-2 text-center text-[11px] leading-snug"
+          style={{ borderTop: "1px solid var(--asksky-share-border)", color: "var(--asksky-muted)" }}
         >
           Tap a channel to share the invite link
         </p>
