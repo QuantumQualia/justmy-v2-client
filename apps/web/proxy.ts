@@ -17,6 +17,8 @@ const publicRoutes = [
   "/reset-password",
   "/verify-email",
   "/stripe-callback",
+  "/try-free",
+  "/p",
 ];
 
 /**
@@ -146,6 +148,10 @@ function rewriteWithPathname(request: NextRequest, internalPath: string) {
  * App routes that must render even when the request Host is a news host.
  * Locally NEXT_PUBLIC_APP_URL and NEXT_PUBLIC_NEWS_HOSTS can be the same
  * origin (127.0.0.1), so claim/verify/onboard would otherwise 302 to `/`.
+ *
+ * `/embed/*` is public widget JS + iframe pages. The news-host catch-all
+ * `NextResponse.redirect` is a 307; third-party `<script src>` then loads
+ * HTML (`/`) instead of `asksky.js` / `myform.js` / `cityos.js` and never mounts.
  */
 function isNewsHostAppPassthrough(pathname: string): boolean {
   const prefixes = [
@@ -157,9 +163,15 @@ function isNewsHostAppPassthrough(pathname: string): boolean {
     "/reset-password",
     "/stripe-callback",
     "/dashboard",
+    "/personal-os",
     "/admin",
     "/account",
     "/lab",
+    "/try-free",
+    "/my-plans",
+    "/daily-drop",
+    "/p",
+    "/embed",
   ];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -226,7 +238,7 @@ export function proxy(request: NextRequest) {
       if (isBizCookieUser(request)) {
         return NextResponse.redirect(new URL("/biz-os", request.url));
       }
-      return NextResponse.redirect(new URL("/dashboard", request.url));
+      return NextResponse.redirect(new URL("/personal-os", request.url));
     }
     return nextWithPathname(request);
   }
@@ -251,8 +263,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - public files (public folder)
+     * - public files (public folder), including embed widgets (*.js)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|js|mjs|css|map|txt|html|ico|woff2|woff|ttf|otf)$).*)",
   ],
 };
