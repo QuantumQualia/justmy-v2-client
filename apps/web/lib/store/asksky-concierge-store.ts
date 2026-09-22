@@ -122,7 +122,7 @@ export function conciergeStageFromPath(pathname: string): string {
 }
 
 export function conciergeStageKind(stage: string): string {
-  return String(stage || "").split(":")[0];
+  return String(stage || "").split(":")[0] ?? "";
 }
 
 export function isPersonalConciergeStage(stage: string): boolean {

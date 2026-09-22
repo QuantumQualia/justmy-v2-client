@@ -42,10 +42,11 @@ function extractCityState(raw: string): string | null {
   let hit: string | null = null;
   let m: RegExpExecArray | null;
   while ((m = re.exec(raw))) {
-    const city = m[1].replace(/\s+/g, " ").trim();
-    const st = m[2].toUpperCase();
-    if (!US_STATES.has(st) || !cityTokenOk(city)) continue;
-    if (city[0] !== city[0].toUpperCase() && city.length < 5) continue;
+    const city = m[1]?.replace(/\s+/g, " ").trim();
+    const st = m[2]?.toUpperCase();
+    if (!city || !st || !US_STATES.has(st) || !cityTokenOk(city)) continue;
+    const initial = city.charAt(0);
+    if (initial !== initial.toUpperCase() && city.length < 5) continue;
     hit = `${city}, ${st}`;
   }
   return hit;

@@ -28,6 +28,7 @@ import {
 import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { QuickActionItem, type QuickActionItemConfig } from "@/components/common/quick-action-item";
 import { BlocksRenderer } from "@/components/cms/blocks-renderer";
+import type { PageBlock } from "@/lib/services/cms";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
 import { PersonalOsStarters } from "@/components/try-free/personal-os-starters";
 import { DailyDropReadyBanner } from "@/components/try-free/daily-drop-banner";
