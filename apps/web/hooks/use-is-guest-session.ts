@@ -11,19 +11,16 @@ export function useIsGuestSession(): boolean | null {
   const [guest, setGuest] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (profileId) {
-      setGuest(false);
-      return;
-    }
     let cancelled = false;
-    void tokenStorage
-      .getUser()
-      .then((user) => {
-        if (!cancelled) setGuest(!user);
-      })
-      .catch(() => {
+    void (async () => {
+      try {
+        const user = await tokenStorage.getUser();
+        const token = user ? true : Boolean(await tokenStorage.getAccessToken());
+        if (!cancelled) setGuest(!user && !token);
+      } catch {
         if (!cancelled) setGuest(true);
-      });
+      }
+    })();
     return () => {
       cancelled = true;
     };
