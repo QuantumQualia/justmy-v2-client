@@ -387,7 +387,7 @@ export function TryFreePageClient() {
     return (
       <>
         {pageNav}
-        <div className="min-h-dvh bg-[#f3f0f8]" />
+        <div className="min-h-dvh bg-white" />
       </>
     );
   }
@@ -395,7 +395,7 @@ export function TryFreePageClient() {
   return (
     <>
       {pageNav}
-      <div className="try-free-page flex h-[calc(100dvh-var(--try-free-chrome,0px))] max-h-[calc(100dvh-var(--try-free-chrome,0px))] flex-col items-center overflow-hidden bg-[#f3f0f8] px-4 py-4 sm:px-6">
+      <div className="try-free-page flex h-[calc(100dvh-var(--try-free-chrome,0px))] max-h-[calc(100dvh-var(--try-free-chrome,0px))] flex-col items-center overflow-hidden bg-white px-4 py-6 sm:px-6">
       <style>{`
         .try-free-rotator-line {
           animation: tryFreeRotateIn 0.35s ease-out;
@@ -410,14 +410,13 @@ export function TryFreePageClient() {
       `}</style>
       <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden">
         <div
-          className="flex min-h-0 w-full max-w-[46rem] max-h-full flex-col overflow-hidden rounded-[1.5rem] border border-violet-200/45 bg-[#faf9fd] px-5 py-5 shadow-[0_8px_24px_-18px_rgba(76,29,149,0.14)] sm:rounded-[2rem] sm:px-8 sm:py-6"
+          className="flex min-h-0 w-full max-w-[46rem] max-h-full flex-col overflow-hidden bg-white"
           data-asksky-theme="light"
         >
           <TryFreeHero
             city={newsHydrated ? location?.city || newsMarket?.city : null}
             questions={newsHydrated ? suggestedQuestions : []}
           />
-          <div className="mb-2 mt-1 h-px w-full shrink-0 bg-[#ececf2]" />
           <div
             ref={threadRef}
             className="flex w-full min-h-[min(16rem,28dvh)] max-h-[min(42dvh,24rem)] flex-col gap-4 overflow-y-auto py-3 pr-1 [scrollbar-width:thin]"
