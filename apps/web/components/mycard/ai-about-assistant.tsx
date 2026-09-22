@@ -402,7 +402,7 @@ export function AIAboutAssistant({
                 }}
                 placeholder="Start typing or use voice input..."
                 className={cn(
-                  "w-full min-h-[150px] p-4 text-sm rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto",
+                  "w-full min-h-[150px] p-4 text-base rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto md:text-sm",
                   LIGHT_SCROLL,
                   isLight
                     ? "text-slate-900 bg-white border border-slate-200 placeholder:text-slate-400 focus:ring-violet-200 focus:border-violet-400"
@@ -527,7 +527,7 @@ export function AIAboutAssistant({
                 value={selectedText || ""}
                 onChange={(e) => setSelectedText(e.target.value)}
                 className={cn(
-                  "w-full min-h-[200px] p-4 text-sm rounded-xl focus:outline-none focus:ring-2 resize-y overflow-y-auto",
+                  "w-full min-h-[200px] p-4 text-base rounded-xl focus:outline-none focus:ring-2 resize-y overflow-y-auto md:text-sm",
                   LIGHT_SCROLL,
                   isLight
                     ? "text-slate-900 bg-white border border-slate-200 focus:ring-violet-200 focus:border-violet-400"
@@ -575,7 +575,7 @@ export function AIAboutAssistant({
                 placeholder="Tell AskSKY what to change…"
                 disabled={isLoading}
                 className={cn(
-                  "w-full min-h-[72px] p-3 text-sm rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto disabled:opacity-60",
+                  "w-full min-h-[72px] p-3 text-base rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto disabled:opacity-60 md:text-sm",
                   LIGHT_SCROLL,
                   isLight
                     ? "text-slate-900 bg-white border border-slate-200 placeholder:text-slate-400 focus:ring-violet-200 focus:border-violet-400"

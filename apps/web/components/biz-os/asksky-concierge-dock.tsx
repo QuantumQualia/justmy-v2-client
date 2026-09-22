@@ -1,11 +1,15 @@
 "use client";
 
 import { X } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { AskSkyConcierge } from "@/components/biz-os/asksky-concierge";
 import { useAskSkyConciergeStore } from "@/lib/store/asksky-concierge-store";
+import { isPersonalOsPath } from "@/lib/personal-os/landing";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 
 export function AskSkyConciergeDock() {
+  const pathname = usePathname();
+  const personal = isPersonalOsPath(pathname || "");
   const open = useAskSkyConciergeStore((s) => s.dockOpen);
   const setOpen = useAskSkyConciergeStore((s) => s.setDockOpen);
   const pending = useAskSkyConciergeStore((s) => {
@@ -48,7 +52,7 @@ export function AskSkyConciergeDock() {
           data-asksky-theme="light"
         >
           <SkyAvatar size={28} />
-          Got Questions?
+          AskSKY!
           {pending ? (
             <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-800">
               Draft

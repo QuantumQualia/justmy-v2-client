@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 
+import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
 import { AskSkyConversation } from "@/components/news/asksky/asksky-results";
 import type { AskSkyTurn, NewsMarketContext } from "@/components/news/asksky/types";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
@@ -168,15 +169,21 @@ export function AskSkyWidget({
               <label htmlFor="asksky-query" className="sr-only">
                 Ask SKY
               </label>
-              <div className="flex flex-col gap-2 rounded-full border border-slate-200 bg-white p-1.5 pl-4 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:flex-row sm:items-center">
-                <input
+              <div className="flex flex-col gap-2 rounded-[1.375rem] border border-slate-200 bg-white p-1.5 pl-4 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:flex-row sm:items-end">
+                <AskSkyGrowTextarea
+                  chrome={false}
                   id="asksky-query"
-                  type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={`Ask anything about ${market.zipcode}…`}
                   disabled={disabled}
-                  className="min-w-0 flex-1 bg-transparent px-2 py-2.5 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-0 sm:py-2 sm:text-base"
+                  className="min-h-10 bg-transparent px-2 py-2.5 text-base text-slate-800 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-0 sm:py-2 md:text-sm"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      submit(query);
+                    }
+                  }}
                 />
                 <button
                   type="submit"

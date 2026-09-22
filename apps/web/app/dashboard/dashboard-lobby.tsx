@@ -29,7 +29,8 @@ import { authService, ApiClientError, User } from "@/lib/services/auth";
 import { QuickActionItem, type QuickActionItemConfig } from "@/components/common/quick-action-item";
 import { BlocksRenderer } from "@/components/cms/blocks-renderer";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
-import type { PageBlock } from "@/lib/services/cms";
+import { PersonalOsStarters } from "@/components/try-free/personal-os-starters";
+import { DailyDropReadyBanner } from "@/components/try-free/daily-drop-banner";
 
 const DASHBOARD_AGENT_PREVIEW_BLOCKS: PageBlock[] = [
   {
@@ -71,7 +72,7 @@ export default function DashboardLobby() {
   const { open: openChatbot } = useChatbotStore();
 
   const QUICK_ACTIONS: QuickActionItemConfig[] = [
-    { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/lab/daily-drop" },
+    { label: "Daily Drop", icon: Droplets, variant: "panel", type: "link", href: "/daily-drop" },
     { label: "myPROFILE", icon: UserIcon, variant: "panel", type: "link", href: "/mycard/edit" },
     { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
     { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
@@ -92,6 +93,8 @@ export default function DashboardLobby() {
   return (
     <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground font-sans relative">
       <div className="px-4 py-8 sm:px-6">
+        <DailyDropReadyBanner />
+        <PersonalOsStarters />
         {/* <WelcomeMessage />
         <DayInHistory /> */}
         {/* <div className="w-full max-w-3xl mx-auto px-4 mb-6">

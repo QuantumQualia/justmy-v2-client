@@ -5,9 +5,14 @@
 export const PROTECTED_SINGLE_SEGMENT_ROUTES = [
   "/admin",
   "/dashboard",
+  "/personal-os",
   "/news",
   "/biz-os",
   "/verify-email",
+  "/try-free",
+  "/my-plans",
+  "/daily-drop",
+  "/p",
 ] as const;
 
 /**

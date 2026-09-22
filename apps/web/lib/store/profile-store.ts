@@ -74,6 +74,7 @@ export interface ProfileData {
   /** Master profile: can create sub-profiles and deploy hubs to them (from API). */
   allowsSubProfiles?: boolean;
   zipCode?: string;
+  dailyDropStartsOn?: string | null;
   googleStarRating?: string | null;
   googleRatingCount?: number | null;
   googlePlaceId?: string | null;
@@ -120,6 +121,7 @@ const initialData: ProfileData = {
   referralCode: undefined,
   allowsSubProfiles: undefined,
   zipCode: undefined,
+  dailyDropStartsOn: undefined,
   googleStarRating: undefined,
   googleRatingCount: undefined,
   googlePlaceId: undefined,

@@ -13,7 +13,7 @@ export function resolveAuthHomePath(
     skipEmailVerification?: boolean;
   },
 ): string {
-  const fallback = options?.fallback || "/dashboard";
+  const fallback = options?.fallback || "/personal-os";
   let homePath = resolveAppHomePath({
     welcomeApp: response.welcomeApp,
     fallback,
@@ -23,6 +23,8 @@ export function resolveAuthHomePath(
     const bizFlow =
       dest === "/dashboard" ||
       dest.startsWith("/dashboard") ||
+      dest === "/personal-os" ||
+      dest.startsWith("/personal-os") ||
       dest === "/biz-os" ||
       dest.startsWith("/biz-os");
     if (bizFlow) {
@@ -30,6 +32,8 @@ export function resolveAuthHomePath(
       // An explicit /biz-os dest (already-verified email link) should not re-open onboard.
       homePath = firstVisit && homePath !== "/biz-os" ? "/biz-os/onboard" : "/biz-os";
     }
+  } else if (homePath === "/dashboard" || homePath.startsWith("/dashboard")) {
+    homePath = options?.afterRegister ? "/personal-os?welcome=1" : "/personal-os";
   }
   if (!options?.skipEmailVerification && needsEmailVerification(response.user)) {
     homePath = verifyEmailHref(homePath);

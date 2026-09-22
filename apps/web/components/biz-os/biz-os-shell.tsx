@@ -21,7 +21,8 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
   const newsHost = useNewsHost();
   const router = useRouter();
   const pathname = usePathname();
-  const lockViewport = pathname === "/biz-os/onboard";
+  const lockViewport =
+    pathname === "/biz-os/onboard" || /^\/biz-os\/battle-plans\/\d+/.test(pathname || "");
   const { isError } = useBizOsProfile();
   const [market, setMarket] = useState<NewsMarketContext | null>(null);
 
@@ -110,17 +111,28 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
     };
   }, [newsHost, market]);
 
+  const chromeClass = lockViewport
+    ? "relative z-20 shrink-0"
+    : newsHost
+      ? "sticky top-[calc(var(--impersonation-banner-h,0px)+var(--news-header-h,3.5rem))] z-30 shrink-0"
+      : "sticky top-[var(--impersonation-banner-h,0px)] z-40 shrink-0";
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col bg-[#f3f0f8] text-slate-900">
+    <div
+      className={cn(
+        "flex min-h-0 flex-1 flex-col bg-[#f3f0f8] text-slate-900",
+        lockViewport &&
+          (newsHost
+            ? "h-[calc(100dvh-var(--news-header-h,3.5rem)-var(--impersonation-banner-h,0px))] max-h-[calc(100dvh-var(--news-header-h,3.5rem)-var(--impersonation-banner-h,0px))] overflow-hidden"
+            : "h-dvh max-h-dvh overflow-hidden"),
+      )}
+    >
       {newsHost ? (
-        <div
-          ref={chromeRef}
-          className="sticky top-[calc(var(--impersonation-banner-h,0px)+var(--news-header-h,3.5rem))] z-30 shrink-0"
-        >
+        <div ref={chromeRef} className={chromeClass}>
           <BizOsSubnav />
         </div>
       ) : (
-        <div ref={chromeRef} className="sticky top-[var(--impersonation-banner-h,0px)] z-40 shrink-0">
+        <div ref={chromeRef} className={chromeClass}>
           {market ? (
             <NewsMarketNav
               market={market}
@@ -136,8 +148,8 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
 
       <div
         className={cn(
-          "mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-8",
-          lockViewport && "overflow-hidden",
+          "mx-auto flex min-h-0 w-full max-w-6xl flex-1 flex-col px-4 py-6 sm:py-8",
+          lockViewport && "overflow-hidden py-3 sm:py-4",
         )}
       >
         {children}

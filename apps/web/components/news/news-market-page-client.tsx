@@ -8,6 +8,7 @@ import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
 import { DotClaimModal } from "@/components/news/asksky/dot-claim-modal";
 import { AskSkyEventsCarousel } from "@/components/news/asksky/asksky-events-carousel";
 import { AskSkyFooter } from "@/components/news/asksky/asksky-footer";
+import { AskSkyTryFreeCta } from "@/components/news/asksky/asksky-try-free-cta";
 import { mapSkySearchToAnswer, turnsFromSkyMessages } from "@/components/news/asksky/map-sky-search";
 import { marketDtoToContext } from "@/components/news/asksky/market-context";
 import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
@@ -303,6 +304,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
             />
 
             <AskSkyEventsCarousel market={activeMarket} />
+            <AskSkyTryFreeCta />
             <AskSkyClaimCta market={activeMarket} onClaim={() => setClaimOpen(true)} />
             <AskSkyFooter market={activeMarket} />
             <DotClaimModal

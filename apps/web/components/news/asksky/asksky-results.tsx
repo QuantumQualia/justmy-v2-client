@@ -44,6 +44,14 @@ import { tokenStorage } from "@/lib/storage/token-storage";
 import { useNewsAuthUiStore } from "@/lib/store/news-auth-ui-store";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 
+import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
+import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import {
+  AskSkyTypedText,
+  askSkyMsgInClass,
+  useAskSkyFreshMessageIds,
+} from "@workspace/ui/components/asksky-typed-text";
+
 import type { AskSkyBusinessMapProps } from "./asksky-business-map";
 import type {
   AskSkyBusinessCard,
@@ -150,6 +158,19 @@ export function AskSkyConversation({
     [cards],
   );
   const openAuth = useNewsAuthUiStore((s) => s.openAuth);
+  const freshIds = useAskSkyFreshMessageIds(
+    turns.flatMap((turn) => {
+      const ids = [`${turn.id}:user`];
+      if (turn.status === "ready" || turn.status === "error") ids.push(`${turn.id}:sky`);
+      return ids;
+    }),
+  );
+
+  function scrollThread() {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
+  }
 
   async function handleFavoriteToggle(
     profileId: number,
@@ -192,6 +213,9 @@ export function AskSkyConversation({
               isLatest={isLatest}
               tab={tab}
               visibleTabs={visibleTabs}
+              animateUser={freshIds.has(`${turn.id}:user`)}
+              animateSky={freshIds.has(`${turn.id}:sky`)}
+              onTyped={scrollThread}
               cards={
                 isLatest && turn.status === "ready"
                   ? cards
@@ -220,15 +244,21 @@ export function AskSkyConversation({
         <label htmlFor="asksky-followup" className="sr-only">
           Continue asking AskSKY
         </label>
-        <div className="flex min-w-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white py-1 pl-3 pr-1 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
-          <input
+        <div className="flex min-w-0 items-end gap-1.5 rounded-[1.375rem] border border-slate-200 bg-white py-1 pl-3 pr-1 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
+          <AskSkyGrowTextarea
+            chrome={false}
             id="asksky-followup"
-            type="text"
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             placeholder={disabled ? "SKY is typing…" : "Ask a follow-up…"}
             disabled={disabled}
-            className="min-w-0 flex-1 bg-transparent py-2 text-sm text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 sm:text-base"
+            className="min-h-10 bg-transparent px-0 py-2 text-base text-slate-800 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                submit(draft);
+              }
+            }}
           />
           <button
             type="submit"
@@ -258,6 +288,9 @@ function ConversationTurn({
   onTabChange,
   onFollowUp,
   followUpsDisabled,
+  animateUser,
+  animateSky,
+  onTyped,
 }: {
   turn: AskSkyTurn;
   market: NewsMarketContext;
@@ -275,6 +308,9 @@ function ConversationTurn({
   onTabChange: (tab: AskSkyResultTab) => void;
   onFollowUp: (query: string) => void;
   followUpsDisabled: boolean;
+  animateUser: boolean;
+  animateSky: boolean;
+  onTyped: () => void;
 }) {
   const answerText = turn.answer?.answer ?? "";
   const displayAnswer = answerText.replace(/\b\d{5}\b/, market.zipcode);
@@ -285,14 +321,15 @@ function ConversationTurn({
 
   return (
     <div className="min-w-0 space-y-3.5 sm:space-y-4">
-      <div className="flex min-w-0 justify-end">
-        <div className="min-w-0 max-w-[min(92%,100%)] break-words asksky-sky-bubble-user sm:max-w-[70%]">
+      <div className={`flex min-w-0 items-end justify-end gap-2 ${askSkyMsgInClass(animateUser) ?? ""}`.trim()}>
+        <div className="min-w-0 max-w-[min(92%,calc(100%-2.5rem))] break-words asksky-sky-bubble-user sm:max-w-[70%]">
           {turn.query}
         </div>
+        <AskSkyUserAvatar size={32} className="mb-0.5" />
       </div>
 
       {turn.status === "loading" ? (
-        <div className="flex items-start gap-2 sm:gap-3">
+        <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(true) ?? ""}`.trim()}>
           <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
           <div
             className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5"
@@ -317,12 +354,15 @@ function ConversationTurn({
       ) : null}
 
       {turn.status === "error" ? (
-        <div className="flex items-start gap-2 sm:gap-3">
+        <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(animateSky) ?? ""}`.trim()}>
           <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
           <div className="min-w-0 flex-1 rounded-[1.25rem] border border-rose-200 bg-rose-50/80 p-3.5 sm:p-5">
             <p className="text-sm leading-relaxed text-rose-800 sm:text-[15px]">
-              {turn.errorMessage?.trim() ||
-                "Something went wrong. Try asking again."}
+              <AskSkyTypedText
+                text={turn.errorMessage?.trim() || "Something went wrong. Try asking again."}
+                animate={animateSky}
+                onTick={onTyped}
+              />
             </p>
           </div>
         </div>
@@ -330,11 +370,17 @@ function ConversationTurn({
 
       {turn.status === "ready" && turn.answer ? (
         <>
-          <div className="flex items-start gap-2 sm:gap-3">
+          <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(animateSky) ?? ""}`.trim()}>
             <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
             <div className="asksky-sky-bubble-assistant min-w-0 flex-1 sm:p-5">
               <p className="whitespace-pre-wrap text-sm leading-relaxed text-white sm:text-[15px]">
-                {answerWithZipHighlight}
+                <AskSkyTypedText
+                  text={displayAnswer}
+                  animate={animateSky}
+                  onTick={onTyped}
+                >
+                  {answerWithZipHighlight}
+                </AskSkyTypedText>
               </p>
             </div>
           </div>

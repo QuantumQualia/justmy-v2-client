@@ -172,10 +172,20 @@
 .asksky-sky-input {
   background: var(--asksky-input-bg) !important;
   border: 1px solid var(--asksky-input-border) !important;
-  border-radius: 9999px !important;
+  border-radius: 1.375rem !important;
   color: var(--asksky-input-fg) !important;
   box-shadow: none !important;
   min-height: 2.75rem !important;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.asksky-sky-input::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .asksky-sky-input::placeholder {
@@ -304,6 +314,27 @@
   border: 1px solid var(--asksky-share-border);
   border-radius: 1rem;
   overflow: hidden;
+}
+
+@keyframes asksky-msg-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.asksky-msg-in {
+  animation: asksky-msg-in 0.32s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .asksky-msg-in {
+    animation: none;
+  }
 }
 
 @keyframes asksky-typing-dot {

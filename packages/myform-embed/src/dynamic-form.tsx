@@ -165,10 +165,10 @@ export function DynamicForm({
   const emptyFieldsCls = embed
     ? "asksky-glass-banner border px-3 py-2 text-sm"
     : "rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200";
-  const inputBase = embed ? "asksky-glass-input text-sm" : "border-slate-700 bg-slate-900 text-white";
+  const inputBase = embed ? "asksky-glass-input text-base md:text-sm" : "border-slate-700 bg-slate-900 text-white";
   const inputSm = cn("h-9", inputBase);
   const textareaCls = cn(
-    "min-h-[88px] text-sm",
+    "min-h-[88px] text-base md:text-sm",
     embed ? "asksky-glass-input" : "border-slate-700 bg-slate-900 text-white",
   );
 
@@ -238,7 +238,7 @@ export function DynamicForm({
               >
                 <SelectTrigger
                   id={`df-${f.id}`}
-                  className={cn("text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
+                  className={cn("text-base md:text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
                 >
                   <SelectValue placeholder={ph || "Choose…"} />
                 </SelectTrigger>
@@ -330,7 +330,7 @@ export function DynamicForm({
                 onChange={(e) => setField(f.id, e.target.value)}
                 disabled={disabled || submitting}
                 placeholder={ph || undefined}
-                className={cn("text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
+                className={cn("text-base md:text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
               />
             </div>
           );
@@ -346,7 +346,7 @@ export function DynamicForm({
                 value={String(values[f.id] ?? "")}
                 onChange={(e) => setField(f.id, e.target.value)}
                 disabled={disabled || submitting}
-                className={cn("text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
+                className={cn("text-base md:text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
               />
             </div>
           );
@@ -388,7 +388,7 @@ export function DynamicForm({
                 onChange={(e) => setField(f.id, e.target.value)}
                 disabled={disabled || submitting}
                 placeholder={ph || "https://"}
-                className={cn("text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
+                className={cn("text-base md:text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
               />
             </div>
           );
@@ -406,7 +406,7 @@ export function DynamicForm({
               onChange={(e) => setField(f.id, e.target.value)}
               disabled={disabled || submitting}
               placeholder={ph || undefined}
-              className={cn("text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
+              className={cn("text-base md:text-sm", embed ? "asksky-glass-input h-9 min-h-0" : inputSm)}
             />
           </div>
         );

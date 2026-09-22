@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { useIsGuestSession } from "@/hooks/use-is-guest-session";
 import type { NewsMarketContext } from "./types";
 
 type FooterLink = {
@@ -11,9 +12,10 @@ type FooterLink = {
 };
 
 const DEFAULT_LINKS: FooterLink[] = [
-  { label: "Business", href: "#" },
-  { label: "Government", href: "#" },
-  { label: "NonProfits", href: "#" },
+  { label: "Try Free", href: "/try-free" },
+  { label: "Business", href: "/try-free?for=business" },
+  { label: "Government", href: "/try-free?for=nonprofit" },
+  { label: "NonProfits", href: "/try-free?for=nonprofit" },
   { label: "Terms", href: "#" },
   { label: "Privacy", href: "#" },
 ];
@@ -30,10 +32,13 @@ export function AskSkyFooter({
   market,
   links = DEFAULT_LINKS,
 }: AskSkyFooterProps) {
+  const guest = useIsGuestSession();
   const place =
     [market.city, market.state].filter(Boolean).join(", ") ||
     market.metroLabel ||
     market.marketName;
+  const navLinks =
+    guest === true ? links : links.filter((link) => !link.href.startsWith("/try-free"));
 
   return (
     <footer className="border-t border-slate-200/80 bg-[#f7f6fb]">
@@ -50,7 +55,7 @@ export function AskSkyFooter({
             className="h-8 w-8 rounded-lg object-contain shadow-sm shadow-violet-500/25"
           />
           <span className="text-sm font-bold tracking-tight text-slate-900">
-            AskSKY!
+            JustMy
           </span>
         </Link>
 
@@ -58,10 +63,11 @@ export function AskSkyFooter({
           aria-label="AskSKY footer"
           className="flex flex-wrap items-center gap-x-5 gap-y-2 lg:justify-center"
         >
-          {links.map((link) => (
+          {navLinks.map((link) => (
             <Link
               key={link.label}
               href={link.href}
+              scroll
               className="text-[13px] text-slate-500 transition hover:text-slate-800"
             >
               {link.label}

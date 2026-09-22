@@ -336,7 +336,7 @@ export function QueueTicketPanel({
           >
             <div className="flex items-end gap-2">
               <textarea
-                className="max-h-36 min-h-11 flex-1 resize-y rounded-2xl border border-border bg-background px-3 py-2 text-sm outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30"
+                className="max-h-36 min-h-11 flex-1 resize-y rounded-2xl border border-border bg-background px-3 py-2 text-base outline-none placeholder:text-muted-foreground/70 focus:border-foreground/30 md:text-sm"
                 rows={2}
                 value={reply}
                 onChange={(e) => onReplyChange(e.target.value)}

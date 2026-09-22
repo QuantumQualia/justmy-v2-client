@@ -103,7 +103,7 @@ export function resolveAppHomePath(options?: {
   welcomeApp?: Partial<CurrentApp> & { navigation?: AppNavigationResponseDto[] | null };
   fallback?: string;
 }): string {
-  const fallback = options?.fallback ?? "/dashboard";
+  const fallback = options?.fallback ?? "/personal-os";
   const store = useAppStore.getState();
 
   const welcome = options?.welcomeApp;

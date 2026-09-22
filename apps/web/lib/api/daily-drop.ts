@@ -13,6 +13,27 @@ import type {
   DealsResponseDto,
 } from "@/components/daily-drop/types";
 
+/** In-flight + session cache so Strict Mode remounts / dual mounts share one request. */
+const inFlight = new Map<string, Promise<unknown>>();
+const cache = new Map<string, unknown>();
+
+function dedupe<T>(key: string, run: () => Promise<T>): Promise<T> {
+  const cached = cache.get(key);
+  if (cached) return Promise.resolve(cached as T);
+  const existing = inFlight.get(key);
+  if (existing) return existing as Promise<T>;
+  const request = run()
+    .then((value) => {
+      cache.set(key, value);
+      return value;
+    })
+    .finally(() => {
+      inFlight.delete(key);
+    });
+  inFlight.set(key, request);
+  return request;
+}
+
 /** Map backend briefing to UI news items (with generated id). */
 function mapBriefingToNewsItems(dto: DailyDropBriefingResponseDto): DailyNewsItem[] {
   return (dto.stories ?? []).map((story, i) => ({
@@ -63,12 +84,14 @@ export async function fetchDailyDropBriefing(): Promise<{
   marketName: string;
   date: string;
 }> {
-  const dto = await apiRequest<DailyDropBriefingResponseDto>("ai/daily-drop/briefing");
-  return {
-    items: mapBriefingToNewsItems(dto),
-    marketName: dto.marketName ?? "",
-    date: dto.date ?? "",
-  };
+  return dedupe("briefing", async () => {
+    const dto = await apiRequest<DailyDropBriefingResponseDto>("ai/daily-drop/briefing");
+    return {
+      items: mapBriefingToNewsItems(dto),
+      marketName: dto.marketName ?? "",
+      date: dto.date ?? "",
+    };
+  });
 }
 
 /**
@@ -80,12 +103,14 @@ export async function fetchDailyDropEvents(): Promise<{
   totalCount: number;
   marketName: string;
 }> {
-  const dto = await apiRequest<MarketEventsResponseDto>("ai/daily-drop/events");
-  return {
-    events: mapEventsToMarketEvents(dto),
-    totalCount: dto.totalCount ?? 0,
-    marketName: dto.marketName ?? "",
-  };
+  return dedupe("events", async () => {
+    const dto = await apiRequest<MarketEventsResponseDto>("ai/daily-drop/events");
+    return {
+      events: mapEventsToMarketEvents(dto),
+      totalCount: dto.totalCount ?? 0,
+      marketName: dto.marketName ?? "",
+    };
+  });
 }
 
 /**
@@ -97,10 +122,12 @@ export async function fetchDailyDropDeals(): Promise<{
   totalCount: number;
   cityName?: string;
 }> {
-  const dto = await apiRequest<DealsResponseDto>("ai/daily-drop/deals");
-  return {
-    deals: mapDealsToLocalDeals(dto),
-    totalCount: dto.totalCount ?? 0,
-    cityName: dto.cityName,
-  };
+  return dedupe("deals", async () => {
+    const dto = await apiRequest<DealsResponseDto>("ai/daily-drop/deals");
+    return {
+      deals: mapDealsToLocalDeals(dto),
+      totalCount: dto.totalCount ?? 0,
+      cityName: dto.cityName,
+    };
+  });
 }

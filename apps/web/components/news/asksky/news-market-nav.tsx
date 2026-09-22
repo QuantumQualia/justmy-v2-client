@@ -75,6 +75,7 @@ export function NewsMarketNav({
   const [zipLoading, setZipLoading] = useState(false);
   const [zipError, setZipError] = useState<string | null>(null);
   const [authUser, setAuthUser] = useState<NewsAccountUser | null>(null);
+  const [authReady, setAuthReady] = useState(false);
   const authOpen = useNewsAuthUiStore((s) => s.authOpen);
   const setAuthOpen = useNewsAuthUiStore((s) => s.setAuthOpen);
   const sidebarOpen = useNewsAuthUiStore((s) => s.sidebarOpen);
@@ -122,10 +123,12 @@ export function NewsMarketNav({
     tokenStorage
       .getUser<NewsAccountUser>()
       .then((user) => {
-        if (!cancelled && user) setAuthUser(user);
+        if (cancelled) return;
+        if (user) setAuthUser(user);
+        setAuthReady(true);
       })
       .catch(() => {
-        /* stay signed out */
+        if (!cancelled) setAuthReady(true);
       });
     return () => {
       cancelled = true;
@@ -185,13 +188,10 @@ export function NewsMarketNav({
         });
         audioRef.current = el;
       })
-      .catch((err) => {
+      .catch(() => {
         if (cancelled) return;
-        toast.error(
-          err instanceof ApiClientError
-            ? err.message
-            : "Unable to load the Sky briefing.",
-        );
+        setBriefing(null);
+        clearBriefingExtras();
       })
       .finally(() => {
         if (!cancelled) setAudioLoading(false);
@@ -326,12 +326,14 @@ export function NewsMarketNav({
     briefing?.sponsor?.targetLink,
   );
 
-  const showSkyFm = hasMarketZip && market.dailyAudioBriefingEnabled;
+  const briefingReady = Boolean(briefing?.audioUrl);
+  const showSkyFm = briefingReady;
 
   return (
     <>
       <header
         ref={headerRef}
+        data-site-chrome
         className={
           sticky
             ? "sticky top-[var(--impersonation-banner-h,0px)] z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
@@ -339,8 +341,7 @@ export function NewsMarketNav({
         }
       >
       <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-center lg:gap-3">
-          <div className="flex min-w-0 flex-1 items-center gap-2">
+        <div className="flex min-w-0 items-center gap-2">
             <Link
               href={NEWS_HOME_HREF}
               className="flex shrink-0 items-center gap-2"
@@ -423,7 +424,7 @@ export function NewsMarketNav({
                   aria-describedby={
                     zipError ? "news-market-zip-error" : "news-market-zip-status"
                   }
-                  className={`h-9 w-[5.5rem] border-0 bg-transparent px-0 pr-3 text-xs font-semibold tracking-wide text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400 focus:ring-0 disabled:opacity-60 lg:w-24 ${
+                  className={`h-9 w-[6.5rem] border-0 bg-transparent px-0 pr-3 text-base font-semibold tracking-wide text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400 focus:ring-0 disabled:opacity-60 md:w-[5.5rem] md:text-xs lg:w-24 ${
                     zipLoading ? "pr-7" : ""
                   }`}
                 />
@@ -446,16 +447,14 @@ export function NewsMarketNav({
             </form>
 
             {showSkyFm ? (
-              <div className="hidden min-w-0 flex-1 lg:block">
-                <SkyFmBriefing
-                  playing={playing}
-                  loading={audioLoading}
-                  ready={Boolean(briefing?.audioUrl)}
-                  sponsorName={sponsorName}
-                  sponsorLink={sponsorLink}
-                  onToggle={toggleSkyFm}
-                />
-              </div>
+              <SkyFmBriefing
+                playing={playing}
+                loading={audioLoading}
+                ready={briefingReady}
+                sponsorName={sponsorName}
+                sponsorLink={sponsorLink}
+                onToggle={toggleSkyFm}
+              />
             ) : null}
 
             <div className="ml-auto flex shrink-0 items-center gap-2">
@@ -491,21 +490,6 @@ export function NewsMarketNav({
                 </button>
               )}
             </div>
-          </div>
-
-          {showSkyFm ? (
-            <div className="lg:hidden">
-              <SkyFmBriefing
-                playing={playing}
-                loading={audioLoading}
-                ready={Boolean(briefing?.audioUrl)}
-                sponsorName={sponsorName}
-                sponsorLink={sponsorLink}
-                onToggle={toggleSkyFm}
-                fullWidth
-              />
-            </div>
-          ) : null}
         </div>
       </div>
       </header>
@@ -544,7 +528,6 @@ function SkyFmBriefing({
   sponsorName,
   sponsorLink,
   onToggle,
-  fullWidth = false,
 }: {
   playing: boolean;
   loading: boolean;
@@ -552,23 +535,12 @@ function SkyFmBriefing({
   sponsorName: string | null;
   sponsorLink: string | null;
   onToggle: () => void;
-  fullWidth?: boolean;
 }) {
   const canPlay = ready && !loading;
 
   return (
-    <div
-      className={
-        fullWidth
-          ? "flex w-full items-center"
-          : "flex min-w-0 flex-1 items-center justify-center"
-      }
-    >
-      <div
-        className={`inline-flex min-h-11 min-w-0 items-center gap-3 rounded-full border border-slate-200/90 bg-white py-1.5 pl-1.5 pr-4 shadow-sm ${
-          fullWidth ? "w-full" : "max-w-full"
-        }`}
-      >
+    <div className="flex shrink-0 items-center lg:min-w-0 lg:flex-1 lg:justify-center">
+      <div className="inline-flex min-w-0 items-center lg:min-h-11 lg:max-w-full lg:gap-3 lg:rounded-full lg:border lg:border-slate-200/90 lg:bg-white lg:py-1.5 lg:pl-1.5 lg:pr-4 lg:shadow-sm">
         <button
           type="button"
           onClick={onToggle}
@@ -593,40 +565,42 @@ function SkyFmBriefing({
           )}
         </button>
 
-        <AudioSpectrum playing={playing && !loading} />
+        <div className="hidden min-w-0 items-center gap-3 lg:flex">
+          <AudioSpectrum playing={playing && !loading} />
 
-        <div className="min-w-0 flex-1 text-left">
-          {loading ? (
-            <p className="truncate text-sm font-semibold text-slate-900">
-              Loading briefing…
-            </p>
-          ) : (
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold leading-tight text-slate-900">
-                Today&apos;s 60-Second Sky Briefing
+          <div className="min-w-0 flex-1 text-left">
+            {loading ? (
+              <p className="truncate text-sm font-semibold text-slate-900">
+                Loading briefing…
               </p>
-              {sponsorName ? (
-                <p className="mt-0.5 truncate text-xs leading-tight text-slate-500 sm:text-[12px]">
-                  Presented by:{" "}
-                  {sponsorLink ? (
-                    <a
-                      href={sponsorLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-semibold text-violet-600 transition hover:text-violet-500 hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      {sponsorName}
-                    </a>
-                  ) : (
-                    <span className="font-semibold text-violet-600">
-                      {sponsorName}
-                    </span>
-                  )}
+            ) : (
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold leading-tight text-slate-900">
+                  Today&apos;s 60-Second Sky Briefing
                 </p>
-              ) : null}
-            </div>
-          )}
+                {sponsorName ? (
+                  <p className="mt-0.5 truncate text-xs leading-tight text-slate-500 sm:text-[12px]">
+                    Presented by:{" "}
+                    {sponsorLink ? (
+                      <a
+                        href={sponsorLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-violet-600 transition hover:text-violet-500 hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {sponsorName}
+                      </a>
+                    ) : (
+                      <span className="font-semibold text-violet-600">
+                        {sponsorName}
+                      </span>
+                    )}
+                  </p>
+                ) : null}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

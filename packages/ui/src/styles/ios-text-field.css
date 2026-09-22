@@ -1,0 +1,17 @@
+/**
+ * iOS Safari zooms the visual viewport when a focused text field is under 16px.
+ * Keep the 16px floor on small screens only so desktop chrome stays at its original size.
+ */
+@media (max-width: 767px) {
+  :where(
+    input:not([type="button"]):not([type="submit"]):not([type="reset"]):not(
+        [type="checkbox"]
+      ):not([type="radio"]):not([type="file"]):not([type="hidden"]):not(
+        [type="image"]
+      ):not([type="range"]):not([type="color"]),
+    textarea,
+    select
+  ) {
+    font-size: 16px !important;
+  }
+}

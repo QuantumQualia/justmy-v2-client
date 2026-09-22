@@ -19,6 +19,8 @@ import {
 } from "@/lib/utils/address-utils";
 import {
   conciergeStageFromPath,
+  conciergeStageKind,
+  isPersonalConciergeStage,
   useAskSkyConciergeStore,
   type AddressDraft,
   type CardDrafts,
@@ -30,6 +32,13 @@ import {
 import { bumpBizOsPageData, useBizOsProfile, useInvalidateBizOsHome, BIZ_OS_CONNECT_GOOGLE_EVENT } from "./use-biz-os-profile";
 import { subscriptionService } from "@/lib/services/subscription";
 import { OS_NAME } from "@/lib/os-types";
+import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
+import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import {
+  AskSkyTypedText,
+  askSkyMsgInClass,
+  useAskSkyFreshMessageIds,
+} from "@workspace/ui/components/asksky-typed-text";
 
 const SUPPORT_RE =
   /\b(fun\s*crew|flag\s+(the\s+)?team|talk to (a )?human|need (human )?support|support ticket|i('m| am) stuck|upgrade|command\s*os)\b/i;
@@ -130,6 +139,12 @@ function firstWebsiteUrl(text: string): string | null {
 
 function inputPlaceholder(surface: string, awaitingWebsite: boolean): string {
   if (awaitingWebsite) return "https://your-site.com";
+  const kind = conciergeStageKind(surface);
+  if (kind === "personal_home") return "Ask Sky to plan the week, a trip, or polish your card…";
+  if (kind === "personal_plans") return "Tell Sky what to plan — a week, trip, dinner, or event…";
+  if (kind === "personal_plan") return "Tell Sky what to add or cut…";
+  if (kind === "personal_drop") return "Ask about today’s briefing, or start a plan from it…";
+  if (kind === "personal_card") return "Draft About, a tagline, or add a phone…";
   if (surface === "skyscan") return "Ask about your score, gaps, or what to fix next…";
   if (surface === "battle_plan") return "Tell Sky what you’re working on, or ask for the next task…";
   if (surface === "reputation") return "Ask about Google reviews, or draft a review request…";
@@ -167,6 +182,8 @@ export function AskSkyConcierge({
   const router = useRouter();
   const pathname = usePathname();
   const surface = stage || conciergeStageFromPath(pathname || "");
+  const surfaceKind = conciergeStageKind(surface);
+  const personal = isPersonalConciergeStage(surface);
   const { profileId } = useBizOsProfile();
   const invalidateHome = useInvalidateBizOsHome();
   const setData = useProfileStore((s) => s.setData);
@@ -174,6 +191,7 @@ export function AskSkyConcierge({
   const hasWebsite = Boolean(website?.trim());
   const turns = useAskSkyConciergeStore((s) => s.turns);
   const setTurns = useAskSkyConciergeStore((s) => s.setTurns);
+  const freshIds = useAskSkyFreshMessageIds(turns.map((turn, i) => `${i}:${turn.role}`));
   const cardDrafts = useAskSkyConciergeStore((s) => s.cardDrafts);
   const setCardDrafts = useAskSkyConciergeStore((s) => s.setCardDrafts);
   const input = useAskSkyConciergeStore((s) => s.input);
@@ -205,7 +223,7 @@ export function AskSkyConcierge({
     }
     setLoading(true);
     try {
-      if (!silent && SUPPORT_RE.test(message)) {
+      if (!silent && !personal && SUPPORT_RE.test(message)) {
         setDraft({ summary: message });
         setDraftOpen(true);
       }
@@ -308,7 +326,7 @@ export function AskSkyConcierge({
             .slice(0, 8);
           if (socials.length) setCardDrafts((d) => ({ ...d, socials }));
         }
-        if (action.type === "open_skyscan") {
+        if (action.type === "open_skyscan" && !personal) {
           onStage?.("skyscan");
           if (!onStage) router.push("/biz-os/skyscan");
           if (action.ran) {
@@ -316,17 +334,29 @@ export function AskSkyConcierge({
             bumpBizOsPageData();
           }
         }
-        if (action.type === "open_battle_plan") {
-          onStage?.("battle_plan");
+        if (action.type === "open_battle_plan" || action.type === "open_personal_plan") {
           const planId = Number(action.planId);
-          const href = Number.isFinite(planId) && planId > 0 ? `/biz-os/battle-plans/${planId}` : "/biz-os/battle-plans";
-          if (!onStage) router.push(href);
-          if (action.created || (Number.isFinite(planId) && planId > 0)) {
+          const personalPlan = personal || action.type === "open_personal_plan";
+          onStage?.(personalPlan ? "personal_plans" : "battle_plan");
+          const href =
+            Number.isFinite(planId) && planId > 0
+              ? personalPlan
+                ? `/personal-os/plans/${planId}`
+                : `/biz-os/battle-plans/${planId}`
+              : personalPlan
+                ? "/personal-os/plans"
+                : "/biz-os/battle-plans";
+          const alreadyThere = (pathname || "") === href || (pathname || "").startsWith(`${href}?`);
+          if (!onStage && !alreadyThere) router.push(href);
+          if (action.created || action.refreshed || (Number.isFinite(planId) && planId > 0)) {
             await invalidateHome();
             bumpBizOsPageData();
           }
         }
-        if (action.type === "open_reputation") {
+        if (action.type === "open_personal_drop") {
+          if ((pathname || "") !== "/personal-os/daily-drop") router.push("/personal-os/daily-drop");
+        }
+        if (action.type === "open_reputation" && !personal) {
           onStage?.("reputation");
           const alreadyThere = (pathname || "").includes("/biz-os/reputation");
           const href = action.connect ? "/biz-os/reputation?connect=1" : "/biz-os/reputation";
@@ -674,12 +704,48 @@ export function AskSkyConcierge({
 
   const pending = hasCardDrafts(cardDrafts);
   const draftInputClass =
-    "mt-1 w-full rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-sm text-slate-800";
+    "mt-1 w-full rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-base text-slate-800 md:text-sm";
   const tipClass = "asksky-sky-pill";
   const tipPrimaryClass = "asksky-sky-pill font-semibold";
 
-  const chips =
-    surface === "skyscan"
+  const chips: Array<{
+    label: string;
+    onClick: () => void;
+    primary?: boolean;
+    disabled?: boolean;
+  }> =
+    surfaceKind === "personal_home"
+      ? [
+          { label: "Plan my week", onClick: () => void send("Help me plan my week", "personal_plans"), primary: true },
+          { label: "Plan a trip", onClick: () => void send("Help me plan a trip", "personal_plans") },
+          { label: "Polish myCARD", onClick: () => router.push("/personal-os/card") },
+        ]
+      : surfaceKind === "personal_plans"
+        ? [
+            { label: "Plan my week", onClick: () => void send("Help me plan my week", "personal_plans"), primary: true },
+            { label: "Plan a trip", onClick: () => void send("Help me plan a trip", "personal_plans") },
+            { label: "Plan an event", onClick: () => void send("Help me plan an event", "personal_plans") },
+          ]
+        : surfaceKind === "personal_plan"
+          ? [
+              { label: "Tighten this", onClick: () => void send("Make this a tighter 1-day, weekend, or 3-day version."), primary: true },
+              { label: "Next step", onClick: () => void send("What's my next step?") },
+              { label: "All plans", onClick: () => router.push("/personal-os/plans") },
+            ]
+          : surfaceKind === "personal_drop"
+            ? [
+                { label: "Plan my week", onClick: () => void send("Help me plan my week from today's briefing", "personal_plans"), primary: true },
+                { label: "Plan a trip", onClick: () => void send("Help me plan a trip", "personal_plans") },
+                { label: "Polish myCARD", onClick: () => router.push("/personal-os/card") },
+              ]
+            : surfaceKind === "personal_card"
+              ? [
+                  { label: "Draft About", onClick: () => void send("Draft an About statement for my personal card"), primary: true },
+                  { label: "Draft tagline", onClick: () => void send("Write a short tagline for myCARD") },
+                  { label: "Add contact", onClick: () => void send("Collect phone, address, and email for myCARD") },
+                  { label: applying ? "Applying…" : "Apply drafts", onClick: () => void applyCardDrafts(), disabled: !pending || applying },
+                ]
+      : surface === "skyscan"
       ? [
           { label: "Run SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan"), primary: true },
           { label: "Explain my score", onClick: () => void send("Explain my SkySCAN score") },
@@ -751,23 +817,26 @@ export function AskSkyConcierge({
         style={{ borderColor: "var(--asksky-panel-border)" }}
       >
         <SkyAvatar size={28} />
-        <p className="text-sm font-semibold">AskSKY! Concierge</p>
+        <p className="text-sm font-semibold">{personal ? "Sky · Personal OS" : "AskSKY! Concierge"}</p>
       </div>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
-        {turns.map((turn, i) => (
+        {turns.map((turn, i) => {
+          const animate = freshIds.has(`${i}:${turn.role}`);
+          return (
           <div
             key={`${turn.role}-${i}`}
-            className={
+            className={cn(
+              askSkyMsgInClass(animate),
               turn.role === "user"
-                ? "ml-8 asksky-sky-bubble-user"
-                : "mr-4 flex items-end gap-2"
-            }
+                ? "flex items-end justify-end gap-2 pl-8"
+                : "mr-4 flex items-end gap-2",
+            )}
           >
             {turn.role === "asksky" ? (
               <>
                 <SkyAvatar size={28} className="mb-0.5" />
                 <div className="asksky-sky-bubble-assistant min-w-0 flex-1 whitespace-pre-wrap">
-                  {turn.text}
+                  <AskSkyTypedText text={turn.text} animate={animate} />
                   {turn.actions?.length ? (
                     <div className="mt-2 flex flex-col gap-1.5">
                       {turn.actions.map((action) => (
@@ -792,10 +861,14 @@ export function AskSkyConcierge({
                 </div>
               </>
             ) : (
-              turn.text
+              <>
+                <div className="asksky-sky-bubble-user min-w-0">{turn.text}</div>
+                <AskSkyUserAvatar className="mb-0.5" />
+              </>
             )}
           </div>
-        ))}
+          );
+        })}
         {loading ? (
           <p className="flex items-center gap-2 text-xs text-slate-400">
             <Loader2 className="h-3 w-3 animate-spin" /> thinking…
@@ -1059,11 +1132,11 @@ export function AskSkyConcierge({
             </div>
           </div>
         ) : null}
-        {draftOpen && draft ? (
+        {draftOpen && draft && !personal ? (
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Support draft</p>
             <textarea
-              className="mt-2 w-full rounded-lg border border-amber-200 bg-white p-2 text-sm"
+              className="mt-2 w-full rounded-lg border border-amber-200 bg-white p-2 text-base md:text-sm"
               rows={1}
               value={draft.summary}
               onChange={(e) => setDraft({ ...draft, summary: e.target.value })}
@@ -1080,12 +1153,12 @@ export function AskSkyConcierge({
         ) : null}
       </div>
       <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--asksky-panel-border)" }}>
-        <div className="mb-2 flex flex-wrap gap-1">
+        <div className="mb-2 flex flex-nowrap gap-1 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
           {chips.map((chip) => (
             <button
               key={chip.label}
               type="button"
-              className={`${chip.primary ? tipPrimaryClass : tipClass} ${chip.disabled ? "disabled:opacity-40" : ""}`}
+              className={`${chip.primary ? tipPrimaryClass : tipClass} shrink-0 whitespace-nowrap ${chip.disabled ? "disabled:opacity-40" : ""}`}
               disabled={loading || chip.disabled}
               onClick={chip.onClick}
             >
@@ -1101,13 +1174,9 @@ export function AskSkyConcierge({
             submitMessage(input);
           }}
         >
-          <textarea
+          <AskSkyGrowTextarea
             ref={inputRef}
-            className={cn(
-              "asksky-sky-input max-h-36 min-h-11 flex-1 resize-y px-4 py-2 text-sm",
-              awaitingWebsite && "ring-2 ring-violet-200/70",
-            )}
-            rows={2}
+            className={cn(awaitingWebsite && "ring-2 ring-violet-200/70")}
             placeholder={inputPlaceholder(surface, awaitingWebsite)}
             value={input}
             onChange={(e) => setInput(e.target.value)}

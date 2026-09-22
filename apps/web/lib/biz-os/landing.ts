@@ -49,12 +49,17 @@ export function resolveBizAuthPath(options: {
   afterRegister?: boolean;
 }): string {
   const explicit = options.explicitRedirect?.trim() || "";
-  const isDefault = !explicit || explicit === "/dashboard";
+  const isDefault =
+    !explicit ||
+    explicit === "/dashboard" ||
+    explicit.startsWith("/dashboard") ||
+    explicit === "/personal-os" ||
+    explicit.startsWith("/personal-os");
   if (!isDefault && explicit !== "/dashboard?welcome=true") {
     return explicit;
   }
   if (!isBizProfile(options.profile)) {
-    return options.fallback || "/dashboard";
+    return options.fallback || "/personal-os";
   }
   if (options.emailVerified === false) {
     return verifyEmailHref(options.afterRegister ? "/biz-os/onboard" : "/biz-os");

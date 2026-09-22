@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { X, Send, MessageCircle, Bot } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
-import { Textarea } from "@workspace/ui/components/textarea";
+import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
 import { useChatbotStore } from "@/lib/store/chatbot-store";
 import { useProfileStore } from "@/lib/store/profile-store";
 import { LinkifiedMessage } from "@/components/common/chatbot/linkified-message";
@@ -27,14 +27,6 @@ export function AIChatbot() {
       setTimeout(() => textareaRef.current?.focus(), 100);
     }
   }, [isOpen, messages]);
-
-  // Auto-resize textarea
-  useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 120)}px`;
-    }
-  }, [input]);
 
   const handleSend = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -188,15 +180,15 @@ export function AIChatbot() {
         {/* Input */}
         <form onSubmit={handleSend} className="p-4 border-t border-border bg-muted">
           <div className="flex gap-2 items-end">
-            <Textarea
+            <AskSkyGrowTextarea
+              chrome={false}
               ref={textareaRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Type your message..."
               disabled={isLoading}
-              rows={1}
-              className="flex-1 min-h-[44px] max-h-[120px] resize-none rounded-3xl border-input bg-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus-visible:border-blue-500 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-muted [&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/60"
+              className="min-h-[44px] rounded-3xl border border-input bg-background px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus-visible:border-blue-500 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-muted [&::-webkit-scrollbar-thumb]:bg-muted-foreground/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted-foreground/60"
             />
             <Button
               type="submit"

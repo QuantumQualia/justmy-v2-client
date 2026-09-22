@@ -39,6 +39,7 @@ type AuthDialogProps = {
   onOpenChange: (open: boolean) => void;
   defaultMode?: AuthDialogMode;
   defaultZip?: string;
+  defaultReferralCode?: string;
   profileKind?: ProfileKind;
   onAuthSuccess?: (response: AuthResponse) => void;
   /** When set, the panel sits under this element (right-aligned) instead of the screen center. */
@@ -94,6 +95,7 @@ export function AuthDialog({
   defaultMode = "register",
   defaultZip = "",
   profileKind = DEFAULT_PROFILE_KIND,
+  defaultReferralCode = "",
   onAuthSuccess,
   anchorRef,
 }: AuthDialogProps) {
@@ -107,7 +109,7 @@ export function AuthDialog({
     email: "",
     password: "",
     zipCode: defaultZip,
-    referralCode: "",
+    referralCode: defaultReferralCode,
   });
 
   const isRegister = mode === "register";
@@ -143,9 +145,10 @@ export function AuthDialog({
     setFormData((prev) => ({
       ...prev,
       zipCode: defaultZip || prev.zipCode,
+      referralCode: defaultReferralCode || prev.referralCode,
     }));
     void preloadOauthProviders();
-  }, [open, defaultMode, defaultZip]);
+  }, [open, defaultMode, defaultZip, defaultReferralCode]);
 
   function closeAndSucceed(response: AuthResponse) {
     onOpenChange(false);

@@ -729,7 +729,7 @@ export default function ReputationPage() {
                   <input
                     type="time"
                     disabled={h.isClosed}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 disabled:opacity-40"
+                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-base disabled:opacity-40 md:text-sm"
                     value={h.openTime}
                     onChange={(e) =>
                       setHours((prev) =>
@@ -741,7 +741,7 @@ export default function ReputationPage() {
                   <input
                     type="time"
                     disabled={h.isClosed}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 disabled:opacity-40"
+                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-base disabled:opacity-40 md:text-sm"
                     value={h.endTime}
                     onChange={(e) =>
                       setHours((prev) =>

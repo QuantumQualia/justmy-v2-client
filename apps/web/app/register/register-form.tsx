@@ -49,7 +49,7 @@ export default function RegisterForm() {
     referralCode: referralCodeFromUrl, // Auto-populate from URL
   });
 
-  const afterRegisterPath = isBusiness ? "/biz-os/onboard" : "/dashboard?welcome=true";
+  const afterRegisterPath = isBusiness ? "/biz-os/onboard" : "/personal-os?welcome=1";
 
   const oauth = useOauthSignIn({
     zipCode: formData.zipCode || newsZip || undefined,

@@ -1651,7 +1651,7 @@ export default function InlineEdit({
                   onChange={(e) => onDataChange({ tagline: e.target.value })}
                   onBlur={() => setEditingTagline(false)}
                   className={cn(
-                    "w-full min-h-[60px] p-2 text-sm text-center rounded-lg focus:outline-none focus:ring-2 resize-none",
+                    "w-full min-h-[60px] p-2 text-base text-center rounded-lg focus:outline-none focus:ring-2 resize-none md:text-sm",
                     isLight
                       ? "text-muted-foreground bg-background border border-primary focus:ring-primary"
                       : "text-slate-400 bg-slate-800 border border-blue-500 focus:ring-blue-500",
@@ -1940,7 +1940,7 @@ export default function InlineEdit({
                     value={data.about}
                     onChange={(e) => onDataChange({ about: e.target.value })}
                     className={cn(
-                      "w-full min-h-[220px] p-5 text-sm leading-relaxed border-2 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all duration-200 overflow-y-auto",
+                      "w-full min-h-[220px] p-5 text-base leading-relaxed border-2 rounded-xl focus:outline-none focus:ring-2 resize-none transition-all duration-200 overflow-y-auto md:text-sm",
                       ui.scroll,
                       isLight
                         ? "text-foreground bg-background border-border focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground"

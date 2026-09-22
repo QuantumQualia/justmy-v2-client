@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@workspace/ui/components/button";
 import { bizOsService, type BattlePlan } from "@/lib/services/biz-os";
 import { useBizOsFetch, useInvalidateBizOsHome } from "@/components/biz-os/use-biz-os-profile";
@@ -22,26 +22,35 @@ function statusLabel(status: string) {
   return "Live";
 }
 
-export default function BattlePlansPage() {
+function BattlePlansInner() {
   const router = useRouter();
+  const search = useSearchParams();
   const invalidateHome = useInvalidateBizOsHome();
   const { data: plans, pageReady, profileId } = useBizOsFetch(
     (id) => bizOsService.listPlans(id),
     [] as BattlePlan[],
   );
   const [creating, setCreating] = useState(false);
+  const autoStarted = useRef(false);
 
-  async function startPlan() {
+  async function startPlan(trigger = "manual") {
     if (!profileId) return;
     setCreating(true);
     try {
-      const plan = await bizOsService.createPlan(profileId, { trigger: "manual" });
+      const plan = await bizOsService.createPlan(profileId, { trigger });
       await invalidateHome();
       router.push(`/biz-os/battle-plans/${plan.id}`);
     } finally {
       setCreating(false);
     }
   }
+
+  useEffect(() => {
+    const start = search.get("start");
+    if (!pageReady || !profileId || !start || autoStarted.current || plans.length) return;
+    autoStarted.current = true;
+    void startPlan(start);
+  }, [pageReady, profileId, plans.length, search]);
 
   if (!pageReady) return <BizOsSkeleton />;
 
@@ -117,5 +126,13 @@ export default function BattlePlansPage() {
         </BizOsCard>
       ) : null}
     </BizOsPage>
+  );
+}
+
+export default function BattlePlansPage() {
+  return (
+    <Suspense fallback={<BizOsSkeleton />}>
+      <BattlePlansInner />
+    </Suspense>
   );
 }

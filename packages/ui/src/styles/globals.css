@@ -6,6 +6,7 @@
 
 @import "tw-animate-css";
 @import "./asksky-sky.css";
+@import "./ios-text-field.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -144,6 +145,15 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    overflow-x: clip;
+  }
+  body {
+    overflow-x: clip;
+    max-width: 100%;
   }
   /*
    * Embeddable iframes (/embed/asksky, /embed/myform): transparent canvas so host pages show through glass UI.

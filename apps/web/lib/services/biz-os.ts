@@ -69,6 +69,18 @@ export type OAuthConnection = {
   configured?: boolean;
 };
 
+export type CalendarProvider = "google_calendar" | "microsoft_calendar" | "apple_caldav";
+
+export type CalendarConnection = {
+  provider: CalendarProvider;
+  label: string;
+  configured: boolean;
+  connected: boolean;
+  accountName?: string | null;
+};
+
+const calendarConnectionsInFlight = new Map<string, Promise<CalendarConnection[]>>();
+
 export type SyndicationJob = {
   jobId: number;
   receipt: Array<{ provider: string; status: string; label: string }>;
@@ -136,6 +148,9 @@ export type BattlePlanTask = {
   assigneeUserId?: number | null;
   assigneeName?: string | null;
   targetDate?: string | null;
+  location?: string | null;
+  calendarEventId?: string | null;
+  calendarProvider?: string | null;
 };
 
 export type BattlePlanLog = {
@@ -172,6 +187,7 @@ export type BattlePlan = {
   needsSupport?: boolean;
   supportStatus?: string | null;
   targetDate?: string | null;
+  shareToken?: string | null;
   progress: number;
   members?: BattlePlanMember[];
   tasks?: BattlePlanTask[];
@@ -180,7 +196,7 @@ export type BattlePlan = {
 };
 
 export const bizOsService = {
-  lookup(businessName: string, zipCode: string) {
+  lookup(businessName: string, zipCode?: string) {
     return apiRequest<{
       businessName: string;
       zipCode: string;
@@ -198,7 +214,7 @@ export const bizOsService = {
       reviewCount: number | null;
     }>("biz-os/claim/lookup", {
       method: "POST",
-      body: JSON.stringify({ businessName, zipCode }),
+      body: JSON.stringify({ businessName, zipCode: zipCode || "" }),
       skipAuth: true,
     });
   },
@@ -449,6 +465,70 @@ export const bizOsService = {
       params: withProfile(profileId),
       body: JSON.stringify({ summary }),
     });
+  },
+
+  sharePlan(profileId: number | string, planId: number) {
+    return apiRequest<{ shareToken: string; url: string }>(`biz-os/battle-plans/${planId}/share`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({}),
+    });
+  },
+
+  listCalendarConnections(profileId: number | string) {
+    const key = String(profileId);
+    const existing = calendarConnectionsInFlight.get(key);
+    if (existing) return existing;
+    const request = apiRequest<CalendarConnection[]>("biz-os/calendar/connections", {
+      params: withProfile(profileId),
+    }).finally(() => {
+      calendarConnectionsInFlight.delete(key);
+    });
+    calendarConnectionsInFlight.set(key, request);
+    return request;
+  },
+
+  connectCalendar(
+    profileId: number | string,
+    provider: "google_calendar" | "microsoft_calendar",
+    returnTo?: string,
+  ) {
+    return apiRequest<{ authUrl: string }>("biz-os/calendar/connect", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ provider, returnTo }),
+    });
+  },
+
+  connectAppleCalendar(profileId: number | string, appleId: string, appPassword: string) {
+    return apiRequest<{ provider: string; status: string }>("biz-os/calendar/apple", {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ appleId, appPassword }),
+    });
+  },
+
+  syncPlanCalendar(
+    profileId: number | string,
+    planId: number,
+    provider: "google_calendar" | "microsoft_calendar" | "apple_caldav",
+  ) {
+    return apiRequest<{ synced: number }>(`biz-os/battle-plans/${planId}/calendar-sync`, {
+      method: "POST",
+      params: withProfile(profileId),
+      body: JSON.stringify({ provider }),
+    });
+  },
+
+  getSharedPlan(token: string) {
+    return apiRequest<{
+      title: string;
+      description?: string | null;
+      tasks: Array<{ text: string; targetDate?: string | null; location?: string | null }>;
+      hostName: string;
+      referralCode: string | null;
+      rsvpHint: string;
+    }>(`biz-os/plans/shared/${encodeURIComponent(token)}`, { skipAuth: true });
   },
 
   reputation(profileId: number | string) {

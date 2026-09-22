@@ -365,7 +365,7 @@ function AskSkyEmbedPublicFormFields({
                 disabled={submitting}
                 placeholder={ph || undefined}
                 className={cn(
-                  "min-h-[88px] text-sm",
+                  "min-h-[88px] text-base md:text-sm",
                   embed
                     ? "border-zinc-600 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-500"
                     : "border-slate-700 bg-slate-900 text-white",
@@ -392,7 +392,7 @@ function AskSkyEmbedPublicFormFields({
                 <SelectTrigger
                   id={`asksky-pf-${f.id}`}
                   className={cn(
-                    "h-9 text-sm",
+                    "h-9 text-base md:text-sm",
                     embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
                   )}
                 >
@@ -487,7 +487,7 @@ function AskSkyEmbedPublicFormFields({
                 disabled={submitting}
                 placeholder={ph || undefined}
                 className={cn(
-                  "h-9 text-sm",
+                  "h-9 text-base md:text-sm",
                   embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
                 )}
               />
@@ -506,7 +506,7 @@ function AskSkyEmbedPublicFormFields({
                 onChange={(e) => setField(f.id, e.target.value)}
                 disabled={submitting}
                 className={cn(
-                  "h-9 text-sm",
+                  "h-9 text-base md:text-sm",
                   embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
                 )}
               />
@@ -551,7 +551,7 @@ function AskSkyEmbedPublicFormFields({
                 disabled={submitting}
                 placeholder={ph || "https://"}
                 className={cn(
-                  "h-9 text-sm",
+                  "h-9 text-base md:text-sm",
                   embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
                 )}
               />
@@ -571,7 +571,7 @@ function AskSkyEmbedPublicFormFields({
               disabled={submitting}
               placeholder={ph || undefined}
               className={cn(
-                "h-9 text-sm",
+                "h-9 text-base md:text-sm",
                 embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
               )}
             />

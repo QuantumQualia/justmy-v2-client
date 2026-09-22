@@ -112,13 +112,13 @@ export default function CampaignsPage() {
         ) : null}
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
           <input
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
             placeholder="Competitor 1 name"
             value={comp1}
             onChange={(e) => setComp1(e.target.value)}
           />
           <input
-            className="rounded-xl border border-slate-200 px-3 py-2 text-sm"
+            className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
             placeholder="Competitor 2 name"
             value={comp2}
             onChange={(e) => setComp2(e.target.value)}
@@ -131,7 +131,7 @@ export default function CampaignsPage() {
           <label className="mt-3 block text-sm text-slate-600">
             Active campaign
             <select
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm"
+              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
               value={campaigns.find((c) => c.status === "active")?.id || ""}
               onChange={(e) => {
                 const id = Number(e.target.value);

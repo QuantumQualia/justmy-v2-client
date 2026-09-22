@@ -1,11 +1,13 @@
 "use client";
 
 import { CalendarDays, Newspaper, Tag } from "lucide-react";
+import Link from "next/link";
 import { useEffect } from "react";
 
 import { NewsHomeLink } from "@/components/news/news-home-link";
 import { NewsMarketPageClient } from "@/components/news/news-market-page-client";
 import { NewsZipForm } from "@/components/news/news-zip-form";
+import { useIsGuestSession } from "@/hooks/use-is-guest-session";
 import { useNewsHost } from "@/lib/news/news-host-context";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { useProfileStore } from "@/lib/store/profile-store";
@@ -70,6 +72,7 @@ export function NewsPageClient() {
 
 function NewsLanding() {
   const newsHost = useNewsHost();
+  const guest = useIsGuestSession();
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-background font-sans text-foreground">
@@ -89,7 +92,16 @@ function NewsLanding() {
               <span className="inline-block h-2 w-2 rounded-full bg-linear-to-r from-emerald-400 to-cyan-500" />
               JustMy News
             </NewsHomeLink>
-            <span className="text-xs text-muted-foreground">Local market routing</span>
+            {guest === true ? (
+              <Link
+                href="/try-free"
+                className="text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+              >
+                Try free
+              </Link>
+            ) : (
+              <span className="text-xs text-muted-foreground">Local market routing</span>
+            )}
           </div>
         </header>
       )}

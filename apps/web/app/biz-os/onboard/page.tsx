@@ -44,7 +44,11 @@ function OnboardInner() {
   function goStage(next: string) {
     setStage(next);
     if (next === "skyscan") router.push("/biz-os/skyscan");
-    if (next === "battle_plan") router.push("/biz-os/battle-plans");
+    if (next === "battle_plan") {
+      const audience = searchParams.get("audience");
+      const trigger = audience === "nonprofit" ? "reach-residents" : "grow-bookings";
+      router.push(`/biz-os/battle-plans?start=${trigger}`);
+    }
     if (next === "reputation") router.push("/biz-os/reputation");
   }
 

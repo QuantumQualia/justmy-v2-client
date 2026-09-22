@@ -101,12 +101,36 @@ export const useAskSkyConciergeStore = create<ConciergeState>((set, get) => ({
 }));
 
 export function conciergeStageFromPath(pathname: string): string {
-  if (pathname.includes("/biz-os/skyscan")) return "skyscan";
-  if (pathname.includes("/biz-os/battle-plans")) return "battle_plan";
-  if (pathname.includes("/biz-os/reputation")) return "reputation";
-  if (pathname.includes("/biz-os/app-store")) return "apps";
-  if (pathname.includes("/biz-os/pricing")) return "pricing";
-  if (pathname.includes("/biz-os/settings")) return "settings";
-  if (pathname.includes("/biz-os/onboard")) return "card";
+  const path = String(pathname || "");
+  if (path.includes("/personal-os/plans/")) {
+    const id = path.split("/personal-os/plans/")[1]?.split(/[/?#]/)[0];
+    if (id && /^\d+$/.test(id)) return `personal_plan:${id}`;
+    return "personal_plans";
+  }
+  if (path.includes("/personal-os/plans")) return "personal_plans";
+  if (path.includes("/personal-os/daily-drop")) return "personal_drop";
+  if (path.includes("/personal-os/card")) return "personal_card";
+  if (path === "/personal-os" || path.startsWith("/personal-os/")) return "personal_home";
+  if (path.includes("/biz-os/skyscan")) return "skyscan";
+  if (path.includes("/biz-os/battle-plans")) return "battle_plan";
+  if (path.includes("/biz-os/reputation")) return "reputation";
+  if (path.includes("/biz-os/app-store")) return "apps";
+  if (path.includes("/biz-os/pricing")) return "pricing";
+  if (path.includes("/biz-os/settings")) return "settings";
+  if (path.includes("/biz-os/onboard")) return "card";
   return "home";
+}
+
+export function conciergeStageKind(stage: string): string {
+  return String(stage || "").split(":")[0];
+}
+
+export function isPersonalConciergeStage(stage: string): boolean {
+  return conciergeStageKind(stage).startsWith("personal_");
+}
+
+export function personalPlanIdFromStage(stage: string): number | null {
+  const match = String(stage || "").match(/^personal_plan:(\d+)$/);
+  const id = match ? Number(match[1]) : NaN;
+  return Number.isFinite(id) && id > 0 ? id : null;
 }

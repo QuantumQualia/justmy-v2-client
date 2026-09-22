@@ -7,7 +7,7 @@
 import { isBusinessOs } from "@/lib/os-types";
 
 export const VERIFY_EMAIL_PATH = "/verify-email";
-export const DEFAULT_POST_VERIFY_PATH = "/dashboard";
+export const DEFAULT_POST_VERIFY_PATH = "/personal-os";
 
 const EXEMPT_PREFIXES = [
   VERIFY_EMAIL_PATH,

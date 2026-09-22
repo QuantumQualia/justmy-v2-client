@@ -3,6 +3,7 @@ import { ArrowRight, Loader2, RefreshCw, Vote } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { SkyAvatar, SkyPoweredBy } from "@workspace/ui/components/sky-avatar";
+import { askSkyMsgInClass, useAskSkyFreshMessageIds } from "@workspace/ui/components/asksky-typed-text";
 import type {
   AskSkySkyTransport,
   SkyConversationMessage,
@@ -46,12 +47,29 @@ function useAskSkyRuntime(): AskSkyRuntimeValue {
   return v;
 }
 
-function UserAvatarThumb({ src, alt }: { src: string; alt: string }) {
+function UserAvatarThumb({ src, alt }: { src?: string | null; alt: string }) {
+  const photo = src?.trim() || "";
+  const initial = (alt.trim() || "Y").slice(0, 1).toUpperCase();
   return (
-    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full bg-slate-200">
-      <img src={src} alt={alt} width={32} height={32} className="h-full w-full object-cover" />
+    <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[linear-gradient(135deg,#7c6cf6,#5fa8ef)] text-[10px] font-bold text-white">
+      {photo ? (
+        <img src={photo} alt={alt} width={32} height={32} className="h-full w-full object-cover" />
+      ) : (
+        initial
+      )}
     </div>
   );
+}
+
+const ASKSKY_COMPOSER_MAX_ROWS = 3;
+
+function syncAskSkyComposerHeight(el: HTMLTextAreaElement) {
+  const cs = getComputedStyle(el);
+  const line = Number.parseFloat(cs.lineHeight) || 20;
+  const min = Number.parseFloat(cs.minHeight) || 44;
+  const max = min + line * (ASKSKY_COMPOSER_MAX_ROWS - 1);
+  el.style.height = "0px";
+  el.style.height = `${Math.min(el.scrollHeight, max)}px`;
 }
 
 const STORAGE_PREFIX = "asksky:v1:";
@@ -292,6 +310,9 @@ function AskSkyConversationView({
   const isMobile = useIsMobile();
   const { sky, visitorUserBubble: profile } = useAskSkyRuntime();
   const [messages, setMessages] = React.useState<AskSkyChatMessage[]>([]);
+  const freshIds = useAskSkyFreshMessageIds(
+    messages.map((m, i) => `${m.at ?? "x"}:${i}:${m.role}`),
+  );
   const [input, setInput] = React.useState("");
   const [conversationId, setConversationId] = React.useState<number | null>(null);
   const [visitorToken, setVisitorToken] = React.useState<string | null>(null);
@@ -431,8 +452,7 @@ function AskSkyConversationView({
       return;
     }
     const syncHeight = () => {
-      el.style.height = "0px";
-      el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+      syncAskSkyComposerHeight(el);
     };
 
     syncHeight();
@@ -829,7 +849,10 @@ function AskSkyConversationView({
               <div
                 key={i}
                 ref={isLastContactFormMessage ? contactFormAnchorRef : undefined}
-                className="flex w-full min-w-0 flex-col gap-2"
+                className={cn(
+                  "flex w-full min-w-0 flex-col gap-2",
+                  askSkyMsgInClass(freshIds.has(`${m.at ?? "x"}:${i}:${m.role}`)),
+                )}
               >
                 <div className="flex items-start gap-2 justify-start">
                   <SkyAvatar size={32} className="mt-0.5" />
@@ -858,6 +881,7 @@ function AskSkyConversationView({
               key={i}
               className={cn(
                 "flex items-start gap-2",
+                askSkyMsgInClass(freshIds.has(`${m.at ?? "x"}:${i}:${m.role}`)),
                 m.role === "user" ? "justify-end" : "justify-start",
               )}
             >
@@ -889,14 +913,14 @@ function AskSkyConversationView({
                   </span>
                 ) : null}
               </div>
-              {m.role === "user" && profile?.photo ? (
-                <UserAvatarThumb src={profile.photo} alt={profile.name || "You"} />
+              {m.role === "user" ? (
+                <UserAvatarThumb src={profile?.photo} alt={profile?.name || "You"} />
               ) : null}
             </div>
           );
         })}
         {phase === "streaming" ? (
-          <div className="flex items-start gap-2 justify-start">
+          <div className={cn("flex items-start gap-2 justify-start", askSkyMsgInClass(true))}>
             <SkyAvatar size={32} className="mt-0.5" />
             <div className="asksky-sky-bubble-assistant">
               {streamingText.trim() ? (
@@ -1002,7 +1026,7 @@ function AskSkyConversationView({
             disabled={!knowledgeReady}
             aria-disabled={phase === "streaming" || !knowledgeReady}
             className={cn(
-              "asksky-sky-input min-h-[44px] max-h-[120px] min-w-0 flex-1 resize-none px-4 py-2.5 transition-colors scrollbar-hide",
+              "asksky-sky-input min-h-[44px] min-w-0 flex-1 resize-none overflow-y-auto px-4 py-2.5 text-base leading-5 transition-colors scrollbar-hide md:text-sm",
               (phase === "streaming" || !knowledgeReady) && "opacity-80",
               chatScrollClasses,
             )}

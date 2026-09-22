@@ -67,16 +67,23 @@ export function DotClaimModal({
   open,
   onOpenChange,
   defaultZip,
+  defaultBusinessName,
+  defaultWebsite,
+  entryCategory,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultZip?: string;
+  defaultBusinessName?: string;
+  defaultWebsite?: string;
+  entryCategory?: "business" | "nonprofit";
 }) {
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
-  const [businessName, setBusinessName] = useState("");
+  const [businessName, setBusinessName] = useState(defaultBusinessName || "");
+  const [website, setWebsite] = useState(defaultWebsite || "");
   const [zipCode, setZipCode] = useState(defaultZip || "");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -97,6 +104,14 @@ export function DotClaimModal({
   }, [defaultZip]);
 
   useEffect(() => {
+    if (defaultBusinessName) setBusinessName(defaultBusinessName);
+  }, [defaultBusinessName]);
+
+  useEffect(() => {
+    if (defaultWebsite) setWebsite(defaultWebsite);
+  }, [defaultWebsite]);
+
+  useEffect(() => {
     if (!open) return;
     setStep("form");
     setError("");
@@ -110,8 +125,11 @@ export function DotClaimModal({
     setGoogleReviewCount(null);
     setListingNote("");
     setRefreshingChips(false);
+    if (defaultBusinessName) setBusinessName(defaultBusinessName);
+    if (defaultWebsite) setWebsite(defaultWebsite);
+    if (defaultZip) setZipCode(defaultZip);
     void preloadOauthProviders();
-  }, [open]);
+  }, [open, defaultBusinessName, defaultWebsite, defaultZip]);
 
   async function runLookup() {
     setError("");
@@ -159,10 +177,15 @@ export function DotClaimModal({
         googleAddress: googleAddress || undefined,
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
+        website: website.trim() || undefined,
       });
       await persistClaimSession(response);
       onOpenChange(false);
-      window.location.assign(bizOsHref("/verify-email?redirect=/biz-os"));
+      window.location.assign(
+        bizOsHref(
+          `/verify-email?redirect=${encodeURIComponent(`/biz-os/onboard?audience=${entryCategory || "business"}`)}`,
+        ),
+      );
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Could not create account.");
     } finally {
@@ -185,10 +208,13 @@ export function DotClaimModal({
         googleAddress: googleAddress || undefined,
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
+        website: website.trim() || undefined,
       });
       await persistClaimSession(response);
       onOpenChange(false);
-      window.location.assign(bizOsHref("/biz-os/onboard"));
+      window.location.assign(
+        bizOsHref(`/biz-os/onboard?audience=${entryCategory || "business"}`),
+      );
     } catch (err) {
       setError(err instanceof ApiClientError ? err.message : "Google sign-in failed.");
     } finally {
@@ -354,7 +380,7 @@ export function DotClaimModal({
               >
                 <div className="space-y-1.5">
                   <Label htmlFor="claim-business-name" className="text-slate-700">
-                    Business name
+                    {entryCategory === "nonprofit" ? "Organization name" : "Business name"}
                   </Label>
                   <Input
                     id="claim-business-name"
@@ -367,27 +393,43 @@ export function DotClaimModal({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label
-                    htmlFor="claim-zip"
-                    className="flex items-center gap-1.5 text-slate-700"
-                  >
-                    <MapPin className="h-3 w-3 text-violet-500" aria-hidden />
-                    Zip code
+                  <Label htmlFor="claim-website" className="text-slate-700">
+                    Website <span className="font-normal text-slate-400">(optional)</span>
                   </Label>
                   <Input
-                    id="claim-zip"
-                    required
-                    inputMode="numeric"
-                    autoComplete="postal-code"
-                    placeholder="e.g. 38103"
+                    id="claim-website"
+                    type="url"
+                    autoComplete="url"
+                    placeholder="https://"
                     className={inputClass}
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value.replace(/[^\d-]/g, ""))}
+                    value={website}
+                    onChange={(e) => setWebsite(e.target.value)}
                   />
-                  <p className="text-[11px] text-slate-400">
-                    We use this to connect you to your local Market.
-                  </p>
                 </div>
+                {defaultZip ? null : (
+                  <div className="space-y-1.5">
+                    <Label
+                      htmlFor="claim-zip"
+                      className="flex items-center gap-1.5 text-slate-700"
+                    >
+                      <MapPin className="h-3 w-3 text-violet-500" aria-hidden />
+                      Zip code
+                    </Label>
+                    <Input
+                      id="claim-zip"
+                      required
+                      inputMode="numeric"
+                      autoComplete="postal-code"
+                      placeholder="e.g. 38103"
+                      className={inputClass}
+                      value={zipCode}
+                      onChange={(e) => setZipCode(e.target.value.replace(/[^\d-]/g, ""))}
+                    />
+                    <p className="text-[11px] text-slate-400">
+                      We use this to connect you to your local Market.
+                    </p>
+                  </div>
+                )}
                 <div className="space-y-1.5">
                   <Label htmlFor="claim-phone" className="text-slate-700">
                     Phone
@@ -415,7 +457,7 @@ export function DotClaimModal({
             {step === "scanning" ? (
               <div className="flex flex-col items-center gap-3 py-6">
                 <Loader2 className="h-8 w-8 animate-spin text-violet-600" aria-hidden />
-                <p className="text-sm text-slate-500">Matching Google listings near {zipCode}</p>
+                <p className="text-sm text-slate-500">Matching Google listings for {businessName.trim() || "this business"}</p>
               </div>
             ) : null}
 

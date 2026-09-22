@@ -231,7 +231,12 @@ export function proxy(request: NextRequest) {
   }
 
   if (isPublicRoute(pathname)) {
-    if (token && (pathname === "/login" || pathname === "/register")) {
+    const guestOnlyAuthPath =
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname === "/try-free" ||
+      pathname.startsWith("/try-free/");
+    if (token && guestOnlyAuthPath) {
       if (unverified) {
         return redirectToVerifyEmail(request, request.nextUrl.searchParams.get("redirect"));
       }

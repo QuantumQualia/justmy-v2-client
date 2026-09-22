@@ -21,9 +21,17 @@ import {
   BizOsPage,
   BizOsProgress,
   BizOsSkeleton,
+  PlanPaneSwitch,
 } from "@/components/biz-os/biz-os-ui";
 import { cn } from "@workspace/ui/lib/utils";
 import { useRealtime, type RealtimeEvent } from "@/lib/realtime";
+import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
+import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import {
+  AskSkyTypedText,
+  askSkyMsgInClass,
+  useAskSkyFreshMessageIds,
+} from "@workspace/ui/components/asksky-typed-text";
 
 const OWNER_APPROVE_LINE = "Approved this plan.";
 const OWNER_KEEP_EDITING_LINE = "Try another draft.";
@@ -110,6 +118,100 @@ function PlanMessageText({
         return <span key={i}>{part}</span>;
       })}
     </p>
+  );
+}
+
+function BattlePlanThread({
+  logs,
+  skyWorkingText,
+  activeHandoff,
+  busy,
+  paidOs,
+  onLocked,
+  onRun,
+}: {
+  logs: BattlePlanLog[];
+  skyWorkingText: string | null;
+  activeHandoff: boolean;
+  busy: boolean;
+  paidOs: boolean;
+  onLocked: () => void;
+  onRun: (log: BattlePlanLog, id: FunctionId) => void;
+}) {
+  const freshIds = useAskSkyFreshMessageIds(logs.map((l) => l.id));
+  return (
+    <>
+      {logs.length ? (
+        logs.map((l) => {
+          const sky = isSky(l.senderType, l.senderName);
+          const funCrew = l.senderType === "team";
+          const animate = freshIds.has(String(l.id));
+          return (
+            <div
+              key={l.id}
+              className={cn(
+                "text-sm",
+                askSkyMsgInClass(animate),
+                funCrew
+                  ? "mr-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-950"
+                  : sky
+                    ? "mr-4 flex items-end gap-2"
+                    : "flex items-end justify-end gap-2 pl-8",
+              )}
+              data-asksky-theme="light"
+            >
+              {funCrew ? (
+                <p className="mb-1 text-[11px] font-semibold text-emerald-700">{logSpeaker(l)}</p>
+              ) : null}
+              {sky ? (
+                <>
+                  <SkyAvatar size={28} className="mb-0.5" />
+                  <div className="asksky-sky-bubble-assistant min-w-0 flex-1">
+                    <div className="flex items-start gap-1">
+                      <AskSkyTypedText text={l.messageText} animate={animate}>
+                        <PlanMessageText
+                          text={l.messageText}
+                          linkClassName="font-medium text-cyan-100 underline underline-offset-2"
+                        />
+                      </AskSkyTypedText>
+                      {l.id > 0 && !activeHandoff ? (
+                        <PlanFunctionsMenu
+                          disabled={busy}
+                          paid={paidOs}
+                          onLocked={onLocked}
+                          onRun={(id) => onRun(l, id)}
+                        />
+                      ) : null}
+                    </div>
+                  </div>
+                </>
+              ) : funCrew ? (
+                <div className="flex items-start gap-1">
+                  <PlanMessageText text={l.messageText} />
+                </div>
+              ) : (
+                <>
+                  <div className="asksky-sky-bubble-user min-w-0">
+                    <PlanMessageText text={l.messageText} />
+                  </div>
+                  <AskSkyUserAvatar className="mb-0.5" />
+                </>
+              )}
+            </div>
+          );
+        })
+      ) : (
+        <p className="text-sm text-slate-500">Tell Sky what you’re working on.</p>
+      )}
+      {skyWorkingText ? (
+        <div className={cn("mr-4 flex items-end gap-2", askSkyMsgInClass(true))} data-asksky-theme="light">
+          <SkyAvatar size={28} className="mb-0.5" />
+          <div className="asksky-sky-bubble-assistant text-sm text-white/90">
+            {skyWorkingText}
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -246,6 +348,7 @@ export default function BattlePlanWorkspacePage() {
   const [taskWorking, setTaskWorking] = useState(0);
   const [hint, setHint] = useState<string | null>(null);
   const [streamStatus, setStreamStatus] = useState<"connecting" | "open" | "closed">("closed");
+  const [mobilePane, setMobilePane] = useState<"chat" | "plan">("chat");
   const logEndRef = useRef<HTMLDivElement>(null);
   const taskPatchSeq = useRef(new Map<number, number>());
   const inflightTasks = useRef(new Set<number>());
@@ -539,10 +642,11 @@ export default function BattlePlanWorkspacePage() {
   if (!plan) {
     return (
       <BizOsPage>
-        <BizOsHeader title="Battle Plan" description="This plan could not be loaded." />
-        <Link className="text-sm font-medium text-violet-600" href="/biz-os/battle-plans">
-          ← All plans
-        </Link>
+        <BizOsHeader
+          title="Battle Plan"
+          description="This plan could not be loaded."
+          back={{ href: "/biz-os/battle-plans", label: "Battle Plans" }}
+        />
       </BizOsPage>
     );
   }
@@ -559,21 +663,23 @@ export default function BattlePlanWorkspacePage() {
   const total = tasks.length;
 
   return (
-    <BizOsPage className="flex h-[calc(100dvh-var(--biz-os-sticky-top,7rem)-4rem)] max-h-[calc(100dvh-var(--biz-os-sticky-top,7rem)-4rem)] min-h-0 flex-1 flex-col gap-6 space-y-0 overflow-hidden">
-      <div className="shrink-0">
+    <BizOsPage className="flex h-full min-h-0 flex-1 flex-col gap-3 space-y-0 overflow-hidden lg:gap-6">
+      <div className="shrink-0 space-y-3">
         <BizOsHeader
-          eyebrow="Battle Plans"
           title={plan.title}
           description={plan.description || "Tell Sky what you’re working on. She drafts a plan, you shape it."}
-          actions={
-            <Link className="text-sm font-medium text-violet-600 hover:text-violet-800" href="/biz-os/battle-plans">
-              ← All plans
-            </Link>
-          }
+          back={{ href: "/biz-os/battle-plans", label: "Battle Plans" }}
         />
+        <PlanPaneSwitch value={mobilePane} onChange={setMobilePane} />
       </div>
-      <div className="grid min-h-0 flex-1 grid-rows-[minmax(0,1fr)_minmax(16rem,1.15fr)] items-stretch gap-4 overflow-hidden lg:grid-cols-2 lg:grid-rows-none">
-        <BizOsCard padded={false} className="order-2 flex min-h-0 flex-col overflow-hidden lg:order-1">
+      <div className="grid min-h-0 flex-1 grid-cols-1 grid-rows-1 items-stretch gap-4 overflow-hidden lg:grid-cols-2 lg:grid-rows-none">
+        <BizOsCard
+          padded={false}
+          className={cn(
+            "min-h-0 flex-col overflow-hidden lg:order-1",
+            mobilePane === "chat" ? "flex" : "max-lg:!hidden",
+          )}
+        >
           <div className="flex shrink-0 items-center gap-2 border-b px-4 py-3" style={{ borderColor: "var(--asksky-panel-border)" }} data-asksky-theme="light">
             <SkyAvatar size={28} />
             <p className="text-sm font-semibold">
@@ -607,65 +713,15 @@ export default function BattlePlanWorkspacePage() {
             </div>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
-            {logs.length ? (
-              logs.map((l) => {
-                const sky = isSky(l.senderType, l.senderName);
-                const funCrew = l.senderType === "team";
-                return (
-                  <div
-                    key={l.id}
-                    className={cn(
-                      "text-sm",
-                      funCrew
-                        ? "mr-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-emerald-950"
-                        : sky
-                          ? "mr-4 flex items-end gap-2"
-                          : "ml-8 asksky-sky-bubble-user",
-                    )}
-                    data-asksky-theme="light"
-                  >
-                    {funCrew ? (
-                      <p className="mb-1 text-[11px] font-semibold text-emerald-700">{logSpeaker(l)}</p>
-                    ) : null}
-                    {sky ? (
-                      <>
-                        <SkyAvatar size={28} className="mb-0.5" />
-                        <div className="asksky-sky-bubble-assistant min-w-0 flex-1">
-                          <div className="flex items-start gap-1">
-                            <PlanMessageText
-                              text={l.messageText}
-                              linkClassName="font-medium text-cyan-100 underline underline-offset-2"
-                            />
-                            {l.id > 0 && !activeHandoff ? (
-                              <PlanFunctionsMenu
-                                disabled={Boolean(busyKind)}
-                                paid={paidOs}
-                                onLocked={() => router.push("/biz-os/pricing")}
-                                onRun={(id) => runFunction(l, id)}
-                              />
-                            ) : null}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-start gap-1">
-                        <PlanMessageText text={l.messageText} />
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            ) : (
-              <p className="text-sm text-slate-500">Tell Sky what you’re working on.</p>
-            )}
-            {skyWorkingText ? (
-              <div className="mr-4 flex items-end gap-2" data-asksky-theme="light">
-                <SkyAvatar size={28} className="mb-0.5" />
-                <div className="asksky-sky-bubble-assistant text-sm text-white/90">
-                  {skyWorkingText}
-                </div>
-              </div>
-            ) : null}
+            <BattlePlanThread
+              logs={logs}
+              skyWorkingText={skyWorkingText}
+              activeHandoff={Boolean(activeHandoff)}
+              busy={Boolean(busyKind)}
+              paidOs={paidOs}
+              onLocked={() => router.push("/biz-os/pricing")}
+              onRun={(log, id) => runFunction(log, id)}
+            />
             <div ref={logEndRef} />
           </div>
           <form
@@ -678,9 +734,7 @@ export default function BattlePlanWorkspacePage() {
             }}
           >
             <div className="flex items-end gap-2">
-              <textarea
-                className="asksky-sky-input max-h-36 min-h-11 flex-1 resize-y px-4 py-2 text-sm outline-none"
-                rows={2}
+              <AskSkyGrowTextarea
                 value={note}
                 onChange={(e) => {
                   setNote(e.target.value);
@@ -710,10 +764,18 @@ export default function BattlePlanWorkspacePage() {
             {hint ? <p className="mt-2 text-xs text-amber-700">{hint}</p> : null}
           </form>
         </BizOsCard>
-        <BizOsCard className="order-1 flex min-h-0 flex-col overflow-hidden lg:order-2">
+        <BizOsCard
+          className={cn(
+            "min-h-0 flex-col overflow-hidden lg:order-2",
+            mobilePane === "plan" ? "flex" : "hidden lg:flex",
+          )}
+        >
           <div className="shrink-0">
             <div className="flex items-start justify-between gap-3">
-              <h2 className="font-semibold">{plan.title}</h2>
+              <h2 className="font-semibold">
+                <span className="lg:hidden">Steps</span>
+                <span className="hidden lg:inline">{plan.title}</span>
+              </h2>
               {live ? (
                 <span className="text-sm font-medium text-slate-500">{plan.progress}%</span>
               ) : (

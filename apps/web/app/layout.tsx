@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono } from "next/font/google"
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import { cookies, headers } from "next/headers"
 
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle"
@@ -75,6 +75,13 @@ export const metadata: Metadata = {
   },
 }
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  interactiveWidget: "resizes-content",
+}
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -87,6 +94,8 @@ export default async function RootLayout({
   const pathname = headerList.get("x-pathname") ?? ""
   const newsHost = isNewsHost(headerList.get("host"))
   const embedPath = pathname.startsWith("/embed/")
+  const isTryFreePage =
+    pathname === "/try-free" || pathname.startsWith("/try-free/")
   const hideSiteChrome =
     embedPath ||
     newsHost ||
@@ -94,8 +103,14 @@ export default async function RootLayout({
     pathname.startsWith("/news/") ||
     pathname === "/biz-os" ||
     pathname.startsWith("/biz-os/") ||
+    pathname === "/personal-os" ||
+    pathname.startsWith("/personal-os/") ||
     pathname === "/verify-email" ||
-    pathname.startsWith("/verify-email/")
+    pathname.startsWith("/verify-email/") ||
+    pathname === "/try-free" ||
+    pathname.startsWith("/try-free/") ||
+    pathname === "/p" ||
+    pathname.startsWith("/p/")
   const embedAskSky = pathname.startsWith("/embed/asksky")
   const embedMyForm = pathname.startsWith("/embed/myform")
   const embedTransparentHost = embedAskSky || embedMyForm
@@ -126,6 +141,7 @@ export default async function RootLayout({
         embedAskSky && "embed-asksky-host",
         embedMyForm && "embed-myform-host",
         pathname.startsWith("/admin") && "admin-shell",
+        isTryFreePage && "h-dvh overflow-hidden",
       )}
     >
       <body
@@ -135,6 +151,7 @@ export default async function RootLayout({
           "font-sans antialiased",
           embedAskSky && "embed-asksky-host",
           embedMyForm && "embed-myform-host",
+          isTryFreePage && "overflow-hidden",
         )}
       >
         <Providers>
@@ -163,11 +180,13 @@ export default async function RootLayout({
                 "min-w-0",
                 embedMyForm
                   ? "min-h-0"
-                  : hideSiteChrome
-                    ? showNewsStandChrome
-                      ? "flex min-h-[calc(100dvh-var(--news-header-h,3.5rem))] flex-col"
-                      : "flex min-h-dvh flex-col"
-                    : "min-h-0",
+                  : isTryFreePage
+                    ? "min-h-0 overflow-hidden"
+                    : hideSiteChrome
+                      ? showNewsStandChrome
+                        ? "flex min-h-[calc(100dvh-var(--news-header-h,3.5rem))] flex-col"
+                        : "flex h-dvh max-h-dvh flex-col overflow-hidden"
+                      : "min-h-0",
                 embedTransparentHost && "bg-transparent",
               )}
             >

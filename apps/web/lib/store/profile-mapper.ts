@@ -18,6 +18,7 @@ export interface ApiProfileResponse {
   osName?: string;
   osId?: number;
   zipCode: string;
+  dailyDropStartsOn?: string | null;
   tagline?: string;
   about?: string;
   email?: string | null;
@@ -194,6 +195,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     referralCode: apiProfile.referralCode ?? undefined,
     allowsSubProfiles: apiProfile.allowsSubProfiles === true,
     zipCode: (apiProfile as any).zipCode,
+    dailyDropStartsOn: apiProfile.dailyDropStartsOn ?? null,
     googleStarRating: (apiProfile as any).googleStarRating ?? null,
     googleRatingCount: (apiProfile as any).googleRatingCount ?? null,
     googlePlaceId: (apiProfile as any).googlePlaceId ?? null,

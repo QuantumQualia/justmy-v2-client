@@ -3,6 +3,7 @@ import { usePathname } from "next/navigation";
 import type { HTMLAttributes, ReactNode } from "react";
 import {
   Check,
+  ChevronLeft,
   CreditCard,
   Crosshair,
   Home,
@@ -15,6 +16,7 @@ import {
   Settings,
   Target,
 } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import { cn } from "@workspace/ui/lib/utils";
 import { useBizOsHome, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { isPlatformAdmin } from "@/lib/auth/session-user";
@@ -168,27 +170,124 @@ export function BizOsPage({
   );
 }
 
+export function OsBackButton({ href, label }: { href: string; label: string }) {
+  return (
+    <Button asChild variant="outline" size="sm" className="max-w-[11rem] shrink-0">
+      <Link href={href}>
+        <ChevronLeft />
+        <span className="truncate">{label}</span>
+      </Link>
+    </Button>
+  );
+}
+
+export function OsPaneSwitch<T extends string>({
+  value,
+  onChange,
+  options,
+}: {
+  value: T;
+  onChange: (value: T) => void;
+  options: Array<{ id: T; label: string }>;
+}) {
+  return (
+    <div
+      className="flex shrink-0 rounded-full border border-slate-200 bg-white p-1 lg:hidden"
+      role="tablist"
+      aria-label="Workspace"
+    >
+      {options.map((option) => (
+        <button
+          key={option.id}
+          type="button"
+          role="tab"
+          aria-selected={value === option.id}
+          className={cn(
+            "flex-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
+            value === option.id ? "bg-violet-600 text-white shadow-sm shadow-violet-600/20" : "text-slate-600",
+          )}
+          onClick={() => onChange(option.id)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function PlanPaneSwitch({
+  value,
+  onChange,
+  chatLabel = "Conversation",
+  planLabel = "Plan",
+}: {
+  value: "chat" | "plan";
+  onChange: (value: "chat" | "plan") => void;
+  chatLabel?: string;
+  planLabel?: string;
+}) {
+  return (
+    <OsPaneSwitch
+      value={value}
+      onChange={onChange}
+      options={[
+        { id: "chat", label: chatLabel },
+        { id: "plan", label: planLabel },
+      ]}
+    />
+  );
+}
+
 export function BizOsHeader({
   eyebrow,
   title,
   description,
   actions,
+  back,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   actions?: ReactNode;
+  back?: { href: string; label: string };
 }) {
+  if (back) {
+    return (
+      <div className="space-y-2 sm:space-y-3">
+        <div className="flex items-center justify-between gap-2">
+          <OsBackButton href={back.href} label={back.label} />
+          {actions ? <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">{actions}</div> : null}
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+            {title}
+          </h1>
+          {description ? (
+            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500 sm:mt-2 sm:line-clamp-none">
+              {description}
+            </p>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-wrap items-start justify-between gap-4">
-      <div className="max-w-2xl">
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="min-w-0 max-w-2xl">
         {eyebrow ? (
           <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-violet-600">{eyebrow}</p>
         ) : null}
-        <h1 className="mt-1 text-3xl font-semibold tracking-tight text-slate-900">{title}</h1>
-        {description ? <p className="mt-2 text-sm leading-relaxed text-slate-500">{description}</p> : null}
+        <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+          {title}
+        </h1>
+        {description ? (
+          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500 sm:mt-2 sm:line-clamp-none">
+            {description}
+          </p>
+        ) : null}
       </div>
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div> : null}
     </div>
   );
 }

@@ -21,7 +21,7 @@ import { DEFAULT_PROFILE_KIND, isBusinessOs, profileKindToOsName } from "@/lib/o
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const redirect = searchParams.get("redirect") || "/dashboard";
+  const redirect = searchParams.get("redirect") || "/personal-os";
   const resetSuccess = searchParams.get("reset") === "success";
   const newsZip = useNewsZipStore((s) => s.zipcode);
 
@@ -40,7 +40,7 @@ export default function LoginForm() {
       if (accessToken || refreshToken || user) {
         const stored = user as { osName?: string; profileType?: string; emailVerified?: boolean } | null;
         let homePath = resolveAppHomePath({ fallback: redirect });
-        if (isBusinessOs(stored?.osName || stored?.profileType) && (homePath === "/dashboard" || homePath.startsWith("/dashboard"))) {
+        if (isBusinessOs(stored?.osName || stored?.profileType) && (homePath === "/dashboard" || homePath.startsWith("/dashboard") || homePath === "/personal-os" || homePath.startsWith("/personal-os"))) {
           homePath = "/biz-os";
         }
         if (needsEmailVerification(stored)) {
