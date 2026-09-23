@@ -154,6 +154,30 @@ function inputPlaceholder(surface: string, awaitingWebsite: boolean): string {
   return "Paste a website, phone, address, or Instagram…";
 }
 
+function coveredFromDrafts(d: CardDrafts): string[] {
+  return [
+    d.phones?.length ? "phone" : "",
+    d.addresses?.length ? "address" : "",
+    d.socials?.length ? "social" : "",
+    d.tagline ? "tagline" : "",
+    d.about ? "about" : "",
+    d.website ? "website" : "",
+  ].filter(Boolean);
+}
+
+function bizCardReady(data: ProfileData, drafts: CardDrafts): boolean {
+  const hasPhone = Boolean(data.phones?.some((phone) => phone.number?.trim())) || Boolean(drafts.phones?.length);
+  const hasAddress =
+    Boolean(data.addresses?.some((item) => item.address?.trim())) || Boolean(drafts.addresses?.length);
+  const hasSocial = Boolean(data.socialLinks?.length) || Boolean(drafts.socials?.length);
+  const hasPhoto = Boolean(data.photo?.trim());
+  const hasBanner = Boolean(data.banner?.trim());
+  const hasTagline = Boolean(data.tagline?.trim()) || Boolean(drafts.tagline?.trim());
+  const hasAbout = Boolean(data.about?.trim()) || Boolean(drafts.about?.trim());
+  const hasWebsite = Boolean(data.website?.trim()) || Boolean(drafts.website?.trim());
+  return hasPhone && hasAddress && hasSocial && hasPhoto && hasBanner && hasTagline && hasAbout && hasWebsite;
+}
+
 function hasCardDrafts(d: CardDrafts): boolean {
   return Boolean(
     d.about ||
@@ -187,12 +211,13 @@ export function AskSkyConcierge({
   const { profileId } = useBizOsProfile();
   const invalidateHome = useInvalidateBizOsHome();
   const setData = useProfileStore((s) => s.setData);
-  const website = useProfileStore((s) => s.data.website);
-  const hasWebsite = Boolean(website?.trim());
+  const profileData = useProfileStore((s) => s.data);
+  const hasWebsite = Boolean(profileData.website?.trim());
   const turns = useAskSkyConciergeStore((s) => s.turns);
   const setTurns = useAskSkyConciergeStore((s) => s.setTurns);
   const freshIds = useAskSkyFreshMessageIds(turns.map((turn, i) => `${i}:${turn.role}`));
   const cardDrafts = useAskSkyConciergeStore((s) => s.cardDrafts);
+  const cardReady = bizCardReady(profileData, cardDrafts);
   const setCardDrafts = useAskSkyConciergeStore((s) => s.setCardDrafts);
   const input = useAskSkyConciergeStore((s) => s.input);
   const setInput = useAskSkyConciergeStore((s) => s.setInput);
@@ -227,13 +252,18 @@ export function AskSkyConcierge({
         setDraft({ summary: message });
         setDraftOpen(true);
       }
-      const res = await bizOsService.onboardingMessage(profileId, nextStage, message);
+      const prior = useAskSkyConciergeStore.getState();
+      const history = prior.turns.slice(-8).map((turn) => ({
+        role: turn.role,
+        text: turn.text.slice(0, 500),
+      }));
+      const res = await bizOsService.onboardingMessage(profileId, nextStage, message, {
+        history: silent ? [] : history,
+        covered: coveredFromDrafts(prior.cardDrafts),
+      });
       if (session !== pageSession.current) return;
       setTurns((t) => {
         if (silent) return t.length ? t : [{ role: "asksky", text: res.reply }];
-        if (t.some((turn) => turn.role === "asksky" && turn.text === res.reply)) {
-          return t;
-        }
         return [...t, { role: "asksky", text: res.reply }];
       });
       for (const action of res.actions || []) {
@@ -685,7 +715,7 @@ export function AskSkyConcierge({
 
   function scanWebsite() {
     const fromInput = firstWebsiteUrl(input);
-    const fromCard = website?.trim() || "";
+    const fromCard = profileData.website?.trim() || "";
     const url = fromInput || fromCard;
     if (url) {
       setAwaitingWebsite(false);
@@ -792,7 +822,9 @@ export function AskSkyConcierge({
                 { label: "Draft tagline", onClick: () => void send("Write a short tagline for myCARD") },
                 { label: "Draft About", onClick: () => void send("Draft an About statement") },
                 { label: applying ? "Applying…" : "Apply drafts", onClick: () => void applyCardDrafts(), disabled: !pending || applying },
-                { label: "SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan") },
+                ...(cardReady
+                  ? [{ label: "SkySCAN", onClick: () => void send("Run SkySCAN", "skyscan") }]
+                  : []),
                 { label: "Flag team", onClick: () => { setDraft({ summary: "Owner asked AskSKY for FunCrew help." }); setDraftOpen(true); } },
               ];
 
@@ -1153,12 +1185,12 @@ export function AskSkyConcierge({
         ) : null}
       </div>
       <div className="shrink-0 p-3" style={{ borderTop: "1px solid var(--asksky-panel-border)" }}>
-        <div className="mb-2 flex flex-nowrap gap-1 overflow-x-auto overscroll-x-contain pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mb-2 flex w-full min-w-0 flex-wrap gap-1.5">
           {chips.map((chip) => (
             <button
               key={chip.label}
               type="button"
-              className={`${chip.primary ? tipPrimaryClass : tipClass} shrink-0 whitespace-nowrap ${chip.disabled ? "disabled:opacity-40" : ""}`}
+              className={`${chip.primary ? tipPrimaryClass : tipClass} whitespace-nowrap ${chip.disabled ? "disabled:opacity-40" : ""}`}
               disabled={loading || chip.disabled}
               onClick={chip.onClick}
             >

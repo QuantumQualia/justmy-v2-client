@@ -249,10 +249,24 @@ export const bizOsService = {
     });
   },
 
-  onboardingMessage(profileId: number | string, stage: string, message: string) {
+  onboardingMessage(
+    profileId: number | string,
+    stage: string,
+    message: string,
+    extra?: { history?: Array<{ role: string; text: string }>; covered?: string[] },
+  ) {
     return apiRequest<{ reply: string; stage: string; actions: Array<Record<string, unknown>> }>(
       "biz-os/onboarding/message",
-      { method: "POST", params: withProfile(profileId), body: JSON.stringify({ stage, message }) },
+      {
+        method: "POST",
+        params: withProfile(profileId),
+        body: JSON.stringify({
+          stage,
+          message,
+          history: extra?.history,
+          covered: extra?.covered,
+        }),
+      },
     );
   },
 
