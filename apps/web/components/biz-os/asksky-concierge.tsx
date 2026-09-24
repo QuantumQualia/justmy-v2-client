@@ -902,9 +902,14 @@ export function AskSkyConcierge({
           );
         })}
         {loading ? (
-          <p className="flex items-center gap-2 text-xs text-slate-400">
-            <Loader2 className="h-3 w-3 animate-spin" /> thinking…
-          </p>
+          <div className="asksky-msg-in mr-4 flex items-end gap-2" role="status" aria-label="Sky is typing">
+            <SkyAvatar size={28} className="mb-0.5" />
+            <div className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5 px-4 py-3">
+              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "0ms" }} />
+              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "160ms" }} />
+              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "320ms" }} />
+            </div>
+          </div>
         ) : null}
         {pending ? (
           <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
