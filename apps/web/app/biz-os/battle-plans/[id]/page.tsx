@@ -29,6 +29,7 @@ import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
 import {
   AskSkyTypedText,
+  AskSkyTypingDots,
   askSkyMsgInClass,
   useAskSkyFreshMessageIds,
 } from "@workspace/ui/components/asksky-typed-text";
@@ -206,8 +207,8 @@ function BattlePlanThread({
       {skyWorkingText ? (
         <div className={cn("mr-4 flex items-end gap-2", askSkyMsgInClass(true))} data-asksky-theme="light">
           <SkyAvatar size={28} className="mb-0.5" />
-          <div className="asksky-sky-bubble-assistant text-sm text-white/90">
-            {skyWorkingText}
+          <div className="asksky-sky-bubble-assistant inline-flex items-center px-4 py-3">
+            <AskSkyTypingDots label={skyWorkingText} />
           </div>
         </div>
       ) : null}

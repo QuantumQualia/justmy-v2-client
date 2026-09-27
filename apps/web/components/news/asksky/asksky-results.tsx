@@ -97,22 +97,21 @@ export function AskSkyConversation({
   disabled = false,
 }: AskSkyConversationProps) {
   const [draft, setDraft] = useState("");
-  const [tab, setTab] = useState<AskSkyResultTab>("all");
   const favorites = useNewsFavoritesStore((s) => s.byId);
   const hydrateFavorites = useNewsFavoritesStore((s) => s.hydrate);
   const toggleFavorite = useNewsFavoritesStore((s) => s.toggle);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const latestTurnAnchorRef = useRef<HTMLDivElement | null>(null);
   const latestTurn = turns[turns.length - 1] ?? null;
-  const latestReady =
-    latestTurn?.status === "ready" && latestTurn.answer
-      ? latestTurn
-      : null;
 
   useEffect(() => {
-    setTab("all");
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
+    const scroller = scrollRef.current;
+    const target = latestTurnAnchorRef.current;
+    if (!scroller || !target) return;
+    const scrollerRect = scroller.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+    const nextTop = scroller.scrollTop + (targetRect.top - scrollerRect.top) - 8;
+    scroller.scrollTo({ top: Math.max(0, nextTop), behavior: "smooth" });
   }, [turns.length, latestTurn?.status]);
 
   useEffect(() => {
@@ -131,32 +130,6 @@ export function AskSkyConversation({
     };
   }, [hydrateFavorites]);
 
-  const visibleTabs = useMemo(() => {
-    if (!latestReady?.answer) return TABS.filter((t) => t.id === "all");
-    return TABS.filter((t) => {
-      if (t.id === "all") return true;
-      return (latestReady.answer?.counts[t.id] ?? 0) > 0;
-    });
-  }, [latestReady]);
-
-  const cards = useMemo(() => {
-    if (!latestReady?.answer) return [];
-    if (tab === "map") {
-      return latestReady.answer.cards.filter((c) => c.type === "business");
-    }
-    if (tab === "mycards") {
-      return latestReady.answer.cards.filter((c) => c.type === "business");
-    }
-    if (tab === "posts") {
-      return latestReady.answer.cards.filter((c) => c.type === "post");
-    }
-    return latestReady.answer.cards;
-  }, [latestReady, tab]);
-
-  const mapBusinesses = useMemo(
-    () => cards.filter((c): c is AskSkyBusinessCard => c.type === "business"),
-    [cards],
-  );
   const openAuth = useNewsAuthUiStore((s) => s.openAuth);
   const freshIds = useAskSkyFreshMessageIds(
     turns.flatMap((turn) => {
@@ -165,12 +138,6 @@ export function AskSkyConversation({
       return ids;
     }),
   );
-
-  function scrollThread() {
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({ top: el.scrollHeight, behavior: "auto" });
-  }
 
   async function handleFavoriteToggle(
     profileId: number,
@@ -206,30 +173,21 @@ export function AskSkyConversation({
         {turns.map((turn, index) => {
           const isLatest = index === turns.length - 1;
           return (
-            <ConversationTurn
+            <div
               key={turn.id}
-              turn={turn}
-              market={market}
-              isLatest={isLatest}
-              tab={tab}
-              visibleTabs={visibleTabs}
-              animateUser={freshIds.has(`${turn.id}:user`)}
-              animateSky={freshIds.has(`${turn.id}:sky`)}
-              onTyped={scrollThread}
-              cards={
-                isLatest && turn.status === "ready"
-                  ? cards
-                  : (turn.answer?.cards ?? [])
-              }
-              mapBusinesses={
-                isLatest && turn.status === "ready" ? mapBusinesses : []
-              }
-              favorites={favorites}
-              onToggleFavorite={handleFavoriteToggle}
-              onTabChange={setTab}
-              onFollowUp={submit}
-              followUpsDisabled={disabled}
-            />
+              ref={isLatest ? latestTurnAnchorRef : undefined}
+            >
+              <ConversationTurn
+                turn={turn}
+                market={market}
+                animateUser={freshIds.has(`${turn.id}:user`)}
+                animateSky={freshIds.has(`${turn.id}:sky`)}
+                favorites={favorites}
+                onToggleFavorite={handleFavoriteToggle}
+                onFollowUp={submit}
+                followUpsDisabled={disabled}
+              />
+            </div>
           );
         })}
       </div>
@@ -278,46 +236,60 @@ export function AskSkyConversation({
 function ConversationTurn({
   turn,
   market,
-  isLatest,
-  tab,
-  visibleTabs,
-  cards,
-  mapBusinesses,
   favorites,
   onToggleFavorite,
-  onTabChange,
   onFollowUp,
   followUpsDisabled,
   animateUser,
   animateSky,
-  onTyped,
 }: {
   turn: AskSkyTurn;
   market: NewsMarketContext;
-  isLatest: boolean;
-  tab: AskSkyResultTab;
-  visibleTabs: typeof TABS;
-  cards: NonNullable<AskSkyTurn["answer"]>["cards"];
-  mapBusinesses: AskSkyBusinessCard[];
   favorites: Record<number, { liked: boolean; bookmarked: boolean }>;
   onToggleFavorite: (
     profileId: number,
     field: "liked" | "bookmarked",
     preview?: { name: string; slug?: string; photo?: string | null },
   ) => void;
-  onTabChange: (tab: AskSkyResultTab) => void;
   onFollowUp: (query: string) => void;
   followUpsDisabled: boolean;
   animateUser: boolean;
   animateSky: boolean;
-  onTyped: () => void;
 }) {
-  const answerText = turn.answer?.answer ?? "";
+  const [tab, setTab] = useState<AskSkyResultTab>("all");
+  const answer = turn.status === "ready" ? turn.answer : undefined;
+  const answerText = answer?.answer ?? "";
   const displayAnswer = answerText.replace(/\b\d{5}\b/, market.zipcode);
   const answerWithZipHighlight = highlightZipInAnswer(
     displayAnswer,
     market.zipcode,
   );
+
+  const visibleTabs = useMemo(() => {
+    if (!answer) return TABS.filter((t) => t.id === "all");
+    return TABS.filter((t) => {
+      if (t.id === "all") return true;
+      return (answer.counts[t.id] ?? 0) > 0;
+    });
+  }, [answer]);
+
+  const cards = useMemo(() => {
+    if (!answer) return [];
+    if (tab === "map" || tab === "mycards") {
+      return answer.cards.filter((c) => c.type === "business");
+    }
+    if (tab === "posts") {
+      return answer.cards.filter((c) => c.type === "post");
+    }
+    return answer.cards;
+  }, [answer, tab]);
+
+  const mapBusinesses = useMemo(
+    () => cards.filter((c): c is AskSkyBusinessCard => c.type === "business"),
+    [cards],
+  );
+
+  const showListings = Boolean(answer && (answer.cards.length > 0 || visibleTabs.length > 1));
 
   return (
     <div className="min-w-0 space-y-3.5 sm:space-y-4">
@@ -361,7 +333,6 @@ function ConversationTurn({
               <AskSkyTypedText
                 text={turn.errorMessage?.trim() || "Something went wrong. Try asking again."}
                 animate={animateSky}
-                onTick={onTyped}
               />
             </p>
           </div>
@@ -377,7 +348,6 @@ function ConversationTurn({
                 <AskSkyTypedText
                   text={displayAnswer}
                   animate={animateSky}
-                  onTick={onTyped}
                 >
                   {answerWithZipHighlight}
                 </AskSkyTypedText>
@@ -385,7 +355,7 @@ function ConversationTurn({
             </div>
           </div>
 
-          {isLatest ? (
+          {showListings ? (
             <div className="space-y-3.5 pl-0 sm:space-y-4 sm:pl-12">
               {visibleTabs.length > 1 ? (
                 <div className="-mx-1 overflow-x-auto px-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -397,7 +367,7 @@ function ConversationTurn({
                         <button
                           key={id}
                           type="button"
-                          onClick={() => onTabChange(id)}
+                          onClick={() => setTab(id)}
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-semibold tracking-wide transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm ${
                             active
                               ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"

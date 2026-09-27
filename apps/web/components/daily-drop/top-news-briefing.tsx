@@ -13,16 +13,22 @@ export interface TopNewsBriefingProps {
   items: DailyNewsItem[];
   /** Link for myCITY banner CTA */
   myCityAppUrl?: string;
+  /** Hide the "Get the myCITY App" band (personal OS). */
+  showMyCityBanner?: boolean;
   className?: string;
 }
 
 const EMPTY_PLACEHOLDER =
   "rounded-xl border border-dashed border-border bg-muted py-8 px-4 text-center text-sm text-muted-foreground";
 
+const NEWS_CARD = `${GLASS_CARD} p-4 transition-colors hover:border-violet-300`;
+const NEWS_CARD_LINK = `${NEWS_CARD} block hover:bg-violet-50/60`;
+
 export function TopNewsBriefing({
   title = "Top News",
   items,
   myCityAppUrl = "/lab/app-hub",
+  showMyCityBanner = true,
   className,
 }: TopNewsBriefingProps) {
   const hasItems = items.length > 0;
@@ -45,10 +51,10 @@ export function TopNewsBriefing({
                 href: item.url,
                 target: "_blank",
                 rel: "noopener noreferrer",
-                className: `${GLASS_CARD} p-4 transition hover:bg-accent block`,
+                className: NEWS_CARD_LINK,
               }
             : {
-                className: `${GLASS_CARD} p-4 transition hover:bg-accent`,
+                className: NEWS_CARD,
               };
           return (
             <Wrapper key={item.id} {...wrapperProps}>
@@ -65,20 +71,22 @@ export function TopNewsBriefing({
         })}
       </div>
       )}
-      <div
-        className={`${GLASS_CARD} mt-4 p-4 flex items-center justify-between gap-2`}
-        role="banner"
-      >
-        <span className="text-sm text-foreground">
-          Dive Deeper into Local. Get the myCITY App
-        </span>
-        <Link
-          href={myCityAppUrl}
-          className="text-sm font-medium text-emerald-400 hover:text-emerald-300 underline underline-offset-2 shrink-0"
+      {showMyCityBanner ? (
+        <div
+          className={`${GLASS_CARD} mt-4 p-4 flex items-center justify-between gap-2`}
+          role="banner"
         >
-          Get myCITY →
-        </Link>
-      </div>
+          <span className="text-sm text-foreground">
+            Dive Deeper into Local. Get the myCITY App
+          </span>
+          <Link
+            href={myCityAppUrl}
+            className="text-sm font-medium text-emerald-600 hover:text-emerald-500 underline underline-offset-2 shrink-0"
+          >
+            Get myCITY →
+          </Link>
+        </div>
+      ) : null}
     </section>
   );
 }

@@ -23,11 +23,77 @@ import { cn } from "@workspace/ui/lib/utils";
 
 const DEFAULT_MARKET_NAME = "Memphis";
 
+function Pulse({ className }: { className: string }) {
+  return <div className={cn("animate-pulse rounded bg-slate-200/70", className)} />;
+}
+
+function DailyDropSkeleton({ compact }: { compact: boolean }) {
+  return (
+    <div
+      className={cn(
+        "text-foreground font-sans",
+        compact ? "bg-transparent" : "min-h-[calc(100vh-4.1rem)] bg-background",
+      )}
+      aria-busy="true"
+      aria-live="polite"
+    >
+      <div className={cn("mx-auto space-y-10", compact ? "max-w-3xl" : "max-w-3xl px-4 py-6 sm:py-8")}>
+        <header className="space-y-2">
+          <Pulse className="h-8 w-40 rounded-lg bg-slate-200/80" />
+          <Pulse className="h-4 w-64 max-w-full bg-slate-200/60" />
+        </header>
+
+        <section className="space-y-3">
+          <Pulse className="h-5 w-24 bg-slate-200/80" />
+          <div className="space-y-3 rounded-xl rounded-br-none border border-slate-200/80 bg-white p-4 shadow-sm">
+            <Pulse className="h-4 w-3/4" />
+            <Pulse className="h-3 w-full bg-slate-100" />
+            <Pulse className="h-3 w-5/6 bg-slate-100" />
+          </div>
+          <div className="space-y-3 rounded-xl rounded-br-none border border-slate-200/80 bg-white p-4 shadow-sm">
+            <Pulse className="h-4 w-2/3" />
+            <Pulse className="h-3 w-full bg-slate-100" />
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <Pulse className="h-5 w-20 bg-slate-200/80" />
+          <div className="flex gap-4 overflow-hidden">
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="w-[min(100%,280px)] shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
+              >
+                <div className="aspect-video animate-pulse bg-slate-200/80" />
+                <div className="space-y-2 p-4">
+                  <Pulse className="h-3 w-24" />
+                  <Pulse className="h-4 w-full" />
+                  <Pulse className="h-4 w-4/5 bg-slate-100" />
+                  <Pulse className="mt-2 h-8 w-20 rounded-full" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="space-y-3">
+          <Pulse className="h-5 w-16 bg-slate-200/80" />
+          <div className="h-16 animate-pulse rounded-xl border border-slate-200/80 bg-white" />
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function DailyDropView({
   showSkyFm = true,
+  showMyCityBanner = true,
+  showAdBanner = true,
   compact = false,
 }: {
   showSkyFm?: boolean;
+  showMyCityBanner?: boolean;
+  showAdBanner?: boolean;
   compact?: boolean;
 }) {
   const [news, setNews] = useState<DailyNewsItem[]>([]);
@@ -112,23 +178,14 @@ export function DailyDropView({
   }, []);
 
   if (loading) {
-    return (
-      <div
-        className={cn(
-          "flex items-center justify-center p-6 text-foreground",
-          compact ? "min-h-[12rem]" : "min-h-[calc(100vh-4.1rem)] bg-background",
-        )}
-      >
-        <p className="text-muted-foreground">Loading your Daily Drop…</p>
-      </div>
-    );
+    return <DailyDropSkeleton compact={compact} />;
   }
 
   return (
     <div
       className={cn(
-        "bg-background text-foreground font-sans",
-        !compact && "min-h-[calc(100vh-4.1rem)]",
+        "text-foreground font-sans",
+        compact ? "bg-transparent" : "min-h-[calc(100vh-4.1rem)] bg-background",
       )}
     >
       <div className={cn("mx-auto space-y-10", compact ? "max-w-3xl" : "max-w-3xl px-4 py-6 sm:py-8")}>
@@ -146,7 +203,12 @@ export function DailyDropView({
 
         {showSkyFm ? <SkyFmDropPlayer /> : null}
 
-        <TopNewsBriefing title="Top News" items={news} myCityAppUrl="/lab/app-hub" />
+        <TopNewsBriefing
+          title="Top News"
+          items={news}
+          myCityAppUrl="/lab/app-hub"
+          showMyCityBanner={showMyCityBanner}
+        />
 
         <MarketEventsStage
           title="Events"
@@ -163,16 +225,18 @@ export function DailyDropView({
           browseAllLabel={`Browse All ${dealsTotal}+ Local Deals`}
         />
 
-        <AdBanner
-          imageSrc="/images/placeholders/banner_placement.jpg"
-          imageAlt="Ad Banner"
-          profileSlug="justmymemphis"
-          hotlinks={[
-            { label: "Learn More", href: "/learn-more" },
-            { label: "Contact Us", href: "/contact-us" },
-            { label: "Follow Us", href: "/follow-us" },
-          ]}
-        />
+        {showAdBanner ? (
+          <AdBanner
+            imageSrc="/images/placeholders/banner_placement.jpg"
+            imageAlt="Ad Banner"
+            profileSlug="justmymemphis"
+            hotlinks={[
+              { label: "Learn More", href: "/learn-more" },
+              { label: "Contact Us", href: "/contact-us" },
+              { label: "Follow Us", href: "/follow-us" },
+            ]}
+          />
+        ) : null}
       </div>
     </div>
   );

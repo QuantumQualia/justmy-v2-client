@@ -40,6 +40,26 @@ export function askSkyMsgInClass(animate: boolean | undefined) {
   return animate ? "asksky-msg-in" : undefined
 }
 
+/** Pulsing dots shown while Sky is drafting a reply. */
+export function AskSkyTypingDots({
+  label = "Sky is typing",
+}: {
+  label?: string
+}) {
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 text-white"
+      role="status"
+      aria-live="polite"
+      aria-label={label}
+    >
+      <span className="asksky-typing-dot" />
+      <span className="asksky-typing-dot" />
+      <span className="asksky-typing-dot" />
+    </span>
+  )
+}
+
 /**
  * Types Sky's text in once. Later edits snap in. Pass `children` to swap in
  * rich content (links, highlights) after the type-in finishes.
