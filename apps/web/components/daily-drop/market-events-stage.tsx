@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -18,27 +17,14 @@ const EVENT_IMAGE_ASPECT = "aspect-video";
 export interface MarketEventsStageProps {
   title?: string;
   events: MarketEvent[];
-  /** e.g. 142 for "See all 142 events" */
-  totalCount?: number;
-  /** Link for View All card */
-  viewAllHref?: string;
-  viewAllLabel?: string;
   className?: string;
 }
 
 export function MarketEventsStage({
   title = "Events",
   events,
-  totalCount = 0,
-  viewAllHref = "/events",
-  viewAllLabel,
   className,
 }: MarketEventsStageProps) {
-  const count = totalCount || events.length;
-  const label =
-    viewAllLabel ??
-    `Your weekend is waiting. See all ${count} events happening in Memphis.`;
-
   const [paginationEl, setPaginationEl] = useState<HTMLElement | null>(null);
   const hasEvents = events.length > 0;
 
@@ -79,9 +65,6 @@ export function MarketEventsStage({
                 <EventPosterCard event={event} />
               </SwiperSlide>
             ))}
-            <SwiperSlide className="!w-full sm:!w-[320px] !h-auto">
-              <ViewAllCard href={viewAllHref} label={label} />
-            </SwiperSlide>
           </Swiper>
           {/* Dots below the slider – dark mode: white/gray, not blue */}
           <div
@@ -142,35 +125,5 @@ function EventPosterCard({ event }: { event: MarketEvent }) {
         </div>
       </div>
     </div>
-  );
-}
-
-/** View All card: same height as event cards. */
-function ViewAllCard({
-  href,
-  label,
-}: {
-  href: string;
-  label: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`${EVENT_GLASS} flex flex-col h-full hover:bg-accent transition`}
-    >
-      <div
-        className={`w-full ${EVENT_IMAGE_ASPECT} shrink-0 bg-muted flex items-center justify-center overflow-hidden`}
-      >
-        <span className="text-4xl sm:text-5xl" aria-hidden>
-          📅
-        </span>
-      </div>
-      <div className="p-3 sm:p-4 flex flex-col flex-1 min-h-0 justify-center text-center">
-        <span className="text-sm font-medium text-foreground leading-snug line-clamp-3">
-          {label}
-        </span>
-        <span className="text-xs text-emerald-400 mt-2">View all events →</span>
-      </div>
-    </Link>
   );
 }

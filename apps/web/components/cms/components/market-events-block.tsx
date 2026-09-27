@@ -18,8 +18,6 @@ interface MarketEventsBlockProps {
  */
 export function MarketEventsBlock({}: MarketEventsBlockProps) {
   const [events, setEvents] = React.useState<MarketEvent[]>([]);
-  const [totalCount, setTotalCount] = React.useState(0);
-  const [marketName, setMarketName] = React.useState<string | undefined>();
   const [isLoading, setIsLoading] = React.useState(true);
   const [hadError, setHadError] = React.useState(false);
 
@@ -38,8 +36,6 @@ export function MarketEventsBlock({}: MarketEventsBlockProps) {
         const res = await fetchDailyDropEvents();
         if (!cancelled) {
           setEvents(res.events || []);
-          setTotalCount(res.totalCount ?? 0);
-          setMarketName(res.marketName || undefined);
         }
       } catch (err) {
         console.error("Failed to load Daily Drop events:", err);
@@ -67,18 +63,6 @@ export function MarketEventsBlock({}: MarketEventsBlockProps) {
     return <PlaceholderPanel text="Daily Drop – Market Events Coming Soon" />;
   }
 
-  const name = marketName || "your city";
-  const label = `Your weekend is waiting. See all ${totalCount} events happening in ${name}.`;
-
-  // MarketEventsStage already has its own empty state when no events are available.
-  return (
-    <MarketEventsStage
-      title="Events"
-      events={events}
-      totalCount={totalCount}
-      viewAllHref="/events"
-      viewAllLabel={label}
-    />
-  );
+  return <MarketEventsStage title="Events" events={events} />;
 }
 

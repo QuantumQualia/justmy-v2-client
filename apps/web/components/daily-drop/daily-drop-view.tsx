@@ -14,14 +14,11 @@ import { SkyFmDropPlayer } from "@/components/try-free/skyfm-drop-player";
 import {
   MOCK_NEWS,
   MOCK_EVENTS,
-  MOCK_EVENTS_TOTAL,
   MOCK_DEALS,
 } from "@/components/daily-drop/mock-data";
 import { AdBanner } from "@/components/common/ad-banner";
 import { isAuthenticated } from "@/lib/services/session";
 import { cn } from "@workspace/ui/lib/utils";
-
-const DEFAULT_MARKET_NAME = "Memphis";
 
 function Pulse({ className }: { className: string }) {
   return <div className={cn("animate-pulse rounded bg-slate-200/70", className)} />;
@@ -98,8 +95,6 @@ export function DailyDropView({
 }) {
   const [news, setNews] = useState<DailyNewsItem[]>([]);
   const [events, setEvents] = useState<MarketEvent[]>([]);
-  const [eventsTotal, setEventsTotal] = useState(0);
-  const [marketName, setMarketName] = useState(DEFAULT_MARKET_NAME);
   const [deals, setDeals] = useState<LocalDeal[]>([]);
   const [dealsTotal, setDealsTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -113,7 +108,6 @@ export function DailyDropView({
         if (!cancelled) {
           setNews(MOCK_NEWS);
           setEvents(MOCK_EVENTS);
-          setEventsTotal(MOCK_EVENTS_TOTAL);
           setDeals(MOCK_DEALS);
           setDealsTotal(150);
           setUsedFallback(true);
@@ -133,7 +127,6 @@ export function DailyDropView({
 
         if (briefingRes.status === "fulfilled") {
           setNews(briefingRes.value.items);
-          if (briefingRes.value.marketName) setMarketName(briefingRes.value.marketName);
         } else {
           setNews(MOCK_NEWS);
           setUsedFallback(true);
@@ -141,11 +134,8 @@ export function DailyDropView({
 
         if (eventsRes.status === "fulfilled") {
           setEvents(eventsRes.value.events);
-          setEventsTotal(eventsRes.value.totalCount);
-          if (eventsRes.value.marketName) setMarketName(eventsRes.value.marketName);
         } else {
           setEvents(MOCK_EVENTS);
-          setEventsTotal(MOCK_EVENTS_TOTAL);
           setUsedFallback(true);
         }
 
@@ -161,7 +151,6 @@ export function DailyDropView({
         if (!cancelled) {
           setNews(MOCK_NEWS);
           setEvents(MOCK_EVENTS);
-          setEventsTotal(MOCK_EVENTS_TOTAL);
           setDeals(MOCK_DEALS);
           setDealsTotal(150);
           setUsedFallback(true);
@@ -210,13 +199,7 @@ export function DailyDropView({
           showMyCityBanner={showMyCityBanner}
         />
 
-        <MarketEventsStage
-          title="Events"
-          events={events}
-          totalCount={eventsTotal}
-          viewAllHref="/events"
-          viewAllLabel={`Your weekend is waiting. See all ${eventsTotal} events happening in ${marketName}.`}
-        />
+        <MarketEventsStage title="Events" events={events} />
 
         <LocalDealsHook
           title="Deals"
