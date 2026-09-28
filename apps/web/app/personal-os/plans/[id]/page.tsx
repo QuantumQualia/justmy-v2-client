@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import { ArrowRight, CalendarDays, Check, Loader2, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
@@ -20,6 +21,10 @@ import {
 import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
 import { PlanCalendarsDialog } from "@/components/personal-os/plan-calendars-dialog";
+import { PlanFunctionsMenu } from "@/components/biz-os/plan-functions-menu";
+import { copyText, downloadConversationPdf, draftInGmail } from "@/lib/functions/output";
+import { conversationThrough, formatTranscript, transcriptLines } from "@/lib/functions/transcript";
+import type { FunctionId } from "@/lib/functions/registry";
 import {
   AskSkyTypedText,
   AskSkyTypingDots,
@@ -30,12 +35,17 @@ import {
 const OWNER_APPROVE_LINE = "Approved this plan.";
 const OWNER_KEEP_EDITING_LINE = "Try another draft.";
 
-type BusyKind = "send" | "approve" | "keep_editing" | "calendar";
+type BusyKind = "send" | "approve" | "keep_editing" | "calendar" | "spawn" | "export_doc";
+
+const MESSAGE_LINK =
+  /(\/personal-os\/plans\/\d+|\/my-plans\/\d+|https:\/\/docs\.google\.com\/document\/d\/[a-zA-Z0-9_-]+(?:\/edit)?)/g;
 
 function busyStatus(kind: BusyKind) {
   if (kind === "approve") return "Sky is making this live…";
   if (kind === "keep_editing") return "Sky is trying another draft…";
   if (kind === "calendar") return "Sky is syncing your calendar…";
+  if (kind === "spawn") return "Sky is starting a new plan…";
+  if (kind === "export_doc") return "Sky is making a Google Doc…";
   return "Sky is drafting…";
 }
 
@@ -45,16 +55,56 @@ function isSky(senderType: string, senderName?: string | null) {
   return type === "asksky" || type === "system" || name.includes("sky");
 }
 
-function PlanMessageText({ text }: { text: string }) {
-  return <p className="min-w-0 flex-1 whitespace-pre-wrap">{text}</p>;
+function PlanMessageText({
+  text,
+  linkClassName,
+}: {
+  text: string;
+  linkClassName: string;
+}) {
+  const parts = text.split(MESSAGE_LINK);
+  return (
+    <p className="min-w-0 flex-1 whitespace-pre-wrap">
+      {parts.map((part, i) => {
+        if (/^\/(?:personal-os\/plans|my-plans)\/\d+$/.test(part)) {
+          const href = part.startsWith("/my-plans/")
+            ? `/personal-os/plans/${part.split("/").pop()}`
+            : part;
+          return (
+            <Link key={`${part}-${i}`} href={href} className={linkClassName}>
+              {part}
+            </Link>
+          );
+        }
+        if (/^https:\/\/docs\.google\.com\/document\/d\//.test(part)) {
+          return (
+            <a
+              key={`${part}-${i}`}
+              href={part}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={linkClassName}
+            >
+              Open Google Doc
+            </a>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </p>
+  );
 }
 
 function PersonalPlanThread({
   logs,
   skyWorkingText,
+  busy,
+  onRun,
 }: {
   logs: BattlePlanLog[];
   skyWorkingText: string | null;
+  busy: boolean;
+  onRun: (log: BattlePlanLog, id: FunctionId) => void;
 }) {
   const freshIds = useAskSkyFreshMessageIds(logs.map((l) => l.id));
   return (
@@ -77,15 +127,26 @@ function PersonalPlanThread({
                 <>
                   <SkyAvatar size={28} className="mb-0.5" />
                   <div className="asksky-sky-bubble-assistant min-w-0 flex-1">
-                    <AskSkyTypedText text={l.messageText} animate={animate}>
-                      <PlanMessageText text={l.messageText} />
-                    </AskSkyTypedText>
+                    <div className="flex items-start gap-1">
+                      <AskSkyTypedText text={l.messageText} animate={animate}>
+                        <PlanMessageText
+                          text={l.messageText}
+                          linkClassName="font-medium text-cyan-100 underline underline-offset-2"
+                        />
+                      </AskSkyTypedText>
+                      {l.id > 0 ? (
+                        <PlanFunctionsMenu disabled={busy} onRun={(id) => onRun(l, id)} />
+                      ) : null}
+                    </div>
                   </div>
                 </>
               ) : (
                 <>
                   <div className="asksky-sky-bubble-user min-w-0">
-                    <PlanMessageText text={l.messageText} />
+                    <PlanMessageText
+                      text={l.messageText}
+                      linkClassName="font-medium text-violet-700 underline underline-offset-2"
+                    />
                   </div>
                   <AskSkyUserAvatar className="mb-0.5" />
                 </>
@@ -226,6 +287,7 @@ function TaskRow({
 
 export default function PersonalOsPlanDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const planId = Number(params.id);
   const { data: plan, pageReady, profileId, setData: setPlan } = useBizOsFetch(
     (id) => bizOsService.getPlan(id, planId),
@@ -364,6 +426,98 @@ export default function PersonalOsPlanDetailPage() {
     }
   }
 
+  async function spawnFrom(log: BattlePlanLog) {
+    if (!profileId || !plan || busy || log.id < 1) return;
+    setBusyKind("spawn");
+    setHint(null);
+    try {
+      const result = await bizOsService.spawnPlan(profileId, planId, log.id);
+      setPlan((current) => mergeFetchedPlan(current, result.sourcePlan, inflightTasks.current));
+      toast.success("New draft started.", {
+        description: result.newPlan.title,
+        action: {
+          label: "Open",
+          onClick: () => router.push(`/personal-os/plans/${result.newPlan.id}`),
+        },
+      });
+    } catch (err) {
+      setHint(err instanceof Error ? err.message : "Sky couldn’t start that plan. Try again.");
+    } finally {
+      setBusyKind(null);
+    }
+  }
+
+  async function exportToDocs(log: BattlePlanLog) {
+    if (!profileId || !plan || busy || log.id < 1) return;
+    setBusyKind("export_doc");
+    setHint(null);
+    try {
+      const returnTo = `/personal-os/plans/${planId}?exportDoc=${log.id}`;
+      const result = await bizOsService.exportPlanDoc(profileId, planId, log.id, returnTo);
+      if (result.status === "auth_required" && result.authUrl) {
+        window.location.href = result.authUrl;
+        return;
+      }
+      if (result.status === "created" && result.sourcePlan) {
+        setPlan((current) => mergeFetchedPlan(current, result.sourcePlan!, inflightTasks.current));
+      }
+    } catch (err) {
+      setHint(err instanceof Error ? err.message : "Sky couldn’t make that Doc. Try again.");
+    } finally {
+      setBusyKind((kind) => (kind === "export_doc" ? null : kind));
+    }
+  }
+
+  async function runFunction(log: BattlePlanLog, id: FunctionId) {
+    const title = plan?.title || "Battle Plan";
+    const thread = conversationThrough(plan?.logs || [], log.id);
+    const lines = transcriptLines(thread);
+    const transcript = formatTranscript(title, lines);
+    try {
+      if (id === "copy") {
+        await copyText(log.messageText || "");
+        toast.success("Copied Sky’s answer");
+        return;
+      }
+      if (id === "convert_pdf") {
+        await downloadConversationPdf(title, lines);
+        toast.success("PDF downloaded");
+        return;
+      }
+      if (id === "export_docs") {
+        await exportToDocs(log);
+        return;
+      }
+      if (id === "draft_gmail") {
+        await draftInGmail(`${title} — conversation`, transcript);
+        toast.success("Copied the conversation — Gmail draft is open");
+        return;
+      }
+      if (id === "convert_battle_plan") {
+        await spawnFrom(log);
+      }
+    } catch {
+      toast.error("Couldn’t run that function.");
+    }
+  }
+
+  useEffect(() => {
+    if (!pageReady || !profileId || !plan) return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("oauth") === "failed") {
+      window.history.replaceState({}, "", window.location.pathname);
+      setHint("Google Docs didn’t connect. Try Export again.");
+      return;
+    }
+    const logId = Number(params.get("exportDoc"));
+    if (!Number.isFinite(logId) || logId < 1) return;
+    window.history.replaceState({}, "", window.location.pathname);
+    const log = (plan.logs || []).find((row) => row.id === logId);
+    if (log) void exportToDocs(log);
+    // Retry once after Google Docs OAuth returns to this plan.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pageReady, profileId, plan, planId]);
+
   async function share() {
     if (!profileId || plan?.status !== "active" || shareState === "working") return;
     setShareState("working");
@@ -475,7 +629,12 @@ export default function PersonalOsPlanDetailPage() {
             <p className="text-sm font-semibold">{draft ? "Start a plan" : "Plan conversation"}</p>
           </div>
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-3 text-sm">
-            <PersonalPlanThread logs={logs} skyWorkingText={skyWorkingText} />
+            <PersonalPlanThread
+              logs={logs}
+              skyWorkingText={skyWorkingText}
+              busy={Boolean(busyKind)}
+              onRun={(log, id) => runFunction(log, id)}
+            />
             <div ref={logEndRef} />
           </div>
           <form

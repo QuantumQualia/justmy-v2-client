@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Lock, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import {
   FUNCTION_APP,
   functionsForApp,
@@ -14,14 +14,10 @@ const MENU_WIDTH = 260;
 
 export function PlanFunctionsMenu({
   disabled,
-  paid,
   onRun,
-  onLocked,
 }: {
   disabled?: boolean;
-  paid?: boolean;
   onRun: (id: FunctionId) => void | Promise<void>;
-  onLocked?: () => void;
 }) {
   const items = functionsForApp(FUNCTION_APP.BATTLE_PLANS);
   const [open, setOpen] = useState(false);
@@ -98,32 +94,23 @@ export function PlanFunctionsMenu({
               style={{ top: coords.top, left: coords.left, width: MENU_WIDTH }}
               className="fixed z-[200] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
             >
-              {items.map((item) => {
-                const locked = Boolean(item.paid && !paid);
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    role="menuitem"
-                    className={cn(
-                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-violet-50",
-                      locked ? "text-slate-400" : "text-slate-700 hover:text-violet-900",
-                      disabled && "pointer-events-none opacity-50",
-                    )}
-                    onClick={() => {
-                      setOpen(false);
-                      if (locked) {
-                        onLocked?.();
-                        return;
-                      }
-                      void onRun(item.id);
-                    }}
-                  >
-                    <span>{item.label}</span>
-                    {locked ? <Lock className="h-3.5 w-3.5 shrink-0" /> : null}
-                  </button>
-                );
-              })}
+              {items.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="menuitem"
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm text-slate-700 hover:bg-violet-50 hover:text-violet-900",
+                    disabled && "pointer-events-none opacity-50",
+                  )}
+                  onClick={() => {
+                    setOpen(false);
+                    void onRun(item.id);
+                  }}
+                >
+                  <span>{item.label}</span>
+                </button>
+              ))}
             </div>,
             document.body,
           )

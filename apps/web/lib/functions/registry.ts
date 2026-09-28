@@ -17,17 +17,15 @@ export type AppFunction = {
   label: string;
   apps: FunctionApp[];
   enabled: boolean;
-  /** Command OS and up when true. Free Biz OS still sees the item, locked. */
-  paid?: boolean;
 };
 
-/** Built once; each app opts in. Battle Plans is the first consumer. */
+/** Available on every OS. Credit charges for these actions come later. */
 export const APP_FUNCTIONS: readonly AppFunction[] = [
   { id: "copy", label: "Copy", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true },
   { id: "draft_gmail", label: "Draft in Gmail", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true },
-  { id: "export_docs", label: "Export to Docs", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true, paid: true },
-  { id: "convert_pdf", label: "Convert to PDF", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true, paid: true },
-  { id: "convert_battle_plan", label: "Convert to New Battle Plan", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true, paid: true },
+  { id: "export_docs", label: "Export to Docs", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true },
+  { id: "convert_pdf", label: "Convert to PDF", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true },
+  { id: "convert_battle_plan", label: "Convert to New Battle Plan", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: true },
   { id: "share_to_profile", label: "Share to Profile", apps: [FUNCTION_APP.BATTLE_PLANS], enabled: false },
 ];
 

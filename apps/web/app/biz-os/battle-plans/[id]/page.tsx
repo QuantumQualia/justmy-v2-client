@@ -127,16 +127,12 @@ function BattlePlanThread({
   skyWorkingText,
   activeHandoff,
   busy,
-  paidOs,
-  onLocked,
   onRun,
 }: {
   logs: BattlePlanLog[];
   skyWorkingText: string | null;
   activeHandoff: boolean;
   busy: boolean;
-  paidOs: boolean;
-  onLocked: () => void;
   onRun: (log: BattlePlanLog, id: FunctionId) => void;
 }) {
   const freshIds = useAskSkyFreshMessageIds(logs.map((l) => l.id));
@@ -176,12 +172,7 @@ function BattlePlanThread({
                         />
                       </AskSkyTypedText>
                       {l.id > 0 && !activeHandoff ? (
-                        <PlanFunctionsMenu
-                          disabled={busy}
-                          paid={paidOs}
-                          onLocked={onLocked}
-                          onRun={(id) => onRun(l, id)}
-                        />
+                        <PlanFunctionsMenu disabled={busy} onRun={(id) => onRun(l, id)} />
                       ) : null}
                     </div>
                   </div>
@@ -554,11 +545,7 @@ export default function BattlePlanWorkspacePage() {
         },
       });
     } catch (err) {
-      if (paidRequired(err)) {
-        router.push("/biz-os/pricing");
-        return;
-      }
-      setHint("Sky couldn’t start that plan. Try again.");
+      setHint(err instanceof Error ? err.message : "Sky couldn’t start that plan. Try again.");
     } finally {
       setBusyKind(null);
     }
@@ -579,10 +566,6 @@ export default function BattlePlanWorkspacePage() {
         setPlan((current) => mergeFetchedPlan(current, result.sourcePlan!, inflightTasks.current));
       }
     } catch (err) {
-      if (paidRequired(err)) {
-        router.push("/biz-os/pricing");
-        return;
-      }
       setHint(err instanceof Error ? err.message : "Sky couldn’t make that Doc. Try again.");
     } finally {
       setBusyKind((kind) => (kind === "export_doc" ? null : kind));
@@ -623,7 +606,7 @@ export default function BattlePlanWorkspacePage() {
   }
 
   useEffect(() => {
-    if (!pageReady || !profileId || !plan || !paidOs) return;
+    if (!pageReady || !profileId || !plan) return;
     const params = new URLSearchParams(window.location.search);
     if (params.get("oauth") === "failed") {
       window.history.replaceState({}, "", window.location.pathname);
@@ -637,7 +620,7 @@ export default function BattlePlanWorkspacePage() {
     if (log) void exportToDocs(log);
     // Retry once after Google Docs OAuth returns to this plan.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pageReady, profileId, plan, paidOs, planId]);
+  }, [pageReady, profileId, plan, planId]);
 
   if (!pageReady) return <BizOsSkeleton />;
   if (!plan) {
@@ -719,8 +702,6 @@ export default function BattlePlanWorkspacePage() {
               skyWorkingText={skyWorkingText}
               activeHandoff={Boolean(activeHandoff)}
               busy={Boolean(busyKind)}
-              paidOs={paidOs}
-              onLocked={() => router.push("/biz-os/pricing")}
               onRun={(log, id) => runFunction(log, id)}
             />
             <div ref={logEndRef} />
