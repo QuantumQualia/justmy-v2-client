@@ -8,7 +8,7 @@ import { NewsHomeLink } from "@/components/news/news-home-link";
 import { NewsMarketPageClient } from "@/components/news/news-market-page-client";
 import { NewsZipForm } from "@/components/news/news-zip-form";
 import { useIsGuestSession } from "@/hooks/use-is-guest-session";
-import { useNewsHost } from "@/lib/news/news-host-context";
+import { useNewsHost, useNewsMarketSite } from "@/lib/news/news-host-context";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { useProfileStore } from "@/lib/store/profile-store";
 
@@ -34,6 +34,7 @@ const HIGHLIGHTS = [
  * `/news` gate: zip entry when no saved zip, market detail when zip is set.
  */
 export function NewsPageClient() {
+  const marketSite = useNewsMarketSite();
   const zipcode = useNewsZipStore((s) => s.zipcode);
   const hasHydrated = useNewsZipStore((s) => s.hasHydrated);
   const profileId = useProfileStore((s) => s.data.id);
@@ -61,6 +62,10 @@ export function NewsPageClient() {
         Loading…
       </div>
     );
+  }
+
+  if (marketSite) {
+    return <NewsMarketPageClient zipcode={effectiveZip} domain={marketSite} />;
   }
 
   if (effectiveZip) {

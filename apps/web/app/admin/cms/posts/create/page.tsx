@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Save } from "lucide-react";
 import { toast } from "sonner";
@@ -25,6 +25,8 @@ import {
 } from "@workspace/ui/components/select";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
 import type { CreatePostDto, CreateSharedPostDto } from "@/lib/services/cms";
+import { contentService, type ContentTypeDto } from "@/lib/services/content";
+import { ContentTypeFields, type ContentDetails } from "@/components/cms/admin/content-type-fields";
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -38,6 +40,15 @@ export default function CreatePostPage() {
     status: "draft",
   });
   const [sharedExternalUrl, setSharedExternalUrl] = useState("");
+  const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
+  const [contentTypeId, setContentTypeId] = useState<string>("");
+  const [details, setDetails] = useState<ContentDetails>({});
+
+  useEffect(() => {
+    contentService.listContentTypes().then(setContentTypes).catch(() => setContentTypes([]));
+  }, []);
+
+  const selectedType = contentTypes.find((type) => String(type.id) === contentTypeId);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +60,8 @@ export default function CreatePostPage() {
           slug: standardFormData.slug?.trim() || undefined,
           excerpt: standardFormData.excerpt?.trim() || undefined,
           tags: standardFormData.tags?.length ? standardFormData.tags : undefined,
+          contentTypeId: contentTypeId ? Number(contentTypeId) : undefined,
+          details: Object.keys(details).length ? details : undefined,
         };
         const post = await cmsService.createPost(payload);
         toast.success("Post created");
@@ -279,11 +292,36 @@ export default function CreatePostPage() {
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border text-foreground">
                         <SelectItem value="draft">Draft</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="review">Review</SelectItem>
                         <SelectItem value="publish">Publish</SelectItem>
                         <SelectItem value="archive">Archive</SelectItem>
+                        <SelectItem value="trash">Trash</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
+                  <div className="space-y-2">
+                    <Label>Content type</Label>
+                    <Select value={contentTypeId} onValueChange={setContentTypeId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose a content type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {contentTypes.map((type) => (
+                          <SelectItem key={type.id} value={String(type.id)}>
+                            {type.application === "INFO_HUB" ? "Info" : "Content"} · {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  {selectedType ? (
+                    <ContentTypeFields
+                      slug={selectedType.slug}
+                      details={details}
+                      onChange={setDetails}
+                    />
+                  ) : null}
                 </>
               ) : (
                 <div className="space-y-2">

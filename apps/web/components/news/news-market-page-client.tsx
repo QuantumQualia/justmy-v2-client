@@ -47,7 +47,13 @@ type SkyThread = {
 /**
  * News market page — uses stored market when available; otherwise resolves by zip once.
  */
-export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
+export function NewsMarketPageClient({
+  zipcode,
+  domain,
+}: {
+  zipcode: string;
+  domain?: string | null;
+}) {
   const newsHost = useNewsHost();
   const market = useNewsZipStore((s) => s.market);
   const setMarket = useNewsZipStore((s) => s.setMarket);
@@ -68,6 +74,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
   const [claimOpen, setClaimOpen] = useState(false);
   const threadRef = useRef<SkyThread | null>(null);
   const askInFlightRef = useRef(false);
+  const loadedDomainRef = useRef<string | null>(null);
 
   // News market is a dedicated light surface — keep the viewport scrollbar light.
   useEffect(() => {
@@ -89,7 +96,12 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
   }, []);
 
   useEffect(() => {
-    if (marketMatchesZip) {
+    const domainKey = domain ? marketSiteToDomain(domain) : "";
+    if (domainKey && loadedDomainRef.current === domainKey) {
+      setLoadState("ready");
+      return;
+    }
+    if (!domain && marketMatchesZip) {
       setLoadState("ready");
       return;
     }
@@ -100,7 +112,14 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
     threadRef.current = null;
     setActiveConversationId(null);
 
-    resolveMarketForZip(zipcode)
+    const loadMarket = domain
+      ? fetch(`/api/news/markets/by-site/${encodeURIComponent(domain)}`).then(async (res) => {
+          if (!res.ok) return null;
+          return res.json();
+        })
+      : resolveMarketForZip(zipcode);
+
+    Promise.resolve(loadMarket)
       .then((primary) => {
         if (cancelled) return;
         if (!primary) {
@@ -108,7 +127,13 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
           clearZipcode();
           return;
         }
-        setMarket(marketDtoToContext(primary, zipcode));
+        setMarket(
+          marketDtoToContext(
+            primary,
+            zipcode || primary.zipcodes?.[0]?.zipcode,
+          ),
+        );
+        if (domainKey) loadedDomainRef.current = domainKey;
         setLoadState("ready");
       })
       .catch((err) => {
@@ -124,7 +149,7 @@ export function NewsMarketPageClient({ zipcode }: { zipcode: string }) {
     return () => {
       cancelled = true;
     };
-  }, [zipcode, marketMatchesZip, setMarket, clearZipcode]);
+  }, [zipcode, domain, marketMatchesZip, setMarket, clearZipcode]);
 
   async function handleAsk(nextQuery: string) {
     const trimmed = nextQuery.trim();

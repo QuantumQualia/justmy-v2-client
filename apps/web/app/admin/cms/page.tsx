@@ -22,7 +22,23 @@ export default function CmsDashboardPage() {
       icon: Newspaper,
       href: "/admin/cms/posts",
       color: "green",
-      stats: "Coming soon",
+      stats: "Articles and shared links",
+    },
+    {
+      title: "Categories",
+      description: "Taxonomy used by migrated posts",
+      icon: FileText,
+      href: "/admin/cms/categories",
+      color: "blue",
+      stats: "Category editor",
+    },
+    {
+      title: "Collections",
+      description: "Collections attached to posts",
+      icon: FileText,
+      href: "/admin/cms/collections",
+      color: "green",
+      stats: "Collection editor",
     },
   ];
 
