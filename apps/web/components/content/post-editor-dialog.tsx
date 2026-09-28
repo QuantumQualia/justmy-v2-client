@@ -55,7 +55,7 @@ interface PostFormData {
   externalUrl: string;
   excerpt: string;
   tags: string[];
-  status: "draft" | "publish" | "archive";
+  status: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
   seo: {
     title: string;
     description: string;
@@ -550,7 +550,7 @@ export function PostEditorDialog({
                         <Select
                           value={formData.status}
                           onValueChange={(v) =>
-                            setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
+                            setFormData({ ...formData, status: v as "draft" | "pending" | "review" | "publish" | "archive" | "trash" })
                           }
                         >
                           <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
@@ -558,8 +558,11 @@ export function PostEditorDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="review">Review</SelectItem>
                             <SelectItem value="publish">Publish</SelectItem>
                             <SelectItem value="archive">Archive</SelectItem>
+                            <SelectItem value="trash">Trash</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -626,7 +629,7 @@ export function PostEditorDialog({
                             <Select
                               value={formData.status}
                               onValueChange={(v) =>
-                                setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
+                                setFormData({ ...formData, status: v as "draft" | "pending" | "review" | "publish" | "archive" | "trash" })
                               }
                             >
                               <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
@@ -634,8 +637,11 @@ export function PostEditorDialog({
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="draft">Draft</SelectItem>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="review">Review</SelectItem>
                                 <SelectItem value="publish">Publish</SelectItem>
                                 <SelectItem value="archive">Archive</SelectItem>
+                                <SelectItem value="trash">Trash</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>

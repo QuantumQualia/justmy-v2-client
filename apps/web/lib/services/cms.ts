@@ -171,6 +171,7 @@ export interface PayloadPost {
   slug: string;
   // Post type discriminator from backend.
   type: "ARTICLE" | "SHARED";
+  videoUrl?: string | null;
   // Only present for "shared-from-url" posts created from external sources.
   externalUrl?: string | null;
   excerpt?: string | null;
@@ -183,7 +184,7 @@ export interface PayloadPost {
     keywords?: string;
     ogImage?: string | { url: string };
   } | null;
-  status: "draft" | "publish" | "archive";
+  status: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
   author?: string | { id: string; email: string };
   publishedAt?: string | null;
   createdAt: string;
@@ -223,7 +224,12 @@ export interface CreatePostDto {
     keywords?: string;
     ogImage?: string;
   };
-  status?: "draft" | "publish" | "archive";
+  status?: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
+  videoUrl?: string;
+  contentTypeId?: number | null;
+  details?: Record<string, unknown>;
+  marketIds?: number[];
+  channelIds?: number[];
 }
 
 /**
@@ -234,7 +240,7 @@ export interface CreateSharedPostDto {
   title?: string;
   excerpt?: string;
   tags?: string[];
-  status?: "draft" | "publish" | "archive";
+  status?: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
   seo?: {
     title?: string;
     description?: string;
@@ -515,12 +521,24 @@ export const cmsService = {
     page?: number;
     limit?: number;
     search?: string;
+    status?: string;
+    type?: string;
+    application?: string;
+    contentTypeId?: number;
+    marketId?: number;
+    profileId?: number;
   }): Promise<PaginatedPostsResponse> {
     try {
       const queryParams: Record<string, string> = {};
       if (params?.page) queryParams.page = params.page.toString();
       if (params?.limit) queryParams.limit = params.limit.toString();
       if (params?.search) queryParams.search = params.search;
+      if (params?.status) queryParams.status = params.status;
+      if (params?.type) queryParams.type = params.type;
+      if (params?.application) queryParams.application = params.application;
+      if (params?.contentTypeId) queryParams.contentTypeId = String(params.contentTypeId);
+      if (params?.marketId) queryParams.marketId = String(params.marketId);
+      if (params?.profileId) queryParams.profileId = String(params.profileId);
 
       return await apiRequest<PaginatedPostsResponse>("cms/posts", {
         method: "GET",
