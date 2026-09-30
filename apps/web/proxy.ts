@@ -20,6 +20,7 @@ const publicRoutes = [
   "/stripe-callback",
   "/try-free",
   "/p",
+  "/blog",
 ];
 
 /**
@@ -201,6 +202,7 @@ function isNewsHostAppPassthrough(pathname: string): boolean {
     "/daily-drop",
     "/p",
     "/embed",
+    "/blog",
   ];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -275,7 +277,7 @@ export async function proxy(request: NextRequest) {
       }
       return NextResponse.redirect(new URL("/personal-os", request.url));
     }
-    return nextWithPathname(request);
+    return nextWithPathname(request, pathname, marketSite);
   }
 
   if (!token) {
@@ -284,7 +286,7 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return nextWithPathname(request);
+  return nextWithPathname(request, pathname, marketSite);
 }
 
 /**

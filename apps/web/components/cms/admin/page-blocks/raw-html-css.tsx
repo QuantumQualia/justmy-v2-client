@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
+import { splitStyleTags } from "@/lib/legacy-html";
 import type { PageBlock } from "@/lib/services/cms";
 
 interface RawHtmlCssBlockEditorProps {
@@ -22,34 +22,34 @@ export function RawHtmlCssBlockEditor({ block, onUpdate }: RawHtmlCssBlockEditor
   const html = (block.html as string) ?? "";
   const customCss = (block.customCss as string) ?? "";
 
+  const handleHtmlChange = (value: string) => {
+    if (!/<\/style>|&lt;\s*\/\s*style\s*&gt;/i.test(value)) {
+      updateField("html", value);
+      return;
+    }
+    const split = splitStyleTags(value);
+    const nextCss = [customCss.trim(), split.css].filter(Boolean).join("\n\n");
+    onUpdate({
+      ...block,
+      html: split.html,
+      customCss: nextCss,
+    });
+  };
+
   return (
     <div className="space-y-4">
-      <Card className="bg-muted border-border text-foreground">
-        <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Paste a fragment of HTML and optional CSS. Use for layouts, anchor links between blocks
-            (<code className="text-muted-foreground">href=&quot;#section-id&quot;</code>), and custom styling.
-          </p>
-          <CardDescription className="text-xs text-muted-foreground">
-            Content is saved as-is and rendered on the live page. Only use for trusted authors. CSS
-            applies globally unless you scope selectors (for example under{" "}
-            <code className="text-muted-foreground">.raw-html-root</code>). For Google Fonts, prefer an{" "}
-            <code className="text-muted-foreground">@import</code> in the CSS field—
-            <code className="text-muted-foreground">&lt;link&gt;</code> inside the HTML may not load in every
-            browser when injected this way.
-          </CardDescription>
-        </CardContent>
-      </Card>
-
       <div className="space-y-2">
         <Label className="text-muted-foreground">HTML</Label>
         <Textarea
           value={html}
-          onChange={(e) => updateField("html", e.target.value)}
+          onChange={(e) => handleHtmlChange(e.target.value)}
           placeholder="<section>...</section>"
           spellCheck={false}
           className="min-h-[180px] font-mono text-sm"
         />
+        <p className="text-xs text-muted-foreground">
+          Paste a legacy section as-is. A style tag is moved into CSS.
+        </p>
       </div>
 
       <div className="space-y-2">

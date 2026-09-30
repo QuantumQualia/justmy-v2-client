@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { ArrowRight } from "lucide-react";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
+import { legacyPlainText } from "@/lib/legacy-html";
 import dynamic from "next/dynamic";
 import {
   useEffect,
@@ -165,10 +166,10 @@ export function AskSkyConversation({
   }
 
   return (
-    <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col border-t border-slate-100">
+    <div className="flex min-h-0 min-w-0 w-full flex-1 flex-col border-t border-border">
       <div
         ref={scrollRef}
-        className="min-h-0 min-w-0 flex-1 space-y-5 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-3 sm:space-y-6 sm:px-6 sm:py-4 lg:px-8 [scrollbar-width:thin] [scrollbar-color:rgb(196_181_253)_rgb(248_250_252)] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-track]:bg-slate-50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-violet-200 [&::-webkit-scrollbar-thumb]:hover:bg-violet-300"
+        className="min-h-0 min-w-0 flex-1 space-y-5 overflow-x-hidden overflow-y-auto overscroll-contain px-3 py-3 sm:space-y-6 sm:px-6 sm:py-4 lg:px-8 custom-scrollbar"
       >
         {turns.map((turn, index) => {
           const isLatest = index === turns.length - 1;
@@ -193,7 +194,7 @@ export function AskSkyConversation({
       </div>
 
       <form
-        className="shrink-0 min-w-0 border-t border-slate-100 bg-white px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8"
+        className="shrink-0 min-w-0 border-t border-border bg-card px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8"
         onSubmit={(e) => {
           e.preventDefault();
           submit(draft);
@@ -202,7 +203,7 @@ export function AskSkyConversation({
         <label htmlFor="asksky-followup" className="sr-only">
           Continue asking AskSKY
         </label>
-        <div className="flex min-w-0 items-end gap-1.5 rounded-[1.375rem] border border-slate-200 bg-white py-1 pl-3 pr-1 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
+        <div className="flex min-w-0 items-end gap-1.5 rounded-[1.375rem] border border-border bg-card py-1 pl-3 pr-1 shadow-sm transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
           <AskSkyGrowTextarea
             chrome={false}
             id="asksky-followup"
@@ -210,7 +211,7 @@ export function AskSkyConversation({
             onChange={(e) => setDraft(e.target.value)}
             placeholder={disabled ? "SKY is typing…" : "Ask a follow-up…"}
             disabled={disabled}
-            className="min-h-10 bg-transparent px-0 py-2 text-base text-slate-800 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
+            className="min-h-10 bg-transparent px-0 py-2 text-base text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -310,15 +311,15 @@ function ConversationTurn({
             aria-label="SKY is typing"
           >
             <span
-              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
               style={{ animationDelay: "0ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
               style={{ animationDelay: "160ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-white/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
               style={{ animationDelay: "320ms", animationDuration: "1.2s" }}
             />
           </div>
@@ -370,8 +371,8 @@ function ConversationTurn({
                           onClick={() => setTab(id)}
                           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-2 text-[11px] font-semibold tracking-wide transition sm:gap-2 sm:px-4 sm:py-2.5 sm:text-sm ${
                             active
-                              ? "bg-violet-600 text-white shadow-md shadow-violet-500/25"
-                              : "border border-slate-200 bg-white text-slate-600 hover:border-violet-200 hover:text-violet-700"
+                              ? "bg-primary text-primary-foreground shadow-md shadow-primary/25"
+                              : "border border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-primary"
                           }`}
                         >
                           <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -379,8 +380,8 @@ function ConversationTurn({
                           <span
                             className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                               active
-                                ? "bg-violet-500 text-white"
-                                : "bg-slate-100 text-slate-500"
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground"
                             }`}
                           >
                             {count}
@@ -452,7 +453,7 @@ function highlightZipInAnswer(answer: string, zipcode: string) {
 }
 
 const CONTACT_ICON_BTN =
-  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700";
+  "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:border-primary/40 hover:bg-secondary hover:text-primary";
 
 type ContactMenuItem = {
   key: string;
@@ -574,7 +575,7 @@ function ContactIconControl({
       {open ? (
         <div
           role="menu"
-          className="absolute left-1/2 top-full z-20 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+          className="absolute left-1/2 top-full z-20 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-lg shadow-card"
         >
           {items.map((item) => (
             <a
@@ -584,7 +585,7 @@ function ContactIconControl({
               target={item.external ? "_blank" : undefined}
               rel={item.external ? "noopener noreferrer" : undefined}
               onClick={() => onOpenMenu(null)}
-              className="block truncate px-3 py-2 text-left text-xs font-medium text-slate-700 transition hover:bg-violet-50 hover:text-violet-700"
+              className="block truncate px-3 py-2 text-left text-xs font-medium text-foreground transition hover:bg-secondary hover:text-primary"
             >
               {item.label}
             </a>
@@ -693,8 +694,8 @@ function BusinessCard({
   };
 
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-violet-200 bg-violet-50 text-sm font-bold text-violet-700">
+    <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-5 shadow-sm">
+      <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-primary/30 bg-secondary text-sm font-bold text-primary">
         {card.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -707,13 +708,13 @@ function BusinessCard({
         )}
       </div>
 
-      <h3 className="mt-4 text-center text-base font-bold text-slate-900">
+      <h3 className="mt-4 text-center text-base font-bold text-foreground">
         {card.url ? (
           <a
             href={card.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="transition hover:text-violet-700"
+            className="transition hover:text-primary"
           >
             {card.name}
           </a>
@@ -723,20 +724,20 @@ function BusinessCard({
       </h3>
 
       {card.verified ? (
-        <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium text-violet-600">
+        <p className="mt-1 flex items-center justify-center gap-1 text-xs font-medium text-primary">
           <CheckCircle2 className="h-3.5 w-3.5" aria-hidden />
           Verified
         </p>
       ) : null}
 
       {card.brief ? (
-        <p className="mt-2 line-clamp-2 text-center text-xs text-slate-500">
+        <p className="mt-2 line-clamp-2 text-center text-xs text-muted-foreground">
           {card.brief}
         </p>
       ) : null}
 
       {card.perkLabel ? (
-        <p className="mt-3 flex items-center justify-center gap-1.5 rounded-full bg-violet-50 px-3 py-1.5 text-[11px] font-semibold text-violet-700">
+        <p className="mt-3 flex items-center justify-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-[11px] font-semibold text-primary">
           <Sparkles className="h-3 w-3" aria-hidden />
           {card.perkLabel}
         </p>
@@ -821,7 +822,7 @@ function BusinessCard({
               href={hot.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="block w-full rounded-full border border-slate-200 bg-white px-4 py-2.5 text-center text-sm font-medium text-slate-700 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+              className="block w-full rounded-full border border-border bg-card px-4 py-2.5 text-center text-sm font-medium text-foreground transition hover:border-primary/40 hover:bg-secondary hover:text-primary"
             >
               {hot.label}
             </a>
@@ -860,7 +861,7 @@ function BusinessCard({
           title="Bookmark"
         >
           <Bookmark
-            className={`h-3.5 w-3.5 ${bookmarked ? "fill-violet-500 text-violet-500" : ""}`}
+            className={`h-3.5 w-3.5 ${bookmarked ? "fill-primary text-primary" : ""}`}
             aria-hidden
           />
         </button>
@@ -890,7 +891,7 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
     if (!card.url?.trim()) return;
     void openShare({
       title: card.title,
-      description: card.excerpt || undefined,
+      description: legacyPlainText(card.excerpt) || undefined,
       url: card.url,
       imageUrl: card.image,
       entityLabel: author?.profileName || "Post",
@@ -898,17 +899,17 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
   }
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+    <article className="flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
       <div
         className={`relative flex h-36 items-start justify-between p-4 ${
           card.image
-            ? "bg-slate-800 bg-cover bg-center"
+            ? "bg-muted bg-cover bg-center"
             : "bg-linear-to-br from-slate-700 to-slate-900"
         }`}
         style={card.image ? { backgroundImage: `url(${card.image})` } : undefined}
       >
         {card.badge ? (
-          <span className="ml-auto rounded-full bg-violet-600 px-2.5 py-1 text-[10px] font-semibold text-white">
+          <span className="ml-auto rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white">
             {card.badge}
           </span>
         ) : null}
@@ -927,7 +928,7 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
                   icon={author.profileIcon}
                   initial={authorInitial}
                 />
-                <span className="truncate text-sm font-semibold text-slate-800">
+                <span className="truncate text-sm font-semibold text-foreground">
                   {author.profileName}
                 </span>
               </a>
@@ -937,7 +938,7 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
                   icon={author.profileIcon}
                   initial={authorInitial}
                 />
-                <span className="truncate text-sm font-semibold text-slate-800">
+                <span className="truncate text-sm font-semibold text-foreground">
                   {author.profileName}
                 </span>
               </div>
@@ -945,13 +946,13 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
           </div>
         ) : null}
 
-        <h3 className="font-serif text-lg font-bold leading-snug text-slate-900">
+        <h3 className="font-serif text-lg font-bold leading-snug text-foreground">
           {card.url ? (
             <a
               href={card.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="transition hover:text-violet-700"
+              className="transition hover:text-primary"
             >
               {card.title}
             </a>
@@ -960,18 +961,18 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
           )}
         </h3>
         {card.excerpt ? (
-          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
-            {card.excerpt}
+          <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+            {legacyPlainText(card.excerpt)}
           </p>
         ) : null}
 
-        <div className="mt-auto flex items-center gap-3 border-t border-slate-100 pt-4">
+        <div className="mt-auto flex items-center gap-3 border-t border-border pt-4">
           {card.url ? (
             <a
               href={card.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-sm font-semibold text-violet-600 transition hover:text-violet-500"
+              className="text-sm font-semibold text-primary transition hover:text-primary"
             >
               Read more &gt;
             </a>
@@ -982,7 +983,7 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
             <button
               type="button"
               onClick={handleShare}
-              className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+              className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:bg-secondary hover:text-primary"
               aria-label={`Share ${card.title}`}
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden />
@@ -1003,7 +1004,7 @@ function AuthorAvatar({
   initial: string;
 }) {
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-violet-200 bg-violet-50 text-xs font-bold text-violet-700">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-primary/30 bg-secondary text-xs font-bold text-primary">
       {icon ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={icon} alt="" className="h-full w-full object-cover" />
@@ -1027,39 +1028,39 @@ function WebCard({ card }: { card: AskSkyWebCard }) {
   function handleShare() {
     void openShare({
       title: card.title,
-      description: card.excerpt || undefined,
+      description: legacyPlainText(card.excerpt) || undefined,
       url: card.url,
       entityLabel: hostname || "Web",
     });
   }
 
   return (
-    <article className="flex flex-col rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-violet-300">
-      <div className="flex items-center gap-2 text-xs font-medium text-violet-600">
+    <article className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40">
+      <div className="flex items-center gap-2 text-xs font-medium text-primary">
         <Globe className="h-3.5 w-3.5" aria-hidden />
         {hostname || "Web"}
       </div>
-      <h3 className="mt-3 font-serif text-lg font-bold leading-snug text-slate-900">
+      <h3 className="mt-3 font-serif text-lg font-bold leading-snug text-foreground">
         <a
           href={card.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="transition hover:text-violet-700"
+          className="transition hover:text-primary"
         >
           {card.title}
         </a>
       </h3>
       {card.excerpt ? (
-        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-slate-500">
-          {card.excerpt}
+        <p className="mt-2 line-clamp-3 text-sm leading-relaxed text-muted-foreground">
+          {legacyPlainText(card.excerpt)}
         </p>
       ) : null}
-      <div className="mt-auto flex items-center gap-3 border-t border-slate-100 pt-4">
+      <div className="mt-auto flex items-center gap-3 border-t border-border pt-4">
         <a
           href={card.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1 text-sm font-semibold text-violet-600 transition hover:text-violet-500"
+          className="inline-flex items-center gap-1 text-sm font-semibold text-primary transition hover:text-primary"
         >
           Open link
           <ExternalLink className="h-3.5 w-3.5" aria-hidden />
@@ -1067,7 +1068,7 @@ function WebCard({ card }: { card: AskSkyWebCard }) {
         <button
           type="button"
           onClick={handleShare}
-          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+          className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:bg-secondary hover:text-primary"
           aria-label={`Share ${card.title}`}
         >
           <Share2 className="h-3.5 w-3.5" aria-hidden />

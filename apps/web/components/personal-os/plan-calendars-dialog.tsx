@@ -100,15 +100,15 @@ export function PlanCalendarsDialog({
           </DialogDescription>
         </DialogHeader>
         {connectionsQuery.isLoading ? (
-          <p className="text-sm text-slate-500">Loading calendars…</p>
+          <p className="text-sm text-muted-foreground">Loading calendars…</p>
         ) : connections.length ? (
           <div className="space-y-4">
             {connections.map((row) => (
-              <div key={row.provider} className="rounded-2xl border border-slate-200/80 p-3">
+              <div key={row.provider} className="rounded-2xl border border-border p-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-slate-900">{row.label}</p>
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="text-sm font-semibold text-foreground">{row.label}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
                       {row.connected
                         ? row.accountName
                           ? `Connected · ${row.accountName}`
@@ -156,7 +156,7 @@ export function PlanCalendarsDialog({
                 {row.provider === "apple_caldav" && !row.connected ? (
                   <div className="mt-3 space-y-2">
                     <div className="space-y-1">
-                      <Label htmlFor="apple-id" className="text-xs text-slate-600">
+                      <Label htmlFor="apple-id" className="text-xs text-muted-foreground">
                         Apple ID
                       </Label>
                       <Input
@@ -167,7 +167,7 @@ export function PlanCalendarsDialog({
                       />
                     </div>
                     <div className="space-y-1">
-                      <Label htmlFor="apple-pass" className="text-xs text-slate-600">
+                      <Label htmlFor="apple-pass" className="text-xs text-muted-foreground">
                         App-specific password
                       </Label>
                       <Input
@@ -193,7 +193,7 @@ export function PlanCalendarsDialog({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-slate-500">No calendars are available on this workspace yet.</p>
+          <p className="text-sm text-muted-foreground">No calendars are available on this workspace yet.</p>
         )}
       </DialogContent>
     </Dialog>

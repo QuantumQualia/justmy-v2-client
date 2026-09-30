@@ -172,7 +172,7 @@ export function MarketList() {
               variant={displayStatus === "Active" ? "default" : "outline"}
               className={
                 displayStatus === "Active"
-                  ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50"
+                  ? "bg-success/15 text-success border-emerald-600/50"
                   : "text-muted-foreground border-border"
               }
             >
@@ -226,7 +226,7 @@ export function MarketList() {
           />
         </div>
         <Link href="/admin/markets/create">
-          <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">
+          <Button className="">
             <Plus className="mr-2 h-4 w-4" />
             Create Market
           </Button>

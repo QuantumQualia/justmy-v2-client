@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
 import type { PageBlock } from "@/lib/services/cms";
@@ -21,17 +20,7 @@ export function NavbarBlockEditor({ block, onUpdate }: NavbarBlockEditorProps) {
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Renders the full Navbar with profile switcher, super search bar, and hamburger menu.
-            It sticks to the top of the page with a blurred background.
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Optionally enable business search mode for the search bar (category bento + ghost phrases).
-          </p>
-        </CardContent>
-      </Card>
+      
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted p-4">

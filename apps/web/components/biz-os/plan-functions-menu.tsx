@@ -79,7 +79,7 @@ export function PlanFunctionsMenu({
       <button
         ref={buttonRef}
         type="button"
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-700 disabled:opacity-40"
+        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground transition hover:bg-card hover:text-foreground disabled:opacity-40"
         aria-label="Functions"
         aria-expanded={open}
         disabled={disabled}
@@ -96,7 +96,7 @@ export function PlanFunctionsMenu({
               ref={menuRef}
               role="menu"
               style={{ top: coords.top, left: coords.left, width: MENU_WIDTH }}
-              className="fixed z-[200] overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+              className="fixed z-[200] overflow-hidden rounded-xl border border-border bg-card py-1 shadow-lg shadow-card"
             >
               {items.map((item) => {
                 const locked = Boolean(item.paid && !paid);
@@ -106,8 +106,8 @@ export function PlanFunctionsMenu({
                     type="button"
                     role="menuitem"
                     className={cn(
-                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-violet-50",
-                      locked ? "text-slate-400" : "text-slate-700 hover:text-violet-900",
+                      "flex w-full items-center justify-between gap-3 px-3 py-2 text-left text-sm hover:bg-secondary",
+                      locked ? "text-muted-foreground" : "text-foreground hover:text-primary",
                       disabled && "pointer-events-none opacity-50",
                     )}
                     onClick={() => {

@@ -21,8 +21,8 @@ export interface TopNewsBriefingProps {
 const EMPTY_PLACEHOLDER =
   "rounded-xl border border-dashed border-border bg-muted py-8 px-4 text-center text-sm text-muted-foreground";
 
-const NEWS_CARD = `${GLASS_CARD} p-4 transition-colors hover:border-violet-300`;
-const NEWS_CARD_LINK = `${NEWS_CARD} block hover:bg-violet-50/60`;
+const NEWS_CARD = `${GLASS_CARD} p-4 transition-colors hover:border-primary/40`;
+const NEWS_CARD_LINK = `${NEWS_CARD} block hover:bg-secondary/60`;
 
 export function TopNewsBriefing({
   title = "Top News",

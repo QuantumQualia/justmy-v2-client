@@ -482,7 +482,7 @@ export function MediaCard({
         <Button
           onClick={handleDownload}
           disabled={isGenerating}
-          className="cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold rounded-lg px-6 py-3 flex items-center gap-2"
+          className="cursor-pointer bg-success hover:bg-success text-foreground font-semibold rounded-lg px-6 py-3 flex items-center gap-2"
         >
           <Download className="h-5 w-5" />
           {isGenerating ? "Generating..." : "Download Image"}

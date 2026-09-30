@@ -10,12 +10,12 @@ interface LifestyleIndicesProps {
 
 function badgeClasses(status: LifestyleGauge["status"]) {
   if (status === "go") {
-    return "bg-emerald-400/90 text-slate-900";
+    return "bg-success/90 text-foreground";
   }
   if (status === "caution") {
-    return "bg-amber-300 text-slate-900";
+    return "bg-amber-300 text-foreground";
   }
-  return "bg-rose-400 text-slate-900";
+  return "bg-rose-400 text-foreground";
 }
 
 function statusLabel(status: LifestyleGauge["status"]) {

@@ -37,7 +37,7 @@ export function AskSkyConciergeDock() {
           <button
             type="button"
             onClick={() => setOpen(false)}
-            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-border bg-card text-muted-foreground hover:bg-muted"
             aria-label="Close AskSKY"
           >
             <X className="h-4 w-4" />
@@ -54,7 +54,7 @@ export function AskSkyConciergeDock() {
           <SkyAvatar size={28} />
           AskSKY!
           {pending ? (
-            <span className="rounded-full bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-800">
+            <span className="rounded-full bg-secondary px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
               Draft
             </span>
           ) : null}

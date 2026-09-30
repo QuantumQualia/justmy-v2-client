@@ -343,9 +343,9 @@ function statusBadgeClass(status: KnowledgeIngestionStatus): string {
     case "completed":
     case "ready":
     case "indexed":
-      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300";
+      return "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-success/40 dark:bg-success/15 dark:text-success";
     case "failed":
-      return "border-red-200 bg-red-50 text-red-800 dark:border-red-500/40 dark:bg-red-500/15 dark:text-red-300";
+      return "border-destructive/30 bg-destructive/10 text-red-800 dark:border-red-500/40 dark:bg-destructive/100/15 dark:text-red-300";
     case "pending":
     case "queued":
       return "border-amber-200 bg-amber-50 text-amber-800 dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300";
@@ -413,7 +413,7 @@ function StatCard({
   description: string;
 }) {
   return (
-    <Card className="min-w-0 max-w-full rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card">
+    <Card className="min-w-0 max-w-full rounded-br-none border-border bg-card py-0 shadow-sm dark:bg-card">
       <CardHeader className="gap-1 border-b border-border/80 py-4">
         <CardDescription className="text-muted-foreground">{title}</CardDescription>
         <CardTitle className="text-2xl text-foreground">{value}</CardTitle>
@@ -577,7 +577,7 @@ function AgentFormDialog({
       }}
     >
       <DialogContent
-        className="max-h-[90vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-2xl"
+        className="max-h-[90vh] overflow-y-auto border-border bg-card text-foreground shadow-xl dark:bg-card sm:max-w-2xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -627,7 +627,7 @@ function AgentFormDialog({
                 <div className="flex items-center gap-2">
                   <span
                     aria-hidden="true"
-                    className={`h-2 w-2 rounded-full ${isActive ? "bg-emerald-400" : "bg-muted-foreground"}`}
+                    className={`h-2 w-2 rounded-full ${isActive ? "bg-success" : "bg-muted-foreground"}`}
                   />
                   <span className="text-sm font-medium text-foreground">
                     {isActive ? "Active" : "Inactive"}
@@ -638,7 +638,7 @@ function AgentFormDialog({
                   checked={isActive}
                   onCheckedChange={setIsActive}
                   disabled={submitting}
-                  className="data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
+                  className="data-[state=checked]:bg-success data-[state=unchecked]:bg-input"
                 />
               </div>
             </div>
@@ -720,7 +720,7 @@ function AgentFormDialog({
                 checked={liveSearchEnabled}
                 onCheckedChange={setLiveSearchEnabled}
                 disabled={submitting}
-                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-success data-[state=unchecked]:bg-input"
               />
             </div>
 
@@ -767,7 +767,7 @@ function AgentFormDialog({
                 checked={shareTrayEnabled}
                 onCheckedChange={setShareTrayEnabled}
                 disabled={submitting}
-                className="mt-0.5 shrink-0 data-[state=checked]:bg-emerald-500 data-[state=unchecked]:bg-input"
+                className="mt-0.5 shrink-0 data-[state=checked]:bg-success data-[state=unchecked]:bg-input"
               />
             </div>
 
@@ -871,7 +871,7 @@ function AgentFormDialog({
               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                 Public identifier
               </p>
-              <p className="mt-1 font-mono text-sm text-emerald-700 dark:text-emerald-300">{publicIdentifier}</p>
+              <p className="mt-1 font-mono text-sm text-success dark:text-success">{publicIdentifier}</p>
             </div>
           ) : null}
 
@@ -1008,7 +1008,7 @@ function KnowledgeSourceDialog({
       }}
     >
       <DialogContent
-        className="border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-xl"
+        className="border-border bg-card text-foreground shadow-xl dark:bg-card sm:max-w-xl"
         onPointerDownOutside={(event) => {
           if (submitting) {
             event.preventDefault();
@@ -1201,8 +1201,8 @@ function KnowledgeSourcesCard({
       id={scope === "agent" ? "agent-knowledge-panel" : undefined}
       className={
         scope === "agent"
-          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card"
-          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card"
+          ? "scroll-mt-24 w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0 shadow-sm dark:bg-card"
+          : "w-full min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0 shadow-sm dark:bg-card"
       }
     >
       <CardHeader className="min-w-0 gap-3 border-b border-border/80 px-4 py-5 sm:px-6">
@@ -1214,7 +1214,7 @@ function KnowledgeSourcesCard({
                 variant="outline"
                 className={
                   scope === "shared"
-                    ? "border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-300"
+                    ? "border-primary/30 bg-secondary text-primary dark:border-violet-500/40 dark:bg-primary/15 dark:text-primary"
                     : "border-cyan-200 bg-cyan-50 text-cyan-800 dark:border-cyan-500/40 dark:bg-cyan-500/15 dark:text-cyan-300"
                 }
               >
@@ -1229,7 +1229,7 @@ function KnowledgeSourcesCard({
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="font-medium text-foreground">{selectedAgent.name}</span>
                   {resolveAgentPublicIdentifier(selectedAgent) ? (
-                    <span className="break-all font-mono text-emerald-700 dark:text-emerald-300">
+                    <span className="break-all font-mono text-success dark:text-success">
                       {resolveAgentPublicIdentifier(selectedAgent)}
                     </span>
                   ) : null}
@@ -1249,7 +1249,7 @@ function KnowledgeSourcesCard({
                   <SelectTrigger className="border-input bg-background text-foreground">
                     <SelectValue placeholder="Select an agent" />
                   </SelectTrigger>
-                  <SelectContent className="border-border bg-white text-foreground dark:bg-popover">
+                  <SelectContent className="border-border bg-card text-foreground dark:bg-popover">
                     {availableAgents.map((agent) => (
                       <SelectItem key={agent.id} value={agent.id}>
                         {agent.name}
@@ -1321,7 +1321,7 @@ function KnowledgeSourcesCard({
               return (
                 <div
                   key={source.id}
-                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-border bg-white p-3 dark:bg-muted/30 sm:p-4"
+                  className="min-w-0 max-w-full overflow-hidden rounded-xl border border-border bg-card p-3 dark:bg-muted/30 sm:p-4"
                 >
                   <div className="flex min-w-0 flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
                     <div className="min-w-0 flex-1 space-y-2">
@@ -1973,7 +1973,7 @@ export function ProfileAgentsPanel({
               {agent.shareTray?.enabled ? (
                 <Badge
                   variant="outline"
-                  className="border-violet-200 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-300"
+                  className="border-primary/30 bg-secondary text-primary dark:border-violet-500/40 dark:bg-primary/15 dark:text-primary"
                 >
                   Share tray
                 </Badge>
@@ -1990,7 +1990,7 @@ export function ProfileAgentsPanel({
             variant="outline"
             className={
               row.original.isActive
-                ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-300"
+                ? "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-success/40 dark:bg-success/15 dark:text-success"
                 : "border-border bg-muted text-muted-foreground"
             }
           >
@@ -2252,7 +2252,7 @@ export function ProfileAgentsPanel({
 
       <div className="min-w-0 space-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-success dark:border-success/30 dark:bg-success/10 dark:text-success">
             <Bot className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
@@ -2286,7 +2286,7 @@ export function ProfileAgentsPanel({
         />
       </div>
 
-      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-white py-0 shadow-sm dark:bg-card">
+      <Card className="min-w-0 max-w-full overflow-x-hidden rounded-br-none border-border bg-card py-0 shadow-sm dark:bg-card">
         <CardHeader className="border-b border-border/80 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div className="space-y-2">

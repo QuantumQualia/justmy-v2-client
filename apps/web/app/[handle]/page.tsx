@@ -8,6 +8,7 @@ import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle";
 import { buildLocalBusinessJsonLd } from "@/lib/biz-os/json-ld";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 interface MyCardPageProps {
   params: Promise<{
@@ -71,10 +72,10 @@ export async function generateMetadata({ params }: MyCardPageProps): Promise<Met
     // Profile exists, use profile metadata
     const profileUrl = `${siteUrl}/${handle}`;
     const title = profile.name
-      ? `${profile.name}${profile.tagline ? ` - ${profile.tagline}` : ""}`
+      ? `${profile.name}${profile.tagline ? ` - ${legacyPlainText(profile.tagline)}` : ""}`
       : `${handle}`;
     
-    const description = profile.about || profile.tagline || `View ${handle}'s profile on JustMy.com - Connect and discover their digital identity.`;
+    const description = legacyPlainText(profile.about || profile.tagline) || `View ${handle}'s profile on JustMy.com - Connect and discover their digital identity.`;
     
     const image = profile.banner || profile.photo || `${siteUrl}/og-image.png`;
 

@@ -30,7 +30,7 @@ export function SkyFmDropPlayer() {
   if (!audioUrl) return null;
 
   return (
-    <div className="rounded-2xl border border-[#e6e4f0] bg-white px-4 py-3">
+    <div className="rounded-2xl border border-[#e6e4f0] bg-card px-4 py-3">
       <p className="mb-2 text-sm font-semibold">{label}</p>
       <audio controls src={audioUrl} className="w-full" preload="none">
         Your browser does not support audio.

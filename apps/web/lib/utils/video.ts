@@ -5,34 +5,54 @@
  * into embeddable iframe sources.
  */
 
+function youtubeVideoId(url: URL): string | null {
+  const host = url.hostname.replace(/^www\./, "").toLowerCase();
+  const youtube =
+    host === "youtube.com" ||
+    host === "m.youtube.com" ||
+    host === "music.youtube.com" ||
+    host === "youtube-nocookie.com" ||
+    host === "youtu.be";
+  if (!youtube) return null;
+
+  if (host === "youtu.be") {
+    return url.pathname.split("/").filter(Boolean)[0] || null;
+  }
+
+  const queryId = url.searchParams.get("v");
+  if (queryId) return queryId;
+
+  const parts = url.pathname.split("/").filter(Boolean);
+  const marker = parts.findIndex((part) =>
+    part === "embed" || part === "shorts" || part === "live" || part === "v" || part === "e",
+  );
+  if (marker >= 0) return parts[marker + 1] || null;
+  return null;
+}
+
 export function getYouTubeEmbedUrl(url: string): string | null {
   try {
-    const u = new URL(url);
-    if (u.hostname.includes("youtube.com")) {
-      const v = u.searchParams.get("v");
-      if (v) return `https://www.youtube.com/embed/${v}`;
-    }
-    if (u.hostname === "youtu.be") {
-      const id = u.pathname.slice(1);
-      if (id) return `https://www.youtube.com/embed/${id}`;
-    }
+    const id = youtubeVideoId(new URL(url));
+    return id ? `https://www.youtube.com/embed/${encodeURIComponent(id)}` : null;
   } catch {
-    /* invalid URL */
+    return null;
   }
-  return null;
 }
 
 export function getVimeoEmbedUrl(url: string): string | null {
   try {
-    const u = new URL(url);
-    if (u.hostname.includes("vimeo.com")) {
-      const id = u.pathname.split("/").filter(Boolean).pop();
-      if (id) return `https://player.vimeo.com/video/${id}`;
-    }
+    const parsed = new URL(url);
+    const host = parsed.hostname.replace(/^www\./, "").toLowerCase();
+    if (host !== "vimeo.com" && host !== "player.vimeo.com") return null;
+    const id = parsed.pathname
+      .split("/")
+      .filter(Boolean)
+      .reverse()
+      .find((part) => /^\d+$/.test(part));
+    return id ? `https://player.vimeo.com/video/${id}` : null;
   } catch {
-    /* invalid URL */
+    return null;
   }
-  return null;
 }
 
 /**

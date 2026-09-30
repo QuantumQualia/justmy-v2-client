@@ -108,14 +108,14 @@ function FlashDealCard({
           {deal.title}
         </h3>
         <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
-          <span className="font-bold text-emerald-400">
+          <span className="font-bold text-success">
             {deal.discountedPrice}
           </span>
           <span className="text-xs text-muted-foreground line-through">
             {deal.originalPrice}
           </span>
           {discountText && (
-            <span className="text-xs font-medium text-emerald-400/90">
+            <span className="text-xs font-medium text-success/90">
               {discountText}
             </span>
           )}
@@ -124,7 +124,7 @@ function FlashDealCard({
           href={deal.dealUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className={`mt-auto ${DEAL_BUTTON_H} flex items-center justify-center rounded-full bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold px-4 transition shrink-0`}
+          className={`mt-auto ${DEAL_BUTTON_H} flex items-center justify-center rounded-full bg-success hover:bg-success text-black text-xs font-semibold px-4 transition shrink-0`}
         >
           View Deal
         </a>

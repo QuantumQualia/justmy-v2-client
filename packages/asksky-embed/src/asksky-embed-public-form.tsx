@@ -172,13 +172,13 @@ function AskSkyEmbedPublicFormLoaded({
   }
   if (!schema) {
     return (
-      <p className={cn("text-xs", embed ? "text-zinc-400" : "text-slate-400")}>Loading form…</p>
+      <p className={cn("text-xs", embed ? "text-zinc-400" : "text-muted-foreground")}>Loading form…</p>
     );
   }
 
   if (done) {
     return (
-      <p className={cn("text-xs", embed ? "text-emerald-300" : "text-emerald-400")}>
+      <p className={cn("text-xs", embed ? "text-success" : "text-success")}>
         Thanks — we received your details and will follow up.
       </p>
     );
@@ -318,7 +318,7 @@ function AskSkyEmbedPublicFormFields({
         <div
           className={cn(
             "rounded-md border px-2 py-1.5 text-xs",
-            embed ? "border-red-500/40 bg-red-950/50 text-red-200" : "border-red-500/30 bg-red-500/10 text-red-200",
+            embed ? "border-red-500/40 bg-red-950/50 text-red-200" : "border-red-500/30 bg-destructive/10 text-red-200",
           )}
         >
           {error}
@@ -332,9 +332,9 @@ function AskSkyEmbedPublicFormFields({
       {fields.map((f) => {
         const label = f.label || f.id;
         const commonLabel = (
-          <Label htmlFor={`asksky-pf-${f.id}`} className={cn("text-xs", embed ? "text-zinc-300" : "text-slate-200")}>
+          <Label htmlFor={`asksky-pf-${f.id}`} className={cn("text-xs", embed ? "text-zinc-300" : "text-foreground")}>
             {label}
-            {f.required ? <span className="text-red-400"> *</span> : null}
+            {f.required ? <span className="text-destructive"> *</span> : null}
           </Label>
         );
         const ph = f.placeholder?.trim();
@@ -368,7 +368,7 @@ function AskSkyEmbedPublicFormFields({
                   "min-h-[88px] text-base md:text-sm",
                   embed
                     ? "border-zinc-600 bg-zinc-950/80 text-zinc-100 placeholder:text-zinc-500"
-                    : "border-slate-700 bg-slate-900 text-white",
+                    : "border-border bg-card text-white",
                 )}
               />
             </div>
@@ -393,7 +393,7 @@ function AskSkyEmbedPublicFormFields({
                   id={`asksky-pf-${f.id}`}
                   className={cn(
                     "h-9 text-base md:text-sm",
-                    embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                    embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
                   )}
                 >
                   <SelectValue placeholder={ph || "Choose…"} />
@@ -415,13 +415,13 @@ function AskSkyEmbedPublicFormFields({
             ? f.options
             : [{ value: "__empty__", label: ph || "Add options in the form builder" }];
           const current = String(values[f.id] ?? "");
-          const fieldSetClass = embed ? "border-zinc-700/50 bg-zinc-950/40" : "border-slate-700/50 bg-slate-900/40";
-          const labelClass = cn("text-sm", embed ? "text-zinc-200" : "text-slate-200");
+          const fieldSetClass = embed ? "border-zinc-700/50 bg-zinc-950/40" : "border-border/50 bg-card/40";
+          const labelClass = cn("text-sm", embed ? "text-zinc-200" : "text-foreground");
           return (
             <fieldset key={f.id} disabled={submitting || !f.options?.length} className="space-y-2">
-              <legend className={cn("mb-1 text-xs", embed ? "text-zinc-300" : "text-slate-200")}>
+              <legend className={cn("mb-1 text-xs", embed ? "text-zinc-300" : "text-foreground")}>
                 {label}
-                {f.required ? <span className="text-red-400"> *</span> : null}
+                {f.required ? <span className="text-destructive"> *</span> : null}
               </legend>
               <div className={cn("space-y-2 rounded-lg border p-3", fieldSetClass)}>
                 {opts.map((o) => {
@@ -431,7 +431,7 @@ function AskSkyEmbedPublicFormFields({
                       key={o.value}
                       className={cn(
                         "flex cursor-pointer items-center gap-2.5 rounded-md px-1 py-0.5",
-                        disabledOpt ? "cursor-not-allowed opacity-60" : "hover:bg-white/5",
+                        disabledOpt ? "cursor-not-allowed opacity-60" : "hover:bg-card/5",
                       )}
                     >
                       <input
@@ -442,7 +442,7 @@ function AskSkyEmbedPublicFormFields({
                         disabled={disabledOpt}
                         onChange={() => setField(f.id, disabledOpt ? "" : o.value)}
                         className={cn(
-                          "h-4 w-4 shrink-0 border-slate-500 bg-slate-900",
+                          "h-4 w-4 shrink-0 border-border bg-card",
                           embed
                             ? "border-zinc-500 text-emerald-500 accent-emerald-500"
                             : "accent-emerald-500",
@@ -466,9 +466,9 @@ function AskSkyEmbedPublicFormFields({
                 onCheckedChange={(c) => setField(f.id, c === true)}
                 disabled={submitting}
               />
-              <Label htmlFor={`asksky-pf-${f.id}`} className={cn("text-xs", embed ? "text-zinc-300" : "text-slate-200")}>
+              <Label htmlFor={`asksky-pf-${f.id}`} className={cn("text-xs", embed ? "text-zinc-300" : "text-foreground")}>
                 {label}
-                {f.required ? <span className="text-red-400"> *</span> : null}
+                {f.required ? <span className="text-destructive"> *</span> : null}
               </Label>
             </div>
           );
@@ -488,7 +488,7 @@ function AskSkyEmbedPublicFormFields({
                 placeholder={ph || undefined}
                 className={cn(
                   "h-9 text-base md:text-sm",
-                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
                 )}
               />
             </div>
@@ -507,7 +507,7 @@ function AskSkyEmbedPublicFormFields({
                 disabled={submitting}
                 className={cn(
                   "h-9 text-base md:text-sm",
-                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
                 )}
               />
             </div>
@@ -527,12 +527,12 @@ function AskSkyEmbedPublicFormFields({
                   setField(f.id, file ? file.name : "");
                 }}
                 className={cn(
-                  "h-auto min-h-9 cursor-pointer py-1.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-1 file:text-xs file:font-medium file:text-white hover:file:bg-emerald-500",
-                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                  "h-auto min-h-9 cursor-pointer py-1.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-success",
+                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
                 )}
               />
               {picked ? (
-                <p className={cn("text-xs", embed ? "text-zinc-400" : "text-slate-400")}>Selected: {picked}</p>
+                <p className={cn("text-xs", embed ? "text-zinc-400" : "text-muted-foreground")}>Selected: {picked}</p>
               ) : null}
             </div>
           );
@@ -552,7 +552,7 @@ function AskSkyEmbedPublicFormFields({
                 placeholder={ph || "https://"}
                 className={cn(
                   "h-9 text-base md:text-sm",
-                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                  embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
                 )}
               />
             </div>
@@ -572,7 +572,7 @@ function AskSkyEmbedPublicFormFields({
               placeholder={ph || undefined}
               className={cn(
                 "h-9 text-base md:text-sm",
-                embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-slate-700 bg-slate-900 text-white",
+                embed ? "border-zinc-600 bg-zinc-950/80 text-zinc-100" : "border-border bg-card text-white",
               )}
             />
           </div>

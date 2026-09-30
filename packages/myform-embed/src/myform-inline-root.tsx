@@ -98,7 +98,7 @@ export function MyFormInlineRoot({
   if (done) {
     return (
       <div className={cn(shell, "p-4")}>
-        <p className="rounded-lg border border-emerald-500/35 bg-emerald-950/45 px-3 py-2 text-sm text-emerald-100 backdrop-blur-md">
+        <p className="rounded-lg border border-success/35 bg-emerald-950/45 px-3 py-2 text-sm text-success backdrop-blur-md">
           {done}
         </p>
       </div>

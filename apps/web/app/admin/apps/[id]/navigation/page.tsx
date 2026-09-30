@@ -516,7 +516,7 @@ export default function NavigationManagerPage() {
                       draggingSource: "opacity-50",
                       dropTarget: "bg-muted/60",
                       placeholder:
-                        "h-2 rounded bg-emerald-500/70 mx-2 my-1 transition-all duration-150",
+                        "h-2 rounded bg-success/70 mx-2 my-1 transition-all duration-150",
                     }}
                   />
                 </div>
@@ -622,7 +622,7 @@ function MenuTreeNodeRow({
         type="button"
         onClick={() => onTypeChange(node.id as number, isAppType ? "page" : "app")}
         className={`p-1.5 rounded border shrink-0 ${isAppType
-          ? "bg-emerald-600/20 border-emerald-500/50 text-emerald-400"
+          ? "bg-success/15 border-success/40 text-success"
           : "bg-muted border-border text-muted-foreground hover:text-foreground"
           }`}
         title={isAppType ? "App menu (click to switch to Page)" : "Page link (click to switch to App)"}
@@ -731,7 +731,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onRemove(node.id as number)}
-          className="p-2 rounded-full border border-red-500/40 text-red-400 hover:bg-red-500/10 hover:border-red-500/80"
+          className="p-2 rounded-full border border-red-500/40 text-destructive hover:bg-destructive/10 hover:border-red-500/80"
           title="Remove menu item"
         >
           <Trash2 className="h-4 w-4" />

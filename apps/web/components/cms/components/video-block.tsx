@@ -13,7 +13,7 @@ export function VideoBlock({ videoUrl, title, description }: VideoBlockProps) {
 
   return (
     <section className="w-full">
-      <div className="mx-auto w-full max-w-4xl space-y-3">
+      <div className="mx-auto w-full space-y-3">
         {title && (
           <h2 className="text-lg font-semibold text-foreground text-center">
             {title}

@@ -165,6 +165,8 @@ export interface CreateSubProfileDto {
 /**
  * Profiles Service
  */
+const profilesBySlugsInflight = new Map<string, Promise<{ profiles: any[] }>>();
+
 export const profilesService = {
   async proxyMutationRequest<T>(
     endpoint: string,
@@ -276,19 +278,34 @@ export const profilesService = {
   },
 
   /**
-   * Bulk-fetch profiles by slugs (public endpoint)
+   * Bulk-fetch profiles by slugs (public endpoint).
+   * Reuses an in-flight request for the same slugs so a second mount does not send another call.
    */
   async getProfilesBySlugs(slugs: string[]): Promise<{ profiles: any[] }> {
-    if (slugs.length === 0) return { profiles: [] };
-    try {
-      return await apiRequest<{ profiles: any[] }>("profiles/slugs", {
-        method: "GET",
-        params: { slugs: slugs.join(",") },
-        skipAuth: true,
+    const key = slugs
+      .map((slug) => slug.trim())
+      .filter(Boolean)
+      .sort()
+      .join(",");
+    if (!key) return { profiles: [] };
+
+    const pending = profilesBySlugsInflight.get(key);
+    if (pending) return pending;
+
+    const request = apiRequest<{ profiles: any[] }>("profiles/slugs", {
+      method: "GET",
+      params: { slugs: key },
+      skipAuth: true,
+    })
+      .catch(() => ({ profiles: [] as any[] }))
+      .finally(() => {
+        if (profilesBySlugsInflight.get(key) === request) {
+          profilesBySlugsInflight.delete(key);
+        }
       });
-    } catch {
-      return { profiles: [] };
-    }
+
+    profilesBySlugsInflight.set(key, request);
+    return request;
   },
 
   /**

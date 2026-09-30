@@ -171,7 +171,7 @@ export function FormSubmissionDetailDialog({
 }: FormSubmissionDetailDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-card text-foreground shadow-xl dark:bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle>{submission ? `Submission #${submission.id}` : "Submission"}</DialogTitle>
           <DialogDescription className="text-muted-foreground">

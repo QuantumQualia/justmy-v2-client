@@ -1120,7 +1120,7 @@ function AskSkyChatbotPanel({
           variant="ghost"
           size="sm"
           onClick={onClose}
-          className="h-8 w-8 text-zinc-300 hover:bg-white/10 hover:text-white"
+          className="h-8 w-8 text-zinc-300 hover:bg-card/10 hover:text-white"
           aria-label="Close AskSKY!"
         >
           <X className="h-4 w-4" />
@@ -1337,7 +1337,7 @@ function AskSkyWidgetInner({
           <SkyAvatar size={28} />
           <span>Got Questions?</span>
           {!chatOpen ? (
-            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full border-2 border-white bg-emerald-400" />
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 animate-pulse rounded-full border-2 border-white bg-success" />
           ) : null}
         </button>
       </div>

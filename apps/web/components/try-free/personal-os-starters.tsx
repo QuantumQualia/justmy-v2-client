@@ -126,7 +126,7 @@ export function PersonalOsStarters({ layout = "pills" }: { layout?: "pills" | "t
               type="button"
               disabled={Boolean(busy)}
               onClick={() => start(item)}
-              className="rounded-full border border-[#e6e4f0] bg-white px-4 py-2 text-sm font-semibold hover:border-[#b9aef7] disabled:opacity-60"
+              className="rounded-full border border-[#e6e4f0] bg-card px-4 py-2 text-sm font-semibold hover:border-[#b9aef7] disabled:opacity-60"
             >
               {busy === item.id ? "Starting…" : item.label}
             </button>
@@ -139,8 +139,8 @@ export function PersonalOsStarters({ layout = "pills" }: { layout?: "pills" | "t
   return (
     <section>
       <div className="mb-3">
-        <h2 className="text-lg font-semibold tracking-tight text-slate-900">Start something with Sky</h2>
-        <p className="mt-1 text-sm text-slate-500">Tap one and she actually starts it — not a brochure.</p>
+        <h2 className="text-lg font-semibold tracking-tight text-foreground">Start something with Sky</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Tap one and she actually starts it — not a brochure.</p>
       </div>
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         {STARTERS.map((item) => {
@@ -151,15 +151,15 @@ export function PersonalOsStarters({ layout = "pills" }: { layout?: "pills" | "t
               type="button"
               disabled={Boolean(busy)}
               onClick={() => start(item)}
-              className="group rounded-2xl border border-slate-200/80 bg-white p-4 text-left shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)] transition hover:-translate-y-0.5 hover:border-violet-200 disabled:opacity-60"
+              className="group rounded-2xl border border-border bg-card p-4 text-left shadow-card transition hover:-translate-y-0.5 hover:border-primary/30 disabled:opacity-60"
             >
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-violet-50 text-violet-700 group-hover:bg-violet-100">
+              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-secondary text-primary group-hover:bg-secondary">
                 <Icon className="h-4 w-4" />
               </span>
-              <div className="mt-3 text-sm font-semibold text-slate-900">
+              <div className="mt-3 text-sm font-semibold text-foreground">
                 {busy === item.id ? "Starting…" : item.label}
               </div>
-              <div className="mt-0.5 text-xs text-slate-500">{item.hint}</div>
+              <div className="mt-0.5 text-xs text-muted-foreground">{item.hint}</div>
             </button>
           );
         })}

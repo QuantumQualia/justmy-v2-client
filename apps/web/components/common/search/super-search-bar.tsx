@@ -190,10 +190,10 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
     <div className="relative w-full max-w-2xl mx-auto">
       <form
         onSubmit={handleSubmit}
-        className="relative flex items-center gap-2 md:gap-3 rounded-full border border-emerald-500/30 bg-card/80 px-2 md:px-4 py-1.5 md:py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
+        className="relative flex items-center gap-1.5 md:gap-3 rounded-full border border-success/30 bg-card/80 px-2 md:px-4 py-1.5 md:py-2 shadow-[0_0_40px_rgba(16,185,129,0.35)] backdrop-blur-2xl"
       >
         {/* Leading icon */}
-        <div className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-400 flex-shrink-0">
+        <div className="flex h-6 w-6 md:h-8 md:w-8 items-center justify-center rounded-full bg-success/10 text-success flex-shrink-0">
           <Search className="h-3 w-3 md:h-4 md:w-4" />
         </div>
 
@@ -239,7 +239,7 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
         {/* Right-side controls: loader + mic + submit */}
         <div className="flex items-center gap-1 md:gap-2 flex-shrink-0">
           {isLoading && (
-            <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin text-emerald-400" aria-hidden="true" />
+            <Loader2 className="h-3 w-3 md:h-4 md:w-4 animate-spin text-success" aria-hidden="true" />
           )}
 
           {!businessSearchMode && (
@@ -250,8 +250,8 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
               onClick={handleMicClick}
               disabled={!micSupported}
               className={`h-6 w-6 md:h-8 md:w-8 rounded-full border ${isRecording
-                  ? "border-red-500/50 bg-red-500/20 text-red-300 hover:bg-red-500/30"
-                  : "border-emerald-500/30 bg-emerald-500/5 text-emerald-400 hover:bg-emerald-500/20 hover:text-emerald-300"
+                  ? "border-destructive/40 bg-destructive/100/20 text-red-300 hover:bg-destructive/100/30"
+                  : "border-success/30 bg-success/5 text-success hover:bg-success/20 hover:text-success"
                 } ${micSupported ? "" : "opacity-40 cursor-not-allowed"}`}
               aria-label="Voice search (coming soon)"
             >
@@ -261,16 +261,18 @@ export function SuperSearchBar({ businessSearchMode = false }: SuperSearchBarPro
           <Button
             type="submit"
             size="sm"
-            className="h-6 md:h-8 rounded-full bg-emerald-500 px-2 md:px-4 text-[10px] md:text-xs font-semibold text-black hover:bg-emerald-400"
+            className="h-7 w-7 shrink-0 rounded-full bg-success p-0 text-black hover:bg-success md:h-8 md:w-auto md:px-4 md:text-xs md:font-semibold"
             disabled={isLoading}
+            aria-label={isLoading ? "Searching" : "Search"}
           >
-            {isLoading ? "Searching…" : "Search"}
+            <Search className="h-3.5 w-3.5 md:hidden" />
+            <span className="hidden md:inline">{isLoading ? "Searching…" : "Search"}</span>
           </Button>
         </div>
 
         {/* Optional mic error helper text */}
         {micError && (
-          <span className="absolute -bottom-5 left-4 text-[10px] text-red-400">
+          <span className="absolute -bottom-5 left-4 text-[10px] text-destructive">
             {micError}
           </span>
         )}

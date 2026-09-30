@@ -50,7 +50,7 @@ export function MycardGoogleRating({
                 ? "fill-amber-400 text-amber-400"
                 : isLight
                   ? "text-border"
-                  : "text-slate-600",
+                  : "text-muted-foreground",
             )}
           />
         ))}
@@ -59,7 +59,7 @@ export function MycardGoogleRating({
         <span
           className={cn(
             "text-[11px]",
-            isLight ? "text-muted-foreground" : "text-slate-400",
+            isLight ? "text-muted-foreground" : "text-muted-foreground",
           )}
         >
           ({reviews.toLocaleString()})
@@ -68,7 +68,7 @@ export function MycardGoogleRating({
       {href ? (
         <>
           <span
-            className={cn("text-[11px]", isLight ? "text-muted-foreground" : "text-slate-500")}
+            className={cn("text-[11px]", isLight ? "text-muted-foreground" : "text-muted-foreground")}
             aria-hidden
           >
             ·
@@ -81,7 +81,7 @@ export function MycardGoogleRating({
               "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors",
               isLight
                 ? "border border-border bg-[var(--hotlink-bg)] text-foreground hover:border-primary/40"
-                : "border border-white/70 bg-white text-slate-900 hover:bg-white/90",
+                : "border border-white/70 bg-card text-foreground hover:bg-card/90",
             )}
           >
             Write a review

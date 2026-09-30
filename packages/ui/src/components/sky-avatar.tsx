@@ -25,9 +25,9 @@ export function SkyAvatar({ className, size = 32, title = "Sky" }: SkyAvatarProp
       <title>{title}</title>
       <defs>
         <linearGradient id={gradientId} x1="12" y1="8" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#818cf8" />
-          <stop offset="0.55" stopColor="#6366f1" />
-          <stop offset="1" stopColor="#38bdf8" />
+          <stop stopColor="var(--primary)" />
+          <stop offset="0.55" stopColor="var(--primary)" />
+          <stop offset="1" stopColor="var(--accent)" />
         </linearGradient>
         <radialGradient id={glowId} cx="32" cy="22" r="28" gradientUnits="userSpaceOnUse">
           <stop stopColor="#fff" stopOpacity="0.35" />

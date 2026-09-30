@@ -43,7 +43,7 @@ export function ReferAFriend() {
           <div className="flex flex-col">
             <Link
               href={`/${row.original.slug}`}
-              className="font-medium text-emerald-300 hover:text-emerald-200 hover:underline"
+              className="font-medium text-success hover:text-success hover:underline"
             >
               {row.original.name}
             </Link>

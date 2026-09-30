@@ -186,7 +186,7 @@ export function DataTable<TData, TValue>({
                     onClick={() => handlePageChange(pageNum)}
                     className={
                       currentPage === pageNum
-                        ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                        ? ""
                         : "border-border bg-background text-foreground hover:bg-secondary hover:text-foreground"
                     }
                   >

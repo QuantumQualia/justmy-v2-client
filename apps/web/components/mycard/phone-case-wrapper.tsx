@@ -13,7 +13,7 @@ export default function PhoneCaseWrapper({
   variant = "dark",
 }: PhoneCaseWrapperProps) {
   const screenBgClass =
-    variant === "light" ? "bg-background" : "bg-slate-900";
+    variant === "light" ? "bg-background" : "bg-card";
   // Phone dimensions: iPhone 14 Pro size (375px width, 812px height)
   // Adding padding for phone frame, total screen area is ~375x812
   const phoneWidth = 375;
@@ -54,7 +54,7 @@ export default function PhoneCaseWrapper({
           {/* Home Indicator (for modern phones) */}
           <div
             className={`absolute bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 rounded-full ${
-              variant === "light" ? "bg-foreground/15" : "bg-white/30"
+              variant === "light" ? "bg-foreground/15" : "bg-card/30"
             }`}
           />
         </div>

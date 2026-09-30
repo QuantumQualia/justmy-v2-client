@@ -39,7 +39,7 @@ export function MycardLiveContactBar({
   const navBtnClass = `absolute top-1/2 z-10 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full border transition-all duration-200 active:scale-95 ${
     isLightMycard
       ? "border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] text-foreground/60 hover:text-foreground"
-      : "border-slate-700 bg-slate-900/50 text-white/60 hover:text-white"
+      : "border-border bg-card/50 text-white/60 hover:text-white"
   }`;
 
   return (

@@ -8,6 +8,8 @@ import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/com
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
+import { LegacyHtml } from "@/components/common/legacy-html";
+import { legacyPlainText } from "@/lib/legacy-html";
 import { PROFILE_KIND } from "@/lib/os-types";
 
 interface MyCardDesktopDefaultViewProps {
@@ -122,9 +124,7 @@ export function MyCardDesktopBizView({
 
             <div className="flex flex-col gap-1">
               <h2 className="text-center text-lg font-bold text-foreground font-serif">About</h2>
-              <p className="text-center text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {data.about}
-              </p>
+              <LegacyHtml value={data.about} className="text-center text-sm text-foreground leading-relaxed" />
             </div>
           </aside>
 
@@ -143,7 +143,7 @@ export function MyCardDesktopBizView({
               <h1 className="text-3xl font-bold text-white font-serif md:text-4xl">
                 {data.name}
               </h1>
-              <p className="mt-2 text-sm text-white/85 md:text-base">{data.tagline}</p>
+              <p className="mt-2 text-sm text-white/85 md:text-base">{legacyPlainText(data.tagline)}</p>
             </div>
           </section>
         </div>
@@ -172,9 +172,7 @@ export function MyCardDesktopBizView({
         <div className="pt-6">
           {activeTab === "about" && data.about ? (
             <div className="max-w-5xl space-y-4">
-              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {data.about}
-              </p>
+              <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
             </div>
           ) : null}
 

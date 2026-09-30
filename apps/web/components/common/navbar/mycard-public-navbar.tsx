@@ -140,9 +140,9 @@ export function MycardPublicNavbar({
           "hidden lg:flex",
           "top-[max(1rem,env(safe-area-inset-top))]",
           "right-[max(1rem,env(safe-area-inset-right))]",
-          "justmy-corners-lg border border-white/70 bg-white/92 shadow-lg cursor-pointer",
+          "justmy-corners-lg border border-white/70 bg-card/92 shadow-lg cursor-pointer",
           "backdrop-blur-[20px]",
-          "transition-colors hover:bg-white active:scale-[0.98]"
+          "transition-colors hover:bg-card active:scale-[0.98]"
         )}
         style={{
           WebkitBackdropFilter: "blur(20px)",

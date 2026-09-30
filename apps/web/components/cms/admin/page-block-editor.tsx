@@ -1,8 +1,8 @@
 "use client";
 
 import type React from "react";
-import { useState } from "react";
-import { ChevronUp, ChevronDown, Trash2, GripVertical, Minus, Settings, Monitor, Tablet, Smartphone, ChevronRight, Plus, Copy, Maximize2, AlignCenter } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ChevronUp, ChevronDown, Trash2, GripVertical, Minus, Settings, Monitor, Tablet, Smartphone, ChevronRight, Plus, Copy, Maximize2, AlignCenter, CircleHelp } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
 import { Label } from "@workspace/ui/components/label";
 import { cn } from "@workspace/ui/lib/utils";
@@ -63,6 +63,9 @@ interface PageBlockEditorProps {
   onUpdateNestedBlock?: (block: PageBlock) => void;
   onDeleteNestedBlock?: () => void;
   isNested?: boolean;
+  surface?: "default" | "light";
+  /** Container and full-width controls. Hidden for profile authors. */
+  showLayoutControls?: boolean;
 }
 
 export function PageBlockEditor({
@@ -75,11 +78,31 @@ export function PageBlockEditor({
   onDuplicate,
   isFirst,
   isLast,
+  surface = "default",
+  showLayoutControls = true,
 }: PageBlockEditorProps) {
   const [isExpanded, setIsExpanded] = useState(true);
   const [showStyles, setShowStyles] = useState(false);
   const [activeBreakpoint, setActiveBreakpoint] = useState<Breakpoint>("desktop");
   const [isDragOverHere, setIsDragOverHere] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const helpRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!helpOpen) return;
+    const onPointerDown = (event: PointerEvent) => {
+      if (!helpRef.current?.contains(event.target as Node)) setHelpOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setHelpOpen(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [helpOpen]);
 
   const breakpoints: { key: Breakpoint; label: string; icon: React.ReactNode }[] = [
     { key: "mobile", label: "Mobile", icon: <Smartphone className="h-4 w-4" /> },
@@ -293,16 +316,19 @@ export function PageBlockEditor({
     }
   };
 
-  const getBlockTypeLabel = () => {
-    const config = PAGE_BLOCK_TYPES.find((b) => b.value === block.blockType);
-    return config?.label || block.blockType;
-  };
+  const blockTypeConfig = PAGE_BLOCK_TYPES.find((b) => b.value === block.blockType);
+  const getBlockTypeLabel = () => blockTypeConfig?.label || block.blockType;
 
   return (
     <div
       className={cn(
-        "bg-muted rounded-lg border border-border w-full max-w-full transition-all duration-150",
-        isDragOverHere && "border-blue-500/70 shadow-[0_0_0_1px_rgba(59,130,246,0.6)] bg-muted translate-y-0.5"
+        surface === "light"
+          ? "w-full max-w-full rounded-2xl border border-border bg-background transition-all duration-150"
+          : "bg-muted rounded-lg border border-border w-full max-w-full transition-all duration-150",
+        isDragOverHere &&
+          (surface === "light"
+            ? "translate-y-0.5 border-ring bg-accent"
+            : "border-blue-500/70 shadow-[0_0_0_1px_rgba(59,130,246,0.6)] bg-muted translate-y-0.5")
       )}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -313,107 +339,134 @@ export function PageBlockEditor({
       }}
     >
       {/* Block Header */}
-      <div className="flex items-center justify-between p-4 border-b border-border">
-        <div className="flex items-center gap-3">
+      <div ref={helpRef} className="border-b border-border">
+        <div className="flex items-center gap-1.5 px-3 py-2">
           <div
-            className="h-5 w-5 flex items-center justify-center text-muted-foreground cursor-move"
+            className="flex h-8 w-6 shrink-0 items-center justify-center text-muted-foreground cursor-move"
             draggable
             onDragStart={handleDragStart}
             onDragEnd={() => setIsDragOverHere(false)}
           >
             <GripVertical className="h-4 w-4" />
           </div>
-          <span className="font-medium text-foreground">{getBlockTypeLabel()}</span>
-          {/* Container Style Toggle */}
-          <div className="flex items-center gap-0.5 ml-2 bg-card rounded-md p-0.5">
+          <span className="min-w-0 truncate text-sm font-medium text-foreground">
+            {getBlockTypeLabel()}
+          </span>
+          {blockTypeConfig?.description ? (
             <button
-              onClick={() => updateContainerStyle("container")}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
-                containerStyle === "container"
-                  ? "bg-blue-600/80 text-white"
-                  : "text-muted-foreground hover:text-muted-foreground"
-              }`}
-              title="Container (centered, max-width)"
+              type="button"
+              aria-label="About this block"
+              aria-expanded={helpOpen}
+              onClick={() => setHelpOpen((open) => !open)}
+              className={cn(
+                "inline-flex size-7 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground",
+                helpOpen && "bg-muted text-foreground",
+              )}
             >
-              <AlignCenter className="h-3 w-3" />
-              Container
+              <CircleHelp className="h-3.5 w-3.5" />
             </button>
-            <button
-              onClick={() => updateContainerStyle("full-width")}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-medium transition-colors ${
-                containerStyle === "full-width"
-                  ? "bg-blue-600/80 text-white"
-                  : "text-muted-foreground hover:text-muted-foreground"
-              }`}
-              title="Full Width (edge-to-edge)"
-            >
-              <Maximize2 className="h-3 w-3" />
-              Full Width
-            </button>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setShowStyles(!showStyles)}
-            className={`h-8 px-3 rounded-md border text-xs ${
-              showStyles
-                ? "border-blue-600/70 text-blue-400 bg-blue-600/10"
-                : "border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent"
-            }`}
-          >
-            <Settings className="h-3 w-3 mr-1.5" />
-            Styles
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, "up")}
-            disabled={isFirst}
-            className="h-8 w-8 p-0 rounded-md border border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent disabled:opacity-40"
-          >
-            <ChevronUp className="h-3 w-3" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => onMove(index, "down")}
-            disabled={isLast}
-            className="h-8 w-8 p-0 rounded-md border border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent disabled:opacity-40"
-          >
-            <ChevronDown className="h-3 w-3" />
-          </Button>
-          {onDuplicate && (
+          ) : null}
+          {showLayoutControls ? (
+            <div className="ml-1 flex shrink-0 items-center rounded-full bg-muted p-0.5">
+              <button
+                type="button"
+                onClick={() => updateContainerStyle("container")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  containerStyle === "container"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                title="Container (centered, max-width)"
+              >
+                <AlignCenter className="h-3 w-3" />
+                Container
+              </button>
+              <button
+                type="button"
+                onClick={() => updateContainerStyle("full-width")}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium transition-colors",
+                  containerStyle === "full-width"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                title="Full Width (edge-to-edge)"
+              >
+                <Maximize2 className="h-3 w-3" />
+                Full Width
+              </button>
+            </div>
+          ) : null}
+          <div className="ml-auto flex shrink-0 items-center">
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onDuplicate(block)}
-              className="h-8 w-8 p-0 rounded-md border border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent"
-              title="Duplicate Block"
+              onClick={() => setShowStyles(!showStyles)}
+              className={cn(
+                "h-8 rounded-full px-2.5 text-xs text-muted-foreground",
+                showStyles && "bg-accent text-foreground",
+              )}
             >
-              <Copy className="h-3 w-3" />
+              <Settings className="h-3.5 w-3.5" />
+              Styles
             </Button>
-          )}
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsExpanded(!isExpanded)}
-            className="h-8 w-8 p-0 rounded-md border border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent"
-            title={isExpanded ? "Collapse" : "Expand"}
-          >
-            {isExpanded ? <Minus className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onDelete}
-            className="h-8 w-8 p-0 rounded-md border border-red-700/70 text-red-400 hover:text-red-200 hover:bg-red-800/40"
-            title="Delete Block"
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onMove(index, "up")}
+              disabled={isFirst}
+              className="size-8 text-muted-foreground"
+              title="Move up"
+            >
+              <ChevronUp className="h-3.5 w-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onMove(index, "down")}
+              disabled={isLast}
+              className="size-8 text-muted-foreground"
+              title="Move down"
+            >
+              <ChevronDown className="h-3.5 w-3.5" />
+            </Button>
+            {onDuplicate && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onDuplicate(block)}
+                className="size-8 text-muted-foreground"
+                title="Duplicate Block"
+              >
+                <Copy className="h-3.5 w-3.5" />
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="size-8 text-muted-foreground"
+              title={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? <Minus className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onDelete}
+              className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              title="Delete Block"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          </div>
         </div>
+        {helpOpen && blockTypeConfig?.description ? (
+          <p className="px-4 pb-3 text-xs leading-relaxed text-muted-foreground">
+            {blockTypeConfig.description}
+          </p>
+        ) : null}
       </div>
 
       {/* Block Content */}
@@ -462,7 +515,7 @@ export function PageBlockEditor({
                           value={getStyleValue("paddingTop", activeBreakpoint)}
                           onChange={(e) => updateStyle("paddingTop", e.target.value, activeBreakpoint)}
                           placeholder="16px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -472,7 +525,7 @@ export function PageBlockEditor({
                           value={getStyleValue("paddingRight", activeBreakpoint)}
                           onChange={(e) => updateStyle("paddingRight", e.target.value, activeBreakpoint)}
                           placeholder="16px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -482,7 +535,7 @@ export function PageBlockEditor({
                           value={getStyleValue("paddingBottom", activeBreakpoint)}
                           onChange={(e) => updateStyle("paddingBottom", e.target.value, activeBreakpoint)}
                           placeholder="16px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -492,7 +545,7 @@ export function PageBlockEditor({
                           value={getStyleValue("paddingLeft", activeBreakpoint)}
                           onChange={(e) => updateStyle("paddingLeft", e.target.value, activeBreakpoint)}
                           placeholder="16px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                     </div>
@@ -507,7 +560,7 @@ export function PageBlockEditor({
                           value={getStyleValue("marginTop", activeBreakpoint)}
                           onChange={(e) => updateStyle("marginTop", e.target.value, activeBreakpoint)}
                           placeholder="24px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -517,7 +570,7 @@ export function PageBlockEditor({
                           value={getStyleValue("marginRight", activeBreakpoint)}
                           onChange={(e) => updateStyle("marginRight", e.target.value, activeBreakpoint)}
                           placeholder="24px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -527,7 +580,7 @@ export function PageBlockEditor({
                           value={getStyleValue("marginBottom", activeBreakpoint)}
                           onChange={(e) => updateStyle("marginBottom", e.target.value, activeBreakpoint)}
                           placeholder="24px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                       <div>
@@ -537,7 +590,7 @@ export function PageBlockEditor({
                           value={getStyleValue("marginLeft", activeBreakpoint)}
                           onChange={(e) => updateStyle("marginLeft", e.target.value, activeBreakpoint)}
                           placeholder="24px"
-                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full mt-0.5 rounded border border-input bg-background px-2 py-1.5 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                         />
                       </div>
                     </div>
@@ -549,7 +602,7 @@ export function PageBlockEditor({
                       value={getStyleValue("gap", activeBreakpoint)}
                       onChange={(e) => updateStyle("gap", e.target.value, activeBreakpoint)}
                       placeholder="16px"
-                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
@@ -571,7 +624,7 @@ export function PageBlockEditor({
                         value={getStyleValue("backgroundColor")}
                         onChange={(e) => updateStyle("backgroundColor", e.target.value)}
                         placeholder="#000000"
-                        className="flex-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </div>
@@ -589,7 +642,7 @@ export function PageBlockEditor({
                         value={getStyleValue("textColor")}
                         onChange={(e) => updateStyle("textColor", e.target.value)}
                         placeholder="#ffffff"
-                        className="flex-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </div>
@@ -608,7 +661,7 @@ export function PageBlockEditor({
                       value={getStyleValue("maxWidth", activeBreakpoint)}
                       onChange={(e) => updateStyle("maxWidth", e.target.value, activeBreakpoint)}
                       placeholder="e.g. 800px or 100%"
-                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                   <div>
@@ -618,7 +671,7 @@ export function PageBlockEditor({
                       value={getStyleValue("border")}
                       onChange={(e) => updateStyle("border", e.target.value)}
                       placeholder="1px solid #333"
-                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                   <div>
@@ -628,7 +681,7 @@ export function PageBlockEditor({
                       value={getStyleValue("borderRadius")}
                       onChange={(e) => updateStyle("borderRadius", e.target.value)}
                       placeholder="8px"
-                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>

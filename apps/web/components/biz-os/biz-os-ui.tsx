@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   CreditCard,
   Crosshair,
+  FileText,
   Home,
   Inbox,
   Radar,
@@ -17,6 +18,8 @@ import {
   Target,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Card } from "@workspace/ui/components/card";
+import { Progress } from "@workspace/ui/components/progress";
 import { cn } from "@workspace/ui/lib/utils";
 import { useBizOsHome, useBizOsProfile } from "@/components/biz-os/use-biz-os-profile";
 import { isPlatformAdmin } from "@/lib/auth/session-user";
@@ -26,6 +29,7 @@ import { ACCOUNT_TIER, currentOsLabel, hasAccess } from "@/lib/plan-features";
 export const BIZ_OS_NAV = [
   { href: "/biz-os", label: "Home", icon: Home, exact: true },
   { href: "/biz-os/onboard", label: "myCARD", icon: CreditCard },
+  { href: "/biz-os/content", label: "Content", icon: FileText },
   { href: "/biz-os/battle-plans", label: "Battle Plans", icon: Crosshair },
   { href: "/biz-os/skyscan", label: "SkySCAN", icon: Radar, businessOnly: true },
   {
@@ -60,7 +64,7 @@ export function BizOsSubnav() {
 
   return (
     <nav
-      className="border-b border-violet-100/80 bg-white/90 backdrop-blur-md"
+      className="border-b border-primary/20 bg-card/90 backdrop-blur-md"
       aria-label={currentOsLabel(osName)}
     >
       <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2">
@@ -74,8 +78,8 @@ export function BizOsSubnav() {
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-violet-600 text-white shadow-sm shadow-violet-600/20"
-                  : "text-slate-600 hover:bg-violet-50 hover:text-violet-800",
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                  : "text-muted-foreground hover:bg-secondary hover:text-primary",
               )}
             >
               <Icon className="h-3.5 w-3.5" />
@@ -89,8 +93,8 @@ export function BizOsSubnav() {
             className={cn(
               "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
               navIsActive(pathname, "/admin/biz-os/queue")
-                ? "bg-violet-600 text-white shadow-sm shadow-violet-600/20"
-                : "text-slate-600 hover:bg-violet-50 hover:text-violet-800",
+                ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                : "text-muted-foreground hover:bg-secondary hover:text-primary",
             )}
           >
             <Inbox className="h-3.5 w-3.5" />
@@ -136,11 +140,11 @@ export function BizOsSetupSteps() {
                 aria-current={isCurrent ? "step" : undefined}
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
-                  isCurrent && "bg-violet-600 text-white shadow-sm shadow-violet-600/20",
-                  done && "border border-violet-200 bg-violet-50 text-violet-800 hover:border-violet-300",
+                  isCurrent && "bg-primary text-primary-foreground shadow-sm shadow-primary/20",
+                  done && "border border-primary/30 bg-secondary text-primary hover:border-primary/40",
                   !isCurrent &&
                     !done &&
-                    "border border-slate-200 bg-white text-slate-500 hover:border-violet-200 hover:text-violet-800",
+                    "border border-border bg-card text-muted-foreground hover:border-primary/30 hover:text-primary",
                 )}
               >
                 {done ? <Check className="h-3 w-3" aria-hidden /> : <span>{i + 1}.</span>}
@@ -150,7 +154,7 @@ export function BizOsSetupSteps() {
           );
         })}
       </ol>
-      <p className="mt-2 text-xs text-slate-500">{next}</p>
+      <p className="mt-2 text-xs text-muted-foreground">{next}</p>
     </div>
   );
 }
@@ -192,24 +196,23 @@ export function OsPaneSwitch<T extends string>({
 }) {
   return (
     <div
-      className="flex shrink-0 rounded-full border border-slate-200 bg-white p-1 lg:hidden"
+      className="flex shrink-0 rounded-full border border-border bg-card p-1 lg:hidden"
       role="tablist"
       aria-label="Workspace"
     >
       {options.map((option) => (
-        <button
+        <Button
           key={option.id}
           type="button"
           role="tab"
           aria-selected={value === option.id}
-          className={cn(
-            "flex-1 rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
-            value === option.id ? "bg-violet-600 text-white shadow-sm shadow-violet-600/20" : "text-slate-600",
-          )}
+          size="sm"
+          variant={value === option.id ? "default" : "ghost"}
+          className="flex-1"
           onClick={() => onChange(option.id)}
         >
           {option.label}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -259,11 +262,11 @@ export function BizOsHeader({
           {actions ? <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">{actions}</div> : null}
         </div>
         <div className="min-w-0">
-          <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+          <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
             {title}
           </h1>
           {description ? (
-            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500 sm:mt-2 sm:line-clamp-none">
+            <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:line-clamp-none">
               {description}
             </p>
           ) : null}
@@ -276,13 +279,13 @@ export function BizOsHeader({
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0 max-w-2xl">
         {eyebrow ? (
-          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-violet-600">{eyebrow}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">{eyebrow}</p>
         ) : null}
-        <h1 className="mt-1 text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:text-3xl">
+        <h1 className="mt-1 text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-3xl">
           {title}
         </h1>
         {description ? (
-          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-slate-500 sm:mt-2 sm:line-clamp-none">
+          <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted-foreground sm:mt-2 sm:line-clamp-none">
             {description}
           </p>
         ) : null}
@@ -302,15 +305,11 @@ export function BizOsCard({
   padded?: boolean;
 }) {
   return (
-    <section
-      className={cn(
-        "rounded-3xl border border-slate-200/80 bg-white shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)]",
-        padded && "p-5 sm:p-6",
-        className,
-      )}
+    <Card
+      className={cn("gap-0 rounded-3xl py-0 shadow-card", padded && "p-5 sm:p-6", className)}
     >
       {children}
-    </section>
+    </Card>
   );
 }
 
@@ -339,24 +338,21 @@ export function BizOsSetupNotice() {
   ].filter(Boolean) as Array<{ href: string; label: string; body: string }>;
 
   return (
-    <BizOsCard className="border-violet-200 bg-violet-50/50">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-violet-600">Finish setup</p>
-      <p className="mt-1 text-sm text-slate-600">
+    <BizOsCard className="border-primary/30 bg-secondary/50">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-primary">Finish setup</p>
+      <p className="mt-1 text-sm text-muted-foreground">
         You skipped a step during onboarding. Pick up where you left off.
       </p>
       <ul className="mt-4 space-y-3">
         {missing.map((item) => (
           <li key={item.href} className="flex flex-wrap items-center justify-between gap-2">
             <div>
-              <p className="text-sm font-semibold text-slate-900">{item.label}</p>
-              <p className="text-sm text-slate-500">{item.body}</p>
+              <p className="text-sm font-semibold text-foreground">{item.label}</p>
+              <p className="text-sm text-muted-foreground">{item.body}</p>
             </div>
-            <Link
-              href={item.href}
-              className="rounded-full bg-violet-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm shadow-violet-600/20"
-            >
-              Continue
-            </Link>
+            <Button asChild size="sm">
+              <Link href={item.href}>Continue</Link>
+            </Button>
           </li>
         ))}
       </ul>
@@ -366,37 +362,30 @@ export function BizOsSetupNotice() {
 
 export function BizOsProgress({ value }: { value: number }) {
   const pct = Math.max(0, Math.min(100, Number(value) || 0));
-  return (
-    <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-      <div
-        className="h-full rounded-full bg-linear-to-r from-violet-600 to-cyan-400 transition-[width]"
-        style={{ width: `${pct}%` }}
-      />
-    </div>
-  );
+  return <Progress value={pct} />;
 }
 
 export function BizOsSkeleton({ lines = 3 }: { lines?: number }) {
   return (
     <BizOsPage aria-busy="true">
       <div className="space-y-2">
-        <div className="h-3 w-28 animate-pulse rounded bg-violet-100" />
-        <div className="h-8 w-72 max-w-full animate-pulse rounded-lg bg-slate-200/80" />
-        <div className="h-4 w-96 max-w-full animate-pulse rounded bg-slate-200/60" />
+        <div className="h-3 w-28 animate-pulse rounded bg-secondary" />
+        <div className="h-8 w-72 max-w-full animate-pulse rounded-lg bg-muted" />
+        <div className="h-4 w-96 max-w-full animate-pulse rounded bg-muted" />
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <BizOsCard className="lg:col-span-2">
           <div className="space-y-3">
             {Array.from({ length: Math.max(lines, 4) }).map((_, i) => (
-              <div key={i} className="h-4 animate-pulse rounded bg-slate-100" style={{ width: `${88 - i * 12}%` }} />
+              <div key={i} className="h-4 animate-pulse rounded bg-muted" style={{ width: `${88 - i * 12}%` }} />
             ))}
           </div>
         </BizOsCard>
         <BizOsCard>
           <div className="space-y-3">
-            <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
-            <div className="h-16 animate-pulse rounded-2xl bg-slate-100" />
-            <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+            <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+            <div className="h-16 animate-pulse rounded-2xl bg-muted" />
+            <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
           </div>
         </BizOsCard>
       </div>
@@ -414,10 +403,10 @@ export function BizOsEmpty({
   action?: ReactNode;
 }) {
   return (
-    <BizOsCard className="border-dashed bg-violet-50/40 text-center">
-      <Sparkles className="mx-auto h-6 w-6 text-violet-500" />
+    <BizOsCard className="border-dashed bg-secondary/40 text-center">
+      <Sparkles className="mx-auto h-6 w-6 text-primary" />
       <h2 className="mt-3 text-lg font-semibold">{title}</h2>
-      <p className="mx-auto mt-1 max-w-md text-sm text-slate-500">{body}</p>
+      <p className="mx-auto mt-1 max-w-md text-sm text-muted-foreground">{body}</p>
       {action ? <div className="mt-4 flex justify-center">{action}</div> : null}
     </BizOsCard>
   );
@@ -427,7 +416,7 @@ export function ComingSoonBadge({ className }: { className?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500",
+        "inline-flex items-center rounded-full border border-border bg-muted px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground",
         className,
       )}
     >

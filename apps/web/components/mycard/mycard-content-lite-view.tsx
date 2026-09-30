@@ -15,6 +15,7 @@ import {
 } from "@/lib/services/content";
 import { contentQueryKeys, firstSortedTab } from "@/lib/query/content-query-keys";
 import { PROFILE_KIND } from "@/lib/os-types";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 const PAGE_SIZE = 10;
 
@@ -202,7 +203,7 @@ export function MyCardContentLiteView({
           const post = item.post;
           const label = post?.title?.trim() || `Post #${item.postId}`;
           const slug = post?.slug?.trim();
-          const excerpt = post?.excerpt?.trim() ?? "";
+          const excerpt = legacyPlainText(post?.excerpt);
           const href = slug ? `/blog/${encodeURIComponent(slug)}` : null;
           const ogUrl = resolveContentPostOgImageUrl(post ?? undefined);
           const seoDescription = post?.seo?.description?.trim() ?? "";
@@ -215,12 +216,12 @@ export function MyCardContentLiteView({
               className={`group flex items-stretch gap-0 overflow-hidden rounded-lg rounded-br-none border backdrop-blur-sm transition-all duration-200 ${
                 isLight
                   ? "border-border bg-card/70 hover:border-primary/30 hover:shadow-lg"
-                  : "border-slate-700/50 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
+                  : "border-border/50 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10"
               }`}
             >
               <div
                 className={`flex min-h-0 w-28 shrink-0 self-stretch overflow-hidden border-r ${
-                  isLight ? "border-border bg-card" : "border-slate-700/40 bg-slate-800/80"
+                  isLight ? "border-border bg-card" : "border-border/40 bg-muted/80"
                 }`}
               >
                 {href ? (
@@ -266,7 +267,7 @@ export function MyCardContentLiteView({
                   {excerpt ? (
                     <p
                       className={`mt-1 line-clamp-2 text-xs ${
-                        isLight ? "text-muted-foreground" : "text-slate-400/80"
+                        isLight ? "text-muted-foreground" : "text-muted-foreground/80"
                       }`}
                     >
                       {excerpt}
@@ -279,7 +280,7 @@ export function MyCardContentLiteView({
                     className={`mt-auto shrink-0 cursor-pointer transition-colors ${
                         isLight
                           ? "text-accent group-hover:text-accent"
-                          : "text-slate-400 group-hover:text-blue-400"
+                          : "text-muted-foreground group-hover:text-blue-400"
                     }`}
                     aria-label={`Share ${label}`}
                     title="Share"

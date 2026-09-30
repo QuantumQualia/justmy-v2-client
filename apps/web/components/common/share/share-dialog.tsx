@@ -17,6 +17,8 @@ export interface SharePayload {
   imageUrl?: string;
   /** Optional label for the content owner (e.g. profile name, business name) */
   entityLabel?: string;
+  /** Dialog title. Profile shares keep the myCARD heading. */
+  heading?: string;
 }
 
 interface ShareDialogProps {
@@ -37,7 +39,7 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const { title, description, url, imageUrl, entityLabel } = payload;
+  const { title, description, url, imageUrl, entityLabel, heading } = payload;
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
@@ -69,7 +71,7 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted">
-          <h2 className="text-lg font-semibold text-foreground">Share myCARD</h2>
+          <h2 className="text-lg font-semibold text-foreground">{heading || "Share myCARD"}</h2>
           <button
             onClick={onClose}
             className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-accent text-muted-foreground cursor-pointer"
@@ -95,7 +97,7 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
           {/* Title / description */}
           <div className="text-center space-y-1">
             {entityLabel && (
-              <div className="text-xs font-semibold tracking-wide text-emerald-400 uppercase">
+              <div className="text-xs font-semibold tracking-wide text-success uppercase">
                 {entityLabel}
               </div>
             )}
@@ -169,7 +171,7 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
             </div>
             <Button
               size="sm"
-              className="cursor-pointer rounded-full bg-emerald-500/90 hover:bg-emerald-400 text-slate-900 text-xs font-semibold px-5 shadow-md shadow-emerald-500/30 transition-colors"
+              className="cursor-pointer rounded-full bg-success/90 hover:bg-success text-foreground text-xs font-semibold px-5 shadow-md shadow-success/30 transition-colors"
               onClick={handleCopy}
               type="button"
             >

@@ -336,8 +336,8 @@ export function NewsMarketNav({
         data-site-chrome
         className={
           sticky
-            ? "sticky top-[var(--impersonation-banner-h,0px)] z-40 border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
-            : "border-b border-slate-200/80 bg-[#f3f4f6]/90 backdrop-blur-xl"
+            ? "sticky top-[var(--impersonation-banner-h,0px)] z-40 border-b border-border bg-card/90 backdrop-blur-xl"
+            : "border-b border-border bg-card/90 backdrop-blur-xl"
         }
       >
       <div className="mx-auto max-w-7xl px-3 py-2.5 sm:px-6 sm:py-3">
@@ -352,10 +352,10 @@ export function NewsMarketNav({
                 alt=""
                 width={32}
                 height={32}
-                className="h-8 w-8 rounded-lg object-contain shadow-sm shadow-violet-500/20"
+                className="h-8 w-8 rounded-lg object-contain shadow-sm shadow-primary/20"
                 priority
               />
-              <span className="hidden text-[15px] font-bold tracking-tight text-slate-900 lg:inline">
+              <span className="hidden text-[15px] font-bold tracking-tight text-foreground lg:inline">
                 JustMy
               </span>
             </Link>
@@ -368,24 +368,24 @@ export function NewsMarketNav({
                 Zip code
               </label>
               <div
-                className={`relative inline-flex h-9 min-w-0 items-center gap-1.5 rounded-full border bg-white pl-2.5 shadow-sm ${
+                className={`relative inline-flex h-9 min-w-0 items-center gap-1.5 rounded-full border bg-card pl-2.5 shadow-sm ${
                   zipError
                     ? "border-red-300"
                     : hasMarketZip
-                      ? "border-slate-200"
-                      : "border-violet-200 shadow-violet-500/10"
+                      ? "border-border"
+                      : "border-primary/30 shadow-primary/10"
                 }`}
               >
                 <MapPin
-                  className="pointer-events-none h-3.5 w-3.5 shrink-0 text-violet-500"
+                  className="pointer-events-none h-3.5 w-3.5 shrink-0 text-primary"
                   aria-hidden
                 />
                 <span
                   id="news-market-zip-status"
                   className={`hidden max-w-[8rem] truncate text-xs font-semibold sm:inline ${
                     hasMarketZip && cityName
-                      ? "text-violet-600"
-                      : "text-slate-500"
+                      ? "text-primary"
+                      : "text-muted-foreground"
                   }`}
                 >
                   {hasMarketZip && cityName ? cityName : "Your city"}
@@ -424,13 +424,13 @@ export function NewsMarketNav({
                   aria-describedby={
                     zipError ? "news-market-zip-error" : "news-market-zip-status"
                   }
-                  className={`h-9 w-[6.5rem] border-0 bg-transparent px-0 pr-3 text-base font-semibold tracking-wide text-slate-800 outline-none placeholder:font-medium placeholder:text-slate-400 focus:ring-0 disabled:opacity-60 md:w-[5.5rem] md:text-xs lg:w-24 ${
+                  className={`h-9 w-[6.5rem] border-0 bg-transparent px-0 pr-3 text-base font-semibold tracking-wide text-foreground outline-none placeholder:font-medium placeholder:text-muted-foreground focus:ring-0 disabled:opacity-60 md:w-[5.5rem] md:text-xs lg:w-24 ${
                     zipLoading ? "pr-7" : ""
                   }`}
                 />
                 {zipLoading ? (
                   <Loader2
-                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-violet-500"
+                    className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 animate-spin text-primary"
                     aria-hidden
                   />
                 ) : null}
@@ -464,14 +464,14 @@ export function NewsMarketNav({
                 <button
                   type="button"
                   onClick={() => setSidebarOpen(true)}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white shadow-sm transition hover:border-slate-300 hover:bg-slate-50 lg:w-auto lg:gap-1.5 lg:px-2.5"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card shadow-sm transition hover:border-border hover:bg-muted lg:w-auto lg:gap-1.5 lg:px-2.5"
                   aria-label={`Account menu for ${authLabel}`}
                 >
                   <NewsAccountAvatar
                     photoUrl={profilePhoto || authUser.avatarUrl}
                     label={authLabel ?? "Account"}
                   />
-                  <span className="hidden max-w-28 truncate text-xs font-semibold text-slate-800 lg:inline">
+                  <span className="hidden max-w-28 truncate text-xs font-semibold text-foreground lg:inline">
                     {authLabel}
                   </span>
                 </button>
@@ -480,7 +480,7 @@ export function NewsMarketNav({
                   ref={authButtonRef}
                   type="button"
                   onClick={() => setAuthOpen(true)}
-                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-cyan-400 text-white shadow-md shadow-violet-500/20 transition hover:brightness-110 lg:w-auto lg:gap-1.5 lg:px-3"
+                  className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-gradient text-white shadow-md shadow-primary/20 transition hover:brightness-110 lg:w-auto lg:gap-1.5 lg:px-3"
                   aria-label="Login or register"
                 >
                   <LogIn className="h-3.5 w-3.5" aria-hidden />
@@ -540,12 +540,12 @@ function SkyFmBriefing({
 
   return (
     <div className="flex shrink-0 items-center lg:min-w-0 lg:flex-1 lg:justify-center">
-      <div className="inline-flex min-w-0 items-center lg:min-h-11 lg:max-w-full lg:gap-3 lg:rounded-full lg:border lg:border-slate-200/90 lg:bg-white lg:py-1.5 lg:pl-1.5 lg:pr-4 lg:shadow-sm">
+      <div className="inline-flex min-w-0 items-center lg:min-h-11 lg:max-w-full lg:gap-3 lg:rounded-full lg:border lg:border-border/90 lg:bg-card lg:py-1.5 lg:pl-1.5 lg:pr-4 lg:shadow-sm">
         <button
           type="button"
           onClick={onToggle}
           disabled={!canPlay && !playing}
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white shadow-md shadow-violet-500/35 transition hover:bg-violet-500 disabled:cursor-wait disabled:opacity-70"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md shadow-primary/35 transition hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
           aria-label={
             loading
               ? "Loading Sky briefing"
@@ -570,29 +570,29 @@ function SkyFmBriefing({
 
           <div className="min-w-0 flex-1 text-left">
             {loading ? (
-              <p className="truncate text-sm font-semibold text-slate-900">
+              <p className="truncate text-sm font-semibold text-foreground">
                 Loading briefing…
               </p>
             ) : (
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold leading-tight text-slate-900">
+                <p className="truncate text-sm font-semibold leading-tight text-foreground">
                   Today&apos;s 60-Second Sky Briefing
                 </p>
                 {sponsorName ? (
-                  <p className="mt-0.5 truncate text-xs leading-tight text-slate-500 sm:text-[12px]">
+                  <p className="mt-0.5 truncate text-xs leading-tight text-muted-foreground sm:text-[12px]">
                     Presented by:{" "}
                     {sponsorLink ? (
                       <a
                         href={sponsorLink}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-semibold text-violet-600 transition hover:text-violet-500 hover:underline"
+                        className="font-semibold text-primary transition hover:text-primary hover:underline"
                         onClick={(e) => e.stopPropagation()}
                       >
                         {sponsorName}
                       </a>
                     ) : (
-                      <span className="font-semibold text-violet-600">
+                      <span className="font-semibold text-primary">
                         {sponsorName}
                       </span>
                     )}
@@ -645,7 +645,7 @@ function AudioSpectrum({ playing }: { playing: boolean }) {
         {bars.map((bar, i) => (
           <span
             key={i}
-            className={`w-[2px] origin-bottom rounded-full bg-violet-400 ${
+            className={`w-[2px] origin-bottom rounded-full bg-primary ${
               playing ? "sky-fm-bar-active" : ""
             }`}
             style={{
@@ -672,7 +672,7 @@ function TodayWeatherPill({ weather }: { weather: TodayWeather | null }) {
 
   return (
     <div
-      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 text-xs font-medium text-slate-700 shadow-sm lg:px-3"
+      className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full border border-border bg-card px-2.5 text-xs font-medium text-foreground shadow-sm lg:px-3"
       title={highHint}
       aria-label={
         weather

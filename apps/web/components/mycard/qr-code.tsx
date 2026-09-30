@@ -30,7 +30,7 @@ export function QRCode({
 
   // Reusable QR code render with hashtag
   const renderQRCodeWithHashtag = () => (
-    <div className="flex flex-col items-center bg-white p-4 rounded-lg max-w-[240px] mx-auto">
+    <div className="flex flex-col items-center bg-card p-4 rounded-lg max-w-[240px] mx-auto">
       <div ref={qrRef}>
         <QRCodeSVG
           value={url}
@@ -42,7 +42,7 @@ export function QRCode({
         />
       </div>
       {hashtag && (
-        <p className="text-slate-800 text-lg font-medium">{hashtag}</p>
+        <p className="text-foreground text-lg font-medium">{hashtag}</p>
       )}
     </div>
   );
@@ -153,7 +153,7 @@ export function QRCode({
         {/* Download QRCode button */}
         <Button
           onClick={handleDownload}
-          className="w-full sm:w-auto cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold rounded-full px-4 py-2 flex items-center justify-center gap-2"
+          className="w-full sm:w-auto cursor-pointer bg-success hover:bg-success text-foreground font-semibold rounded-full px-4 py-2 flex items-center justify-center gap-2"
         >
           <Download className="h-4 w-4" />
           Download QRCode
@@ -162,21 +162,21 @@ export function QRCode({
         {/* Open Card button */}
         <Button
           onClick={handleOpenCard}
-          className="w-full sm:w-auto cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold rounded-full px-4 py-2 flex items-center justify-center gap-2"
+          className="w-full sm:w-auto cursor-pointer bg-success hover:bg-success text-foreground font-semibold rounded-full px-4 py-2 flex items-center justify-center gap-2"
         >
           <ExternalLink className="h-4 w-4" />
           Open Card
         </Button>
 
         {/* Copy link section */}
-        <div className="flex items-center gap-2 bg-slate-800 rounded-full border border-slate-700 px-3 py-2">
+        <div className="flex items-center gap-2 bg-muted rounded-full border border-border px-3 py-2">
           <div className="flex-1 min-w-0">
-            <div className="text-xs text-slate-400 truncate">{url}</div>
+            <div className="text-xs text-muted-foreground truncate">{url}</div>
           </div>
           <Button
             size="sm"
             onClick={handleCopy}
-            className="cursor-pointer rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 flex-shrink-0"
+            className="cursor-pointer rounded-full bg-success hover:bg-success text-foreground text-xs font-semibold px-3 py-1.5 flex items-center gap-1.5 flex-shrink-0"
           >
             {copied ? (
               <>

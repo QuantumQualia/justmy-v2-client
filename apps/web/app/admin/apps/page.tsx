@@ -157,7 +157,7 @@ export default function AppsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(app.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
                           title="Delete App"
                         >
                           <Trash2 className="h-4 w-4" />

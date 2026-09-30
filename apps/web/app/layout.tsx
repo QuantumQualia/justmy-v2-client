@@ -13,6 +13,7 @@ import { Providers } from "@/components/providers"
 import { Navbar } from "@/components/common/navbar/navbar"
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
 import { NewsStandChrome } from "@/components/news/news-stand-chrome"
+import { SiteFooter } from "@/components/common/site-footer"
 import { isNewsHost } from "@/lib/hosts"
 import { NewsHostProvider, NewsMarketSiteProvider } from "@/lib/news/news-host-context"
 
@@ -116,6 +117,15 @@ export default async function RootLayout({
   const embedMyForm = pathname.startsWith("/embed/myform")
   const embedTransparentHost = embedAskSky || embedMyForm
   const showNewsStandChrome = newsHost && !embedPath
+  const showSiteFooter =
+    !embedPath &&
+    !isTryFreePage &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/biz-os") &&
+    !pathname.startsWith("/personal-os") &&
+    !pathname.startsWith("/verify-email") &&
+    pathname !== "/p" &&
+    !pathname.startsWith("/p/")
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
@@ -160,7 +170,7 @@ export default async function RootLayout({
           <NewsMarketSiteProvider value={marketSiteHeader}>
             <a
               href="#site-main"
-              className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
+              className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
             >
               Skip to content
             </a>
@@ -193,6 +203,7 @@ export default async function RootLayout({
               )}
             >
               {children}
+              {showSiteFooter ? <SiteFooter newsHost={newsHost} /> : null}
             </div>
           </NewsMarketSiteProvider>
           </NewsHostProvider>

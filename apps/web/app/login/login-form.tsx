@@ -79,7 +79,7 @@ export default function LoginForm() {
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
-        <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
+        <div className="mx-auto h-12 w-12 bg-primary rounded-full flex items-center justify-center mb-4">
           <LogIn className="h-6 w-6 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold">Welcome Back</CardTitle>
@@ -89,12 +89,12 @@ export default function LoginForm() {
       </CardHeader>
       <CardContent className="space-y-4">
         {resetSuccess && (
-          <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm">
+          <div className="p-3 rounded-lg bg-success/10 border border-success/40 text-success text-sm">
             Your password has been reset. Please sign in with your new password.
           </div>
         )}
         {oauth.error ? (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/40 text-destructive text-sm">
             {oauth.error}
           </div>
         ) : null}
@@ -128,7 +128,7 @@ export default function LoginForm() {
               <Label>Password</Label>
               <Link
                 href="/forgot-password"
-                className="text-xs text-emerald-500 hover:text-emerald-400 font-medium"
+                className="text-xs text-primary hover:text-primary/80 font-medium"
               >
                 Forgot password?
               </Link>
@@ -143,7 +143,7 @@ export default function LoginForm() {
 
           <Button
             type="submit"
-            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg"
+            className="cursor-pointer w-full mt-4 h-12 text-lg"
             disabled={oauth.loading}
           >
             {oauth.loading ? "Signing In..." : "Sign In"}
@@ -152,7 +152,7 @@ export default function LoginForm() {
           <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
             <p>
               Don't have an account?{" "}
-              <Link href="/register" className="text-emerald-500 hover:text-emerald-400 font-medium">
+              <Link href="/register" className="text-primary hover:text-primary/80 font-medium">
                 Create Account
               </Link>
             </p>

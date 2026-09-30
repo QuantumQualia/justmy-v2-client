@@ -75,7 +75,7 @@ export function ProfileSwitcher() {
       open={isOpen}
       onOpenChange={setIsOpen}
     >
-      <SelectTrigger className="h-10 w-10 p-0 border-0 bg-transparent hover:bg-accent rounded-full focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-background">
+      <SelectTrigger className="h-10 w-10 p-0 border-0 bg-transparent hover:bg-accent rounded-full focus:ring-2 focus:ring-success/50 focus:ring-offset-2 focus:ring-offset-background">
         {currentProfile.photo ? (
           <img
             src={currentProfile.photo}
@@ -83,8 +83,8 @@ export function ProfileSwitcher() {
             className="h-10 w-10 rounded-full object-cover cursor-pointer"
           />
         ) : (
-          <div className="h-10 w-10 rounded-full bg-emerald-500/20 flex items-center justify-center cursor-pointer">
-            <User className="h-5 w-5 text-emerald-400" />
+          <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center cursor-pointer">
+            <User className="h-5 w-5 text-success" />
           </div>
         )}
       </SelectTrigger>
@@ -103,15 +103,15 @@ export function ProfileSwitcher() {
                   className="h-5 w-5 rounded-full object-cover"
                 />
               ) : (
-                <div className="h-5 w-5 rounded-full bg-emerald-500/20 flex items-center justify-center">
-                  <User className="h-3 w-3 text-emerald-400" />
+                <div className="h-5 w-5 rounded-full bg-success/20 flex items-center justify-center">
+                  <User className="h-3 w-3 text-success" />
                 </div>
               )}
               <span>{p!.name}</span>
             </div>
           </SelectItem>
         ))}
-        <SelectItem value="new" className="cursor-pointer text-emerald-400 hover:text-emerald-300 focus:text-emerald-300">
+        <SelectItem value="new" className="cursor-pointer text-success hover:text-success focus:text-success">
           <div className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
             <span>Create New Profile</span>

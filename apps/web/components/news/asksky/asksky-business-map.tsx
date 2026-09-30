@@ -263,7 +263,7 @@ export function AskSkyBusinessMap({
   if (pins === null) {
     return (
       <div
-        className={`flex min-h-72 items-center justify-center rounded-2xl border border-slate-200 bg-slate-50 px-4 text-center text-sm text-slate-500 ${className}`}
+        className={`flex min-h-72 items-center justify-center rounded-2xl border border-border bg-muted px-4 text-center text-sm text-muted-foreground ${className}`}
       >
         Loading map…
       </div>
@@ -273,7 +273,7 @@ export function AskSkyBusinessMap({
   if (pins.length === 0) {
     return (
       <div
-        className={`flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-4 text-center text-sm text-slate-500 ${className}`}
+        className={`flex min-h-72 items-center justify-center rounded-2xl border border-dashed border-border bg-muted px-4 text-center text-sm text-muted-foreground ${className}`}
       >
         No mapped locations for these businesses yet.
       </div>
@@ -283,7 +283,7 @@ export function AskSkyBusinessMap({
   return (
     <div
       ref={containerRef}
-      className={`asksky-business-map min-h-72 w-full overflow-hidden rounded-2xl border border-slate-200 ${className}`}
+      className={`asksky-business-map min-h-72 w-full overflow-hidden rounded-2xl border border-border ${className}`}
       style={{ height: 380 }}
       role="region"
       aria-label="Business locations map"

@@ -16,6 +16,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { useProfileStore } from "@/lib/store";
 import { contentService, ApiClientError } from "@/lib/services/content";
+import { preventDialogDismiss } from "@/components/content/post-editor-dialog";
 import { profilesService, type SubProfileSummaryDto } from "@/lib/services/profiles";
 
 function subProfileNumericId(sp: SubProfileSummaryDto): number | null {
@@ -126,7 +127,10 @@ export function DeployContentHubDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         showCloseButton={false}
-        className="w-full max-w-md gap-0 rounded-2xl rounded-br-none border border-border bg-card p-0 text-foreground shadow-2xl shadow-black/50"
+        onPointerDownOutside={preventDialogDismiss}
+        onInteractOutside={preventDialogDismiss}
+        onEscapeKeyDown={preventDialogDismiss}
+        className="w-full max-w-md gap-0 rounded-2xl rounded-br-none border border-border bg-background p-0 text-foreground shadow-2xl shadow-black/50"
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <DialogTitle className="text-lg font-semibold tracking-tight text-foreground">
@@ -178,19 +182,19 @@ export function DeployContentHubDialog({
                   className={cn(
                     "flex w-full items-center gap-3 rounded-xl border px-3 py-3 transition-colors",
                     checked
-                      ? "border-success bg-success/5 ring-1 ring-success/35"
-                      : "border-border bg-muted/50"
+                      ? "border-primary bg-primary/5 ring-1 ring-ring"
+                      : "border-border bg-background"
                   )}
                 >
                   <Checkbox
                     checked={checked}
                     onCheckedChange={() => toggleId(nid)}
-                    className="border-input data-[state=checked]:border-success data-[state=checked]:bg-success data-[state=checked]:text-success-foreground"
+                    className="border-input data-[state=checked]:border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                   />
                   <button
                     type="button"
                     onClick={() => toggleId(nid)}
-                    className="min-w-0 flex-1 cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-success/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                    className="min-w-0 flex-1 cursor-pointer text-left outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
                   >
                     <span className="block truncate text-sm font-medium text-foreground">{sp.name}</span>
                     <span className="mt-0.5 block truncate font-mono text-xs text-muted-foreground">/{sp.slug}</span>
@@ -202,7 +206,7 @@ export function DeployContentHubDialog({
         </div>
 
         {error && subProfiles.length > 0 ? (
-          <p className="mx-5 mb-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+          <p className="mx-5 mb-2 rounded-lg border border-red-500/30 bg-destructive/10 px-3 py-2 text-sm text-red-100">
             {error}
           </p>
         ) : null}
@@ -219,8 +223,7 @@ export function DeployContentHubDialog({
           </Button>
           <Button
             type="button"
-            variant="success"
-            className="rounded-lg rounded-br-none"
+            variant="primary"
             disabled={saving || loading || !canInteract || hubId == null}
             onClick={() => void handleSave()}
           >

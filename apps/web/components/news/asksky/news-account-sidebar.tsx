@@ -365,7 +365,7 @@ export function NewsAccountSidebar({
     <>
       {open ? (
         <div
-          className="fixed inset-x-0 bottom-0 top-[var(--impersonation-banner-h,0px)] z-60 bg-slate-900/30 backdrop-blur-[2px]"
+          className="fixed inset-x-0 bottom-0 top-[var(--impersonation-banner-h,0px)] z-60 bg-card/30 backdrop-blur-[2px]"
           onClick={onClose}
           aria-hidden
         />
@@ -373,13 +373,13 @@ export function NewsAccountSidebar({
 
       <aside
         className={cn(
-          "fixed top-[var(--impersonation-banner-h,0px)] right-0 z-70 flex h-[calc(100dvh-var(--impersonation-banner-h,0px))] w-[min(22rem,100vw)] flex-col border-l border-slate-200 bg-white text-slate-900 shadow-xl shadow-slate-900/10 transition-transform duration-300 ease-in-out",
+          "fixed top-[var(--impersonation-banner-h,0px)] right-0 z-70 flex h-[calc(100dvh-var(--impersonation-banner-h,0px))] w-[min(22rem,100vw)] flex-col border-l border-border bg-card text-foreground shadow-xl shadow-card transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "translate-x-full",
         )}
         aria-hidden={!open}
         aria-label="Account"
       >
-        <div className="flex items-start gap-3 border-b border-slate-200 px-4 py-4">
+        <div className="flex items-start gap-3 border-b border-border px-4 py-4">
           <NewsAccountAvatar photoUrl={avatarSrc} label={name} size="md" />
           <div className="min-w-0 flex-1">
             {liveCardUrl ? (
@@ -388,26 +388,26 @@ export function NewsAccountSidebar({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={onClose}
-                className="block truncate text-sm font-semibold text-slate-900 hover:text-violet-700 hover:underline"
+                className="block truncate text-sm font-semibold text-foreground hover:text-primary hover:underline"
                 title="Open myCARD"
               >
                 {name}
               </a>
             ) : (
-              <p className="truncate text-sm font-semibold text-slate-900">{name}</p>
+              <p className="truncate text-sm font-semibold text-foreground">{name}</p>
             )}
-            <p className="mt-0.5 truncate text-xs text-slate-500">
-              {osLabel ? <span className="text-violet-600">{osLabel}</span> : null}
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">
+              {osLabel ? <span className="text-primary">{osLabel}</span> : null}
               {osLabel ? " · " : null}
               {zip ? `${zip} resident` : "Resident"}
               {isVerified ? (
-                <span className="text-violet-600"> · Verified</span>
+                <span className="text-primary"> · Verified</span>
               ) : null}
             </p>
           </div>
           <button
             type="button"
-            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-muted hover:text-foreground"
             aria-label="Close account menu"
             onClick={onClose}
           >
@@ -419,18 +419,18 @@ export function NewsAccountSidebar({
           <button
             type="button"
             onClick={() => void handleNewChat()}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-linear-to-r from-violet-600 via-fuchsia-500 to-cyan-400 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-violet-500/20 transition hover:brightness-110"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand-gradient px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition hover:brightness-110"
           >
             <Plus className="h-4 w-4" aria-hidden />
             New AskSKY! search
           </button>
 
           <section className="mt-6">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Recents
             </h2>
             {recents.length === 0 ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Your AskSKY searches will show up here.
               </p>
             ) : (
@@ -445,7 +445,7 @@ export function NewsAccountSidebar({
                           void commitRename(item.id);
                         }}
                       >
-                        <MessageCircle className="h-4 w-4 shrink-0 text-violet-500" />
+                        <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
                         <input
                           ref={renameRef}
                           value={renameValue}
@@ -461,7 +461,7 @@ export function NewsAccountSidebar({
                               cancelRename();
                             }
                           }}
-                          className="h-8 min-w-0 flex-1 rounded-lg border border-violet-200 bg-white px-2 text-base text-slate-800 outline-none focus:ring-2 focus:ring-violet-200 md:text-sm"
+                          className="h-8 min-w-0 flex-1 rounded-lg border border-primary/30 bg-card px-2 text-base text-foreground outline-none focus:ring-2 focus:ring-ring md:text-sm"
                           maxLength={120}
                           aria-label="Rename search"
                         />
@@ -471,8 +471,8 @@ export function NewsAccountSidebar({
                         className={cn(
                           "flex items-center gap-1 rounded-xl pr-1 transition",
                           activeConversationId === item.id
-                            ? "bg-violet-50"
-                            : "hover:bg-slate-50",
+                            ? "bg-secondary"
+                            : "hover:bg-muted",
                         )}
                       >
                         <button
@@ -480,14 +480,14 @@ export function NewsAccountSidebar({
                           onClick={() => void handleOpenRecent(item.id)}
                           className="flex min-w-0 flex-1 items-center gap-2 px-2 py-2 text-left"
                         >
-                          <MessageCircle className="h-4 w-4 shrink-0 text-violet-500" />
-                          <span className="truncate text-sm text-slate-800">
+                          <MessageCircle className="h-4 w-4 shrink-0 text-primary" />
+                          <span className="truncate text-sm text-foreground">
                             {conversationTitle(item)}
                           </span>
                         </button>
                         <button
                           type="button"
-                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 transition hover:bg-white hover:text-slate-700"
+                          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground transition hover:bg-card hover:text-foreground"
                           aria-label="Conversation actions"
                           aria-expanded={menuOpenId === item.id}
                           onPointerDown={(e) => e.stopPropagation()}
@@ -506,7 +506,7 @@ export function NewsAccountSidebar({
                       <div
                         ref={menuRef}
                         role="menu"
-                        className="absolute right-2 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-lg shadow-slate-900/10"
+                        className="absolute right-2 top-full z-20 mt-1 w-44 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-lg shadow-card"
                       >
                         <RecentMenuItem
                           icon={<Pencil className="h-3.5 w-3.5" />}
@@ -547,7 +547,7 @@ export function NewsAccountSidebar({
             {recents.length > PREVIEW_COUNT ? (
               <button
                 type="button"
-                className="mt-1 px-2 text-xs font-semibold text-violet-600 hover:text-violet-500"
+                className="mt-1 px-2 text-xs font-semibold text-primary hover:text-primary"
                 onClick={() => setShowAllRecents((v) => !v)}
               >
                 {showAllRecents ? "Show less" : "Show more"}
@@ -556,11 +556,11 @@ export function NewsAccountSidebar({
           </section>
 
           <section className="mt-6">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               Liked & Bookmarked
             </h2>
             {favorites.length === 0 ? (
-              <p className="mt-2 text-xs text-slate-500">
+              <p className="mt-2 text-xs text-muted-foreground">
                 Heart or bookmark a business card to save it here.
               </p>
             ) : (
@@ -574,23 +574,23 @@ export function NewsAccountSidebar({
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-slate-50"
+                          className="flex items-center gap-2 rounded-xl px-2 py-2 transition hover:bg-muted"
                         >
                           <FavoriteThumb item={item} />
-                          <span className="min-w-0 flex-1 truncate text-sm text-slate-800">
+                          <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                             {item.name}
                           </span>
                           {item.liked ? (
                             <Heart className="h-3.5 w-3.5 shrink-0 fill-rose-500 text-rose-500" />
                           ) : null}
                           {item.bookmarked ? (
-                            <Bookmark className="h-3.5 w-3.5 shrink-0 fill-violet-500 text-violet-500" />
+                            <Bookmark className="h-3.5 w-3.5 shrink-0 fill-primary text-primary" />
                           ) : null}
                         </a>
                       ) : (
                         <div className="flex items-center gap-2 rounded-xl px-2 py-2">
                           <FavoriteThumb item={item} />
-                          <span className="min-w-0 flex-1 truncate text-sm text-slate-800">
+                          <span className="min-w-0 flex-1 truncate text-sm text-foreground">
                             {item.name}
                           </span>
                         </div>
@@ -603,7 +603,7 @@ export function NewsAccountSidebar({
             {favorites.length > PREVIEW_COUNT ? (
               <button
                 type="button"
-                className="mt-1 px-2 text-xs font-semibold text-violet-600 hover:text-violet-500"
+                className="mt-1 px-2 text-xs font-semibold text-primary hover:text-primary"
                 onClick={() => setShowAllFavorites((v) => !v)}
               >
                 {showAllFavorites ? "Show less" : "Show more"}
@@ -612,7 +612,7 @@ export function NewsAccountSidebar({
           </section>
 
           <section className="mt-6">
-            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+            <h2 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
               myAPPS
             </h2>
             <div className="mt-2 space-y-2">
@@ -623,8 +623,8 @@ export function NewsAccountSidebar({
                   className={cn(
                     "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
                     pathname.startsWith("/biz-os")
-                      ? "border-violet-300 bg-violet-50 text-violet-800"
-                      : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                      ? "border-primary/40 bg-secondary text-primary"
+                      : "border-border bg-muted text-foreground hover:bg-muted",
                   )}
                 >
                   {currentOsLabel(rawOs)}
@@ -636,8 +636,8 @@ export function NewsAccountSidebar({
                   className={cn(
                     "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
                     pathname.startsWith("/personal-os")
-                      ? "border-violet-300 bg-violet-50 text-violet-800"
-                      : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                      ? "border-primary/40 bg-secondary text-primary"
+                      : "border-border bg-muted text-foreground hover:bg-muted",
                   )}
                 >
                   Personal OS
@@ -651,8 +651,8 @@ export function NewsAccountSidebar({
                     className={cn(
                       "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
                       pathname.startsWith("/admin/biz-os")
-                        ? "border-violet-300 bg-violet-50 text-violet-800"
-                        : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                        ? "border-primary/40 bg-secondary text-primary"
+                        : "border-border bg-muted text-foreground hover:bg-muted",
                     )}
                   >
                     [#FunCREW] SmartHandoff
@@ -663,8 +663,8 @@ export function NewsAccountSidebar({
                     className={cn(
                       "block w-full rounded-2xl border px-3 py-2.5 text-left text-sm font-medium transition",
                       pathname.startsWith("/admin") && !pathname.startsWith("/admin/biz-os")
-                        ? "border-violet-300 bg-violet-50 text-violet-800"
-                        : "border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100",
+                        ? "border-primary/40 bg-secondary text-primary"
+                        : "border-border bg-muted text-foreground hover:bg-muted",
                     )}
                   >
                     Admin panel
@@ -674,14 +674,14 @@ export function NewsAccountSidebar({
               <button
                 type="button"
                 onClick={() => comingSoon("Night-out planner")}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+                className="w-full rounded-2xl border border-border bg-muted px-3 py-2.5 text-left text-sm font-medium text-foreground transition hover:bg-muted"
               >
                 Night-out planner
               </button>
               <button
                 type="button"
                 onClick={() => comingSoon("Sky FM vault")}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-left text-sm font-medium text-slate-800 transition hover:bg-slate-100"
+                className="w-full rounded-2xl border border-border bg-muted px-3 py-2.5 text-left text-sm font-medium text-foreground transition hover:bg-muted"
               >
                 Sky FM vault
               </button>
@@ -689,12 +689,12 @@ export function NewsAccountSidebar({
           </section>
         </div>
 
-        <div className="border-t border-slate-200 p-4">
+        <div className="border-t border-border p-4">
           <button
             type="button"
             onClick={() => void handleSignOut()}
             disabled={signingOut}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-60"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground transition hover:bg-muted disabled:opacity-60"
           >
             <LogOut className="h-4 w-4" aria-hidden />
             Sign out
@@ -725,7 +725,7 @@ function RecentMenuItem({
         "flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-medium transition",
         danger
           ? "text-rose-600 hover:bg-rose-50"
-          : "text-slate-700 hover:bg-violet-50 hover:text-violet-700",
+          : "text-foreground hover:bg-secondary hover:text-primary",
       )}
     >
       {icon}
@@ -737,7 +737,7 @@ function RecentMenuItem({
 function FavoriteThumb({ item }: { item: ProfileFavoriteItem }) {
   const initial = (item.name.trim() || "B").slice(0, 1).toUpperCase();
   return (
-    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-slate-100 text-[11px] font-bold text-slate-600">
+    <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full border border-border bg-muted text-[11px] font-bold text-muted-foreground">
       {item.photo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={item.photo} alt="" className="h-full w-full object-cover" />

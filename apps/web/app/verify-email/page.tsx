@@ -145,16 +145,16 @@ function VerifyEmailInner() {
 
   return (
     <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-      <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Verify your email</h1>
-        <p className="mt-3 text-sm text-slate-600">{message}</p>
+      <div className="rounded-2xl border border-border bg-card p-8 text-center shadow-sm">
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">Verify your email</h1>
+        <p className="mt-3 text-sm text-muted-foreground">{message}</p>
         {status === "working" ? (
-          <Loader2 className="mx-auto mt-6 h-5 w-5 animate-spin text-violet-600" aria-hidden />
+          <Loader2 className="mx-auto mt-6 h-5 w-5 animate-spin text-primary" aria-hidden />
         ) : null}
         {showResend ? (
           <button
             type="button"
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110"
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white shadow-md shadow-primary/25 transition hover:brightness-110"
             onClick={() => void resend()}
           >
             Resend confirmation
@@ -163,7 +163,7 @@ function VerifyEmailInner() {
         {status === "ok" && !signedIn ? (
           <Link
             href={loginHref}
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110"
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white shadow-md shadow-primary/25 transition hover:brightness-110"
           >
             Sign in to continue
           </Link>
@@ -171,13 +171,13 @@ function VerifyEmailInner() {
         {status === "ok" && signedIn ? (
           <Link
             href={continueHref}
-            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110"
+            className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-full bg-brand-gradient text-sm font-semibold text-white shadow-md shadow-primary/25 transition hover:brightness-110"
           >
             Continue
           </Link>
         ) : null}
         {status === "error" ? (
-          <Link href={loginHref} className="mt-6 inline-block text-sm font-medium text-violet-700 hover:underline">
+          <Link href={loginHref} className="mt-6 inline-block text-sm font-medium text-primary hover:underline">
             Back to sign in
           </Link>
         ) : null}
@@ -192,7 +192,7 @@ export default function VerifyEmailPage() {
       <Suspense
         fallback={
           <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-12">
-            <p className="text-center text-sm text-slate-600">Loading…</p>
+            <p className="text-center text-sm text-muted-foreground">Loading…</p>
           </div>
         }
       >

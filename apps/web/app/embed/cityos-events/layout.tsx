@@ -9,6 +9,6 @@ export const metadata: Metadata = {
 
 export default function EmbedCityOsEventsLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="box-border min-h-screen w-full bg-slate-950 text-slate-100 antialiased">{children}</div>
+    <div className="box-border min-h-screen w-full bg-background text-foreground antialiased">{children}</div>
   );
 }

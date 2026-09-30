@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { Switch } from "@workspace/ui/components/switch";
 import type { PageBlock } from "@/lib/services/cms";
@@ -24,16 +23,7 @@ export function DayInHistoryBlockEditor({ block, onUpdate }: DayInHistoryBlockEd
 
   return (
     <div className="space-y-4">
-      <Card>
-        <CardContent className="p-4 pt-4">
-          <p className="text-sm text-muted-foreground">
-            This block renders the &quot;This Day in History&quot; AI card.
-          </p>
-          <CardDescription className="text-xs text-muted-foreground mt-2">
-            Choose whether to render it as a standalone card or embedded inside another layout (for example, in the greeting card).
-          </CardDescription>
-        </CardContent>
-      </Card>
+      
 
       <div className="space-y-3">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-muted p-4">

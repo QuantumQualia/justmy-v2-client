@@ -21,7 +21,7 @@ export function NewsAccountAvatar({
   return (
     <span
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-r from-violet-600 to-cyan-400 font-bold text-white",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-brand-gradient font-bold text-white",
         size === "md" ? "h-11 w-11 text-sm" : "h-6 w-6 text-[10px]",
         className,
       )}

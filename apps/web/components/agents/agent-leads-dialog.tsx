@@ -113,7 +113,7 @@ export function AgentLeadsDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleDialogOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-2xl">
+      <DialogContent className="max-h-[85vh] overflow-y-auto border-border bg-card text-foreground shadow-xl dark:bg-card sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{selected ? `Submission #${selected.id}` : title}</DialogTitle>
           <DialogDescription className="text-muted-foreground">

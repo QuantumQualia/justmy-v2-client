@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Check, ChevronDown, Loader2, MapPin, Star, X } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import {
@@ -54,14 +55,7 @@ function listingsFromLookup(result: {
   ];
 }
 
-const inputClass =
-  "h-10 rounded-lg border border-slate-200 bg-white text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:border-violet-300 focus-visible:ring-2 focus-visible:ring-violet-200/70 dark:bg-white dark:text-slate-900 dark:placeholder:text-slate-400 [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#fff]";
-
-const aiButtonClass =
-  "inline-flex h-11 w-full min-w-0 items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-4 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
-
-const secondaryButtonClass =
-  "inline-flex h-11 min-h-11 w-full min-w-0 items-center justify-center rounded-full bg-slate-100 px-5 text-sm font-semibold text-slate-800 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:opacity-60";
+const inputClass = "h-10 border-border bg-card text-foreground shadow-none";
 
 export function DotClaimModal({
   open,
@@ -287,20 +281,18 @@ export function DotClaimModal({
       categories.map((c) => {
         const on = selected.includes(c);
         return (
-          <button
+          <Button
             key={c}
             type="button"
             aria-pressed={on}
+            size="sm"
+            variant={on ? "default" : "outline"}
+            className="h-auto max-w-full whitespace-normal px-3 py-1.5 text-left text-xs sm:text-sm"
             onClick={() => toggleCategory(c)}
-            className={`inline-flex max-w-full items-center gap-1.5 rounded-lg border px-3 py-1.5 text-left text-xs font-medium break-words transition sm:text-sm ${
-              on
-                ? "border-violet-600 bg-violet-600 text-white shadow-sm ring-2 ring-violet-600/30 ring-offset-2 ring-offset-white"
-                : "border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-white"
-            }`}
           >
             {on ? <Check className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} aria-hidden /> : null}
             {c}
-          </button>
+          </Button>
         );
       }),
     [categories, selected],
@@ -341,31 +333,33 @@ export function DotClaimModal({
         showCloseButton={false}
         onWheel={(event) => event.stopPropagation()}
         onTouchMove={(event) => event.stopPropagation()}
-        className="light inset-x-3 top-auto bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 right-3 flex max-h-[min(90dvh,44rem)] w-auto max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-2xl border-slate-200 bg-white p-4 text-slate-900 shadow-xl sm:inset-auto sm:top-[50%] sm:left-[50%] sm:bottom-auto sm:w-[min(100%-1.5rem,28rem)] sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:p-6"
+        className="inset-x-3 top-auto bottom-[max(0.75rem,env(safe-area-inset-bottom))] left-3 right-3 flex max-h-[min(90dvh,44rem)] w-auto max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-2xl border-border bg-card p-4 text-foreground shadow-xl sm:inset-auto sm:top-[50%] sm:left-[50%] sm:bottom-auto sm:w-[min(100%-1.5rem,28rem)] sm:max-w-md sm:translate-x-[-50%] sm:translate-y-[-50%] sm:rounded-lg sm:p-6"
       >
         <DialogClose asChild>
-          <button
+          <Button
             type="button"
-            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
+            variant="outline"
+            size="icon"
+            className="absolute top-3 right-3 z-10"
             aria-label="Close"
           >
             <X className="h-4 w-4" strokeWidth={2.25} />
-          </button>
+          </Button>
         </DialogClose>
 
         <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-1 [-webkit-overflow-scrolling:touch]">
           <div className="flex flex-col gap-5 pb-4">
             <DialogHeader className="gap-1.5 pr-8 text-center sm:text-center">
-              <DialogTitle className="text-xl font-bold tracking-tight text-balance text-slate-900 sm:text-2xl">
+              <DialogTitle className="text-xl font-bold tracking-tight text-balance text-foreground sm:text-2xl">
                 {title}
               </DialogTitle>
-              <DialogDescription className="text-sm text-pretty text-slate-500">
+              <DialogDescription className="text-sm text-pretty text-muted-foreground">
                 {description}
               </DialogDescription>
             </DialogHeader>
 
             {error ? (
-              <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+              <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
                 {error}
               </div>
             ) : null}
@@ -379,7 +373,7 @@ export function DotClaimModal({
                 }}
               >
                 <div className="space-y-1.5">
-                  <Label htmlFor="claim-business-name" className="text-slate-700">
+                  <Label htmlFor="claim-business-name" className="text-foreground">
                     {entryCategory === "nonprofit" ? "Organization name" : "Business name"}
                   </Label>
                   <Input
@@ -393,8 +387,8 @@ export function DotClaimModal({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label htmlFor="claim-website" className="text-slate-700">
-                    Website <span className="font-normal text-slate-400">(optional)</span>
+                  <Label htmlFor="claim-website" className="text-foreground">
+                    Website <span className="font-normal text-muted-foreground">(optional)</span>
                   </Label>
                   <Input
                     id="claim-website"
@@ -410,9 +404,9 @@ export function DotClaimModal({
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="claim-zip"
-                      className="flex items-center gap-1.5 text-slate-700"
+                      className="flex items-center gap-1.5 text-foreground"
                     >
-                      <MapPin className="h-3 w-3 text-violet-500" aria-hidden />
+                      <MapPin className="h-3 w-3 text-primary" aria-hidden />
                       Zip code
                     </Label>
                     <Input
@@ -425,13 +419,13 @@ export function DotClaimModal({
                       value={zipCode}
                       onChange={(e) => setZipCode(e.target.value.replace(/[^\d-]/g, ""))}
                     />
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-muted-foreground">
                       We use this to connect you to your local Market.
                     </p>
                   </div>
                 )}
                 <div className="space-y-1.5">
-                  <Label htmlFor="claim-phone" className="text-slate-700">
+                  <Label htmlFor="claim-phone" className="text-foreground">
                     Phone
                   </Label>
                   <Input
@@ -444,20 +438,20 @@ export function DotClaimModal({
                     onChange={(e) => setPhone(e.target.value)}
                   />
                 </div>
-                <button type="submit" className={aiButtonClass} disabled={loading}>
+                <Button type="submit" className="h-11 w-full" disabled={loading}>
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   ) : (
                     "AskSKY, scan this business"
                   )}
-                </button>
+                </Button>
               </form>
             ) : null}
 
             {step === "scanning" ? (
               <div className="flex flex-col items-center gap-3 py-6">
-                <Loader2 className="h-8 w-8 animate-spin text-violet-600" aria-hidden />
-                <p className="text-sm text-slate-500">Matching Google listings for {businessName.trim() || "this business"}</p>
+                <Loader2 className="h-8 w-8 animate-spin text-primary" aria-hidden />
+                <p className="text-sm text-muted-foreground">Matching Google listings for {businessName.trim() || "this business"}</p>
               </div>
             ) : null}
 
@@ -472,44 +466,45 @@ export function DotClaimModal({
                     return (
                       <div
                         key={listing.placeId}
-                        className="rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-3"
+                        className="rounded-xl border border-border bg-muted/80 px-4 py-3"
                       >
-                        <p className="font-semibold text-slate-900">
+                        <p className="font-semibold text-foreground">
                           {listing.name || "Google listing"}
                         </p>
                         {listing.address ? (
-                          <p className="mt-0.5 text-sm leading-snug text-slate-500">
+                          <p className="mt-0.5 text-sm leading-snug text-muted-foreground">
                             {listing.address}
                           </p>
                         ) : null}
                         {rating != null || listing.reviewCount ? (
-                          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-slate-500">
+                          <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted-foreground">
                             <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" aria-hidden />
                             {rating != null ? rating.toFixed(1) : "—"}
                             <span>· {listing.reviewCount || 0} reviews</span>
                           </p>
                         ) : null}
-                        <button
+                        <Button
                           type="button"
-                          className={`${aiButtonClass} mt-3 h-10`}
+                          className="mt-3 h-10 w-full"
                           onClick={() => confirmListing(listing)}
                         >
                           This is my business
-                        </button>
+                        </Button>
                       </div>
                     );
                   })}
                 </div>
-                <button type="button" className={secondaryButtonClass} onClick={skipListing}>
+                <Button type="button" variant="secondary" className="h-11 w-full" onClick={skipListing}>
                   None of these — skip for now
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
-                  className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                  variant="ghost"
+                  className="w-full"
                   onClick={() => setStep("form")}
                 >
                   Search again
-                </button>
+                </Button>
               </div>
             ) : null}
 
@@ -521,7 +516,7 @@ export function DotClaimModal({
                     {googleAddress ? ` Address: ${googleAddress}.` : ""} Reviews will attach to this Dot.
                   </p>
                 ) : listingNote ? (
-                  <p className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600">
+                  <p className="rounded-lg border border-border bg-muted px-3 py-2 text-xs leading-relaxed text-muted-foreground">
                     {listingNote}
                   </p>
                 ) : null}
@@ -529,9 +524,10 @@ export function DotClaimModal({
                   {chipRow}
                 </div>
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(7.5rem,1fr)_minmax(0,1.75fr)]">
-                  <button
+                  <Button
                     type="button"
-                    className={`${secondaryButtonClass} order-2 sm:order-1`}
+                    variant="secondary"
+                    className="order-2 h-11 w-full sm:order-1"
                     disabled={refreshingChips || !chipsNeeded}
                     onClick={() => void refreshCategories()}
                   >
@@ -544,32 +540,24 @@ export function DotClaimModal({
                     ) : (
                       "Adjust"
                     )}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className={`${aiButtonClass} order-1 sm:order-2`}
+                    className="order-1 h-11 w-full sm:order-2"
                     disabled={refreshingChips || !chipsReady}
                     onClick={() => setStep("account")}
                   >
                     Looks spot on
-                  </button>
+                  </Button>
                 </div>
                 {listings.length ? (
-                  <button
-                    type="button"
-                    className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
-                    onClick={() => setStep("listing")}
-                  >
+                  <Button type="button" variant="ghost" className="w-full" onClick={() => setStep("listing")}>
                     Change Google listing
-                  </button>
+                  </Button>
                 ) : (
-                  <button
-                    type="button"
-                    className="inline-flex w-full items-center justify-center text-sm font-medium text-slate-500 transition hover:text-slate-800"
-                    onClick={() => setStep("form")}
-                  >
+                  <Button type="button" variant="ghost" className="w-full" onClick={() => setStep("form")}>
                     Edit name or ZIP
-                  </button>
+                  </Button>
                 )}
               </div>
             ) : null}
@@ -578,10 +566,11 @@ export function DotClaimModal({
               <div className="space-y-3.5">
                 <AuthSocialButtons loading={loading} onGoogle={() => void finishGoogle()} />
 
-                <button
+                <Button
                   type="button"
+                  variant="ghost"
+                  className="w-full"
                   onClick={() => setEmailOpen((v) => !v)}
-                  className="inline-flex w-full items-center justify-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-800"
                   aria-expanded={emailOpen}
                 >
                   Or continue with email
@@ -589,7 +578,7 @@ export function DotClaimModal({
                     className={`h-4 w-4 transition ${emailOpen ? "rotate-180" : ""}`}
                     aria-hidden
                   />
-                </button>
+                </Button>
 
                 {emailOpen ? (
                   <form
@@ -600,7 +589,7 @@ export function DotClaimModal({
                     }}
                   >
                     <div className="space-y-1.5">
-                      <Label htmlFor="claim-email" className="text-slate-700">
+                      <Label htmlFor="claim-email" className="text-foreground">
                         Email Address
                       </Label>
                       <Input
@@ -614,7 +603,7 @@ export function DotClaimModal({
                       />
                     </div>
                     <div className="space-y-1.5">
-                      <Label htmlFor="claim-password" className="text-slate-700">
+                      <Label htmlFor="claim-password" className="text-foreground">
                         Password
                       </Label>
                       <Input
@@ -628,13 +617,13 @@ export function DotClaimModal({
                         onChange={(e) => setPassword(e.target.value)}
                       />
                     </div>
-                    <button type="submit" className={aiButtonClass} disabled={loading}>
+                    <Button type="submit" className="h-11 w-full" disabled={loading}>
                       {loading ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                       ) : (
                         "Create account & verify email"
                       )}
-                    </button>
+                    </Button>
                   </form>
                 ) : null}
               </div>

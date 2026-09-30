@@ -380,7 +380,7 @@ export function CityOsEventsTagCloud({
 
   const shell =
     variant === "light"
-      ? "border border-slate-200 bg-white px-2 py-5 shadow-sm md:px-4 md:pt-10 md:pb-8"
+      ? "border border-border bg-card px-2 py-5 shadow-sm md:px-4 md:pt-10 md:pb-8"
       : // Single arbitrary gradient: composed bg-linear-to-br + from/via/to can lose stops in shadow CSS order.
         "bg-[linear-gradient(to_bottom_right,#020618,#0a1628,#0f172b)] px-2 py-5 shadow-inner md:px-4 md:pt-10 md:pb-8";
 
@@ -391,7 +391,7 @@ export function CityOsEventsTagCloud({
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(16,185,129,0.08),transparent_55%)]" />
     );
 
-  const emptyNote = variant === "light" ? "text-slate-500" : "text-slate-400";
+  const emptyNote = variant === "light" ? "text-muted-foreground" : "text-muted-foreground";
 
   if (!events.length) {
     return (

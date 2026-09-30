@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function TryFreePage() {
   return (
-    <Suspense fallback={<div className="min-h-dvh bg-white" />}>
+    <Suspense fallback={<div className="min-h-dvh bg-card" />}>
       <TryFreePageClient />
     </Suspense>
   );

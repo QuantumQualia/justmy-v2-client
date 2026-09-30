@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
 import { DotClaimModal } from "@/components/news/asksky/dot-claim-modal";
 import { AskSkyEventsCarousel } from "@/components/news/asksky/asksky-events-carousel";
-import { AskSkyFooter } from "@/components/news/asksky/asksky-footer";
 import { AskSkyTryFreeCta } from "@/components/news/asksky/asksky-try-free-cta";
 import { mapSkySearchToAnswer, turnsFromSkyMessages } from "@/components/news/asksky/map-sky-search";
 import { marketDtoToContext } from "@/components/news/asksky/market-context";
@@ -75,18 +74,6 @@ export function NewsMarketPageClient({
   const threadRef = useRef<SkyThread | null>(null);
   const askInFlightRef = useRef(false);
   const loadedDomainRef = useRef<string | null>(null);
-
-  // News market is a dedicated light surface — keep the viewport scrollbar light.
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    html.classList.add("news-light-html");
-    body.classList.add("news-light-body");
-    return () => {
-      html.classList.remove("news-light-html");
-      body.classList.remove("news-light-body");
-    };
-  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -282,13 +269,13 @@ export function NewsMarketPageClient({
     <div
       className={cn(
         instrumentSerif.variable,
-        "relative min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-[#f7f6fb] text-slate-900",
+        "relative min-h-screen w-full min-w-0 max-w-full overflow-x-hidden bg-background text-foreground",
         "[&_.font-serif]:font-[family-name:var(--font-asksky-serif),ui-serif,Georgia,serif]",
       )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-violet-300/30 blur-3xl"
+        className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-primary/15 blur-3xl"
       />
       <div
         aria-hidden
@@ -331,7 +318,6 @@ export function NewsMarketPageClient({
             <AskSkyEventsCarousel market={activeMarket} />
             <AskSkyTryFreeCta />
             <AskSkyClaimCta market={activeMarket} onClaim={() => setClaimOpen(true)} />
-            <AskSkyFooter market={activeMarket} />
             <DotClaimModal
               open={claimOpen}
               onOpenChange={setClaimOpen}
@@ -355,14 +341,14 @@ function MarketStatusMessage({
 
   return (
     <div className="mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-6 text-center">
-      <p className="text-lg font-semibold text-slate-800">{title}</p>
+      <p className="text-lg font-semibold text-foreground">{title}</p>
       {detail ? (
-        <p className="mt-2 text-sm text-slate-500">{detail}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{detail}</p>
       ) : null}
       <button
         type="button"
         onClick={() => clearZipcode()}
-        className="mt-6 text-sm font-medium text-violet-700 transition hover:text-violet-900"
+        className="mt-6 text-sm font-medium text-primary transition hover:text-primary"
       >
         Back to JustMy News
       </button>

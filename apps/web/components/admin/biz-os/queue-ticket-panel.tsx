@@ -29,7 +29,7 @@ function statusLabel(status?: string | null) {
 function statusBadgeClass(status?: string | null) {
   const value = String(status || "open");
   if (value === "resolved") {
-    return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700";
+    return "border-success/30 bg-success/10 text-success";
   }
   if (value === "in_progress") {
     return "border-sky-500/30 bg-sky-500/10 text-sky-700";
@@ -226,7 +226,7 @@ export function QueueTicketPanel({
                       </div>
                       <div className="mb-3 h-1.5 overflow-hidden rounded-full bg-muted">
                         <div
-                          className="h-full rounded-full bg-emerald-500 transition-[width]"
+                          className="h-full rounded-full bg-success transition-[width]"
                           style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
                         />
                       </div>
@@ -280,8 +280,8 @@ export function QueueTicketPanel({
                         className={cn(
                           "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
                           system && "max-w-full border border-dashed border-border bg-transparent text-center text-muted-foreground",
-                          team && "bg-emerald-600 text-white",
-                          sky && "bg-slate-100 text-slate-800",
+                          team && "bg-primary text-primary-foreground",
+                          sky && "bg-muted text-foreground",
                           !team && !system && !sky && "bg-muted text-foreground",
                         )}
                       >
@@ -290,8 +290,8 @@ export function QueueTicketPanel({
                             <p
                               className={cn(
                                 "text-[11px] font-semibold",
-                                team ? "text-emerald-100" : "text-muted-foreground",
-                                sky && "text-slate-500",
+                                team ? "text-success" : "text-muted-foreground",
+                                sky && "text-muted-foreground",
                               )}
                             >
                               {speakerLabel(log)}
@@ -300,7 +300,7 @@ export function QueueTicketPanel({
                               <time
                                 className={cn(
                                   "shrink-0 text-[10px]",
-                                  team ? "text-emerald-100/80" : "text-muted-foreground",
+                                  team ? "text-success/80" : "text-muted-foreground",
                                 )}
                               >
                                 {new Date(log.createdAt).toLocaleTimeString([], {
