@@ -1,140 +1,96 @@
 "use client";
 
-import { MyCardContentLiteView } from "@/components/mycard/mycard-content-lite-view";
+import { AdBanner } from "@/components/common/ad-banner";
+import { MycardContentSections } from "@/components/mycard/mycard-content-sections";
 import { MycardGoogleRating } from "@/components/mycard/mycard-google-rating";
 import { MycardLiveContactBar } from "@/components/mycard/mycard-live-contact-bar";
-import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
-import { PROFILE_KIND } from "@/lib/os-types";
-import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
-import { LegacyHtml } from "@/components/common/legacy-html";
+import { MycardProfileAvatar } from "@/components/mycard/mycard-cover-fallbacks";
+import { openShare } from "@/components/common/share/share-store";
 import { legacyPlainText } from "@/lib/legacy-html";
+import { downloadProfileVCard } from "@/lib/mycard/vcard";
+import { publicMycardUrl } from "@/lib/mycard/public-url";
+import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
+import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
 
 export function MyCardMobileBizView({
   data,
-  usePublicNavbar,
   outerTextClass,
-  screenBgClass,
   avatarOuterClass,
   nameTextClass,
   taglineTextClass,
-  aboutTitleTextClass,
-  aboutCardClass,
-  aboutBodyTextClass,
   ctaButtonClassName,
-  registerHref,
-  footerAdUrl,
   contactActions,
   isLightMycard,
 }: MyCardMobileViewProps) {
+  const setSection = useMycardPublicNavStore((state) => state.setSection);
+  const agent = data.agents?.find((item) => item.agentToken?.trim());
+  const cardUrl = publicMycardUrl(data.slug);
+  const showHotlinks = !data.ad?.image;
+  const tagline = legacyPlainText(data.tagline);
+
   return (
-    <div className={`${outerTextClass} w-full max-w-xl mx-auto`}>
-      <div className={`w-full mx-auto ${screenBgClass} relative overflow-hidden`}>
-        <div className="relative">
-          <div className="relative h-48 overflow-hidden rounded-b-3xl">
-            {hasMycardMedia(data.banner) ? (
-              <>
-                <div className="absolute inset-0 bg-black/10" />
-                <img
-                  src={data.banner}
-                  alt=""
-                  className="w-full h-full object-cover object-center"
-                />
-              </>
-            ) : (
-              <MycardFallbackBanner name={data.name} />
-            )}
-          </div>
-
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2">
-            <div className="relative">
-              <div className={`h-24 w-24 rounded-full ${avatarOuterClass} overflow-hidden`}>
-                <MycardProfileAvatar name={data.name} photo={data.photo} />
-              </div>
-            </div>
+    <div className={`${outerTextClass} mx-auto w-full max-w-xl`}>
+      <div className="space-y-6 px-4 py-8">
+        <div className="flex justify-center">
+          <div className={`h-24 w-24 overflow-hidden rounded-full ${avatarOuterClass}`}>
+            <MycardProfileAvatar name={data.name} photo={data.photo} />
           </div>
         </div>
-
-        <div className="px-4 pt-16 pb-8 space-y-6">
-          <MycardLiveContactBar
-            contactActions={contactActions}
-            isLightMycard={isLightMycard}
+        <div className="space-y-2 text-center">
+          <h1 className={`text-xl font-bold md:text-2xl ${nameTextClass}`}>{data.name}</h1>
+          {tagline ? <p className={`text-sm break-words ${taglineTextClass}`}>{tagline}</p> : null}
+          <MycardGoogleRating
+            rating={data.googleStarRating}
+            count={data.googleRatingCount}
+            placeId={data.googlePlaceId}
+            reviewLink={data.googleReviewLink}
+            variant={isLightMycard ? "light" : "dark"}
           />
-
-          <div className="text-center space-y-2">
-            <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
-              {data.name}
-            </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{legacyPlainText(data.tagline)}</p>
-
-            <MycardGoogleRating
-              rating={data.googleStarRating}
-              count={data.googleRatingCount}
-              placeId={data.googlePlaceId}
-              variant={isLightMycard ? "light" : "dark"}
-            />
-          </div>
-
-          <div className="flex flex-col gap-2">
-            {data.hotlinks.map((hotlink) => (
-              <a
-                key={hotlink.id}
-                href={hotlink.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
-                className={ctaButtonClassName}
-              >
-                <span className="min-w-0 truncate">{hotlink.title}</span>
-              </a>
-            ))}
-            <button type="button" className={ctaButtonClassName}>
-              Save to Contacts
+        </div>
+        <MycardLiveContactBar contactActions={contactActions} isLightMycard={isLightMycard} />
+        <div className="flex flex-col gap-2">
+          <button type="button" className={ctaButtonClassName} onClick={() => downloadProfileVCard(data)}>
+            Save to Contacts
+          </button>
+          {agent ? (
+            <button type="button" className={ctaButtonClassName} onClick={() => setSection("asksky")}>
+              AskSKY!
             </button>
-            <button type="button" className={ctaButtonClassName}>
-              Send myCARD
-            </button>
-          </div>
+          ) : null}
+          {showHotlinks
+            ? data.hotlinks.map((hotlink) => (
+                <a key={hotlink.id} href={hotlink.url} target="_blank" rel="noopener noreferrer" className={ctaButtonClassName}>
+                  <span className="min-w-0 truncate">{hotlink.title}</span>
+                </a>
+              ))
+            : null}
+          <button
+            type="button"
+            className={ctaButtonClassName}
+            onClick={() =>
+              void openShare({
+                title: data.name,
+                description: tagline || undefined,
+                url: cardUrl || `/${data.slug}`,
+                entityLabel: "myCARD",
+              })
+            }
+          >
+            Send myCARD
+          </button>
+        </div>
 
-          <MyCardContentLiteView
-            profileType={data.type}
+        {data.ad?.image ? (
+          <AdBanner
+            imageSrc={data.ad.image}
+            imageAlt={data.ad.alt || data.name}
+            bannerLink={data.ad.href || undefined}
             profileSlug={data.slug}
-            variant={usePublicNavbar ? "light" : "dark"}
+            hotlinks={data.hotlinks.map((hotlink) => ({ label: hotlink.title, href: hotlink.url }))}
           />
+        ) : null}
 
-          {data.about && (
-            <div className="space-y-2">
-              <h2 className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}>About</h2>
-
-              {isLightMycard ? (
-                <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
-              ) : (
-                <div className={aboutCardClass}>
-                  <LegacyHtml value={data.about} className={`text-sm ${aboutBodyTextClass} leading-relaxed`} />
-                </div>
-              )}
-            </div>
-          )}
-
-          <div className="flex flex-col gap-2">
-            {footerAdUrl ? (
-              <a href={registerHref} aria-label="Claim your free myCARD">
-                <img
-                  src={footerAdUrl}
-                  alt="Get Amplified Now - Claim Your Free myCARD"
-                  className="w-full rounded-md rounded-br-none object-cover"
-                  loading="lazy"
-                />
-              </a>
-            ) : null}
-
-            <a
-              href={registerHref}
-              className="block text-center text-sm underline underline-offset-2 text-muted-foreground hover:text-foreground transition-colors"
-            >
-              Click to create your free account
-            </a>
-          </div>
-        </div>
+        <MycardContentSections profileSlug={data.slug} layout="carousel" />
       </div>
     </div>
   );

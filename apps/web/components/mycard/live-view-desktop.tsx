@@ -3,11 +3,8 @@
 import type { ProfileData } from "@/lib/store";
 import { MyCardDesktopDefaultView } from "@/components/mycard/live-view-desktop-default";
 import { MyCardDesktopBizView } from "@/components/mycard/live-view-desktop-biz";
-import { MyCardDesktopFounderView } from "@/components/mycard/live-view-desktop-founder";
-import { MyCardDesktopCommandView } from "@/components/mycard/live-view-desktop-command";
-import { MyCardDesktopCityView } from "@/components/mycard/live-view-desktop-city";
-import { MyCardDesktopNetworkView } from "@/components/mycard/live-view-desktop-network";
-import { DEFAULT_OS_NAME, OS_NAME } from "@/lib/os-types";
+import { profileVideo } from "@/components/mycard/mycard-video";
+import { resolveMycardLayout } from "@/lib/os-types";
 
 interface MyCardDesktopViewProps {
   data: ProfileData;
@@ -20,24 +17,9 @@ interface MyCardDesktopViewProps {
 }
 
 export function MyCardDesktopView(props: MyCardDesktopViewProps) {
-  const osName = (props.data.osName ?? DEFAULT_OS_NAME).trim().toUpperCase();
+  const layout = resolveMycardLayout(props.data.osName);
+  const pitch = profileVideo(props.data.videos, "PITCH");
 
-  switch (osName) {
-    case OS_NAME.BIZ:
-      return <MyCardDesktopBizView {...props} />;
-    case "FOUNDER":
-    case OS_NAME.COMMAND_PRO:
-    case OS_NAME.ENTERPRISE:
-      return <MyCardDesktopFounderView {...props} />;
-    case "GROWTH":
-    case OS_NAME.COMMAND:
-      return <MyCardDesktopCommandView {...props} />;
-    case OS_NAME.CITY:
-      return <MyCardDesktopCityView {...props} />;
-    case OS_NAME.NETWORK:
-      return <MyCardDesktopNetworkView {...props} />;
-    default:
-      return <MyCardDesktopDefaultView {...props} />;
-  }
+  if (layout === "biz" && pitch?.videoUrl) return <MyCardDesktopBizView {...props} />;
+  return <MyCardDesktopDefaultView {...props} />;
 }
-

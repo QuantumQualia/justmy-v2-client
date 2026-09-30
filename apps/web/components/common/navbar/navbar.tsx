@@ -111,7 +111,7 @@ function AppNavbar({ businessSearchMode }: NavbarProps = {}) {
 
 /**
  * Auth-aware Navbar:
- * - On public myCARD profile (`MyCardLive` with `usePublicNavbar`): floating menu control + full-screen overlay menu.
+ * - On a public myCARD profile: site nav on desktop, and the myCARD menu on mobile.
  * - When logged in: app navbar (profile switcher + super search).
  * - When logged out: fixed marketing navbar.
  */
@@ -125,6 +125,7 @@ export function Navbar({
   const pathname = usePathname();
   const [isAuthed, setIsAuthed] = React.useState<boolean>(initialIsAuthed);
   const [navShellMounted, setNavShellMounted] = React.useState(false);
+  const [isNarrow, setIsNarrow] = React.useState(false);
   const fromStore = useMycardPublicNavStore((s) => s.isMycardPublicProfile);
 
   React.useEffect(() => {
@@ -152,7 +153,15 @@ export function Navbar({
   const showMycardPublicNav =
     fromStore || (!navShellMounted && initialMycardPublicNav);
 
-  if (showMycardPublicNav) {
+  React.useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setIsNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
+
+  if (showMycardPublicNav && isNarrow) {
     return (
       <MycardPublicNavbar
         initialRegisterType={initialMycardRegisterType}

@@ -37,6 +37,7 @@ import {
   type PayloadPost,
   type PageBlock,
 } from "@/lib/services/cms";
+import { NewsstandControl } from "@/components/content/newsstand-control";
 import { uploadBase64Image } from "@/lib/api-client";
 import { TagInput } from "@/components/ui/tag-input";
 import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
@@ -72,7 +73,7 @@ interface PostFormData {
   externalUrl: string;
   excerpt: string;
   tags: string[];
-  status: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
+  status: "draft" | "publish" | "archive" | "trash";
   seo: {
     title: string;
     description: string;
@@ -112,6 +113,7 @@ export function PostEditorDialog({
 }: PostEditorDialogProps) {
   const [postType, setPostType] = React.useState<PostType>(initialPostType);
   const [formData, setFormData] = React.useState<PostFormData>({ ...EMPTY_FORM });
+  const [newsstandStatus, setNewsstandStatus] = React.useState<"none" | "pending" | "published">("none");
   const [content, setContent] = React.useState<PageBlock[]>([]);
   const [isSharedPost, setIsSharedPost] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
@@ -172,7 +174,10 @@ export function PostEditorDialog({
             externalUrl: post.externalUrl || "",
             excerpt: post.excerpt ?? "",
             tags: post.tags ?? [],
-            status: post.status ?? "draft",
+            status:
+              post.status === "publish" || post.status === "archive" || post.status === "trash"
+                ? post.status
+                : "draft",
             seo: {
               title: post.seo?.title || "",
               description: post.seo?.description || "",
@@ -182,6 +187,7 @@ export function PostEditorDialog({
           };
           const nextContent = (post.content || []) as PageBlock[];
           setFormData(nextForm);
+          setNewsstandStatus(post.newsstandStatus ?? "none");
           setContent(nextContent);
           setSavedSnapshot(editorSnapshot(nextForm, nextContent));
         })
@@ -610,7 +616,7 @@ export function PostEditorDialog({
                         <Select
                           value={formData.status}
                           onValueChange={(v) =>
-                            setFormData({ ...formData, status: v as "draft" | "pending" | "review" | "publish" | "archive" | "trash" })
+                            setFormData({ ...formData, status: v as PostFormData["status"] })
                           }
                         >
                           <SelectTrigger>
@@ -618,8 +624,6 @@ export function PostEditorDialog({
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
-                            <SelectItem value="pending">Pending</SelectItem>
-                            <SelectItem value="review">Review</SelectItem>
                             <SelectItem value="publish">Publish</SelectItem>
                             <SelectItem value="archive">Archive</SelectItem>
                             <SelectItem value="trash">Trash</SelectItem>
@@ -686,7 +690,7 @@ export function PostEditorDialog({
                             <Select
                               value={formData.status}
                               onValueChange={(v) =>
-                                setFormData({ ...formData, status: v as "draft" | "pending" | "review" | "publish" | "archive" | "trash" })
+                                setFormData({ ...formData, status: v as PostFormData["status"] })
                               }
                             >
                               <SelectTrigger>
@@ -694,8 +698,6 @@ export function PostEditorDialog({
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="draft">Draft</SelectItem>
-                                <SelectItem value="pending">Pending</SelectItem>
-                                <SelectItem value="review">Review</SelectItem>
                                 <SelectItem value="publish">Publish</SelectItem>
                                 <SelectItem value="archive">Archive</SelectItem>
                                 <SelectItem value="trash">Trash</SelectItem>
@@ -708,6 +710,13 @@ export function PostEditorDialog({
                   </>
                 )}
               </fieldset>
+
+              <NewsstandControl
+                postId={editPostId}
+                status={formData.status}
+                newsstandStatus={newsstandStatus}
+                onChange={setNewsstandStatus}
+              />
 
               {/* ── SEO ── */}
               <fieldset disabled={saving} className="space-y-4">

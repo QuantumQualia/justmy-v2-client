@@ -234,6 +234,16 @@
   }
 }
 
+@keyframes mycard-menu-hint {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 55%, transparent);
+  }
+  70%,
+  100% {
+    box-shadow: 0 0 0 10px color-mix(in oklch, var(--primary) 0%, transparent);
+  }
+}
+
 @layer utilities {
   /* Sample JustMy proprietary corner geometry */
   .justmy-corners {

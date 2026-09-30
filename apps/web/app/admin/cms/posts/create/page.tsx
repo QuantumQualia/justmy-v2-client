@@ -292,8 +292,6 @@ export default function CreatePostPage() {
                       </SelectTrigger>
                       <SelectContent className="bg-card border-border text-foreground">
                         <SelectItem value="draft">Draft</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="review">Review</SelectItem>
                         <SelectItem value="publish">Publish</SelectItem>
                         <SelectItem value="archive">Archive</SelectItem>
                         <SelectItem value="trash">Trash</SelectItem>

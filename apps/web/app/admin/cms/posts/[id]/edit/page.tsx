@@ -38,6 +38,7 @@ import { readFileAsDataUrl } from "@/lib/read-image-files";
 import type { PayloadPost, PageBlock } from "@/lib/services/cms";
 import { PageBlockEditor } from "@/components/cms/admin/page-block-editor";
 import { PostBlockSelector } from "@/components/cms/admin/post-block-selector";
+import { NewsstandControl } from "@/components/content/newsstand-control";
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -75,6 +76,7 @@ export default function EditPostPage() {
   const [channelIds, setChannelIds] = useState<number[]>([]);
   const [channels, setChannels] = useState<Array<{ id: number; name: string }>>([]);
   const [videoUrl, setVideoUrl] = useState("");
+  const [newsstandStatus, setNewsstandStatus] = useState<"none" | "pending" | "published">("none");
   const selectedType = contentTypes.find((type) => String(type.id) === contentTypeId);
 
   const handleReorderBlock = (fromIndex: number, toIndex: number) => {
@@ -112,7 +114,10 @@ export default function EditPostPage() {
         externalUrl: data.externalUrl || "",
         excerpt: data.excerpt ?? "",
         tags: data.tags ?? [],
-        status: data.status ?? "draft",
+        status:
+          data.status === "publish" || data.status === "archive" || data.status === "trash"
+            ? data.status
+            : "draft",
         seo: {
           title: data.seo?.title || "",
           description: data.seo?.description || "",
@@ -123,6 +128,7 @@ export default function EditPostPage() {
               : data.seo?.ogImage?.url || "",
         },
       });
+      setNewsstandStatus(data.newsstandStatus ?? "none");
       setContent((data.content || []) as PageBlock[]);
       setVideoUrl(data.videoUrl || "");
       const [types, record, marketPage, channelRows] = await Promise.all([
@@ -461,13 +467,18 @@ export default function EditPostPage() {
                     </SelectTrigger>
                     <SelectContent className="bg-card border-border text-foreground">
                       <SelectItem value="draft">Draft</SelectItem>
-                      <SelectItem value="pending">Pending</SelectItem>
-                      <SelectItem value="review">Review</SelectItem>
                       <SelectItem value="publish">Publish</SelectItem>
                       <SelectItem value="archive">Archive</SelectItem>
                       <SelectItem value="trash">Trash</SelectItem>
                     </SelectContent>
                   </Select>
+                  <NewsstandControl
+                    postId={postId}
+                    status={formData.status}
+                    newsstandStatus={newsstandStatus}
+                    allowAdmin
+                    onChange={setNewsstandStatus}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Video URL</Label>

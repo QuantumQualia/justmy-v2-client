@@ -11,6 +11,7 @@ import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import { Providers } from "@/components/providers"
 import { Navbar } from "@/components/common/navbar/navbar"
+import { MycardPublicNavbar } from "@/components/common/navbar/mycard-public-navbar"
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
 import { NewsStandChrome } from "@/components/news/news-stand-chrome"
 import { SiteFooter } from "@/components/common/site-footer"
@@ -130,7 +131,7 @@ export default async function RootLayout({
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
   let initialMycardProfileSlug = ""
-  if (!hideSiteChrome && isLikelyHandlePath(pathname)) {
+  if (!embedPath && isLikelyHandlePath(pathname)) {
     const handle = firstPathSegment(pathname)
     if (handle) {
       const profile = await fetchPublicProfileByHandle(handle)
@@ -175,6 +176,13 @@ export default async function RootLayout({
               Skip to content
             </a>
             {showNewsStandChrome ? <NewsStandChrome /> : null}
+            {newsHost && initialMycardPublicNav ? (
+              <MycardPublicNavbar
+                initialRegisterType={initialMycardRegisterType}
+                initialProfileSlug={initialMycardProfileSlug}
+                belowNewsHeader
+              />
+            ) : null}
             {!hideSiteChrome ? (
               <>
                 <Navbar
@@ -203,7 +211,11 @@ export default async function RootLayout({
               )}
             >
               {children}
-              {showSiteFooter ? <SiteFooter newsHost={newsHost} /> : null}
+              {showSiteFooter ? (
+                <div className={initialMycardPublicNav ? "max-lg:hidden" : undefined}>
+                  <SiteFooter newsHost={newsHost} />
+                </div>
+              ) : null}
             </div>
           </NewsMarketSiteProvider>
           </NewsHostProvider>

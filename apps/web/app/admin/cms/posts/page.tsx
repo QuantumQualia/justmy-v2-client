@@ -14,20 +14,16 @@ import { useRouter } from "next/navigation";
 
 const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
-  pending: "Pending",
-  review: "Review",
   publish: "Published",
   archive: "Archived",
   trash: "Trash",
 };
 
 const STATUS_BADGE_CLASSES: Record<string, string> = {
-  draft: "bg-yellow-500/20 text-yellow-400",
-  pending: "bg-orange-500/20 text-orange-400",
-  review: "bg-blue-500/20 text-blue-400",
-  publish: "bg-green-500/20 text-green-400",
-  archive: "bg-muted0/20 text-muted-foreground",
-  trash: "bg-destructive/100/20 text-destructive",
+  draft: "bg-muted text-muted-foreground",
+  publish: "bg-secondary text-foreground",
+  archive: "bg-muted text-muted-foreground",
+  trash: "bg-destructive/15 text-destructive",
 };
 
 export default function CmsPostsPage() {
@@ -39,6 +35,7 @@ export default function CmsPostsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(20);
   const [status, setStatus] = useState("");
+  const [newsstand, setNewsstand] = useState("");
   const [application, setApplication] = useState("");
   const [contentTypeId, setContentTypeId] = useState("");
   const [postType, setPostType] = useState("");
@@ -56,11 +53,11 @@ export default function CmsPostsPage() {
   }, []);
 
   useEffect(() => {
-    const key = `${currentPage}:${search}:${status}:${application}:${contentTypeId}:${postType}:${marketId}`;
+    const key = `${currentPage}:${search}:${status}:${newsstand}:${application}:${contentTypeId}:${postType}:${marketId}`;
     if (loadedForRef.current === key) return;
     loadedForRef.current = key;
     loadPosts();
-  }, [currentPage, search, status, application, contentTypeId, postType, marketId]);
+  }, [currentPage, search, status, newsstand, application, contentTypeId, postType, marketId]);
 
   const loadPosts = async () => {
     try {
@@ -70,6 +67,7 @@ export default function CmsPostsPage() {
         limit,
         search: search || undefined,
         status: status || undefined,
+        newsstand: newsstand || undefined,
         type: postType || undefined,
         application: application || undefined,
         contentTypeId: contentTypeId ? Number(contentTypeId) : undefined,
@@ -137,11 +135,14 @@ export default function CmsPostsPage() {
               <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={status} onChange={(e) => { setCurrentPage(1); setStatus(e.target.value); }}>
                 <option value="">All statuses</option>
                 <option value="draft">Draft</option>
-                <option value="pending">Pending</option>
-                <option value="review">Review</option>
-                <option value="publish">Published</option>
-                <option value="archive">Archived</option>
+                <option value="publish">Publish</option>
+                <option value="archive">Archive</option>
                 <option value="trash">Trash</option>
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={newsstand} onChange={(e) => { setCurrentPage(1); setNewsstand(e.target.value); }}>
+                <option value="">All newsstand</option>
+                <option value="pending">Newsstand requests</option>
+                <option value="published">On newsstand</option>
               </select>
               <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={application} onChange={(e) => { setCurrentPage(1); setApplication(e.target.value); }}>
                 <option value="">All hubs</option>
