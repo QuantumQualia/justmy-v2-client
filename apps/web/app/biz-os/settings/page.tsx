@@ -106,14 +106,14 @@ export default function BizOsSettingsPage() {
                     <p className="font-semibold">{LABELS[row.provider] || row.provider}</p>
                     {!row.configured ? <ComingSoonBadge /> : null}
                   </div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm text-muted-foreground">
                     {connected
                       ? `🟢 Connected${row.accountName ? ` · ${row.accountName}` : ""}`
                       : row.configured
                         ? "🔴 Not connected"
                         : "Coming soon — FunCREW can post from the pack"}
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">{row.configured ? hint?.ready : hint?.waiting}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{row.configured ? hint?.ready : hint?.waiting}</p>
                 </div>
                 {connected ? (
                   <Button

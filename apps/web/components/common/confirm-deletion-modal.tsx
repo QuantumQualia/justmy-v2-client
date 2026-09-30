@@ -59,7 +59,7 @@ export function ConfirmDeletionModal({
         onOpenChange(nextOpen);
       }}
     >
-      <AlertDialogContent className="rounded-2xl rounded-br-none border-border bg-white text-foreground shadow-xl dark:bg-card">
+      <AlertDialogContent className="rounded-2xl rounded-br-none border-border bg-card text-foreground shadow-xl dark:bg-card">
         <AlertDialogHeader>
           <AlertDialogTitle className="text-foreground">{title}</AlertDialogTitle>
           <AlertDialogDescription className="text-muted-foreground">

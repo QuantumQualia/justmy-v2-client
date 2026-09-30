@@ -51,7 +51,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     value: "raw-html-css-block",
     label: "Raw HTML & CSS",
     icon: <Code2 className="h-5 w-5" />,
-    description: "Custom HTML fragment and optional CSS (trusted authors)",
+    description: "Paste HTML and optional CSS. It renders as written. Scope CSS under .raw-html-root. Scripts and iframes load only from https://justmy.com, a subdomain, or a path on this site. Inline scripts and other hosts are removed.",
     category: "Content",
   },
   {
@@ -278,6 +278,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
 export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((block) =>
   [
     "text-block",
+    "raw-html-css-block",
     "image-block",
     "video-block",
     "lookbook-block",

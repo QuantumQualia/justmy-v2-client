@@ -20,13 +20,13 @@ export interface AdBannerProps {
   bannerLink?: string;
   /** Profile slug (e.g. @handle or profile identifier) shown under the image */
   profileSlug: string;
-  /** Exactly 3 hotlinks under the image */
-  hotlinks: [AdBannerHotlink, AdBannerHotlink, AdBannerHotlink];
+  /** Hotlinks under the image, right-aligned */
+  hotlinks: readonly AdBannerHotlink[];
   className?: string;
 }
 
 /**
- * Ad banner: image, profile slug, and 3 hotlinks under the image.
+ * Ad banner: image, profile slug, and hotlinks under the image.
  */
 export function AdBanner({
   imageSrc,
@@ -38,13 +38,13 @@ export function AdBanner({
   className,
 }: AdBannerProps) {
   const imageArea = (
-    <div className="relative w-full aspect-[6/1]">
+    <div className="justmy-corners-xl relative aspect-[6/1] w-full overflow-hidden">
       {imageElement ?? (
         <Image
           src={imageSrc}
           alt={imageAlt}
           fill
-          className="rounded-lg rounded-br-none"
+          className="object-cover"
         />
       )}
     </div>
@@ -53,7 +53,7 @@ export function AdBanner({
   const wrappedImage = bannerLink ? (
     <Link
       href={bannerLink}
-      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-400/50 focus-visible:ring-offset-2 focus-visible:ring-offset-background rounded-lg rounded-br-none"
+      className="justmy-corners-xl block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
       aria-label={imageAlt || "Open banner link"}
     >
       {imageArea}
@@ -78,7 +78,7 @@ export function AdBanner({
               {i > 0 && <span className="text-muted-foreground" aria-hidden>|</span>}
               <Link
                 href={link.href}
-                className="text-purple-300 underline underline-offset-2 hover:text-purple-200 focus:outline-none focus:ring-2 focus:ring-purple-400/50"
+                className="text-primary underline underline-offset-2 hover:text-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {link.label}
               </Link>

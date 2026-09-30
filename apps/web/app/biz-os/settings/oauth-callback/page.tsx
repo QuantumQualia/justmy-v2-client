@@ -46,9 +46,9 @@ export default function SocialOauthCallbackPage() {
     <BizOsPage>
       <BizOsHeader eyebrow="Biz OS" title="Account connection" />
       <BizOsCard>
-        <p className={failed ? "text-sm text-rose-600" : "text-sm text-slate-600"}>{message}</p>
+        <p className={failed ? "text-sm text-rose-600" : "text-sm text-muted-foreground"}>{message}</p>
         {failed ? (
-          <Link className="mt-3 inline-block text-sm font-medium text-violet-700" href="/biz-os/settings">
+          <Link className="mt-3 inline-block text-sm font-medium text-primary" href="/biz-os/settings">
             Back to Connections
           </Link>
         ) : null}

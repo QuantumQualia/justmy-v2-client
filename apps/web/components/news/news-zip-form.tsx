@@ -66,7 +66,7 @@ export function NewsZipForm() {
               if (error) setError(null);
             }}
             maxLength={10}
-            className="h-14 w-full rounded-xl border border-input bg-background pl-12 pr-4 text-lg tracking-wide text-foreground outline-none transition placeholder:text-base placeholder:tracking-normal placeholder:text-muted-foreground hover:border-ring focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-400/20 disabled:opacity-60"
+            className="h-14 w-full rounded-xl border border-input bg-background pl-12 pr-4 text-lg tracking-wide text-foreground outline-none transition placeholder:text-base placeholder:tracking-normal placeholder:text-muted-foreground hover:border-ring focus:border-emerald-400/60 focus:ring-2 focus:ring-success/20 disabled:opacity-60"
             disabled={loading}
             aria-invalid={Boolean(error)}
             aria-describedby={error ? "zip-error" : undefined}
@@ -76,7 +76,7 @@ export function NewsZipForm() {
         <button
           type="submit"
           disabled={loading}
-          className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-400 to-cyan-500 px-6 text-sm font-semibold text-black shadow-lg shadow-emerald-500/20 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          className="inline-flex h-14 items-center justify-center gap-2 rounded-xl bg-linear-to-r from-emerald-400 to-accent px-6 text-sm font-semibold text-black shadow-lg shadow-success/20 transition hover:brightness-110 focus:outline-none focus-visible:ring-2 focus-visible:ring-success/50 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
         >
           {loading ? (
             <>
@@ -96,7 +96,7 @@ export function NewsZipForm() {
         <p
           id="zip-error"
           role="alert"
-          className="flex items-start gap-2 text-sm text-red-400"
+          className="flex items-start gap-2 text-sm text-destructive"
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           {error}

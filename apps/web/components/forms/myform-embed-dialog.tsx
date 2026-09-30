@@ -90,7 +90,7 @@ export function MyFormEmbedDialog({ open, onOpenChange, form }: MyFormEmbedDialo
       <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-background text-foreground sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Link2 className="h-5 w-5 text-emerald-400" />
+            <Link2 className="h-5 w-5 text-success" />
             Embed myFORM
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">

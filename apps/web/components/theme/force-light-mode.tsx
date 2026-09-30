@@ -1,33 +1,14 @@
 "use client";
 
-import { useLayoutEffect, type ReactNode } from "react";
-
-const HTML_CLASS = "news-light-html";
-const BODY_CLASS = "news-light-body";
+import type { ReactNode } from "react";
 
 /**
- * NewsSTAND / Biz OS / verify-email are light product surfaces.
- * Apply light classes for the lifetime of this tree without calling
- * setTheme (that can loop if the theme setter identity changes).
+ * Layout shell for product routes. Color comes from the shared tokens so
+ * light and dark both apply. The name is kept so existing layouts stay stable.
  */
 export function ForceLightMode({ children }: { children: ReactNode }) {
-  useLayoutEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    const hadDark = html.classList.contains("dark");
-    html.classList.remove("dark");
-    html.classList.add(HTML_CLASS);
-    body.classList.add(BODY_CLASS);
-
-    return () => {
-      html.classList.remove(HTML_CLASS);
-      body.classList.remove(BODY_CLASS);
-      if (hadDark) html.classList.add("dark");
-    };
-  }, []);
-
   return (
-    <div className="light flex min-h-0 flex-1 flex-col bg-[#f7f6fb] text-slate-900" data-theme="light">
+    <div className="flex min-h-0 flex-1 flex-col bg-background text-foreground">
       {children}
     </div>
   );

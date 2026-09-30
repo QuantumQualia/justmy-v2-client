@@ -16,6 +16,7 @@ import {
   hasMycardMedia,
 } from "@/components/mycard/mycard-cover-fallbacks";
 import { cn } from "@workspace/ui/lib/utils";
+import { LegacyHtml } from "@/components/common/legacy-html";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
@@ -84,46 +85,45 @@ type ModalAppearance = "light" | "dark";
 function modalUi(appearance: ModalAppearance = "dark") {
   const isLight = appearance === "light";
   const lightScroll =
-    "[scrollbar-width:thin] [scrollbar-color:rgb(203_213_225)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300";
+    "[scrollbar-width:thin] [scrollbar-color:rgb(203_213_225)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-muted";
   return {
     isLight,
-    overlay: isLight ? "bg-slate-900/40" : "bg-black/70",
+    overlay: isLight ? "bg-card/40" : "bg-black/70",
     card: isLight
-      ? "bg-white p-6 rounded-2xl border border-slate-200 shadow-xl w-full max-w-sm text-slate-900"
-      : "bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm",
+      ? "bg-card p-6 rounded-2xl border border-border shadow-xl w-full max-w-sm text-foreground"
+      : "dark bg-card p-6 rounded-2xl border border-border shadow-card w-full max-w-sm text-foreground",
     scroll: isLight ? lightScroll : "custom-scrollbar",
-    iconWrap: isLight ? "bg-slate-100 text-slate-600" : "bg-slate-700",
-    title: isLight ? "text-slate-900" : "text-white",
-    desc: isLight ? "text-slate-500" : "text-slate-400",
-    closeBtn: isLight ? "bg-slate-100 hover:bg-slate-200" : "bg-slate-700 hover:bg-slate-600",
-    closeIcon: isLight ? "text-slate-500" : "text-slate-300",
-    input: isLight
-      ? "w-full bg-white border-slate-200 text-sm text-slate-900 placeholder:text-slate-400 focus:border-violet-400 focus:ring-violet-200"
-      : "w-full bg-slate-900/50 border-slate-600 text-sm focus:border-blue-500",
+    iconWrap: "bg-muted text-muted-foreground",
+    title: "text-foreground",
+    desc: isLight ? "text-muted-foreground" : "text-muted-foreground",
+    closeBtn: "bg-muted hover:bg-muted",
+    closeIcon: isLight ? "text-muted-foreground" : "text-muted-foreground",
+    input:
+      "w-full border-border bg-card text-sm text-foreground placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring",
     item: isLight
-      ? "p-3 rounded-xl border border-slate-200 bg-slate-50"
-      : "p-3 bg-slate-900/50 rounded-lg",
-    itemTitle: isLight ? "text-sm font-medium text-slate-900" : "text-sm font-medium text-white",
-    itemSub: isLight ? "text-xs text-slate-500" : "text-xs text-slate-400",
+      ? "p-3 rounded-xl border border-border bg-muted"
+      : "p-3 bg-card/50 rounded-lg",
+    itemTitle: "text-sm font-medium text-foreground",
+    itemSub: isLight ? "text-xs text-muted-foreground" : "text-xs text-muted-foreground",
     addTile: isLight
-      ? "flex flex-col items-center gap-1.5 p-2.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 hover:border-violet-200 rounded-xl transition-all group cursor-pointer"
-      : "flex flex-col items-center gap-1.5 p-2.5 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 hover:border-blue-500 rounded-lg transition-all group cursor-pointer",
+      ? "flex flex-col items-center gap-1.5 p-2.5 bg-muted hover:bg-muted border border-border hover:border-primary/30 rounded-xl transition-all group cursor-pointer"
+      : "flex flex-col items-center gap-1.5 p-2.5 bg-muted/50 hover:bg-muted border border-border hover:border-primary rounded-lg transition-all group cursor-pointer",
     addTileIcon: isLight
-      ? "h-8 w-8 rounded-full bg-white border border-slate-200 text-slate-600 group-hover:border-violet-200 group-hover:text-violet-700 flex items-center justify-center transition-colors"
-      : "h-8 w-8 rounded-full bg-slate-800 group-hover:bg-blue-600 flex items-center justify-center transition-colors",
+      ? "h-8 w-8 rounded-full bg-card border border-border text-muted-foreground group-hover:border-primary/30 group-hover:text-primary flex items-center justify-center transition-colors"
+      : "h-8 w-8 rounded-full bg-muted group-hover:bg-primary flex items-center justify-center transition-colors",
     addTileLabel: isLight
-      ? "text-[10px] font-medium text-slate-500 leading-tight text-center"
-      : "text-[10px] font-medium text-slate-300 leading-tight text-center",
+      ? "text-[10px] font-medium text-muted-foreground leading-tight text-center"
+      : "text-[10px] font-medium text-muted-foreground leading-tight text-center",
     saveBtn: isLight
-      ? "px-4 py-2.5 text-sm font-medium bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
-      : "px-4 py-2.5 text-sm font-medium bg-blue-600 hover:bg-blue-700 disabled:bg-slate-700 disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer",
+      ? "px-4 py-2.5 text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer"
+      : "px-4 py-2.5 text-sm font-medium bg-primary hover:bg-primary/90 disabled:bg-muted disabled:cursor-not-allowed rounded-lg transition-colors cursor-pointer",
     secondaryBtn: isLight
-      ? "px-4 py-2.5 text-sm font-medium bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors cursor-pointer"
-      : "px-4 py-2.5 text-sm font-medium bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors cursor-pointer",
+      ? "px-4 py-2.5 text-sm font-medium bg-muted hover:bg-muted text-foreground rounded-lg transition-colors cursor-pointer"
+      : "px-4 py-2.5 text-sm font-medium bg-muted hover:bg-muted rounded-lg transition-colors cursor-pointer",
     dangerBtn: isLight
-      ? "px-4 py-2.5 text-sm font-medium bg-white text-red-600 border border-red-200 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+      ? "px-4 py-2.5 text-sm font-medium bg-card text-destructive border border-destructive/30 hover:bg-destructive/10 rounded-lg transition-colors cursor-pointer"
       : "px-4 py-2.5 text-sm font-medium bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors cursor-pointer",
-    sectionLabel: isLight ? "text-sm font-semibold text-slate-500 mb-2" : "text-sm font-semibold text-slate-400 mb-2",
+    sectionLabel: isLight ? "text-sm font-semibold text-muted-foreground mb-2" : "text-sm font-semibold text-muted-foreground mb-2",
   };
 }
 
@@ -209,7 +209,7 @@ const SimpleFieldEditModal: React.FC<SimpleFieldEditModalProps> = ({
         className={cn(ui.input, "mb-1", error ? "border-red-500 focus:border-red-500" : "")}
         autoFocus
       />
-      {error && <p className="text-xs text-red-400 mb-4">{error}</p>}
+      {error && <p className="text-xs text-destructive mb-4">{error}</p>}
       <div className="flex gap-2 mt-2">
         <button
           onClick={onSave}
@@ -333,7 +333,7 @@ export default function InlineEdit({
   const ui = modalUi(appearance);
   const contactBtnClass = isLight
     ? "h-10 w-10 rounded-full border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer bg-muted hover:bg-muted/70 border-border"
-    : "h-10 w-10 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer";
+    : "h-10 w-10 rounded-full bg-muted hover:bg-muted border border-border flex items-center justify-center transition-colors touch-manipulation relative cursor-pointer";
   const contactGlassStyle = isLight
     ? {
         background: "var(--glass-bg)",
@@ -346,13 +346,13 @@ export default function InlineEdit({
   const contactIconClass = isLight ? "text-foreground/60" : undefined;
   const editPencilBtnClass = isLight
     ? "absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-[var(--glass-bg)] border border-border hover:border-primary/30 flex items-center justify-center transition-all duration-200 cursor-pointer"
-    : "absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer";
+    : "absolute right-0 top-1/2 -translate-y-1/2 opacity-100 sm:opacity-0 group-hover:opacity-100 touch-manipulation h-9 w-9 rounded-lg bg-gradient-to-br from-muted/60 to-muted/60 hover:from-primary hover:to-primary flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-primary/30 cursor-pointer";
   const dashedAddClass = isLight
     ? "w-full p-4 rounded-xl border-2 border-dashed border-border hover:border-primary/40 bg-[var(--glass-bg)] hover:bg-muted/60 transition-all duration-200 text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer"
-    : "w-full p-4 bg-gradient-to-br from-slate-800/40 to-slate-900/20 rounded-xl border-2 border-dashed border-slate-700/50 hover:border-blue-500/50 hover:bg-slate-800/60 transition-all duration-200 text-sm font-medium text-slate-400 hover:text-slate-300 cursor-pointer";
+    : "w-full p-4 bg-gradient-to-br from-card/40 to-card/20 rounded-xl border-2 border-dashed border-border/50 hover:border-primary/50 hover:bg-muted/60 transition-all duration-200 text-sm font-medium text-muted-foreground hover:text-muted-foreground cursor-pointer";
   const ctaButtonClassName = isLight
     ? LIGHT_CTA_CLASSNAME
-    : "w-full bg-gradient-to-r from-slate-800 to-slate-800/90 hover:from-slate-700 hover:to-slate-700/90 text-white border border-slate-700/50 shadow-lg shadow-slate-900/20 touch-manipulation cursor-pointer font-medium";
+    : "w-full bg-gradient-to-r from-card to-muted/90 hover:from-muted hover:to-muted/90 text-white border border-border/50 shadow-lg shadow-card touch-manipulation cursor-pointer font-medium";
 
   // Get profileId from data
   const profileId = data.id;
@@ -804,12 +804,12 @@ export default function InlineEdit({
   };
 
   return (
-    <div className={cn("w-full relative", isLight ? "text-foreground" : "text-white")}>
+    <div className={cn("relative w-full text-foreground", !isLight && "dark")}>
       {/* Mobile View Container */}
       <div
         className={cn(
           "w-full max-w-[375px] mx-auto relative overflow-hidden",
-          isLight ? "bg-background border border-border/60 rounded-2xl shadow-sm" : "bg-slate-900 rounded-2xl shadow-2xl",
+          isLight ? "bg-background border border-border/60 rounded-2xl shadow-sm" : "bg-card rounded-2xl shadow-card",
         )}
       >
         {/* Banner and Profile Image - Step 1 */}
@@ -817,7 +817,7 @@ export default function InlineEdit({
           {/* Edit Step Badge */}
           {isEditMode && !isLight && (
             <div className="absolute left-2 top-2 flex items-center gap-2 z-20">
-              <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+              <div className="h-5 w-5 bg-destructive/100 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                 1
               </div>
             </div>
@@ -868,7 +868,7 @@ export default function InlineEdit({
                   }}
                   className={cn(
                     "h-24 w-24 overflow-hidden rounded-full",
-                    isLight ? "bg-card border-4 border-border shadow-xl" : "bg-slate-800 border-4 border-slate-900",
+                    isLight ? "bg-card border-4 border-border shadow-xl" : "bg-muted border-4 border-border",
                   )}
                   aria-label="Edit profile photo"
                 >
@@ -924,7 +924,7 @@ export default function InlineEdit({
                     <span
                       className={cn(
                         "absolute -top-1 -right-1 h-4 w-4 rounded-full text-xs flex items-center justify-center",
-                        isLight ? "bg-violet-600 text-white" : "bg-blue-500 text-white",
+                        isLight ? "bg-primary text-primary-foreground" : "bg-primary text-primary-foreground",
                       )}
                     >
                       {data.phones.length}
@@ -980,7 +980,7 @@ export default function InlineEdit({
                     <span
                       className={cn(
                         "absolute -top-1 -right-1 h-4 w-4 rounded-full text-xs flex items-center justify-center",
-                        isLight ? "bg-violet-600 text-white" : "bg-blue-500 text-white",
+                        isLight ? "bg-primary text-primary-foreground" : "bg-primary text-primary-foreground",
                       )}
                     >
                       {data.addresses.length}
@@ -1110,7 +1110,7 @@ export default function InlineEdit({
                       : contactGlassStyle
                   }
                 >
-                  <Plus className={cn("h-5 w-5", isLight ? "text-muted-foreground" : "text-slate-400")} />
+                  <Plus className={cn("h-5 w-5", isLight ? "text-muted-foreground" : "text-muted-foreground")} />
                 </button>
               ) : null}
             </div>
@@ -1180,7 +1180,7 @@ export default function InlineEdit({
                   autoFocus
                 />
                 {validationErrors.socialLink && (
-                  <p className="text-xs text-red-400 mb-4">{validationErrors.socialLink}</p>
+                  <p className="text-xs text-destructive mb-4">{validationErrors.socialLink}</p>
                 )}
                 <div className="flex gap-2 mt-2">
                   <button
@@ -1395,7 +1395,7 @@ export default function InlineEdit({
                           onDataChange({ phones: updatedPhones });
                           performSave({ ...data, phones: updatedPhones });
                         }}
-                        className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                        className="p-1.5 text-destructive hover:text-red-300 transition-colors cursor-pointer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -1417,7 +1417,7 @@ export default function InlineEdit({
                       className={cn(ui.input, validationErrors.phone ? "border-red-500 focus:border-red-500" : "")}
                     />
                     {validationErrors.phone && (
-                      <p className="text-xs text-red-400 mt-1">{validationErrors.phone}</p>
+                      <p className="text-xs text-destructive mt-1">{validationErrors.phone}</p>
                     )}
                   </div>
                   <Input
@@ -1485,7 +1485,7 @@ export default function InlineEdit({
                         <div className="flex items-start justify-between">
                           <div className={cn("flex-1 text-sm", ui.itemTitle)}>
                             {address.title && (
-                              <div className={cn("font-semibold mb-1", isLight ? "text-violet-700" : "text-blue-400")}>{address.title}</div>
+                              <div className={cn("font-semibold mb-1", isLight ? "text-primary" : "text-blue-400")}>{address.title}</div>
                             )}
                             <div className="font-medium">{extractedFields.address}</div>
                             {(extractedFields.city || extractedFields.state || extractedFields.zipCode) && (
@@ -1509,7 +1509,7 @@ export default function InlineEdit({
                                   country: extractedFields.country || "",
                                 });
                               }}
-                              className={cn("p-1.5 transition-colors cursor-pointer", isLight ? "text-slate-400 hover:text-slate-700" : "text-blue-400 hover:text-blue-300")}
+                              className={cn("p-1.5 transition-colors cursor-pointer", isLight ? "text-muted-foreground hover:text-foreground" : "text-blue-400 hover:text-blue-300")}
                               title="Edit"
                             >
                               <Pencil className="h-4 w-4" />
@@ -1520,7 +1520,7 @@ export default function InlineEdit({
                                 onDataChange({ addresses: updatedAddresses });
                                 performSave({ ...data, addresses: updatedAddresses });
                               }}
-                              className="p-1.5 text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                              className="p-1.5 text-destructive hover:text-red-300 transition-colors cursor-pointer"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -1610,7 +1610,7 @@ export default function InlineEdit({
                     "w-full text-xl font-bold text-center rounded-lg p-2 focus:outline-none focus:ring-2",
                     isLight
                       ? "font-serif bg-background border border-primary focus:ring-primary text-foreground"
-                      : "bg-slate-800 border border-blue-500 focus:ring-blue-500 text-slate-200",
+                      : "bg-muted border border-primary focus-visible:ring-ring text-foreground",
                   )}
                   autoFocus
                 />
@@ -1621,7 +1621,7 @@ export default function InlineEdit({
                       <h1
                         className={cn(
                           "text-xl md:text-2xl font-bold font-serif",
-                          isLight ? "text-foreground" : "text-slate-200",
+                          isLight ? "text-foreground" : "text-foreground",
                         )}
                       >
                         {data.name}
@@ -1654,7 +1654,7 @@ export default function InlineEdit({
                     "w-full min-h-[60px] p-2 text-base text-center rounded-lg focus:outline-none focus:ring-2 resize-none md:text-sm",
                     isLight
                       ? "text-muted-foreground bg-background border border-primary focus:ring-primary"
-                      : "text-slate-400 bg-slate-800 border border-blue-500 focus:ring-blue-500",
+                      : "text-muted-foreground bg-muted border border-primary focus-visible:ring-ring",
                   )}
                   autoFocus
                 />
@@ -1662,7 +1662,7 @@ export default function InlineEdit({
                 <>
                   {data.tagline ? (
                     <div className="flex items-center justify-center gap-2">
-                      <p className={cn("text-sm break-words", isLight ? "text-muted-foreground" : "text-slate-400")}>
+                      <p className={cn("text-sm break-words", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
                         {data.tagline}
                       </p>
                       <button
@@ -1690,7 +1690,7 @@ export default function InlineEdit({
             {/* Edit Step Badge */}
             {isEditMode && !isLight && (
               <div className="absolute left-0 top-0 flex items-center gap-2 z-20">
-                <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                <div className="h-5 w-5 bg-destructive/100 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                   2
                 </div>
               </div>
@@ -1703,12 +1703,12 @@ export default function InlineEdit({
                       "p-5 rounded-2xl border-2 shadow-xl backdrop-blur-sm",
                       isLight
                         ? "bg-card border-primary/40"
-                        : "bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 border-blue-500/60",
+                        : "bg-gradient-to-br from-card via-card/95 to-card border-primary/60",
                     )}
                   >
                     <div className="space-y-4">
                       <div className="space-y-2">
-                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>Title</label>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-muted-foreground")}>Title</label>
                         <Input
                           value={hotlink.title}
                           onChange={(e) => onHotlinkUpdate(hotlink.id, { title: e.target.value })}
@@ -1716,13 +1716,13 @@ export default function InlineEdit({
                             "h-12 rounded-xl px-4 text-sm font-semibold border-2 transition-all duration-200 shadow-sm focus:ring-2",
                             isLight
                               ? "bg-background border-border text-foreground focus:border-primary focus:ring-primary/40"
-                              : "bg-slate-900/90 border-slate-600/40 text-slate-100 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-md focus:shadow-blue-500/20",
+                              : "bg-card/90 border-border/40 text-foreground focus:border-primary focus-visible:ring-ring/40 focus:shadow-md focus:shadow-primary/20",
                           )}
                           autoFocus
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>URL</label>
+                        <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-muted-foreground")}>URL</label>
                         <Input
                           value={hotlink.url}
                           onChange={(e) => {
@@ -1742,18 +1742,18 @@ export default function InlineEdit({
                             "h-12 rounded-xl px-4 text-sm font-medium border-2 transition-all duration-200 shadow-sm focus:ring-2",
                             isLight
                               ? "bg-background text-foreground placeholder:text-muted-foreground"
-                              : "bg-slate-900/90 text-slate-100",
+                              : "bg-card/90 text-foreground",
                             validationErrors.hotlink?.[hotlink.id]
                               ? isLight
                                 ? "border-red-500 focus:border-red-500 focus:ring-red-500/30"
                                 : "border-red-500 focus:border-red-500 focus:ring-red-500/40 focus:shadow-red-500/20"
                               : isLight
                                 ? "border-border focus:border-primary focus:ring-primary/40"
-                                : "border-slate-600/40 focus:border-blue-500 focus:ring-blue-500/40 focus:shadow-blue-500/20",
+                                : "border-border/40 focus:border-primary focus-visible:ring-ring/40 focus:shadow-primary/20",
                           )}
                         />
                         {validationErrors.hotlink?.[hotlink.id] && (
-                          <p className={cn("text-xs mt-1", isLight ? "text-red-600" : "text-red-400")}>{validationErrors.hotlink[hotlink.id]}</p>
+                          <p className={cn("text-xs mt-1", isLight ? "text-destructive" : "text-destructive")}>{validationErrors.hotlink[hotlink.id]}</p>
                         )}
                       </div>
                       <div className="flex gap-3 pt-1">
@@ -1776,8 +1776,8 @@ export default function InlineEdit({
                           className={cn(
                             "flex-1 text-sm font-medium cursor-pointer",
                             isLight
-                              ? "bg-violet-600 text-white hover:bg-violet-700 disabled:bg-slate-100 disabled:text-slate-400"
-                              : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white shadow-lg shadow-blue-600/20",
+                              ? "bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+                              : "bg-gradient-to-r from-primary to-primary hover:from-primary/90 hover:to-primary/80 disabled:from-muted disabled:to-muted disabled:cursor-not-allowed text-white shadow-lg shadow-primary/20",
                           )}
                         >
                           Save Changes
@@ -1797,8 +1797,8 @@ export default function InlineEdit({
                           className={cn(
                             "px-4 text-sm font-medium cursor-pointer",
                             isLight
-                              ? "border-border bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
-                              : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
+                              ? "border-border bg-muted text-foreground hover:bg-muted hover:text-foreground"
+                              : "bg-muted/50 hover:bg-muted/70 border-border/50 text-muted-foreground hover:text-foreground",
                           )}
                         >
                           Cancel
@@ -1829,17 +1829,17 @@ export default function InlineEdit({
                     </button>
                   </div>
                 ) : (
-                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 hover:border-blue-500/60 hover:shadow-lg hover:shadow-blue-500/10 transition-all duration-200 group/item backdrop-blur-sm">
+                  <div className="flex items-center gap-3 p-4 bg-gradient-to-br from-card/60 via-card/40 to-card/30 rounded-xl border border-border/50 hover:border-primary/60 hover:shadow-lg hover:shadow-primary/10 transition-all duration-200 group/item backdrop-blur-sm">
                     <div className="flex-1 min-w-0">
-                      <span className="text-sm font-semibold text-slate-100 block truncate">{hotlink.title}</span>
+                      <span className="text-sm font-semibold text-foreground block truncate">{hotlink.title}</span>
                       {hotlink.url && (
-                        <span className="text-xs text-slate-400/80 block truncate mt-1">{hotlink.url}</span>
+                        <span className="text-xs text-muted-foreground/80 block truncate mt-1">{hotlink.url}</span>
                       )}
                     </div>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => setEditingHotlink(hotlink.id)}
-                        className="h-9 w-9 rounded-lg bg-slate-700/60 hover:bg-gradient-to-br hover:from-blue-600 hover:to-blue-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-blue-500/30 cursor-pointer"
+                        className="h-9 w-9 rounded-lg bg-muted/60 hover:bg-gradient-to-br hover:from-primary hover:to-primary flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-primary/30 cursor-pointer"
                       >
                         <Pencil className="h-4 w-4 text-blue-400 group-hover/item:text-white transition-colors" />
                       </button>
@@ -1849,9 +1849,9 @@ export default function InlineEdit({
                           // Save removal to API
                           performSave({ ...data, hotlinks: data.hotlinks.filter(h => h.id !== hotlink.id) });
                         }}
-                        className="h-9 w-9 rounded-lg bg-slate-700/60 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-red-500/30 cursor-pointer"
+                        className="h-9 w-9 rounded-lg bg-muted/60 hover:bg-gradient-to-br hover:from-red-600 hover:to-red-700 flex items-center justify-center transition-all duration-200 shadow-sm hover:shadow-red-500/30 cursor-pointer"
                       >
-                        <Trash2 className="h-4 w-4 text-red-400 group-hover/item:text-white transition-colors" />
+                        <Trash2 className="h-4 w-4 text-destructive group-hover/item:text-white transition-colors" />
                       </button>
                     </div>
                   </div>
@@ -1887,7 +1887,7 @@ export default function InlineEdit({
             {/* Edit Step Badge */}
             {isEditMode && !isLight && (
               <div className="absolute left-0 top-2 flex items-center gap-2 z-20">
-                <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                <div className="h-5 w-5 bg-destructive/100 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                   3
                 </div>
               </div>
@@ -1896,7 +1896,7 @@ export default function InlineEdit({
               <h2
                 className={cn(
                   "font-bold font-serif",
-                  isLight ? "text-xl text-foreground" : "text-lg text-slate-100 ml-8",
+                  isLight ? "text-xl text-foreground" : "text-lg text-foreground ml-8",
                 )}
               >
                 About
@@ -1908,7 +1908,7 @@ export default function InlineEdit({
                     "h-9 w-9 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer",
                     isLight
                       ? "bg-[var(--glass-bg)] border border-border hover:border-primary/30"
-                      : "bg-gradient-to-br from-slate-700/60 to-slate-800/60 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-blue-500/30",
+                      : "bg-gradient-to-br from-muted/60 to-muted/60 hover:from-primary hover:to-primary shadow-sm hover:shadow-primary/30",
                   )}
                 >
                   <Pencil className={cn("h-4 w-4", isLight ? "text-foreground/70" : "text-blue-400 group-hover:text-white transition-colors")} />
@@ -1921,15 +1921,15 @@ export default function InlineEdit({
                   "p-5 rounded-2xl border-2 shadow-xl backdrop-blur-sm",
                   isLight
                     ? "bg-card border-primary/40"
-                    : "bg-gradient-to-br from-slate-800 via-slate-800/95 to-slate-900 border-blue-500/60",
+                    : "bg-gradient-to-br from-card via-card/95 to-card border-primary/60",
                 )}
               >
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-slate-300")}>About Text</label>
+                    <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-muted-foreground")}>About Text</label>
                     <button
                       onClick={() => setShowAIAssistant(true)}
-                      className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-blue-600/80 to-purple-600/80 hover:from-blue-600 hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
+                      className="px-3 py-1.5 text-xs font-medium text-white bg-gradient-to-r from-primary/80 to-purple-600/80 hover:from-primary hover:to-purple-600 rounded-lg transition-colors cursor-pointer flex items-center gap-1.5"
                       title="AskSKY! suggestions for your About section"
                     >
                       <Sparkles className="h-3.5 w-3.5" />
@@ -1944,7 +1944,7 @@ export default function InlineEdit({
                       ui.scroll,
                       isLight
                         ? "text-foreground bg-background border-border focus:ring-primary/40 focus:border-primary placeholder:text-muted-foreground"
-                        : "text-slate-100 bg-slate-900/90 border-slate-600/30 focus:ring-blue-500/40 focus:border-blue-500/80 placeholder:text-slate-500/70",
+                        : "text-foreground bg-card/90 border-border/30 focus-visible:ring-ring/40 focus:border-primary/80 placeholder:text-muted-foreground/70",
                     )}
                     placeholder="Tell people about yourself..."
                     autoFocus
@@ -1956,7 +1956,7 @@ export default function InlineEdit({
                         performSave(data);
                         setEditingAbout(false);
                       }}
-                      className="flex-1 bg-violet-600 text-white hover:bg-violet-700 text-sm font-medium cursor-pointer"
+                      className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium cursor-pointer"
                     >
                       Save Changes
                     </Button>
@@ -1966,8 +1966,8 @@ export default function InlineEdit({
                       className={cn(
                         "px-4 text-sm font-medium cursor-pointer",
                             isLight
-                              ? "border-border bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
-                              : "bg-slate-700/50 hover:bg-slate-700/70 border-slate-600/50 text-slate-300 hover:text-slate-100",
+                              ? "border-border bg-muted text-foreground hover:bg-muted hover:text-foreground"
+                              : "bg-muted/50 hover:bg-muted/70 border-border/50 text-muted-foreground hover:text-foreground",
                       )}
                     >
                       Cancel
@@ -1979,10 +1979,10 @@ export default function InlineEdit({
               <>
                 {data.about ? (
                   isLight ? (
-                    <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{data.about}</p>
+                    <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
                   ) : (
-                    <div className="p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-xl border border-slate-700/50 backdrop-blur-sm">
-                      <p className="text-sm text-slate-200 leading-relaxed whitespace-pre-wrap">{data.about}</p>
+                    <div className="p-5 bg-gradient-to-br from-card/60 via-card/40 to-card/30 rounded-xl border border-border/50 backdrop-blur-sm">
+                      <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
                     </div>
                   )
                 ) : (
@@ -2001,7 +2001,7 @@ export default function InlineEdit({
             <div className="relative">
               {isEditMode && (
                 <div className="absolute left-0 top-2 flex items-center gap-2 z-20">
-                  <div className="h-5 w-5 bg-red-500 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
+                  <div className="h-5 w-5 bg-destructive/100 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg">
                     4
                   </div>
                 </div>

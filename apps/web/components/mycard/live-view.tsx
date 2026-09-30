@@ -220,15 +220,13 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
   const isLight = variant === "light";
   const overlayClass = isLight ? "bg-black/30" : "bg-black/70";
   const cardClass = isLight
-    ? "bg-card p-6 rounded-2xl border border-border shadow-2xl w-full max-w-sm"
-    : "bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-2xl border border-slate-700 shadow-2xl w-full max-w-sm";
-  const closeBtnClass = isLight
-    ? "bg-muted hover:bg-muted"
-    : "bg-slate-700 hover:bg-slate-600";
-  const titleClass = isLight ? "text-foreground" : "text-white";
+    ? "bg-card p-6 rounded-2xl border border-border shadow-card w-full max-w-sm"
+    : "dark bg-card p-6 rounded-2xl border border-border shadow-card w-full max-w-sm text-foreground";
+  const closeBtnClass = "bg-muted hover:bg-muted";
+  const titleClass = "text-foreground";
   const itemBtnClass = isLight
     ? "w-full p-4 border border-border bg-[var(--glass-bg)] shadow-[0_2px_10px_oklch(0_0_0/_0.06)] backdrop-blur-[12px] hover:border-primary/30 justmy-corners transition-all text-left cursor-pointer"
-    : "w-full p-4 bg-slate-900/50 hover:bg-slate-800 border border-slate-700 hover:border-blue-500 justmy-corners transition-all text-left cursor-pointer";
+    : "w-full p-4 bg-card/50 hover:bg-muted border border-border hover:border-blue-500 justmy-corners transition-all text-left cursor-pointer";
 
   return (
     <div
@@ -255,7 +253,7 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
             onClick={onClose}
             className={`h-8 w-8 rounded-full ${closeBtnClass} flex items-center justify-center transition-colors cursor-pointer`}
           >
-            <X className={`h-4 w-4 ${isLight ? "text-muted-foreground" : "text-slate-300"}`} />
+            <X className={`h-4 w-4 ${isLight ? "text-muted-foreground" : "text-muted-foreground"}`} />
           </button>
         </div>
         <div className="space-y-2">
@@ -275,7 +273,7 @@ const SelectionModal: React.FC<SelectionModalProps> = ({
               </div>
               {item.subtitle && (
                 <div
-                  className={`text-xs mt-1 ${isLight ? "text-muted-foreground" : "text-slate-400"
+                  className={`text-xs mt-1 ${isLight ? "text-muted-foreground" : "text-muted-foreground"
                     }`}
                 >
                   {item.subtitle}
@@ -332,13 +330,13 @@ export default function MyCardLive({
 
   const isLightMycard = usePublicNavbar || lightAppearance;
   const outerTextClass = isLightMycard ? "text-foreground" : "text-white";
-  const screenBgClass = isLightMycard ? "bg-background" : "bg-slate-900";
+  const screenBgClass = isLightMycard ? "bg-background" : "bg-card";
   const avatarOuterClass = isLightMycard
     ? "bg-card border-4 border-border shadow-xl"
-    : "bg-slate-800 border-4 border-slate-900";
+    : "bg-muted border-4 border-slate-900";
   const socialBtnColorClass = isLightMycard
     ? "bg-muted hover:bg-muted/70 border-border"
-    : "bg-slate-800 hover:bg-slate-700 border-slate-700";
+    : "bg-muted hover:bg-slate-700 border-border";
   const socialIconTextClass = isLightMycard ? "text-foreground/60" : "text-white";
   const actionGlassStyle = isLightMycard
     ? {
@@ -349,19 +347,19 @@ export default function MyCardLive({
       boxShadow: "0 2px 12px oklch(0 0 0 / 0.08)",
     }
     : undefined;
-  const nameTextClass = isLightMycard ? "text-foreground" : "text-slate-200";
+  const nameTextClass = isLightMycard ? "text-foreground" : "text-foreground";
   const taglineTextClass = isLightMycard
     ? "text-muted-foreground"
-    : "text-slate-400";
+    : "text-muted-foreground";
   const aboutTitleTextClass = isLightMycard
     ? "text-foreground"
-    : "text-slate-100";
+    : "text-foreground";
   const aboutCardClass = isLightMycard
     ? "p-5 bg-card/90 rounded-lg rounded-br-none border border-border backdrop-blur-sm"
-    : "p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-lg rounded-br-none border border-slate-700/50 backdrop-blur-sm";
+    : "p-5 bg-gradient-to-br from-slate-800/60 via-slate-800/40 to-slate-900/30 rounded-lg rounded-br-none border border-border/50 backdrop-blur-sm";
   const aboutBodyTextClass = isLightMycard
     ? "text-muted-foreground"
-    : "text-slate-200";
+    : "text-foreground";
 
   const ctaButtonClassName = isLightMycard
     ? "block w-full py-3 px-4 justmy-corners text-center text-sm font-medium text-foreground transition-all duration-200 active:scale-95 hover:shadow-md border-[1.5px] border-border bg-[var(--hotlink-bg)] touch-manipulation cursor-pointer"

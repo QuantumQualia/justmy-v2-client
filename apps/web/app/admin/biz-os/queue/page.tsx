@@ -34,7 +34,7 @@ function statusLabel(status?: string | null) {
 
 function statusBadgeClass(status?: string | null) {
   const value = String(status || "open");
-  if (value === "resolved") return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700";
+  if (value === "resolved") return "border-success/30 bg-success/10 text-success";
   if (value === "in_progress") return "border-sky-500/30 bg-sky-500/10 text-sky-700";
   return "border-amber-500/30 bg-amber-500/10 text-amber-800";
 }
@@ -204,7 +204,7 @@ export default function BizOsAdminQueuePage() {
               </button>
             ))}
           </div>
-          {error ? <p className="text-sm text-red-600">{error}</p> : null}
+          {error ? <p className="text-sm text-destructive">{error}</p> : null}
         </div>
 
         <div className="grid min-h-0 flex-1 gap-5 overflow-y-auto xl:grid-cols-[minmax(0,1.1fr)_minmax(20rem,0.9fr)] xl:overflow-hidden">

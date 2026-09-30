@@ -165,6 +165,19 @@ export interface UpdatePageDto extends Partial<CreatePageDto> {
 /**
  * Payload Post (matches backend response)
  */
+export interface PostAuthorProfile {
+  id: string;
+  name: string;
+  slug: string;
+  tagline?: string | null;
+  photo?: string | null;
+  banner?: string | null;
+  website?: string | null;
+  ad?: { image: string; href?: string | null; alt?: string | null } | null;
+  socialLinks?: { id: string; name: string; link: string }[];
+  hotlinks?: { id: string; label: string; link: string }[];
+}
+
 export interface PayloadPost {
   id: string;
   title: string;
@@ -185,7 +198,9 @@ export interface PayloadPost {
     ogImage?: string | { url: string };
   } | null;
   status: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
-  author?: string | { id: string; email: string };
+  authorId?: number;
+  author?: PostAuthorProfile | null;
+  channelLabel?: string | null;
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;

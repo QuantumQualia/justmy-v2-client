@@ -60,7 +60,7 @@ function BusinessResultCard({
             <span className="flex items-center gap-1">
               {item.isVerified && (
                 <CheckCircle2
-                  className="h-3.5 w-3.5 text-emerald-400"
+                  className="h-3.5 w-3.5 text-success"
                   aria-label="Verified business"
                 />
               )}
@@ -80,7 +80,7 @@ function BusinessResultCard({
         )}
       </div>
       {item.subtitle && (
-        <div className="text-xs text-emerald-300/80 mt-0.5">{item.subtitle}</div>
+        <div className="text-xs text-success/80 mt-0.5">{item.subtitle}</div>
       )}
       {item.snippet && (
         <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{item.snippet}</p>
@@ -89,7 +89,7 @@ function BusinessResultCard({
   );
 
   const className =
-    "rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-emerald-500/60 hover:bg-muted transition-colors flex gap-3 items-start";
+    "rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-success/60 hover:bg-muted transition-colors flex gap-3 items-start";
 
   if (href) {
     return (
@@ -150,7 +150,7 @@ function StandardSearchResultsPanel() {
           {/* Header / toggle */}
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <div className="text-xs uppercase tracking-[0.2em] text-emerald-400">
+              <div className="text-xs uppercase tracking-[0.2em] text-success">
                 Super Search
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
@@ -168,7 +168,7 @@ function StandardSearchResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-success/70 hover:bg-accent hover:text-success transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse search results" : "Expand search results"}
               >
@@ -186,7 +186,7 @@ function StandardSearchResultsPanel() {
             <div className="border-t border-border pt-3">
               {isLoading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
+                  <Loader2 className="h-4 w-4 animate-spin text-success" />
                   Searching the network…
                 </div>
               )}
@@ -229,7 +229,7 @@ function StandardSearchResultsPanel() {
                                 {title}
                               </div>
                               {subtitle && (
-                                <div className="text-xs text-emerald-300/80">{subtitle}</div>
+                                <div className="text-xs text-success/80">{subtitle}</div>
                               )}
                             </div>
                             {item.type && (
@@ -252,7 +252,7 @@ function StandardSearchResultsPanel() {
                           href={href}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-emerald-500/60 hover:bg-muted transition-colors block"
+                          className="rounded-lg rounded-br-none border border-border bg-muted/50 p-3 hover:border-success/60 hover:bg-muted transition-colors block"
                         >
                           {content}
                         </a>
@@ -320,7 +320,7 @@ export function BusinessInternalResultsPanel() {
         <CardContent className="p-4 space-y-3">
           <div className="flex items-center justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <div className="text-xs uppercase tracking-[0.2em] text-emerald-400">
+              <div className="text-xs uppercase tracking-[0.2em] text-success">
                 JustMy Partners
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
@@ -336,7 +336,7 @@ export function BusinessInternalResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-success/70 hover:bg-accent hover:text-success transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse partner results" : "Expand partner results"}
               >
@@ -353,7 +353,7 @@ export function BusinessInternalResultsPanel() {
             <div className="border-t border-border pt-3">
               {isLoading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
+                  <Loader2 className="h-4 w-4 animate-spin text-success" />
                   Searching partners…
                 </div>
               )}
@@ -444,7 +444,7 @@ export function BusinessExternalResultsPanel() {
                 type="button"
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-emerald-500/70 hover:bg-accent hover:text-emerald-300 transition-colors"
+                className="h-8 w-8 rounded-full border border-border bg-muted text-foreground hover:border-success/70 hover:bg-accent hover:text-success transition-colors"
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-label={isOpen ? "Collapse local results" : "Expand local results"}
               >
@@ -461,7 +461,7 @@ export function BusinessExternalResultsPanel() {
             <div className="border-t border-border pt-3">
               {isLoading && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Loader2 className="h-4 w-4 animate-spin text-emerald-400" />
+                  <Loader2 className="h-4 w-4 animate-spin text-success" />
                   Searching local results…
                 </div>
               )}

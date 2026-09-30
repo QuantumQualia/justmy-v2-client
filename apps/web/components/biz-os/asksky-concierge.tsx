@@ -734,7 +734,7 @@ export function AskSkyConcierge({
 
   const pending = hasCardDrafts(cardDrafts);
   const draftInputClass =
-    "mt-1 w-full rounded-lg border border-violet-200 bg-white px-2.5 py-1.5 text-base text-slate-800 md:text-sm";
+    "mt-1 w-full rounded-lg border border-primary/30 bg-card px-2.5 py-1.5 text-base text-foreground md:text-sm";
   const tipClass = "asksky-sky-pill";
   const tipPrimaryClass = "asksky-sky-pill font-semibold";
 
@@ -879,8 +879,8 @@ export function AskSkyConcierge({
                           className={cn(
                             "h-auto whitespace-normal py-1.5 text-left text-xs",
                             action.id.endsWith("b") || action.kind === "upgrade"
-                              ? "border-white/40 bg-white/10 text-white hover:bg-white/20"
-                              : "bg-white text-violet-700 hover:bg-violet-50",
+                              ? "border-white/40 bg-card/10 text-white hover:bg-card/20"
+                              : "bg-card text-primary hover:bg-secondary",
                           )}
                           disabled={loading}
                           onClick={() => void runTurnAction(action)}
@@ -905,19 +905,19 @@ export function AskSkyConcierge({
           <div className="asksky-msg-in mr-4 flex items-end gap-2" role="status" aria-label="Sky is typing">
             <SkyAvatar size={28} className="mb-0.5" />
             <div className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5 px-4 py-3">
-              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "0ms" }} />
-              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "160ms" }} />
-              <span className="size-1.5 animate-bounce rounded-full bg-white/90" style={{ animationDelay: "320ms" }} />
+              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "0ms" }} />
+              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "160ms" }} />
+              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "320ms" }} />
             </div>
           </div>
         ) : null}
         {pending ? (
-          <div className="rounded-xl border border-violet-200 bg-violet-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-violet-800">
+          <div className="rounded-xl border border-primary/30 bg-secondary p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
               Drafts — edit, then apply
             </p>
             {cardDrafts.website != null && cardDrafts.website !== "" ? (
-              <label className="mt-2 block text-xs font-medium text-slate-600">
+              <label className="mt-2 block text-xs font-medium text-muted-foreground">
                 Website
                 <Input
                   className={draftInputClass}
@@ -927,7 +927,7 @@ export function AskSkyConcierge({
               </label>
             ) : null}
             {cardDrafts.email != null && cardDrafts.email !== "" ? (
-              <label className="mt-2 block text-xs font-medium text-slate-600">
+              <label className="mt-2 block text-xs font-medium text-muted-foreground">
                 Email
                 <Input
                   className={draftInputClass}
@@ -937,7 +937,7 @@ export function AskSkyConcierge({
               </label>
             ) : null}
             {cardDrafts.calendarLink != null && cardDrafts.calendarLink !== "" ? (
-              <label className="mt-2 block text-xs font-medium text-slate-600">
+              <label className="mt-2 block text-xs font-medium text-muted-foreground">
                 Calendar
                 <Input
                   className={draftInputClass}
@@ -948,7 +948,7 @@ export function AskSkyConcierge({
             ) : null}
             {cardDrafts.phones?.length ? (
               <div className="mt-2">
-                <p className="text-xs font-medium text-slate-600">Phone</p>
+                <p className="text-xs font-medium text-muted-foreground">Phone</p>
                 <div className="mt-1 space-y-1.5">
                   {cardDrafts.phones.map((phone, index) => (
                     <div key={`phone-${index}`} className="grid gap-1.5">
@@ -985,10 +985,10 @@ export function AskSkyConcierge({
             ) : null}
             {cardDrafts.addresses?.length ? (
               <div className="mt-2">
-                <p className="text-xs font-medium text-slate-600">Locations</p>
+                <p className="text-xs font-medium text-muted-foreground">Locations</p>
                 <div className="mt-1 space-y-1.5">
                   {cardDrafts.addresses.map((address, index) => (
-                    <div key={`addr-${index}`} className="space-y-1.5 rounded-lg border border-violet-200 bg-white/70 p-2">
+                    <div key={`addr-${index}`} className="space-y-1.5 rounded-lg border border-primary/30 bg-card/70 p-2">
                 <Input
                   className={draftInputClass}
                   placeholder="Title (e.g. Office, Home)"
@@ -1075,7 +1075,7 @@ export function AskSkyConcierge({
               </div>
             ) : null}
             {cardDrafts.socials?.map((social, index) => (
-              <label key={`social-${index}`} className="mt-2 block text-xs font-medium text-slate-600">
+              <label key={`social-${index}`} className="mt-2 block text-xs font-medium text-muted-foreground">
                 <span className="capitalize">{social.name}</span>
                 <Input
                   className={draftInputClass}
@@ -1092,7 +1092,7 @@ export function AskSkyConcierge({
               </label>
             ))}
             {cardDrafts.tagline != null && cardDrafts.tagline !== "" ? (
-              <label className="mt-2 block text-xs font-medium text-slate-600">
+              <label className="mt-2 block text-xs font-medium text-muted-foreground">
                 Tagline
                 <Input
                   className={draftInputClass}
@@ -1102,7 +1102,7 @@ export function AskSkyConcierge({
               </label>
             ) : null}
             {cardDrafts.about != null && cardDrafts.about !== "" ? (
-              <label className="mt-2 block text-xs font-medium text-slate-600">
+              <label className="mt-2 block text-xs font-medium text-muted-foreground">
                 About
                 <textarea
                   className={`${draftInputClass} min-h-[4.5rem] resize-y`}
@@ -1113,7 +1113,7 @@ export function AskSkyConcierge({
             ) : null}
             {cardDrafts.hotlinks?.length ? (
               <div className="mt-2">
-                <p className="text-xs font-medium text-slate-600">Hotlinks</p>
+                <p className="text-xs font-medium text-muted-foreground">Hotlinks</p>
                 <div className="mt-1 space-y-1.5">
                   {cardDrafts.hotlinks.map((link, index) => (
                     <div key={`hot-${index}`} className="grid gap-1.5">
@@ -1173,7 +1173,7 @@ export function AskSkyConcierge({
           <div className="rounded-xl border border-amber-200 bg-amber-50 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-amber-800">Support draft</p>
             <textarea
-              className="mt-2 w-full rounded-lg border border-amber-200 bg-white p-2 text-base md:text-sm"
+              className="mt-2 w-full rounded-lg border border-amber-200 bg-card p-2 text-base md:text-sm"
               rows={1}
               value={draft.summary}
               onChange={(e) => setDraft({ ...draft, summary: e.target.value })}
@@ -1213,7 +1213,7 @@ export function AskSkyConcierge({
         >
           <AskSkyGrowTextarea
             ref={inputRef}
-            className={cn(awaitingWebsite && "ring-2 ring-violet-200/70")}
+            className={cn(awaitingWebsite && "ring-2 ring-ring/50")}
             placeholder={inputPlaceholder(surface, awaitingWebsite)}
             value={input}
             onChange={(e) => setInput(e.target.value)}

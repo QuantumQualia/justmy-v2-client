@@ -372,7 +372,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
             >
               <SelectTrigger
                 id="parentMarket"
-                className="bg-muted border-border text-foreground focus:ring-emerald-500"
+                className="bg-muted border-border text-foreground focus:ring-success"
               >
                 <SelectValue placeholder="Search and select a parent market">
                   {(() => {

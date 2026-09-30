@@ -7,6 +7,7 @@ import { ArrowRight } from "lucide-react";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { bizOsService, type BattlePlan, type BattlePlanLog, type BattlePlanTask } from "@/lib/services/biz-os";
 import { useBizOsFetch } from "@/components/biz-os/use-biz-os-profile";
 import { PlanFunctionsMenu } from "@/components/biz-os/plan-functions-menu";
@@ -83,7 +84,7 @@ function logSpeaker(log: BattlePlanLog) {
 
 function PlanMessageText({
   text,
-  linkClassName = "font-medium text-violet-700 underline underline-offset-2",
+  linkClassName = "font-medium text-primary underline underline-offset-2",
 }: {
   text: string;
   linkClassName?: string;
@@ -110,7 +111,7 @@ function PlanMessageText({
               href={part}
               target="_blank"
               rel="noopener noreferrer"
-              className="font-medium text-violet-700 underline underline-offset-2"
+              className="font-medium text-primary underline underline-offset-2"
             >
               Open Google Doc
             </a>
@@ -158,7 +159,7 @@ function BattlePlanThread({
               data-asksky-theme="light"
             >
               {funCrew ? (
-                <p className="mb-1 text-[11px] font-semibold text-emerald-700">{logSpeaker(l)}</p>
+                <p className="mb-1 text-[11px] font-semibold text-success">{logSpeaker(l)}</p>
               ) : null}
               {sky ? (
                 <>
@@ -193,7 +194,7 @@ function BattlePlanThread({
           );
         })
       ) : (
-        <p className="text-sm text-slate-500">Tell Sky what you’re working on.</p>
+        <p className="text-sm text-muted-foreground">Tell Sky what you’re working on.</p>
       )}
       {skyWorkingText ? (
         <div className={cn("mr-4 flex items-end gap-2", askSkyMsgInClass(true))} data-asksky-theme="light">
@@ -302,20 +303,19 @@ function TaskRow({
           live ? "cursor-pointer" : "cursor-default",
         )}
       >
-        <input
-          type="checkbox"
-          className="mt-1 h-4 w-4 rounded border-slate-300 text-violet-600"
+        <Checkbox
+          className="mt-1"
           checked={done}
           disabled={!live}
-          onChange={() => live && onToggle(task)}
+          onCheckedChange={() => live && onToggle(task)}
         />
         <span className="min-w-0 flex-1">
-          <span className={cn("font-medium", done ? "text-slate-400 line-through" : "text-slate-800")}>
+          <span className={cn("font-medium", done ? "text-muted-foreground line-through" : "text-foreground")}>
             {task.taskText}
           </span>
-          {meta ? <span className="mt-0.5 block text-xs text-slate-500">{meta}</span> : null}
+          {meta ? <span className="mt-0.5 block text-xs text-muted-foreground">{meta}</span> : null}
           {task.description ? (
-            <span className="mt-1 block text-xs text-slate-500">{task.description}</span>
+            <span className="mt-1 block text-xs text-muted-foreground">{task.description}</span>
           ) : null}
         </span>
       </label>
@@ -672,14 +672,14 @@ export default function BattlePlanWorkspacePage() {
             <div className="ml-auto flex items-center gap-2">
               {activeHandoff ? (
                 <Link
-                  className="text-xs font-medium text-violet-700 hover:text-violet-900"
+                  className="text-xs font-medium text-primary hover:text-primary"
                   href={`/biz-os/battle-plans/${plan.id}`}
                 >
                   Back to main chat
                 </Link>
               ) : latestHandoff ? (
                 <Link
-                  className="text-xs font-medium text-violet-700 hover:text-violet-900"
+                  className="text-xs font-medium text-primary hover:text-primary"
                   href={`/biz-os/battle-plans/${plan.id}?handoff=${latestHandoff.id}`}
                 >
                   Join #FunCREW
@@ -687,7 +687,7 @@ export default function BattlePlanWorkspacePage() {
               ) : live && paidOs ? (
                 <button
                   type="button"
-                  className="text-xs font-medium text-violet-700 hover:text-violet-900 disabled:opacity-50"
+                  className="text-xs font-medium text-primary hover:text-primary disabled:opacity-50"
                   disabled={busy}
                   onClick={() => void askFunCrew()}
                 >
@@ -759,9 +759,9 @@ export default function BattlePlanWorkspacePage() {
                 <span className="hidden lg:inline">{plan.title}</span>
               </h2>
               {live ? (
-                <span className="text-sm font-medium text-slate-500">{plan.progress}%</span>
+                <span className="text-sm font-medium text-muted-foreground">{plan.progress}%</span>
               ) : (
-                <span className="rounded-full bg-violet-50 px-2.5 py-0.5 text-xs font-semibold text-violet-800">
+                <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
                   Draft
                 </span>
               )}
@@ -769,12 +769,12 @@ export default function BattlePlanWorkspacePage() {
             {live ? (
               <div className="mt-2">
                 <BizOsProgress value={plan.progress} />
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="mt-1 text-xs text-muted-foreground">
                   {done} of {total} complete
                 </p>
               </div>
             ) : (
-              <p className="mt-1 text-xs text-slate-400">Proposal — not tracked until you approve.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Proposal — not tracked until you approve.</p>
             )}
           </div>
           <ul className="mt-4 min-h-0 flex-1 space-y-1 overflow-y-auto overscroll-contain">
@@ -783,13 +783,13 @@ export default function BattlePlanWorkspacePage() {
                 <TaskRow key={t.id} task={t} live={live} onToggle={(task) => void toggle(task)} />
               ))
             ) : (
-              <li className="text-sm text-slate-500">
+              <li className="text-sm text-muted-foreground">
                 No checklist yet. Tell Sky the goal and she’ll draft the steps here.
               </li>
             )}
           </ul>
           {draft ? (
-            <div className="mt-4 flex shrink-0 flex-wrap gap-2 border-t border-slate-100 pt-4">
+            <div className="mt-4 flex shrink-0 flex-wrap gap-2 border-t border-border pt-4">
               <Button type="button" disabled={busy || !total} onClick={() => void approve()}>
                 Approve plan
               </Button>

@@ -117,12 +117,12 @@ export function FixedMarketingNavbar({
   const getMobileItemClass = (level: number, isActive: boolean) => {
     if (level === 0) {
       return isActive
-        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+        ? "bg-success/10 text-success border border-success/20"
         : "text-muted-foreground hover:bg-accent hover:text-foreground";
     }
 
     return isActive
-      ? "bg-accent text-emerald-400"
+      ? "bg-accent text-success"
       : "text-muted-foreground hover:bg-accent hover:text-foreground";
   };
 
@@ -250,7 +250,7 @@ export function FixedMarketingNavbar({
               Log In
             </Link>
             <Button
-              className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-6"
+              className="cursor-pointer rounded-full px-6"
               onClick={() => void handleBecomeFounder()}
               disabled={isCheckoutLoading}
             >
@@ -429,7 +429,7 @@ export function FixedMarketingNavbar({
                   <span className="font-medium">Log In</span>
                 </Link>
                 <Button
-                  className="w-full cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-full px-6"
+                  className="w-full cursor-pointer rounded-full px-6"
                   onClick={() => void handleBecomeFounder()}
                   disabled={isCheckoutLoading}
                 >

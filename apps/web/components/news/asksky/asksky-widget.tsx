@@ -114,13 +114,13 @@ export function AskSkyWidget({
       <div className="relative z-10 -mb-8 flex h-16 w-16 items-center justify-center sm:-mb-10 sm:h-20 sm:w-20">
         <div
           aria-hidden
-          className="absolute inset-0 rounded-full bg-violet-400/25 blur-xl"
+          className="absolute inset-0 rounded-full bg-primary/20 blur-xl"
         />
         <SkyAvatar size={64} className="relative drop-shadow-[0_0_36px_rgba(139,92,246,0.45)]" />
       </div>
 
       <div
-        className={`flex w-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-slate-200/90 bg-white shadow-[0_24px_60px_-28px_rgba(15,23,42,0.18)] sm:rounded-[2rem] ${
+        className={`flex w-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden rounded-[1.5rem] border border-border/90 bg-card shadow-[0_24px_60px_-28px_rgba(15,23,42,0.18)] sm:rounded-[2rem] ${
           hasConversation
             ? "h-auto max-h-[min(68svh,34rem)] sm:h-[min(72vh,44rem)] sm:max-h-none lg:h-[min(75vh,48rem)]"
             : ""
@@ -133,25 +133,25 @@ export function AskSkyWidget({
         >
           <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
             <h1
-              className={`min-w-0 flex-1 break-words font-serif leading-snug tracking-tight text-slate-900 ${
+              className={`min-w-0 flex-1 break-words font-serif leading-snug tracking-tight text-foreground ${
                 hasConversation
                   ? "text-left text-lg sm:text-2xl"
                   : "text-center text-[1.45rem] sm:text-[2.15rem] sm:leading-tight"
               }`}
             >
               <span>{leadVisible}</span>
-              <span className="font-sans font-bold text-violet-600">
+              <span className="font-sans font-bold text-primary">
                 {brandVisible}
               </span>
               {showCursor ? (
-                <span className="ml-0.5 inline-block h-[1em] w-0.5 animate-pulse bg-violet-600 align-[-0.1em]" />
+                <span className="ml-0.5 inline-block h-[1em] w-0.5 animate-pulse bg-primary align-[-0.1em]" />
               ) : null}
             </h1>
             {hasConversation ? (
               <button
                 type="button"
                 onClick={onNewChat}
-                className="shrink-0 rounded-full border border-violet-200 bg-violet-50 px-2.5 py-1.5 text-[11px] font-semibold text-violet-700 transition hover:bg-violet-100 sm:px-3 sm:text-xs"
+                className="shrink-0 rounded-full border border-primary/30 bg-secondary px-2.5 py-1.5 text-[11px] font-semibold text-primary transition hover:bg-secondary sm:px-3 sm:text-xs"
               >
                 New chat
               </button>
@@ -169,7 +169,7 @@ export function AskSkyWidget({
               <label htmlFor="asksky-query" className="sr-only">
                 Ask SKY
               </label>
-              <div className="flex flex-col gap-2 rounded-[1.375rem] border border-slate-200 bg-white p-1.5 pl-4 shadow-sm transition focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200/60 sm:flex-row sm:items-end">
+              <div className="flex flex-col gap-2 rounded-[1.375rem] border border-border bg-card p-1.5 pl-4 shadow-sm transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/60 sm:flex-row sm:items-end">
                 <AskSkyGrowTextarea
                   chrome={false}
                   id="asksky-query"
@@ -177,7 +177,7 @@ export function AskSkyWidget({
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder={`Ask anything about ${market.zipcode}…`}
                   disabled={disabled}
-                  className="min-h-10 bg-transparent px-2 py-2.5 text-base text-slate-800 placeholder:text-slate-400 disabled:cursor-not-allowed disabled:opacity-60 sm:px-0 sm:py-2 md:text-sm"
+                  className="min-h-10 bg-transparent px-2 py-2.5 text-base text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60 sm:px-0 sm:py-2 md:text-sm"
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
@@ -198,19 +198,19 @@ export function AskSkyWidget({
           ) : null}
 
           {!hasConversation && sponsorName ? (
-            <p className="mt-3 text-center text-xs text-slate-500 sm:text-[13px]">
+            <p className="mt-3 text-center text-xs text-muted-foreground sm:text-[13px]">
               {sponsorCta}:{" "}
               {sponsorLink ? (
                 <a
                   href={sponsorLink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-semibold text-violet-600 transition hover:text-violet-500 hover:underline"
+                  className="font-semibold text-primary transition hover:text-primary hover:underline"
                 >
                   {sponsorName}
                 </a>
               ) : (
-                <span className="font-semibold text-violet-600">
+                <span className="font-semibold text-primary">
                   {sponsorName}
                 </span>
               )}

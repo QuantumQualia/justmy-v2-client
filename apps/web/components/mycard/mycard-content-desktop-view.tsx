@@ -15,6 +15,7 @@ import {
 } from "@/lib/services/content";
 import { contentQueryKeys, firstSortedTab } from "@/lib/query/content-query-keys";
 import { PROFILE_KIND } from "@/lib/os-types";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 const PAGE_SIZE = 12;
 
@@ -148,7 +149,7 @@ export function MyCardContentDesktopView({
           const post = item.post;
           const label = post?.title?.trim() || `Post #${item.postId}`;
           const slug = post?.slug?.trim();
-          const excerpt = post?.excerpt?.trim() ?? "";
+          const excerpt = legacyPlainText(post?.excerpt);
           const href = slug ? `/blog/${encodeURIComponent(slug)}` : null;
           const ogUrl = resolveContentPostOgImageUrl(post ?? undefined);
           const seoDescription = post?.seo?.description?.trim() ?? "";
@@ -161,7 +162,7 @@ export function MyCardContentDesktopView({
               className={`group flex min-w-0 flex-col overflow-hidden justmy-corners border transition-all duration-300 hover:-translate-y-1 ${
                 isLight
                   ? "border-border/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(255,255,255,0.9))] shadow-[0_10px_35px_rgba(15,23,42,0.08)] hover:border-primary/40 hover:shadow-[0_18px_48px_rgba(15,23,42,0.16)]"
-                  : "border-slate-700/60 bg-[linear-gradient(180deg,rgba(15,23,42,0.85),rgba(2,6,23,0.9))] shadow-[0_10px_35px_rgba(2,6,23,0.3)] hover:border-blue-500/55 hover:shadow-[0_18px_48px_rgba(37,99,235,0.2)]"
+                  : "border-border/60 bg-[linear-gradient(180deg,rgba(15,23,42,0.85),rgba(2,6,23,0.9))] shadow-[0_10px_35px_rgba(2,6,23,0.3)] hover:border-blue-500/55 hover:shadow-[0_18px_48px_rgba(37,99,235,0.2)]"
               }`}
             >
               <Link
@@ -183,7 +184,7 @@ export function MyCardContentDesktopView({
               </Link>
 
               <div className="px-3">
-                <div className={`relative overflow-hidden justmy-corners border ${isLight ? "border-border/70" : "border-slate-700/50"}`}>
+                <div className={`relative overflow-hidden justmy-corners border ${isLight ? "border-border/70" : "border-border/50"}`}>
                   {ogUrl ? (
                     href ? (
                       <Link
@@ -235,7 +236,7 @@ export function MyCardContentDesktopView({
                     </span>
                   )}
                   {excerpt ? (
-                    <p className={`mt-2 line-clamp-3 text-[13px] leading-relaxed ${isLight ? "text-muted-foreground" : "text-slate-300/85"}`}>
+                    <p className={`mt-2 line-clamp-3 text-[13px] leading-relaxed ${isLight ? "text-muted-foreground" : "text-muted-foreground/85"}`}>
                       {excerpt}
                     </p>
                   ) : null}
@@ -246,7 +247,7 @@ export function MyCardContentDesktopView({
                     className={`mt-1 shrink-0 rounded-full p-2 cursor-pointer transition-all ${
                       isLight
                         ? "text-muted-foreground hover:bg-accent/15 hover:text-accent"
-                        : "text-slate-300 hover:bg-blue-500/15 hover:text-blue-300"
+                        : "text-muted-foreground hover:bg-blue-500/15 hover:text-blue-300"
                     }`}
                     aria-label={`Share ${label}`}
                     title="Share"
@@ -273,7 +274,7 @@ export function MyCardContentDesktopView({
                   className={`mx-4 mb-4 inline-flex items-center justify-center rounded-xl border px-3 py-2 text-xs font-semibold tracking-wide transition-colors ${
                     isLight
                       ? "border-border/80 text-muted-foreground hover:border-primary/40 hover:bg-primary/5 hover:text-primary"
-                      : "border-slate-700 text-slate-300 hover:border-blue-400/60 hover:bg-blue-500/10 hover:text-blue-300"
+                      : "border-border text-muted-foreground hover:border-blue-400/60 hover:bg-blue-500/10 hover:text-blue-300"
                   }`}
                 >
                   Read Article

@@ -26,23 +26,23 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground font-sans selection:bg-success selection:text-black">
       {/* --- NAVIGATION --- */}
 
       {/* --- HERO SECTION --- */}
       <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-emerald-500/20 blur-[120px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-success/20 blur-[120px] rounded-full pointer-events-none" />
         <div className="container px-4 mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-emerald-400 text-xs font-medium mb-8 uppercase tracking-widest">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-card border border-border text-success text-xs font-medium mb-8 uppercase tracking-widest">
             <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
             </span>
             Founders Growth OS Available
           </div>
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight text-foreground">
             Don't just live in the city. <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-success to-accent">
               Run it.
             </span>
           </h1>
@@ -106,21 +106,21 @@ export default function LandingPage() {
 
             {/* 4. Command PRO / Enterprise */}
             <div className="relative transform md:-translate-y-4" id="pricing_founder">
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-emerald-500 text-black px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide z-10">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-success text-success-foreground px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide z-10">
                 Best Value
               </div>
-              <Card className="bg-card border-2 border-emerald-500 shadow-lg shadow-emerald-500/20 h-full">
+              <Card className="bg-card border-2 border-success shadow-lg shadow-success/20 h-full">
                 <CardContent className="p-6 flex flex-col h-full">
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded bg-emerald-500/10"><Award className="h-6 w-6 text-emerald-500" /></div>
-                    <div className="text-lg font-medium text-emerald-400">Command PRO / Enterprise</div>
+                    <div className="p-2 rounded bg-success/10"><Award className="h-6 w-6 text-success" /></div>
+                    <div className="text-lg font-medium text-success">Command PRO / Enterprise</div>
                   </div>
                   <div className="text-3xl font-bold text-foreground mb-1">Paid</div>
-                  <p className="text-emerald-500/80 text-xs mb-4">Prices live in Stripe</p>
+                  <p className="text-success/80 text-xs mb-4">Prices live in Stripe</p>
                   <p className="text-xs mb-6 text-muted-foreground">Claim Biz OS first, then subscribe in-app.</p>
                   
                   <Button 
-                    className="cursor-pointer w-full bg-emerald-500 hover:bg-emerald-600 text-black font-bold mb-6"
+                    className="cursor-pointer w-full bg-success hover:bg-primary text-black font-bold mb-6"
                     onClick={goToBizPricing}
                   >
                     See plans
@@ -129,7 +129,7 @@ export default function LandingPage() {
                   <div className="mt-auto space-y-3">
                     {["Everything in Biz OS", "Command PRO or Enterprise tag", "Annual or monthly Stripe"].map((item, i) => (
                       <div key={i} className="flex gap-2 items-center text-sm text-foreground">
-                        <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" /> {item}
+                        <Check className="h-4 w-4 text-success flex-shrink-0" /> {item}
                       </div>
                     ))}
                   </div>
@@ -148,7 +148,7 @@ export default function LandingPage() {
           <h2 className="text-2xl md:text-3xl font-bold mb-6 text-foreground">Ready to win with JustMy?</h2>
           
           <p className="text-muted-foreground text-lg mb-12 max-w-3xl mx-auto leading-relaxed">
-            Dive into our <span className="text-emerald-400 font-semibold">quick-start guides</span> for <span className="text-foreground font-semibold">Business</span>, <span className="text-foreground font-semibold">Enterprise</span>, and <span className="text-foreground font-semibold">Partner</span> users—see how easy it is to <span className="text-foreground font-semibold">grow faster</span>, <span className="text-foreground font-semibold">connect better</span>, and <span className="text-foreground font-semibold">dominate your market</span>!
+            Dive into our <span className="text-success font-semibold">quick-start guides</span> for <span className="text-foreground font-semibold">Business</span>, <span className="text-foreground font-semibold">Enterprise</span>, and <span className="text-foreground font-semibold">Partner</span> users—see how easy it is to <span className="text-foreground font-semibold">grow faster</span>, <span className="text-foreground font-semibold">connect better</span>, and <span className="text-foreground font-semibold">dominate your market</span>!
           </p>
 
           <div className="w-full h-px bg-gradient-to-r from-transparent via-border to-transparent mb-12"></div>
@@ -193,7 +193,7 @@ function PricingCard({ icon, title, price, period, desc, btnText, btnAction, fea
         <div className="mt-auto space-y-3">
           {features.map((item: string, i: number) => (
             <div key={i} className="flex gap-2 items-center text-sm text-muted-foreground">
-              <Check className="h-4 w-4 text-emerald-500 flex-shrink-0" /> {item}
+              <Check className="h-4 w-4 text-success flex-shrink-0" /> {item}
             </div>
           ))}
         </div>
@@ -206,7 +206,7 @@ function FooterLink({ href, text }: { href: string, text: string }) {
   return (
     <a 
       href={href} 
-      className="block py-3 px-4 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:border-emerald-500/50 hover:bg-accent transition-all text-sm font-medium"
+      className="block py-3 px-4 rounded-lg border border-border bg-card text-muted-foreground hover:text-foreground hover:border-success/40 hover:bg-accent transition-all text-sm font-medium"
     >
       {text}
     </a>

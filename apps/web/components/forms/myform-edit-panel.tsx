@@ -95,7 +95,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
           asChild
           variant="ghost"
           size="sm"
-          className="-ml-2 mb-4 h-9 gap-1.5 px-2 text-muted-foreground hover:bg-white/5 hover:text-accent-foreground"
+          className="-ml-2 mb-4 h-9 gap-1.5 px-2 text-muted-foreground hover:bg-card/5 hover:text-accent-foreground"
         >
           <Link href={myFormListHref(basePath)}>
             <ArrowLeft className="h-4 w-4" />
@@ -126,7 +126,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                     variant={q.data.status === "published" ? "default" : "outline"}
                     className={
                       q.data.status === "published"
-                        ? "border-emerald-500/30 bg-emerald-600/20 text-emerald-200"
+                        ? "border-success/30 bg-success/15 text-success"
                         : "border-amber-500/25 bg-amber-500/10 text-amber-200"
                     }
                   >
@@ -169,7 +169,7 @@ export function MyFormEditPanel({ basePath, formId }: MyFormEditPanelProps) {
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:bg-red-950/30 hover:text-red-400"
+                    className="text-muted-foreground hover:bg-red-950/30 hover:text-destructive"
                     onClick={() => setDeleteOpen(true)}
                   >
                     <Trash2 className="mr-1.5 h-3.5 w-3.5" />

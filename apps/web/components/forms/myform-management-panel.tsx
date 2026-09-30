@@ -42,7 +42,7 @@ function schemaFieldCount(schema: Record<string, unknown> | undefined): number {
 function statusBadge(status: FormDefinitionDto["status"]) {
   if (status === "published") {
     return (
-      <Badge className="shrink-0 border-emerald-500/35 bg-emerald-600/20 font-medium text-emerald-200">
+      <Badge className="shrink-0 border-success/35 bg-success/15 font-medium text-success">
         Published
       </Badge>
     );
@@ -169,7 +169,7 @@ export function MyFormManagementPanel({
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/25">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-success/15 text-success ring-1 ring-success/25">
                 <Layers className="h-5 w-5" />
               </div>
               <h1 className="text-2xl font-semibold tracking-tight md:text-3xl">myFORM</h1>
@@ -189,7 +189,7 @@ export function MyFormManagementPanel({
       ) : (
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-gradient-to-r from-muted to-muted/40 px-4 py-3 ring-1 ring-white/[0.04]">
           <div className="flex min-w-0 items-center gap-2">
-            <Sparkles className="h-4 w-4 shrink-0 text-emerald-400/90" />
+            <Sparkles className="h-4 w-4 shrink-0 text-success/90" />
             <span className="text-sm font-semibold text-foreground">Forms</span>
             {loaded ? (
               <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">{count}</span>
@@ -289,7 +289,7 @@ export function MyFormManagementPanel({
               <Button
                 type="button"
                 variant="link"
-                className="ml-2 h-auto p-0 text-emerald-400"
+                className="ml-2 h-auto p-0 text-success"
                 onClick={() => {
                   setListQDraft("");
                   setListQApplied("");
@@ -401,7 +401,7 @@ export function MyFormManagementPanel({
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center gap-0 p-0 text-muted-foreground hover:bg-red-950/40 hover:text-red-400 sm:h-9 sm:w-auto sm:gap-1 sm:px-3"
+                          className="inline-flex h-8 w-8 shrink-0 rounded-full items-center justify-center gap-0 p-0 text-muted-foreground hover:bg-red-950/40 hover:text-destructive sm:h-9 sm:w-auto sm:gap-1 sm:px-3"
                           disabled={deleteMutation.isPending && deleteMutation.variables === f.id}
                           aria-label={`Delete ${f.name}`}
                           onClick={() => setDeleteTarget(f)}

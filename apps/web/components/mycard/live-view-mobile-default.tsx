@@ -5,6 +5,8 @@ import { MycardLiveContactBar } from "@/components/mycard/mycard-live-contact-ba
 import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
 import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
+import { LegacyHtml } from "@/components/common/legacy-html";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 export function MyCardMobileDefaultView({
   data,
@@ -61,7 +63,7 @@ export function MyCardMobileDefaultView({
             <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
               {data.name}
             </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
+            <p className={`text-sm ${taglineTextClass} break-words`}>{legacyPlainText(data.tagline)}</p>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -98,14 +100,10 @@ export function MyCardMobileDefaultView({
               <h2 className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}>About</h2>
 
               {isLightMycard ? (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {data.about}
-                </p>
+                <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
               ) : (
                 <div className={aboutCardClass}>
-                  <p className={`text-sm ${aboutBodyTextClass} leading-relaxed whitespace-pre-wrap`}>
-                    {data.about}
-                  </p>
+                  <LegacyHtml value={data.about} className={`text-sm ${aboutBodyTextClass} leading-relaxed`} />
                 </div>
               )}
             </div>

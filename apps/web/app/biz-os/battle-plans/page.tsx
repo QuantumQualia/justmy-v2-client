@@ -77,21 +77,21 @@ function BattlePlansInner() {
             <Link
               key={p.id}
               href={`/biz-os/battle-plans/${p.id}`}
-              className="block rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_10px_40px_-24px_rgba(76,29,149,0.35)] transition hover:border-violet-200"
+              className="block rounded-3xl border border-border bg-card p-5 shadow-card transition hover:border-primary/30"
             >
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <p className="font-semibold">{p.title}</p>
                   {p.description ? (
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-500">{p.description}</p>
+                    <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{p.description}</p>
                   ) : null}
                 </div>
                 <span
                   className={cn(
                     "shrink-0 rounded-full px-2.5 py-0.5 text-xs font-semibold",
                     p.status === "draft"
-                      ? "bg-violet-50 text-violet-800"
-                      : "bg-slate-100 text-slate-600",
+                      ? "bg-secondary text-primary"
+                      : "bg-muted text-muted-foreground",
                   )}
                 >
                   {statusLabel(p.status)}
@@ -99,7 +99,7 @@ function BattlePlansInner() {
               </div>
               {p.status !== "draft" ? (
                 <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs text-slate-500">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
                     <span>{p.progress}% complete</span>
                   </div>
                   <div className="mt-1">
@@ -107,16 +107,16 @@ function BattlePlansInner() {
                   </div>
                 </div>
               ) : (
-                <p className="mt-2 text-xs text-slate-400">Not live yet — keep talking, then approve.</p>
+                <p className="mt-2 text-xs text-muted-foreground">Not live yet — keep talking, then approve.</p>
               )}
             </Link>
           ))
         )}
       </div>
       {plans.length === 0 ? (
-        <BizOsCard className="border-violet-100 bg-violet-50/40">
+        <BizOsCard className="border-primary/20 bg-secondary/40">
           <h2 className="font-semibold">Start a plan</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Bring a goal, not a task list. Sky checks this business’s brain first, then drafts a checklist you can
             cut and add to.
           </p>

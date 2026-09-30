@@ -21,7 +21,7 @@ import { isAuthenticated } from "@/lib/services/session";
 import { cn } from "@workspace/ui/lib/utils";
 
 function Pulse({ className }: { className: string }) {
-  return <div className={cn("animate-pulse rounded bg-slate-200/70", className)} />;
+  return <div className={cn("animate-pulse rounded bg-muted/70", className)} />;
 }
 
 function DailyDropSkeleton({ compact }: { compact: boolean }) {
@@ -36,36 +36,36 @@ function DailyDropSkeleton({ compact }: { compact: boolean }) {
     >
       <div className={cn("mx-auto space-y-10", compact ? "max-w-3xl" : "max-w-3xl px-4 py-6 sm:py-8")}>
         <header className="space-y-2">
-          <Pulse className="h-8 w-40 rounded-lg bg-slate-200/80" />
-          <Pulse className="h-4 w-64 max-w-full bg-slate-200/60" />
+          <Pulse className="h-8 w-40 rounded-lg bg-muted" />
+          <Pulse className="h-4 w-64 max-w-full bg-muted" />
         </header>
 
         <section className="space-y-3">
-          <Pulse className="h-5 w-24 bg-slate-200/80" />
-          <div className="space-y-3 rounded-xl rounded-br-none border border-slate-200/80 bg-white p-4 shadow-sm">
+          <Pulse className="h-5 w-24 bg-muted" />
+          <div className="space-y-3 rounded-xl rounded-br-none border border-border bg-card p-4 shadow-sm">
             <Pulse className="h-4 w-3/4" />
-            <Pulse className="h-3 w-full bg-slate-100" />
-            <Pulse className="h-3 w-5/6 bg-slate-100" />
+            <Pulse className="h-3 w-full bg-muted" />
+            <Pulse className="h-3 w-5/6 bg-muted" />
           </div>
-          <div className="space-y-3 rounded-xl rounded-br-none border border-slate-200/80 bg-white p-4 shadow-sm">
+          <div className="space-y-3 rounded-xl rounded-br-none border border-border bg-card p-4 shadow-sm">
             <Pulse className="h-4 w-2/3" />
-            <Pulse className="h-3 w-full bg-slate-100" />
+            <Pulse className="h-3 w-full bg-muted" />
           </div>
         </section>
 
         <section className="space-y-3">
-          <Pulse className="h-5 w-20 bg-slate-200/80" />
+          <Pulse className="h-5 w-20 bg-muted" />
           <div className="flex gap-4 overflow-hidden">
             {[0, 1, 2].map((i) => (
               <div
                 key={i}
-                className="w-[min(100%,280px)] shrink-0 overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm"
+                className="w-[min(100%,280px)] shrink-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm"
               >
-                <div className="aspect-video animate-pulse bg-slate-200/80" />
+                <div className="aspect-video animate-pulse bg-muted" />
                 <div className="space-y-2 p-4">
                   <Pulse className="h-3 w-24" />
                   <Pulse className="h-4 w-full" />
-                  <Pulse className="h-4 w-4/5 bg-slate-100" />
+                  <Pulse className="h-4 w-4/5 bg-muted" />
                   <Pulse className="mt-2 h-8 w-20 rounded-full" />
                 </div>
               </div>
@@ -74,8 +74,8 @@ function DailyDropSkeleton({ compact }: { compact: boolean }) {
         </section>
 
         <section className="space-y-3">
-          <Pulse className="h-5 w-16 bg-slate-200/80" />
-          <div className="h-16 animate-pulse rounded-xl border border-slate-200/80 bg-white" />
+          <Pulse className="h-5 w-16 bg-muted" />
+          <div className="h-16 animate-pulse rounded-xl border border-border bg-card" />
         </section>
       </div>
     </div>

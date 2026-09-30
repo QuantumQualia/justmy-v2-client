@@ -172,7 +172,7 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
                 <BlockRenderer key={block.id || index} block={block} disableContainer />
               ))
             ) : (
-              <div className="rounded border-2 border-dashed border-slate-700 p-4 text-center text-sm text-slate-500">
+              <div className="rounded border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground">
                 Container (empty)
               </div>
             )}
@@ -195,7 +195,7 @@ export function LayoutBlock({ layout, children, styles }: LayoutBlockProps) {
               ))}
             </div>
           ) : (
-            <div className="rounded border-2 border-dashed border-slate-700 p-4 text-center text-sm text-slate-500">
+            <div className="rounded border-2 border-dashed border-border p-4 text-center text-sm text-muted-foreground">
               Container (empty)
             </div>
           )}

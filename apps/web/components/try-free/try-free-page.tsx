@@ -387,7 +387,7 @@ export function TryFreePageClient() {
     return (
       <>
         {pageNav}
-        <div className="min-h-dvh bg-white" />
+        <div className="min-h-dvh bg-card" />
       </>
     );
   }
@@ -395,7 +395,7 @@ export function TryFreePageClient() {
   return (
     <>
       {pageNav}
-      <div className="try-free-page flex h-[calc(100dvh-var(--try-free-chrome,0px))] max-h-[calc(100dvh-var(--try-free-chrome,0px))] flex-col items-center overflow-hidden bg-white px-4 py-6 sm:px-6">
+      <div className="try-free-page flex h-[calc(100dvh-var(--try-free-chrome,0px))] max-h-[calc(100dvh-var(--try-free-chrome,0px))] flex-col items-center overflow-hidden bg-card px-4 py-6 sm:px-6">
       <style>{`
         .try-free-rotator-line {
           animation: tryFreeRotateIn 0.35s ease-out;
@@ -410,7 +410,7 @@ export function TryFreePageClient() {
       `}</style>
       <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center overflow-hidden">
         <div
-          className="flex min-h-0 w-full max-w-[46rem] max-h-full flex-col overflow-hidden bg-white"
+          className="flex min-h-0 w-full max-w-[46rem] max-h-full flex-col overflow-hidden bg-card"
           data-asksky-theme="light"
         >
           <TryFreeHero

@@ -9,6 +9,7 @@ import { cmsService } from "@/lib/services/cms";
 import type { PayloadPost } from "@/lib/services/cms";
 import { contentService, type ContentTypeDto } from "@/lib/services/content";
 import { marketsService } from "@/lib/services/markets";
+import { legacyPlainText } from "@/lib/legacy-html";
 import { useRouter } from "next/navigation";
 
 const STATUS_LABELS: Record<string, string> = {
@@ -25,8 +26,8 @@ const STATUS_BADGE_CLASSES: Record<string, string> = {
   pending: "bg-orange-500/20 text-orange-400",
   review: "bg-blue-500/20 text-blue-400",
   publish: "bg-green-500/20 text-green-400",
-  archive: "bg-slate-500/20 text-muted-foreground",
-  trash: "bg-red-500/20 text-red-400",
+  archive: "bg-muted0/20 text-muted-foreground",
+  trash: "bg-destructive/100/20 text-destructive",
 };
 
 export default function CmsPostsPage() {
@@ -196,7 +197,7 @@ export default function CmsPostsPage() {
                         </div>
                         {(post.excerpt || post.tags?.length) && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            {[post.excerpt, post.tags?.length ? post.tags.join(", ") : ""]
+                            {[legacyPlainText(post.excerpt), post.tags?.length ? post.tags.join(", ") : ""]
                               .filter(Boolean)
                               .join(" · ")}
                           </p>
@@ -225,7 +226,7 @@ export default function CmsPostsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(post.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
                           title="Delete post"
                         >
                           <Trash2 className="h-4 w-4" />

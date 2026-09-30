@@ -136,7 +136,7 @@ export function ProfileList() {
               <span className="text-foreground text-sm">{memberName}</span>
               <span className="text-xs text-muted-foreground">{primaryMember.email}</span>
               {primaryMember.isDefault && (
-                <Badge variant="outline" className="mt-1 w-fit text-xs border-emerald-700 text-emerald-400">
+                <Badge variant="outline" className="mt-1 w-fit text-xs border-emerald-700 text-success">
                   Default
                 </Badge>
               )}
@@ -175,7 +175,7 @@ export function ProfileList() {
                 variant={subscription.status === "ACTIVE" ? "default" : "outline"}
                 className={
                   subscription.status === "ACTIVE"
-                    ? "bg-emerald-600/20 text-emerald-400 border-emerald-600/50 w-fit"
+                    ? "bg-success/15 text-success border-emerald-600/50 w-fit"
                     : "border-border text-muted-foreground w-fit"
                 }
               >

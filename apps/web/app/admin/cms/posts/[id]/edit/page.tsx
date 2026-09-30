@@ -208,7 +208,7 @@ export default function EditPostPage() {
     const defaultStyles = {
       paddingTop: "16px",
       paddingBottom: "16px",
-      maxWidth: "48rem",
+      maxWidth: "64rem",
     } as PageBlock["styles"];
 
     let newBlock: PageBlock;

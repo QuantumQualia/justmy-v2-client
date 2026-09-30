@@ -68,23 +68,23 @@ export function CityOsEventsEmbedClient({
 
   if (!documentReferrerProbeDone) {
     return (
-      <div className="flex min-h-[120px] items-center justify-center p-4 text-sm text-slate-400">Loading…</div>
+      <div className="flex min-h-[120px] items-center justify-center p-4 text-sm text-muted-foreground">Loading…</div>
     );
   }
 
   if (!effectiveDomain) {
     return (
-      <div className="space-y-2 p-4 text-center text-sm text-slate-400">
+      <div className="space-y-2 p-4 text-center text-sm text-muted-foreground">
         <p>
           Could not resolve a market domain. Use the same iframe on a newsstand page so the parent URL
           is sent as referrer, or add{" "}
-          <code className="rounded bg-slate-800 px-1 text-slate-200">?domain=justmymemphis.com</code> for a fixed
+          <code className="rounded bg-muted px-1 text-foreground">?domain=justmymemphis.com</code> for a fixed
           market.
         </p>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-muted-foreground">
           If the parent site strips referrers (strict Referrer-Policy), you must pass{" "}
-          <code className="rounded bg-slate-800 px-1 text-slate-300">domain</code> in the iframe{" "}
-          <code className="rounded bg-slate-800 px-1 text-slate-300">src</code>.
+          <code className="rounded bg-muted px-1 text-muted-foreground">domain</code> in the iframe{" "}
+          <code className="rounded bg-muted px-1 text-muted-foreground">src</code>.
         </p>
       </div>
     );
@@ -96,7 +96,7 @@ export function CityOsEventsEmbedClient({
 
   if (effectiveDomain && data === null) {
     return (
-      <div className="flex min-h-[120px] items-center justify-center p-4 text-sm text-slate-400">Loading…</div>
+      <div className="flex min-h-[120px] items-center justify-center p-4 text-sm text-muted-foreground">Loading…</div>
     );
   }
 

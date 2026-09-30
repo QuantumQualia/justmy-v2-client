@@ -240,7 +240,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-red-700/60 text-red-400 hover:bg-red-900/30 hover:text-red-200"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-red-700/60 text-destructive hover:bg-red-900/30 hover:text-red-200"
                       title="Remove image"
                     >
                       <Trash2 className="h-3 w-3" />

@@ -47,11 +47,11 @@ const LIGHT_SCROLL =
   "[scrollbar-width:thin] [scrollbar-color:rgb(203_213_225)_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-300";
 
 const lightSecondaryBtn =
-  "bg-slate-100 text-slate-800 border border-slate-200 hover:bg-slate-200 hover:text-slate-900";
+  "bg-muted text-foreground border border-border hover:bg-muted hover:text-foreground";
 const lightChipBtn =
-  "bg-white text-slate-700 border border-slate-200 hover:border-violet-300 hover:bg-violet-50 hover:text-violet-800";
+  "bg-card text-foreground border border-border hover:border-primary/40 hover:bg-secondary hover:text-primary";
 const lightStyleCard =
-  "w-full p-4 rounded-xl border text-left transition-all cursor-pointer bg-slate-50 border-slate-200 hover:bg-violet-50 hover:border-violet-400";
+  "w-full p-4 rounded-xl border text-left transition-all cursor-pointer bg-muted border-border hover:bg-secondary hover:border-violet-400";
 const skyPrimaryBtn =
   "asksky-sky-send text-white disabled:opacity-45 disabled:cursor-not-allowed";
 
@@ -313,7 +313,7 @@ export function AIAboutAssistant({
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in",
-        isLight ? "bg-slate-900/40 backdrop-blur-sm" : "bg-black/70 backdrop-blur-sm",
+        isLight ? "bg-card/40 backdrop-blur-sm" : "bg-black/70 backdrop-blur-sm",
       )}
       onClick={onClose}
     >
@@ -338,17 +338,17 @@ export function AIAboutAssistant({
             onClick={onClose}
             className={cn(
               "h-8 w-8 rounded-full flex items-center justify-center transition-colors cursor-pointer",
-              isLight ? "bg-slate-100 hover:bg-slate-200" : "bg-muted hover:bg-accent",
+              isLight ? "bg-muted hover:bg-muted" : "bg-muted hover:bg-accent",
             )}
           >
-            <X className={cn("h-4 w-4", isLight ? "text-slate-500" : "text-muted-foreground")} />
+            <X className={cn("h-4 w-4", isLight ? "text-muted-foreground" : "text-muted-foreground")} />
           </button>
         </div>
 
         {/* Error Message */}
         {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-            <p className={cn("text-sm", isLight ? "text-red-600" : "text-red-400")}>{error}</p>
+          <div className="mb-4 p-3 bg-destructive/10 border border-red-500/30 rounded-lg">
+            <p className={cn("text-sm", isLight ? "text-destructive" : "text-destructive")}>{error}</p>
           </div>
         )}
 
@@ -360,7 +360,7 @@ export function AIAboutAssistant({
                 <div
                   className={`h-20 w-20 rounded-full flex items-center justify-center transition-all ${
                     isRecording || isPreparing
-                      ? "bg-red-500/20 animate-pulse"
+                      ? "bg-destructive/100/20 animate-pulse"
                       : "bg-gradient-to-br from-blue-600/20 to-purple-600/20"
                   }`}
                 >
@@ -369,25 +369,25 @@ export function AIAboutAssistant({
                       "h-10 w-10",
                       isRecording || isPreparing
                         ? isLight
-                          ? "text-red-600"
-                          : "text-red-400"
+                          ? "text-destructive"
+                          : "text-destructive"
                         : isLight
-                          ? "text-violet-600"
+                          ? "text-primary"
                           : "text-blue-400",
                     )}
                   />
                 </div>
               </div>
               <div>
-                <p className={cn("text-sm mb-2", isLight ? "text-slate-500" : "text-muted-foreground")}>
+                <p className={cn("text-sm mb-2", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
                   Don't worry about being perfect. Just brain dump who you are, what you do, and why you love it.
                 </p>
                 {isPreparing && prepCountdown !== null ? (
-                  <p className={cn("text-xs font-semibold", isLight ? "text-red-600" : "text-red-300")}>
+                  <p className={cn("text-xs font-semibold", isLight ? "text-destructive" : "text-red-300")}>
                     Starting in {prepCountdown}...
                   </p>
                 ) : (
-                  <p className={cn("text-xs animate-pulse", isLight ? "text-slate-400" : "text-muted-foreground")}>
+                  <p className={cn("text-xs animate-pulse", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
                     {PROMPT_SUGGESTIONS[currentPromptIndex]}
                   </p>
                 )}
@@ -405,7 +405,7 @@ export function AIAboutAssistant({
                   "w-full min-h-[150px] p-4 text-base rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto md:text-sm",
                   LIGHT_SCROLL,
                   isLight
-                    ? "text-slate-900 bg-white border border-slate-200 placeholder:text-slate-400 focus:ring-violet-200 focus:border-violet-400"
+                    ? "text-foreground bg-card border border-border placeholder:text-muted-foreground focus:ring-ring focus-visible:border-ring"
                     : "text-foreground bg-background border border-input placeholder:text-muted-foreground focus:ring-blue-500/40 focus:border-blue-500",
                 )}
                 autoFocus
@@ -458,13 +458,13 @@ export function AIAboutAssistant({
             {/* Progress Bar */}
             {isLoading && (
               <div className="space-y-2">
-                <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-slate-100" : "bg-muted")}>
+                <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-muted" : "bg-muted")}>
                   <div
                     className="h-full transition-all duration-300"
                     style={{ width: `${progress}%`, background: "var(--asksky-gradient)" }}
                   />
                 </div>
-                <p className={cn("text-xs text-center", isLight ? "text-slate-500" : "text-muted-foreground")}>Synthesizing your greatness...</p>
+                <p className={cn("text-xs text-center", isLight ? "text-muted-foreground" : "text-muted-foreground")}>Synthesizing your greatness...</p>
               </div>
             )}
           </div>
@@ -473,7 +473,7 @@ export function AIAboutAssistant({
         {/* State 2: Suggestion Stage */}
         {state === "suggesting" && suggestions && (
           <div className="space-y-4">
-            <p className={cn("text-sm text-center mb-4", isLight ? "text-slate-500" : "text-muted-foreground")}>
+            <p className={cn("text-sm text-center mb-4", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
               Choose the style that best represents you:
             </p>
 
@@ -496,18 +496,18 @@ export function AIAboutAssistant({
                   )}
                 >
                   <div className="flex items-start justify-between mb-2">
-                    <h4 className={cn("text-sm font-semibold", isLight ? "text-slate-900" : "text-foreground")}>
+                    <h4 className={cn("text-sm font-semibold", isLight ? "text-foreground" : "text-foreground")}>
                       {title}
                     </h4>
                     <Check
                       className={cn(
                         "h-4 w-4 opacity-0 group-hover:opacity-100",
-                        isLight ? "text-violet-600" : "text-blue-400",
+                        isLight ? "text-primary" : "text-blue-400",
                       )}
                     />
                   </div>
-                  <p className={cn("text-xs mb-2", isLight ? "text-slate-500" : "text-muted-foreground")}>{blurb}</p>
-                  <p className={cn("text-xs line-clamp-3", isLight ? "text-slate-700" : "text-muted-foreground")}>
+                  <p className={cn("text-xs mb-2", isLight ? "text-muted-foreground" : "text-muted-foreground")}>{blurb}</p>
+                  <p className={cn("text-xs line-clamp-3", isLight ? "text-foreground" : "text-muted-foreground")}>
                     {suggestions[key]}
                   </p>
                 </button>
@@ -520,7 +520,7 @@ export function AIAboutAssistant({
         {state === "refining" && (
           <div className="space-y-4">
             <div className="space-y-2">
-              <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-slate-500" : "text-foreground")}>
+              <label className={cn("block text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-foreground")}>
                 Your About Text
               </label>
               <textarea
@@ -530,11 +530,11 @@ export function AIAboutAssistant({
                   "w-full min-h-[200px] p-4 text-base rounded-xl focus:outline-none focus:ring-2 resize-y overflow-y-auto md:text-sm",
                   LIGHT_SCROLL,
                   isLight
-                    ? "text-slate-900 bg-white border border-slate-200 focus:ring-violet-200 focus:border-violet-400"
+                    ? "text-foreground bg-card border border-border focus:ring-ring focus-visible:border-ring"
                     : "text-foreground bg-background border border-input focus:ring-blue-500/40 focus:border-blue-500",
                 )}
               />
-              <p className={cn("text-[11px]", isLight ? "text-slate-500" : "text-muted-foreground")}>
+              <p className={cn("text-[11px]", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
                 {selectedText.trim().length.toLocaleString()} characters
                 {selectedText.trim()
                   ? ` · ${selectedText.trim().split(/\s+/).filter(Boolean).length.toLocaleString()} words`
@@ -545,11 +545,11 @@ export function AIAboutAssistant({
             {refineTurns.length ? (
               <div className={cn(
                 "max-h-28 space-y-1.5 overflow-y-auto rounded-xl border p-2",
-                isLight ? "border-slate-200 bg-slate-50" : "border-border bg-muted/40",
+                isLight ? "border-border bg-muted" : "border-border bg-muted/40",
               )}>
                 {refineTurns.map((turn, index) => (
                   <p key={`${turn.text}-${index}`} className="text-xs text-foreground">
-                    <span className="font-semibold text-violet-700">You: </span>
+                    <span className="font-semibold text-primary">You: </span>
                     {turn.text}
                   </p>
                 ))}
@@ -557,10 +557,10 @@ export function AIAboutAssistant({
             ) : null}
 
             <div className="space-y-2">
-              <p className={cn("text-xs font-semibold uppercase tracking-wide", isLight ? "text-slate-500" : "text-foreground")}>
+              <p className={cn("text-xs font-semibold uppercase tracking-wide", isLight ? "text-muted-foreground" : "text-foreground")}>
                 Keep talking to AskSKY
               </p>
-              <p className={cn("text-xs", isLight ? "text-slate-500" : "text-muted-foreground")}>
+              <p className={cn("text-xs", isLight ? "text-muted-foreground" : "text-muted-foreground")}>
                 Example: “Make it 500 words, add our weekend hours, and mention our veteran discount.”
               </p>
               <textarea
@@ -578,7 +578,7 @@ export function AIAboutAssistant({
                   "w-full min-h-[72px] p-3 text-base rounded-xl focus:outline-none focus:ring-2 resize-none overflow-y-auto disabled:opacity-60 md:text-sm",
                   LIGHT_SCROLL,
                   isLight
-                    ? "text-slate-900 bg-white border border-slate-200 placeholder:text-slate-400 focus:ring-violet-200 focus:border-violet-400"
+                    ? "text-foreground bg-card border border-border placeholder:text-muted-foreground focus:ring-ring focus-visible:border-ring"
                     : "text-foreground bg-background border border-input placeholder:text-muted-foreground focus:ring-blue-500/40 focus:border-blue-500",
                 )}
               />
@@ -626,7 +626,7 @@ export function AIAboutAssistant({
                   className={cn(
                     "px-3 py-2 text-xs font-medium rounded-lg transition-colors cursor-pointer flex items-center justify-center gap-1 disabled:cursor-not-allowed",
                     isLight
-                      ? `${lightChipBtn} disabled:bg-slate-50 disabled:text-slate-400`
+                      ? `${lightChipBtn} disabled:bg-muted disabled:text-muted-foreground`
                       : "bg-muted text-foreground hover:bg-accent disabled:bg-muted/50",
                   )}
                 >
@@ -639,13 +639,13 @@ export function AIAboutAssistant({
             {/* Progress Bar */}
             {isLoading && (
               <div className="space-y-2">
-                <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-slate-100" : "bg-muted")}>
+                <div className={cn("w-full rounded-full h-2 overflow-hidden", isLight ? "bg-muted" : "bg-muted")}>
                   <div
                     className="h-full transition-all duration-300"
                     style={{ width: `${progress}%`, background: "var(--asksky-gradient)" }}
                   />
                 </div>
-                <p className={cn("text-xs text-center", isLight ? "text-slate-500" : "text-muted-foreground")}>Refining your text...</p>
+                <p className={cn("text-xs text-center", isLight ? "text-muted-foreground" : "text-muted-foreground")}>Refining your text...</p>
               </div>
             )}
 
@@ -655,7 +655,7 @@ export function AIAboutAssistant({
                 onClick={handleAccept}
                 disabled={!selectedText || !selectedText.trim()}
                 className={cn(
-                  "flex-1 text-white text-sm font-medium cursor-pointer shadow-md shadow-violet-500/20",
+                  "flex-1 text-white text-sm font-medium cursor-pointer shadow-md shadow-primary/20",
                   skyPrimaryBtn,
                 )}
               >
@@ -667,7 +667,7 @@ export function AIAboutAssistant({
                 className={cn(
                   "px-4 text-sm font-medium cursor-pointer",
                   isLight
-                    ? "border-slate-200 bg-slate-100 text-slate-700 hover:bg-slate-200 hover:text-slate-900"
+                    ? "border-border bg-muted text-foreground hover:bg-muted hover:text-foreground"
                     : "bg-muted hover:bg-accent border-border text-foreground hover:text-foreground",
                 )}
               >

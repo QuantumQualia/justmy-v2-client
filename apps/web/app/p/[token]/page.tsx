@@ -45,7 +45,7 @@ function SharedPlanInner() {
         {data.tasks.map((task, i) => (
           <li key={`${task.text}-${i}`} className="rounded-xl border border-[#ececf2] px-4 py-3">
             <div className="font-medium">{task.text}</div>
-            {task.location ? <div className="text-xs text-violet-600">{task.location}</div> : null}
+            {task.location ? <div className="text-xs text-primary">{task.location}</div> : null}
           </li>
         ))}
       </ol>

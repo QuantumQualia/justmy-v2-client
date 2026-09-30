@@ -80,7 +80,7 @@ const PALETTE: {
 function fieldTypeStyles(type: MyFormBuilderFieldType): string {
   switch (type) {
     case "header":
-      return "border-violet-400/35 bg-violet-500/20 text-violet-100";
+      return "border-violet-400/35 bg-primary/20 text-primary-foreground";
     case "email":
       return "border-sky-400/35 bg-sky-500/20 text-sky-100";
     case "phone":
@@ -96,7 +96,7 @@ function fieldTypeStyles(type: MyFormBuilderFieldType): string {
     case "textarea":
       return "border-amber-400/35 bg-amber-500/20 text-amber-100";
     case "select":
-      return "border-emerald-400/35 bg-emerald-500/20 text-emerald-100";
+      return "border-emerald-400/35 bg-success/20 text-success";
     case "radio":
       return "border-fuchsia-400/35 bg-fuchsia-500/20 text-fuchsia-100";
     case "checkbox":
@@ -172,9 +172,9 @@ function SortableFieldOutlineRow({
       }}
       className={cn(
         "flex items-center gap-2 py-2.5 pl-2 pr-1 outline-none transition-colors sm:gap-3 sm:py-3 sm:pl-3",
-        "focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-emerald-500/40",
+        "focus-visible:bg-muted focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-success/40",
         isDragging && "bg-muted/60 shadow-md",
-        selected ? "bg-emerald-950/35 ring-1 ring-inset ring-emerald-500/25" : "hover:bg-accent/40",
+        selected ? "bg-emerald-950/35 ring-1 ring-inset ring-success/25" : "hover:bg-accent/40",
       )}
     >
       <button
@@ -194,7 +194,7 @@ function SortableFieldOutlineRow({
       <span
         className={cn(
           "flex h-7 w-7 shrink-0 items-center justify-center rounded-md font-mono text-[11px] font-bold tabular-nums",
-          selected ? "bg-emerald-500/20 text-emerald-200" : "bg-muted text-muted-foreground",
+          selected ? "bg-success/20 text-success" : "bg-muted text-muted-foreground",
         )}
       >
         {index + 1}
@@ -227,7 +227,7 @@ function SortableFieldOutlineRow({
         type="button"
         variant="ghost"
         size="icon"
-        className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-950/50 hover:text-red-400"
+        className="h-8 w-8 shrink-0 text-muted-foreground hover:bg-red-950/50 hover:text-destructive"
         aria-label="Remove field"
         onClick={(e) => {
           e.stopPropagation();
@@ -277,17 +277,17 @@ function SortableFieldRow({
       }}
       className={cn(
         "group relative overflow-hidden rounded-2xl border text-left outline-none transition-[box-shadow,transform,border-color,background-color] duration-200",
-        "focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
+        "focus-visible:ring-2 focus-visible:ring-success/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950",
         isDragging && "scale-[1.01] shadow-2xl shadow-black/50",
         selected
-          ? "border-emerald-400/55 bg-muted/95 shadow-lg shadow-emerald-950/25 ring-1 ring-emerald-400/25"
+          ? "border-emerald-400/55 bg-muted/95 shadow-lg shadow-emerald-950/25 ring-1 ring-success/25"
           : "border-border bg-muted hover:border-border hover:bg-accent",
       )}
     >
       <div
         className={cn(
           "absolute inset-y-0 left-0 w-1.5 transition-colors",
-          selected ? "bg-emerald-400" : "bg-muted-foreground/70 group-hover:bg-muted-foreground",
+          selected ? "bg-success" : "bg-muted-foreground/70 group-hover:bg-muted-foreground",
         )}
         aria-hidden
       />
@@ -311,7 +311,7 @@ function SortableFieldRow({
             className={cn(
               "flex h-8 min-w-[2rem] items-center justify-center rounded-full border px-2 font-mono text-xs font-bold tabular-nums",
               selected
-                ? "border-emerald-500/40 bg-emerald-950/50 text-emerald-200"
+                ? "border-success/40 bg-emerald-950/50 text-success"
                 : "border-border bg-card text-muted-foreground",
             )}
             aria-label={`Position ${index + 1}`}
@@ -571,7 +571,7 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
     >
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-muted px-4 py-3.5 sm:px-5">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-500/15 text-emerald-400">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-success/15 text-success">
             <Eye className="h-4 w-4" />
           </div>
           <div className="min-w-0">
@@ -672,7 +672,7 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
 
         <div className={panelClass}>
           <div className="flex items-center gap-2 border-b border-border/40 pb-3">
-            <List className="h-4 w-4 text-emerald-400/90" />
+            <List className="h-4 w-4 text-success/90" />
             <div>
               <p className="text-sm font-semibold text-foreground">Add blocks</p>
               <p className="text-[11px] text-muted-foreground">Click to append to the end of the form</p>
@@ -688,8 +688,8 @@ export function MyFormSchemaBuilder({ schema, onSchemaChange, preview, className
                   onClick={() => addField(p.type)}
                   className={cn(
                     "flex flex-col items-start gap-1 rounded-xl border border-border/40 bg-muted p-3 text-left transition-all",
-                    "hover:border-emerald-500/35 hover:bg-emerald-950/20 hover:shadow-md hover:shadow-emerald-950/10",
-                    "active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40",
+                    "hover:border-success/35 hover:bg-emerald-950/20 hover:shadow-md hover:shadow-emerald-950/10",
+                    "active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-success/40",
                   )}
                 >
                   <Icon className="h-4 w-4 text-muted-foreground" />

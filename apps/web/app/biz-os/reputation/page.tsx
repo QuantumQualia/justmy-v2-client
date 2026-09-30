@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
 import { Input } from "@workspace/ui/components/input";
 import { Switch } from "@workspace/ui/components/switch";
 import { cn } from "@workspace/ui/lib/utils";
@@ -77,7 +78,7 @@ function starRow(rating: number | null) {
   return (
     <span className="tracking-tight text-amber-500" aria-hidden>
       {"★".repeat(filled)}
-      <span className="text-slate-200">{"★".repeat(5 - filled)}</span>
+      <span className="text-foreground">{"★".repeat(5 - filled)}</span>
     </span>
   );
 }
@@ -92,12 +93,12 @@ function ToggleRow({
   onCheckedChange: (next: boolean) => void;
 }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-slate-200/70 p-3.5">
-      <span className="text-sm text-slate-700">{label}</span>
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-border/70 p-3.5">
+      <span className="text-sm text-foreground">{label}</span>
       <Switch
         checked={checked}
         onCheckedChange={onCheckedChange}
-        className="data-[state=checked]:bg-violet-600"
+        className="data-[state=checked]:bg-primary"
       />
     </label>
   );
@@ -407,11 +408,11 @@ export default function ReputationPage() {
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <BizOsCard>
-            <h2 id="gbp-search" className="text-sm font-semibold text-slate-500">
+            <h2 id="gbp-search" className="text-sm font-semibold text-muted-foreground">
               Google Business Profile
             </h2>
             <div className="relative mt-4">
-              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -419,19 +420,19 @@ export default function ReputationPage() {
                   if (e.key === "Enter") void search();
                 }}
                 placeholder="Search for your business on Google..."
-                className="h-11 rounded-xl border-slate-200 pl-10 pr-24"
+                className="h-11 rounded-xl border-border pl-10 pr-24"
               />
               <Button
                 type="button"
                 size="sm"
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-lg bg-card text-white hover:bg-muted"
                 onClick={() => void search()}
                 disabled={searching}
               >
                 {searching ? "Searching…" : "Search"}
               </Button>
             </div>
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-muted-foreground">
               Find your Google listing, then tap Verify to attach it to this profile.
             </p>
 
@@ -442,17 +443,17 @@ export default function ReputationPage() {
             ) : null}
 
             {hasSearched && !searching && !searchError && results.length === 0 ? (
-              <div className="mt-3 rounded-xl border border-dashed border-slate-200 bg-slate-50 px-4 py-4">
-                <p className="text-sm font-medium text-slate-800">
+              <div className="mt-3 rounded-xl border border-dashed border-border bg-muted px-4 py-4">
+                <p className="text-sm font-medium text-foreground">
                   No matching Google listing
                   {lastSearch ? (
                     <>
                       {" "}
-                      for <span className="text-violet-700">“{lastSearch}”</span>
+                      for <span className="text-primary">“{lastSearch}”</span>
                     </>
                   ) : null}
                 </p>
-                <p className="mt-1 text-xs leading-relaxed text-slate-500">
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
                   Try another name or add a city. When you find it, Verify attaches that listing to this profile.
                 </p>
               </div>
@@ -460,7 +461,7 @@ export default function ReputationPage() {
 
             {results.length ? (
               <div className="mt-3 space-y-2">
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-muted-foreground">
                   Tap Verify to attach this listing to {businessName || "this profile"}.
                 </p>
                 {results.map((r) => {
@@ -470,15 +471,15 @@ export default function ReputationPage() {
                   return (
                     <div
                       key={placeId || r.name}
-                      className="flex flex-col gap-3 rounded-xl border border-slate-200 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+                      className="flex flex-col gap-3 rounded-xl border border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="min-w-0">
-                        <p className="font-medium text-slate-900">{r.name}</p>
+                        <p className="font-medium text-foreground">{r.name}</p>
                         {r.address ? (
-                          <p className="mt-0.5 text-sm text-slate-500">{r.address}</p>
+                          <p className="mt-0.5 text-sm text-muted-foreground">{r.address}</p>
                         ) : null}
                         {r.rating ? (
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="mt-1 text-xs text-muted-foreground">
                             {r.rating} · {r.reviewCount || 0} reviews
                           </p>
                         ) : null}
@@ -492,7 +493,7 @@ export default function ReputationPage() {
                         <Button
                           type="button"
                           size="sm"
-                          className="shrink-0 self-start rounded-lg bg-violet-600 text-white hover:bg-violet-700 sm:self-center"
+                          className="shrink-0 self-start rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 sm:self-center"
                           disabled={!placeId || Boolean(verifyingId)}
                           onClick={() => void verify(r)}
                         >
@@ -509,11 +510,11 @@ export default function ReputationPage() {
               </div>
             ) : null}
 
-            <div className="mt-4 rounded-xl border border-slate-200/70 bg-slate-50 p-5">
+            <div className="mt-4 rounded-xl border border-border/70 bg-muted p-5">
               {verified ? (
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white text-lg">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-border bg-card text-lg">
                       {profile.photo ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={profile.photo} alt="" className="h-full w-full object-cover" />
@@ -522,14 +523,14 @@ export default function ReputationPage() {
                       )}
                     </div>
                     <div>
-                      <p className="text-sm font-semibold text-slate-900">{businessName || "Your business"}</p>
-                      {address ? <p className="mt-0.5 text-xs text-slate-500">{address}</p> : null}
+                      <p className="text-sm font-semibold text-foreground">{businessName || "Your business"}</p>
+                      {address ? <p className="mt-0.5 text-xs text-muted-foreground">{address}</p> : null}
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {starRow(rating)}
-                        <span className="text-sm font-semibold text-slate-800">
+                        <span className="text-sm font-semibold text-foreground">
                           {rating != null && Number.isFinite(rating) ? rating.toFixed(1) : "—"}
                         </span>
-                        <span className="text-xs text-slate-400">· {reviewCount} reviews</span>
+                        <span className="text-xs text-muted-foreground">· {reviewCount} reviews</span>
                       </div>
                     </div>
                   </div>
@@ -553,7 +554,7 @@ export default function ReputationPage() {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-muted-foreground">
                   Search, then tap Verify to attach a Google listing to this profile.
                 </p>
               )}
@@ -561,7 +562,7 @@ export default function ReputationPage() {
 
             <button
               type="button"
-              className="mt-3 text-xs font-medium text-slate-400 hover:text-violet-700"
+              className="mt-3 text-xs font-medium text-muted-foreground hover:text-primary"
               onClick={() => setShowPlaceId((v) => !v)}
             >
               {showPlaceId ? "Hide Place ID" : "Have a Place ID?"}
@@ -608,17 +609,17 @@ export default function ReputationPage() {
           </BizOsCard>
 
           <BizOsCard>
-            <h2 className="text-sm font-semibold text-slate-500">Review acquisition toolkit</h2>
+            <h2 className="text-sm font-semibold text-muted-foreground">Review acquisition toolkit</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-xl border border-slate-200/70 p-4">
-                <p className="mb-2 text-xs font-medium text-slate-500">Direct review link</p>
-                <div className="mb-3 truncate rounded-lg border border-slate-200/70 bg-slate-50 px-3 py-2 text-sm text-slate-700">
+              <div className="rounded-xl border border-border/70 p-4">
+                <p className="mb-2 text-xs font-medium text-muted-foreground">Direct review link</p>
+                <div className="mb-3 truncate rounded-lg border border-border/70 bg-muted px-3 py-2 text-sm text-foreground">
                   {reviewUrl || "Verify a listing to generate a link."}
                 </div>
                 <div className="flex gap-2">
                   <Button
                     size="sm"
-                    className="flex-1 rounded-lg bg-violet-600 text-white hover:bg-violet-700"
+                    className="flex-1 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
                     disabled={!reviewUrl}
                     onClick={() => void copyLink()}
                   >
@@ -627,25 +628,25 @@ export default function ReputationPage() {
                   </Button>
                   {reviewUrl ? (
                     <a
-                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                      className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-border px-3 py-2 text-xs font-medium text-muted-foreground hover:bg-muted"
                       href={`sms:?&body=${encodeURIComponent(smsBody)}`}
                     >
                       <MessageSquare className="h-3.5 w-3.5" />
                       Send via SMS
                     </a>
                   ) : (
-                    <span className="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-100 px-3 py-2 text-xs text-slate-300">
+                    <span className="inline-flex flex-1 items-center justify-center rounded-lg border border-border px-3 py-2 text-xs text-muted-foreground">
                       Send via SMS
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="rounded-xl border border-slate-200/70 p-4">
-                <p className="mb-3 text-xs font-medium text-slate-500">High-res QR code studio</p>
+              <div className="rounded-xl border border-border/70 p-4">
+                <p className="mb-3 text-xs font-medium text-muted-foreground">High-res QR code studio</p>
                 <div
                   ref={qrRef}
-                  className="mx-auto mb-3 flex aspect-square w-full max-w-[160px] items-center justify-center overflow-hidden rounded-xl border border-slate-200 bg-white p-3"
+                  className="mx-auto mb-3 flex aspect-square w-full max-w-[160px] items-center justify-center overflow-hidden rounded-xl border border-border bg-card p-3"
                 >
                   {reviewUrl ? (
                     <QRCodeSVG
@@ -657,10 +658,10 @@ export default function ReputationPage() {
                       className="h-full w-full"
                     />
                   ) : (
-                    <span className="text-xs text-slate-300">QR</span>
+                    <span className="text-xs text-muted-foreground">QR</span>
                   )}
                 </div>
-                <p className="mb-3 text-center text-xs leading-relaxed text-slate-400">
+                <p className="mb-3 text-center text-xs leading-relaxed text-muted-foreground">
                   Scans straight to your review link — printable and mobile-ready.
                 </p>
                 <div className="flex gap-2">
@@ -668,7 +669,7 @@ export default function ReputationPage() {
                     type="button"
                     disabled={!reviewUrl}
                     onClick={downloadPng}
-                    className="flex-1 rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    className="flex-1 rounded-lg border border-border px-2 py-2 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-40"
                   >
                     PNG
                   </button>
@@ -676,7 +677,7 @@ export default function ReputationPage() {
                     type="button"
                     disabled={!reviewUrl}
                     onClick={downloadSvg}
-                    className="flex-1 rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    className="flex-1 rounded-lg border border-border px-2 py-2 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-40"
                   >
                     SVG
                   </button>
@@ -684,7 +685,7 @@ export default function ReputationPage() {
                     type="button"
                     disabled={!reviewUrl}
                     onClick={printCounterPdf}
-                    className="flex-1 whitespace-nowrap rounded-lg border border-slate-200 px-2 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50 disabled:opacity-40"
+                    className="flex-1 whitespace-nowrap rounded-lg border border-border px-2 py-2 text-xs font-medium text-muted-foreground hover:bg-muted disabled:opacity-40"
                   >
                     Counter PDF
                   </button>
@@ -692,16 +693,16 @@ export default function ReputationPage() {
               </div>
             </div>
 
-            <div className="mt-5 rounded-xl border border-slate-200/70 bg-slate-50 p-4">
-              <p className="mb-2.5 text-xs font-medium text-slate-500">Where to place your QR code</p>
+            <div className="mt-5 rounded-xl border border-border/70 bg-muted p-4">
+              <p className="mb-2.5 text-xs font-medium text-muted-foreground">Where to place your QR code</p>
               <ul className="space-y-1.5">
                 {[
                   "Counter stand near checkout",
                   "Printed on invoices & receipts",
                   "Vehicle wraps & window decals",
                 ].map((item) => (
-                  <li key={item} className="flex items-center gap-2 text-sm text-slate-700">
-                    <span className="h-1 w-1 shrink-0 rounded-full bg-violet-500" />
+                  <li key={item} className="flex items-center gap-2 text-sm text-foreground">
+                    <span className="h-1 w-1 shrink-0 rounded-full bg-primary" />
                     {item}
                   </li>
                 ))}
@@ -710,26 +711,24 @@ export default function ReputationPage() {
           </BizOsCard>
 
           <BizOsCard>
-            <h2 className="text-sm font-semibold text-slate-500">Hours</h2>
-            <p className="mt-1 text-sm text-slate-500">Shown on myCARD when you publish your listing details.</p>
+            <h2 className="text-sm font-semibold text-muted-foreground">Hours</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Shown on myCARD when you publish your listing details.</p>
             <div className="mt-4 grid gap-2 sm:grid-cols-2">
               {hours.map((h) => (
-                <div key={h.weekday} className="flex items-center gap-2 rounded-xl border border-slate-200/70 bg-slate-50 px-3 py-2 text-sm">
-                  <span className="w-10 font-medium text-slate-700">{DAYS[h.weekday]}</span>
-                  <input
-                    type="checkbox"
-                    className="accent-violet-600"
+                <div key={h.weekday} className="flex items-center gap-2 rounded-xl border border-border/70 bg-muted px-3 py-2 text-sm">
+                  <span className="w-10 font-medium text-foreground">{DAYS[h.weekday]}</span>
+                  <Checkbox
                     checked={!h.isClosed}
-                    onChange={(e) =>
+                    onCheckedChange={(checked) =>
                       setHours((prev) =>
-                        prev.map((x) => (x.weekday === h.weekday ? { ...x, isClosed: !e.target.checked } : x)),
+                        prev.map((x) => (x.weekday === h.weekday ? { ...x, isClosed: checked !== true } : x)),
                       )
                     }
                   />
-                  <input
+                  <Input
                     type="time"
                     disabled={h.isClosed}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-base disabled:opacity-40 md:text-sm"
+                    className="min-w-0 flex-1"
                     value={h.openTime}
                     onChange={(e) =>
                       setHours((prev) =>
@@ -737,11 +736,11 @@ export default function ReputationPage() {
                       )
                     }
                   />
-                  <span className="text-slate-400">–</span>
-                  <input
+                  <span className="text-muted-foreground">–</span>
+                  <Input
                     type="time"
                     disabled={h.isClosed}
-                    className="min-w-0 flex-1 rounded-lg border border-slate-200 bg-white px-1.5 py-1 text-base disabled:opacity-40 md:text-sm"
+                    className="min-w-0 flex-1"
                     value={h.endTime}
                     onChange={(e) =>
                       setHours((prev) =>
@@ -758,8 +757,8 @@ export default function ReputationPage() {
           </BizOsCard>
 
           <BizOsCard>
-            <h2 className="text-sm font-semibold text-slate-500">Why reviews matter</h2>
-            <div className="mt-2 divide-y divide-slate-100">
+            <h2 className="text-sm font-semibold text-muted-foreground">Why reviews matter</h2>
+            <div className="mt-2 divide-y divide-border">
               {FAQ.map((item) => {
                 const open = faq === item.q;
                 return (
@@ -769,16 +768,16 @@ export default function ReputationPage() {
                       className="flex w-full items-center justify-between gap-4 py-3 text-left"
                       onClick={() => setFaq(open ? null : item.q)}
                     >
-                      <span className="text-sm font-medium text-slate-800">{item.q}</span>
+                      <span className="text-sm font-medium text-foreground">{item.q}</span>
                       <ChevronDown
                         className={cn(
-                          "h-4 w-4 shrink-0 text-slate-400 transition-transform",
+                          "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
                           open && "rotate-180",
                         )}
                       />
                     </button>
                     {open ? (
-                      <p className="pb-3 text-sm leading-relaxed text-slate-500">{item.a}</p>
+                      <p className="pb-3 text-sm leading-relaxed text-muted-foreground">{item.a}</p>
                     ) : null}
                   </div>
                 );
@@ -790,13 +789,13 @@ export default function ReputationPage() {
         <aside className="space-y-6">
           <BizOsCard className="p-5">
             <div className="mb-3 flex items-center gap-2.5">
-              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-600 text-white">
+              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
               </span>
-              <p className="text-sm font-medium text-slate-800">AskSKY review co-pilot</p>
+              <p className="text-sm font-medium text-foreground">AskSKY review co-pilot</p>
             </div>
-            <div className="mb-4 rounded-2xl rounded-tl-sm border border-slate-200/70 bg-slate-50 p-3.5">
-              <p className="text-sm leading-relaxed text-slate-700">
+            <div className="mb-4 rounded-2xl rounded-tl-sm border border-border/70 bg-muted p-3.5">
+              <p className="text-sm leading-relaxed text-foreground">
                 {verified
                   ? `You have ${reviewCount} reviews! Getting to ${milestone} will unlock higher AI search authority in ${city}. Want me to draft a customer SMS text?`
                   : "Connect your Google listing and I’ll help you ask happy customers for reviews."}
@@ -807,37 +806,37 @@ export default function ReputationPage() {
                 type="button"
                 disabled={!reviewUrl}
                 onClick={() => void copySmsDraft()}
-                className="flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-40"
+                className="flex w-full items-center gap-2 rounded-xl border border-border px-3.5 py-2.5 text-left text-sm font-medium text-foreground hover:bg-muted disabled:opacity-40"
               >
-                <Copy className="h-4 w-4 text-slate-400" />
+                <Copy className="h-4 w-4 text-muted-foreground" />
                 {copied === "sms" ? "SMS draft copied" : "Draft SMS copy"}
               </button>
               <button
                 type="button"
                 disabled={creatingPlan}
                 onClick={() => void addReviewGoal()}
-                className="flex w-full items-center gap-2 rounded-xl border border-slate-200 px-3.5 py-2.5 text-left text-sm font-medium text-slate-700 hover:bg-slate-50"
+                className="flex w-full items-center gap-2 rounded-xl border border-border px-3.5 py-2.5 text-left text-sm font-medium text-foreground hover:bg-muted"
               >
-                <Crosshair className="h-4 w-4 text-slate-400" />
+                <Crosshair className="h-4 w-4 text-muted-foreground" />
                 {creatingPlan ? "Adding…" : "Add goal to active battle plan"}
               </button>
             </div>
-            {planMsg ? <p className="mt-3 text-xs text-violet-700">{planMsg}</p> : null}
+            {planMsg ? <p className="mt-3 text-xs text-primary">{planMsg}</p> : null}
           </BizOsCard>
 
           <BizOsCard className="p-5">
-            <p className="mb-3 text-xs font-medium text-slate-500">Progress to next milestone</p>
+            <p className="mb-3 text-xs font-medium text-muted-foreground">Progress to next milestone</p>
             <div className="mb-2 flex items-end justify-between">
-              <span className="text-3xl font-semibold tracking-tight text-slate-900">{reviewCount}</span>
-              <span className="mb-1 text-xs text-slate-400">of {milestone} reviews</span>
+              <span className="text-3xl font-semibold tracking-tight text-foreground">{reviewCount}</span>
+              <span className="mb-1 text-xs text-muted-foreground">of {milestone} reviews</span>
             </div>
             <BizOsProgress value={milestone ? (reviewCount / milestone) * 100 : 0} />
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-muted-foreground">
               {remaining} reviews to your next authority tier
             </p>
             <Link
               href="/biz-os/skyscan"
-              className="mt-4 inline-flex text-sm font-semibold text-violet-600 hover:text-violet-800"
+              className="mt-4 inline-flex text-sm font-semibold text-primary hover:text-primary"
             >
               See how reviews score on SkySCAN →
             </Link>

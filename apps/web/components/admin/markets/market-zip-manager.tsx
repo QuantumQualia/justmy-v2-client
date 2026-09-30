@@ -101,13 +101,13 @@ export function MarketZipManager({ initialZips = [], onChange }: MarketZipManage
             onChange={(e) => setZipInput(e.target.value)}
             onKeyDown={handleKeyPress}
             placeholder="Enter zip codes separated by commas (e.g., 38103, 38104, 38105)"
-            className="flex min-h-[100px] w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-emerald-500 disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex min-h-[100px] w-full rounded-md border border-border bg-muted px-3 py-2 text-sm text-foreground shadow-xs placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-success disabled:cursor-not-allowed disabled:opacity-50"
           />
           <div className="flex items-center justify-between">
             <p className="text-muted-foreground text-xs">
               Press Ctrl+Enter (or Cmd+Enter) to add zip codes
             </p>
-            <Button onClick={handleAddZips} size="sm" disabled={!zipInput.trim()} className="bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button onClick={handleAddZips} size="sm" disabled={!zipInput.trim()} className="">
               Add Zip Codes
             </Button>
           </div>

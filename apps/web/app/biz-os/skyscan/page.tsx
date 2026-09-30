@@ -3,6 +3,14 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import {
   bizOsService,
   type OAuthConnection,
@@ -45,7 +53,7 @@ const CHANNELS = [
 ];
 
 function statusDot(status: SkyScanCheck["status"] | undefined) {
-  if (status === "pass") return "bg-emerald-500";
+  if (status === "pass") return "bg-success";
   if (status === "gap") return "bg-amber-400";
   if (status === "unavailable") return "bg-slate-300";
   return "bg-rose-500";
@@ -260,9 +268,9 @@ export default function SkyScanPage() {
 
       {header?.name ? (
         <BizOsCard>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">Business</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">Business</p>
           <p className="mt-1 text-lg font-semibold">{header.name}</p>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             {[header.address, header.website, header.category].filter(Boolean).join(" · ") || "Add address, website, and category on myCARD"}
           </p>
         </BizOsCard>
@@ -270,11 +278,11 @@ export default function SkyScanPage() {
 
       {latest ? (
         <BizOsCard className="bg-linear-to-br from-white to-violet-50/60">
-          <p className="text-sm text-slate-500">Overall score</p>
+          <p className="text-sm text-muted-foreground">Overall score</p>
           <div className="mt-2 flex flex-wrap items-end gap-6">
             <p className="text-6xl font-semibold tracking-tight">
               {latest.overallScore}
-              <span className="text-lg font-medium text-slate-400">/100</span>
+              <span className="text-lg font-medium text-muted-foreground">/100</span>
             </p>
             <div className="min-w-48 flex-1">
               <BizOsProgress value={latest.overallScore} />
@@ -282,13 +290,13 @@ export default function SkyScanPage() {
           </div>
           {isCommand && flags ? (
             <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium">
-              <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
+              <span className="rounded-full bg-card px-2.5 py-1 ring-1 ring-border">
                 {flags.geoLocked ? "🟢" : "🟡"} GEO locking
               </span>
-              <span className="rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
+              <span className="rounded-full bg-card px-2.5 py-1 ring-1 ring-border">
                 {flags.kbSynced ? "🟢" : "🟡"} Knowledge Base sync
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-1 ring-1 ring-slate-200">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-card px-2.5 py-1 ring-1 ring-border">
                 SmartHandoff
                 <ComingSoonBadge />
               </span>
@@ -314,20 +322,20 @@ export default function SkyScanPage() {
             const items = checksFor(latest, ch.checks);
             return (
               <BizOsCard key={ch.key}>
-                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-400">{ch.label}</p>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">{ch.label}</p>
                 <p className="mt-2 text-3xl font-semibold">
                   {value}
-                  <span className="text-sm font-medium text-slate-400">/{ch.max}</span>
+                  <span className="text-sm font-medium text-muted-foreground">/{ch.max}</span>
                 </p>
                 <div className="mt-3">
                   <BizOsProgress value={(value / ch.max) * 100} />
                 </div>
                 <ul className="mt-3 space-y-1.5">
                   {items.map((item) => (
-                    <li key={item.key} className="flex items-start gap-2 text-xs text-slate-600">
+                    <li key={item.key} className="flex items-start gap-2 text-xs text-muted-foreground">
                       <span className={`mt-1 inline-block h-2 w-2 shrink-0 rounded-full ${statusDot(item.status)}`} />
                       <span>
-                        <span className="font-medium text-slate-800">{item.label}</span>
+                        <span className="font-medium text-foreground">{item.label}</span>
                         {item.detail ? ` — ${item.detail}` : ""}
                       </span>
                     </li>
@@ -342,7 +350,7 @@ export default function SkyScanPage() {
       {isCommand && latest ? (
         <BizOsCard>
           <h2 className="text-sm font-semibold">Voice recap</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             ElevenLabs reads your latest SkySCAN. SmartHandoff SMS is coming soon — FunCREW handoff works today.
           </p>
           {latest.auditData?.voiceRecapUrl ? (
@@ -359,20 +367,20 @@ export default function SkyScanPage() {
           <h2 className="text-sm font-semibold">Plain-English breakdown</h2>
           <div className="mt-3 grid gap-3 sm:grid-cols-3 text-sm">
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-emerald-700">Winning areas</p>
-              <ul className="mt-1 list-disc pl-4 text-slate-600">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-success">Winning areas</p>
+              <ul className="mt-1 list-disc pl-4 text-muted-foreground">
                 {winning.length ? winning.map((w) => <li key={w.key}>{w.label}</li>) : <li>Run another scan after you fill gaps.</li>}
               </ul>
             </div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-amber-700">AI opportunities</p>
-              <ul className="mt-1 list-disc pl-4 text-slate-600">
+              <ul className="mt-1 list-disc pl-4 text-muted-foreground">
                 {opportunities.length ? opportunities.map((w) => <li key={w.key}>{w.label}</li>) : <li>Looking strong across GEO probes.</li>}
               </ul>
             </div>
             <div>
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-700">Why JustMy beats agencies</p>
-              <p className="mt-1 text-slate-600">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">Why JustMy beats agencies</p>
+              <p className="mt-1 text-muted-foreground">
                 Live GEO probes plus your myCARD facts — not a monthly PDF. AskSKY turns gaps into a BattlePlan the same day.
               </p>
             </div>
@@ -384,13 +392,13 @@ export default function SkyScanPage() {
         <BizOsCard>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-sm font-semibold">Enterprise war room</h2>
-            <Link className="text-sm font-medium text-violet-700 hover:underline" href="/biz-os/campaigns">
+            <Link className="text-sm font-medium text-primary hover:underline" href="/biz-os/campaigns">
               Open Campaigns
             </Link>
           </div>
           {sov ? (
             <div className="mt-3">
-              <p className="text-sm text-slate-600">
+              <p className="text-sm text-muted-foreground">
                 Market share of AI voice {sov.clientShare}% · rank #{sov.rank}
               </p>
               <div className="mt-2">
@@ -401,33 +409,31 @@ export default function SkyScanPage() {
                   {sov.clientName}: {sov.clientShare}%
                 </p>
                 {sov.competitors.map((c) => (
-                  <p key={c.name} className="text-slate-600">
+                  <p key={c.name} className="text-muted-foreground">
                     {c.name}: {c.share}%
                   </p>
                 ))}
               </div>
             </div>
           ) : (
-            <p className="mt-2 text-sm text-slate-500">Add up to two competitor names, then re-run SkySCAN for share of voice.</p>
+            <p className="mt-2 text-sm text-muted-foreground">Add up to two competitor names, then re-run SkySCAN for share of voice.</p>
           )}
           {targets.length ? (
-            <ul className="mt-3 space-y-1 text-sm text-slate-600">
+            <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
               {targets.map((t) => (
                 <li key={t.label}>
-                  <span className="font-medium text-slate-800">{t.kind}:</span> {t.label}
+                  <span className="font-medium text-foreground">{t.kind}:</span> {t.label}
                 </li>
               ))}
             </ul>
           ) : null}
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
-            <input
-              className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
+            <Input
               placeholder="Competitor 1 name"
               value={comp1}
               onChange={(e) => setComp1(e.target.value)}
             />
-            <input
-              className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
+            <Input
               placeholder="Competitor 2 name"
               value={comp2}
               onChange={(e) => setComp2(e.target.value)}
@@ -437,13 +443,15 @@ export default function SkyScanPage() {
             {savingCampaign ? "Saving…" : "Save competitors"}
           </Button>
           {campaigns.length ? (
-            <label className="mt-3 block text-sm text-slate-600">
+            <label className="mt-3 block text-sm text-muted-foreground">
               Active campaign
-              <select
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
-                value={campaigns.find((c) => c.status === "active")?.id || ""}
-                onChange={(e) => {
-                  const id = Number(e.target.value);
+              <Select
+                value={(() => {
+                  const active = campaigns.find((c) => c.status === "active")?.id;
+                  return active ? String(active) : undefined;
+                })()}
+                onValueChange={(value) => {
+                  const id = Number(value);
                   const row = campaigns.find((c) => c.id === id);
                   if (!row || !profileId) return;
                   void bizOsService
@@ -464,12 +472,17 @@ export default function SkyScanPage() {
                     });
                 }}
               >
-                {campaigns.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="mt-1">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {campaigns.map((c) => (
+                    <SelectItem key={c.id} value={String(c.id)}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </label>
           ) : null}
         </BizOsCard>
@@ -478,11 +491,11 @@ export default function SkyScanPage() {
       {isCommandPro && latest ? (
         <BizOsCard>
           <h2 className="text-sm font-semibold">Approve & broadcast</h2>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted-foreground">
             Broadcast publishes your listing on JustMy and builds a caption pack on S3. Auto-post to YouTube / Meta /
             TikTok / GBP is coming soon — unconnected networks stay in the pack for FunCREW.
           </p>
-          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+          <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
             {connections.map((c) => (
                 <li key={c.provider}>
                   {c.status === "connected" ? "🟢" : "🔴"} {c.provider === "gbp" ? "Google Business Profile" : c.provider}{" "}
@@ -492,20 +505,20 @@ export default function SkyScanPage() {
           </ul>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+              className="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium"
               href="/biz-os/settings"
             >
               Connections
             </Link>
             <Link
-              className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+              className="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium"
               href="/biz-os/media-engine"
             >
               Media engine
             </Link>
             {lastSyn?.bundleUrl ? (
               <a
-                className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+                className="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium"
                 href={lastSyn.bundleUrl}
                 target="_blank"
                 rel="noreferrer"
@@ -539,25 +552,25 @@ export default function SkyScanPage() {
       {scans.length > 1 ? (
         <BizOsCard>
           <h2 className="text-sm font-semibold">Score history</h2>
-          <ul className="mt-3 divide-y divide-slate-100 text-sm text-slate-600">
+          <ul className="mt-3 divide-y divide-border text-sm text-muted-foreground">
             {scans.map((s) => (
               <li key={s.id} className="flex items-center justify-between py-2">
                 <span>{new Date(s.scannedAt).toLocaleString()}</span>
-                <span className="font-semibold text-slate-800">{s.overallScore}/100</span>
+                <span className="font-semibold text-foreground">{s.overallScore}/100</span>
               </li>
             ))}
           </ul>
         </BizOsCard>
       ) : null}
 
-      <BizOsCard className="border-violet-200 bg-violet-50/70">
+      <BizOsCard className="border-primary/30 bg-secondary/70">
         <h2 className="font-semibold">Next step</h2>
-        <p className="mt-1 text-sm text-slate-600">
+        <p className="mt-1 text-sm text-muted-foreground">
           AskSKY opens after each scan with the right BattlePlan or upgrade path for your plan.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
           <Link
-            className="inline-flex items-center rounded-md border border-slate-200 bg-white px-3 py-2 text-sm font-medium"
+            className="inline-flex items-center rounded-md border border-border bg-card px-3 py-2 text-sm font-medium"
             href="/biz-os/battle-plans"
           >
             Open Battle Plans

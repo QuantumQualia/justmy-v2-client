@@ -187,21 +187,21 @@ export function ImageCropModal({
       : "Crop image";
 
   return (
-    <div className={cn("fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4", isLight ? "bg-slate-900/40" : "bg-black/40")}>
-      <div className={cn("p-6 rounded-2xl border shadow-xl w-full max-w-md", isLight ? "bg-white border-slate-200 text-slate-900" : "bg-background border-border text-foreground")}>
+    <div className={cn("fixed inset-0 z-[100] flex items-center justify-center backdrop-blur-sm p-4", isLight ? "bg-card/40" : "bg-black/40")}>
+      <div className={cn("p-6 rounded-2xl border shadow-xl w-full max-w-md", isLight ? "bg-card border-border text-foreground" : "bg-background border-border text-foreground")}>
         <div className="flex items-center justify-between mb-4">
-          <h3 className={cn("text-lg font-bold", isLight ? "text-slate-900" : "text-foreground")}>{cropTitle}</h3>
+          <h3 className={cn("text-lg font-bold", isLight ? "text-foreground" : "text-foreground")}>{cropTitle}</h3>
           <button
             type="button"
             onClick={onCancel}
             disabled={isApplying}
             className={cn(
               "flex h-8 w-8 items-center justify-center rounded-full transition-colors disabled:pointer-events-none disabled:opacity-40",
-              isLight ? "bg-slate-100 hover:bg-slate-200" : "bg-muted hover:bg-muted",
+              isLight ? "bg-muted hover:bg-muted" : "bg-muted hover:bg-muted",
             )}
             aria-label="Close"
           >
-            <X className={cn("h-4 w-4", isLight ? "text-slate-500" : "text-muted-foreground")} />
+            <X className={cn("h-4 w-4", isLight ? "text-muted-foreground" : "text-muted-foreground")} />
           </button>
         </div>
 
@@ -261,7 +261,7 @@ export function ImageCropModal({
             className={cn(
               "flex-1 disabled:opacity-50",
               isLight
-                ? "border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-900"
+                ? "border-border bg-card text-foreground hover:bg-muted hover:text-foreground"
                 : "border-border bg-background text-foreground hover:bg-muted hover:text-foreground",
             )}
           >
@@ -273,7 +273,7 @@ export function ImageCropModal({
             disabled={isApplying || !croppedAreaPixels}
             className={cn(
               "flex-1 text-white disabled:opacity-50",
-              isLight ? "bg-violet-600 hover:bg-violet-700" : "bg-blue-600 hover:bg-blue-700",
+              isLight ? "bg-primary hover:bg-primary/90" : "bg-blue-600 hover:bg-blue-700",
             )}
           >
             {isApplying ? (

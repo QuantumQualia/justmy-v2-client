@@ -37,7 +37,7 @@ export default function ForgotPasswordForm() {
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
-        <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
+        <div className="mx-auto h-12 w-12 bg-primary rounded-full flex items-center justify-center mb-4">
           <KeyRound className="h-6 w-6 text-white" />
         </div>
         <CardTitle className="text-2xl font-bold">Forgot Password</CardTitle>
@@ -48,7 +48,7 @@ export default function ForgotPasswordForm() {
       <CardContent>
         {submitted ? (
           <div className="space-y-4 text-center">
-            <div className="mx-auto h-12 w-12 bg-emerald-600/20 rounded-full flex items-center justify-center">
+            <div className="mx-auto h-12 w-12 bg-success/15 rounded-full flex items-center justify-center">
               <CheckCircle2 className="h-6 w-6 text-emerald-500" />
             </div>
             <p className="text-muted-foreground text-sm">
@@ -57,7 +57,7 @@ export default function ForgotPasswordForm() {
             </p>
             <Link
               href="/login"
-              className="inline-flex items-center gap-2 text-sm text-emerald-500 hover:text-emerald-400 font-medium"
+              className="inline-flex items-center gap-2 text-sm text-primary hover:text-primary/80 font-medium"
             >
               <ArrowLeft className="h-4 w-4" />
               Back to Sign In
@@ -66,7 +66,7 @@ export default function ForgotPasswordForm() {
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/40 text-destructive text-sm">
                 {error}
               </div>
             )}
@@ -83,7 +83,7 @@ export default function ForgotPasswordForm() {
 
             <Button
               type="submit"
-              className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg"
+              className="cursor-pointer w-full mt-4 h-12 text-lg"
               disabled={loading}
             >
               {loading ? "Sending..." : "Send Reset Link"}
@@ -92,7 +92,7 @@ export default function ForgotPasswordForm() {
             <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
               <Link
                 href="/login"
-                className="inline-flex items-center gap-2 text-emerald-500 hover:text-emerald-400 font-medium"
+                className="inline-flex items-center gap-2 text-primary hover:text-primary/80 font-medium"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back to Sign In

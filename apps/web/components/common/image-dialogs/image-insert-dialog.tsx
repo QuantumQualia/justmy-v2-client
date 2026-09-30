@@ -222,7 +222,7 @@ export function ImageInsertDialog({
         className={cn(
           "gap-0 overflow-hidden p-0 sm:max-w-lg",
           isLight
-            ? "border-slate-200 bg-white text-slate-900"
+            ? "border-border bg-card text-foreground"
             : "border-border bg-background text-foreground",
           panel === "unsplash" && "w-[calc(100vw-1rem)] sm:max-w-4xl",
         )}
@@ -233,7 +233,7 @@ export function ImageInsertDialog({
           className={cn(
             "absolute right-3 top-3 z-10 rounded-full p-1.5 transition-colors",
             isLight
-              ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              ? "text-muted-foreground hover:bg-muted hover:text-foreground"
               : "text-muted-foreground hover:bg-muted hover:text-foreground",
           )}
           aria-label="Close"
@@ -243,13 +243,13 @@ export function ImageInsertDialog({
 
         {panel === "sources" ? (
           <>
-            <DialogHeader className={cn("px-5 py-4 pr-12 text-left", isLight ? "border-b border-slate-200" : "border-b border-border")}>
-              <DialogTitle className={cn("text-lg font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{title}</DialogTitle>
+            <DialogHeader className={cn("px-5 py-4 pr-12 text-left", isLight ? "border-b border-border" : "border-b border-border")}>
+              <DialogTitle className={cn("text-lg font-semibold", isLight ? "text-foreground" : "text-foreground")}>{title}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-3 p-5 sm:grid-cols-2">
               {sources.map((src) => {
                 const sourceCardClass = isLight
-                  ? "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-4 py-6 text-center transition-colors hover:border-violet-300 hover:bg-violet-50"
+                  ? "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-border bg-muted px-4 py-6 text-center transition-colors hover:border-primary/40 hover:bg-secondary"
                   : "flex w-full flex-col gap-1 cursor-pointer rounded-xl border border-border bg-muted/50 px-4 py-6 text-center transition-colors hover:border-blue-500/50 hover:bg-muted";
 
                 if (src.id === "local") {
@@ -260,9 +260,9 @@ export function ImageInsertDialog({
                       onClick={handleLocalClick}
                       className={sourceCardClass}
                     >
-                      <span className={cn("font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{src.label}</span>
+                      <span className={cn("font-semibold", isLight ? "text-foreground" : "text-foreground")}>{src.label}</span>
                       {src.description ? (
-                        <span className={cn("text-xs font-normal", isLight ? "text-slate-500" : "text-muted-foreground")}>{src.description}</span>
+                        <span className={cn("text-xs font-normal", isLight ? "text-muted-foreground" : "text-muted-foreground")}>{src.description}</span>
                       ) : null}
                     </button>
                   );
@@ -281,9 +281,9 @@ export function ImageInsertDialog({
                       }}
                       className={sourceCardClass}
                     >
-                      <span className={cn("font-semibold", isLight ? "text-slate-900" : "text-foreground")}>{src.label}</span>
+                      <span className={cn("font-semibold", isLight ? "text-foreground" : "text-foreground")}>{src.label}</span>
                       {src.description ? (
-                        <span className={cn("text-xs font-normal", isLight ? "text-slate-500" : "text-muted-foreground")}>{src.description}</span>
+                        <span className={cn("text-xs font-normal", isLight ? "text-muted-foreground" : "text-muted-foreground")}>{src.description}</span>
                       ) : null}
                     </button>
                   );
@@ -311,7 +311,7 @@ export function ImageInsertDialog({
           </>
         ) : (
           <div className="flex max-h-[min(88vh,640px)] min-h-[420px] flex-col sm:flex-row">
-            <aside className={cn("flex shrink-0 flex-row gap-2 p-3 sm:w-40 sm:flex-col sm:border-b-0 sm:border-r", isLight ? "border-b border-slate-200 sm:border-slate-200" : "border-b border-border")}>
+            <aside className={cn("flex shrink-0 flex-row gap-2 p-3 sm:w-40 sm:flex-col sm:border-b-0 sm:border-r", isLight ? "border-b border-border sm:border-border" : "border-b border-border")}>
               <Button
                 type="button"
                 variant="ghost"
@@ -319,7 +319,7 @@ export function ImageInsertDialog({
                 className={cn(
                   "justify-start sm:w-full",
                   isLight
-                    ? "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                    ? "text-muted-foreground hover:bg-muted hover:text-foreground"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 onClick={() => setPanel("sources")}
@@ -335,7 +335,7 @@ export function ImageInsertDialog({
                   className={cn(
                     "hidden sm:flex sm:w-full",
                     isLight
-                      ? "border border-violet-200 bg-violet-600 text-white hover:bg-violet-700"
+                      ? "border border-primary/30 bg-primary text-primary-foreground hover:bg-primary/90"
                       : "border border-blue-500/40 bg-blue-600/90 text-white hover:bg-blue-600",
                   )}
                 >
@@ -344,9 +344,9 @@ export function ImageInsertDialog({
               ))}
             </aside>
             <div className="flex min-w-0 flex-1 flex-col p-4">
-              <h2 className={cn("mb-3 text-base font-semibold", isLight ? "text-slate-900" : "text-foreground")}>Image library</h2>
+              <h2 className={cn("mb-3 text-base font-semibold", isLight ? "text-foreground" : "text-foreground")}>Image library</h2>
               <div className="relative mb-3">
-                <Search className={cn("pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2", isLight ? "text-slate-400" : "text-muted-foreground")} />
+                <Search className={cn("pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2", isLight ? "text-muted-foreground" : "text-muted-foreground")} />
                 <Input
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
@@ -354,7 +354,7 @@ export function ImageInsertDialog({
                   className={cn(
                     "pl-9 pr-9",
                     isLight
-                      ? "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-violet-400"
+                      ? "border-border bg-card text-foreground placeholder:text-muted-foreground focus-visible:border-violet-400"
                       : "border-input bg-background text-foreground placeholder:text-muted-foreground",
                   )}
                 />
@@ -364,7 +364,7 @@ export function ImageInsertDialog({
                     className={cn(
                       "absolute right-2 top-1/2 -translate-y-1/2 rounded p-1",
                       isLight
-                        ? "text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                        ? "text-muted-foreground hover:bg-muted hover:text-foreground"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                     onClick={() => setSearchInput("")}

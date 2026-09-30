@@ -94,7 +94,7 @@ function NewsLanding() {
         <header className="relative z-10 border-b border-border backdrop-blur-sm">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
             <NewsHomeLink className="flex items-center gap-2 text-sm font-semibold tracking-wide text-foreground transition hover:opacity-80">
-              <span className="inline-block h-2 w-2 rounded-full bg-linear-to-r from-emerald-400 to-cyan-500" />
+              <span className="inline-block h-2 w-2 rounded-full bg-linear-to-r from-emerald-400 to-accent" />
               JustMy News
             </NewsHomeLink>
             {guest === true ? (
@@ -119,7 +119,7 @@ function NewsLanding() {
 
           <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
             Find your{" "}
-            <span className="bg-linear-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-400 to-accent bg-clip-text text-transparent">
               local market
             </span>
           </h1>

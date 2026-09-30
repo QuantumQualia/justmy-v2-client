@@ -116,12 +116,12 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
                 "p-4 rounded-xl transition-all duration-300",
                 "hover:scale-105 active:scale-95",
                 selected
-                  ? "border-emerald-500/60 bg-emerald-500/10 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-emerald-500/15"
+                  ? "border-success/60 bg-success/10 shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:bg-success/15"
                   : "border-border bg-muted/40 hover:border-border hover:bg-accent",
                 disabled && "opacity-40 cursor-not-allowed hover:scale-100",
                 category.hasFoundingPartner &&
                   !selected &&
-                  "ring-1 ring-emerald-400/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                  "ring-1 ring-success/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
               )}
               aria-label={`Select ${category.label} category`}
             >
@@ -129,9 +129,9 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
               {category.hasFoundingPartner && (
                 <Badge
                   variant="outline"
-                  className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 flex items-center justify-center border-emerald-400/50 bg-emerald-500/20"
+                  className="absolute -top-1.5 -right-1.5 h-5 w-5 p-0 flex items-center justify-center border-emerald-400/50 bg-success/20"
                 >
-                  <Sparkles className="h-3 w-3 text-emerald-400 animate-pulse" />
+                  <Sparkles className="h-3 w-3 text-success animate-pulse" />
                 </Badge>
               )}
 
@@ -170,7 +170,7 @@ export function CategoryBento({ onApply, className }: CategoryBentoProps) {
           className={cn(
             "rounded-full px-4 py-2 transition-colors",
             selectedCategories.length > 0
-              ? "border-emerald-500/60 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/25 hover:border-emerald-400/90 hover:text-emerald-200"
+              ? "border-success/60 bg-success/10 text-success hover:bg-success/25 hover:border-emerald-400/90 hover:text-success"
               : "border-border text-muted-foreground cursor-not-allowed"
           )}
         >
@@ -213,8 +213,8 @@ export function CategoryChips() {
           variant="outline"
           className={cn(
             "inline-flex items-center gap-1.5 px-2 py-1",
-            "bg-emerald-500/20 border-emerald-500/40 text-emerald-300",
-            "hover:bg-emerald-500/30"
+            "bg-success/20 border-success/40 text-success",
+            "hover:bg-success/30"
           )}
         >
           <span>{getCategoryIcon(categoryId)}</span>
@@ -224,7 +224,7 @@ export function CategoryChips() {
             variant="ghost"
             size="icon"
             onClick={() => removeCategory(categoryId)}
-            className="h-4 w-4 p-0 ml-0.5 -mr-1 hover:bg-emerald-500/30 rounded-full text-emerald-300"
+            className="h-4 w-4 p-0 ml-0.5 -mr-1 hover:bg-success/30 rounded-full text-success"
             aria-label={`Remove ${getCategoryLabel(categoryId)} category`}
           >
             <X className="h-3 w-3" />

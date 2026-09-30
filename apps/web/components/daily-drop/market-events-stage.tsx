@@ -113,7 +113,7 @@ function EventPosterCard({ event }: { event: MarketEvent }) {
               href={event.eventUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center rounded-full bg-emerald-500/90 hover:bg-emerald-500 text-black text-xs font-semibold py-2 px-4 transition shrink-0"
+              className="inline-flex items-center justify-center rounded-full bg-success/90 hover:bg-success text-black text-xs font-semibold py-2 px-4 transition shrink-0"
             >
               Tickets
             </a>

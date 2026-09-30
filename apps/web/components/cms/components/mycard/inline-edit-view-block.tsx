@@ -58,7 +58,7 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
               </div>
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-slate-200 leading-relaxed">
+              <p className="text-sm text-foreground leading-relaxed">
                 <span className="font-semibold text-blue-400">Tip:</span> Click on any section with a red numbered badge to start editing. Your changes are automatically saved as you work.
               </p>
             </div>
@@ -97,7 +97,7 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
         <div className="flex items-center justify-center gap-3 py-4 px-4">
           <Button
             variant="outline"
-            className={`bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer ${viewMode === "live" ? "max-w-xs w-full" : "flex-1 max-w-[200px]"}`}
+            className={`bg-muted/50 hover:bg-muted border-border/50 text-foreground hover:text-white cursor-pointer ${viewMode === "live" ? "max-w-xs w-full" : "flex-1 max-w-[200px]"}`}
             onClick={() => setViewMode((prev) => (prev === "edit" ? "live" : "edit"))}
           >
             {viewMode === "edit" ? (
@@ -115,7 +115,7 @@ export function InlineEditViewBlock({ block }: InlineEditViewBlockProps) {
           {viewMode === "edit" ? (
             <Button
               variant="outline"
-              className="flex-1 max-w-[200px] bg-slate-800/50 hover:bg-slate-800 border-slate-700/50 text-slate-200 hover:text-white cursor-pointer"
+              className="flex-1 max-w-[200px] bg-muted/50 hover:bg-muted border-border/50 text-foreground hover:text-white cursor-pointer"
               onClick={handleShare}
             >
               <Share2 className="h-4 w-4 mr-2" />

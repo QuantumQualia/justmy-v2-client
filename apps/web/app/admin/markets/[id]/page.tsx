@@ -255,7 +255,7 @@ export default function EditMarketPage() {
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-red-400">
+          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-destructive">
             {error}
           </div>
         )}
@@ -272,7 +272,7 @@ export default function EditMarketPage() {
               <Button
                 onClick={handleSave}
                 disabled={saving || !identityData}
-                className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                className="disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -296,7 +296,7 @@ export default function EditMarketPage() {
                     onClick={() => setActiveTab(tab.id)}
                     className={`px-4 py-2 border-b-2 transition-colors cursor-pointer ${
                       activeTab === tab.id
-                        ? "border-emerald-500 text-emerald-500 font-medium"
+                        ? "border-success text-emerald-500 font-medium"
                         : "border-transparent text-muted-foreground hover:text-accent-foreground"
                     }`}
                   >

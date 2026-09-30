@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import type { PageBlock } from "@/lib/services/cms";
@@ -32,16 +31,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
 
   return (
     <div className="space-y-4">
-      <Card className="bg-muted border-border text-foreground">
-        <CardContent className="p-4 pt-4">
-          <p className="text-sm text-muted-foreground">
-            A single quick action: either a link (URL) or an action (e.g. open chatbot). Choose label, icon name, and style.
-          </p>
-          <CardDescription className="text-xs text-muted-foreground mt-2">
-            Icon: use any Lucide icon name (e.g. HelpCircle, Droplets, User). Action ID is used when type is Action (e.g. openChatbot).
-          </CardDescription>
-        </CardContent>
-      </Card>
+      
 
       <div className="space-y-2">
         <Label className="text-muted-foreground">Label</Label>

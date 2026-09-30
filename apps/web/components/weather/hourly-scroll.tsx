@@ -81,9 +81,9 @@ export function HourlyScroll({ points, className }: HourlyScrollProps) {
                       className={cn(
                         "inline-flex items-center rounded-full px-1.5 py-0.5 text-[10px]/none font-medium",
                         isCommute
-                          ? "bg-emerald-400 text-slate-900"
+                          ? "bg-success text-foreground"
                           : isRainWall
-                            ? "bg-sky-300 text-slate-900"
+                            ? "bg-sky-300 text-foreground"
                             : "bg-muted text-foreground",
                       )}
                     >
