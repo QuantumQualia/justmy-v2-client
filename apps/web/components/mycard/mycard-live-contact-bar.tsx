@@ -70,7 +70,7 @@ export function MycardLiveContactBar({
         navigation
         freeMode
         slidesPerView="auto"
-        spaceBetween={12}
+        spaceBetween={16}
         grabCursor={overflows}
         className={`[&_.swiper-slide:last-child]:!mr-0 ${
           overflows

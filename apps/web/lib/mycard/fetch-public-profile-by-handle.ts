@@ -30,7 +30,7 @@ const fetchPublicProfileByHandleImpl = cache(
           return null;
         }
       },
-      ["public-profile-by-handle", handle],
+      ["public-profile-by-handle-v3", handle],
       {
         revalidate: 300,
         tags: [`public-profile:${handle}`],

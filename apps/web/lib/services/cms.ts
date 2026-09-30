@@ -197,7 +197,8 @@ export interface PayloadPost {
     keywords?: string;
     ogImage?: string | { url: string };
   } | null;
-  status: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
+  status: "draft" | "publish" | "archive" | "trash";
+  newsstandStatus?: "none" | "pending" | "published";
   authorId?: number;
   author?: PostAuthorProfile | null;
   channelLabel?: string | null;
@@ -239,7 +240,7 @@ export interface CreatePostDto {
     keywords?: string;
     ogImage?: string;
   };
-  status?: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
+  status?: "draft" | "publish" | "archive" | "trash";
   videoUrl?: string;
   contentTypeId?: number | null;
   details?: Record<string, unknown>;
@@ -255,7 +256,7 @@ export interface CreateSharedPostDto {
   title?: string;
   excerpt?: string;
   tags?: string[];
-  status?: "draft" | "pending" | "review" | "publish" | "archive" | "trash";
+  status?: "draft" | "publish" | "archive" | "trash";
   seo?: {
     title?: string;
     description?: string;
@@ -537,6 +538,7 @@ export const cmsService = {
     limit?: number;
     search?: string;
     status?: string;
+    newsstand?: string;
     type?: string;
     application?: string;
     contentTypeId?: number;
@@ -549,6 +551,7 @@ export const cmsService = {
       if (params?.limit) queryParams.limit = params.limit.toString();
       if (params?.search) queryParams.search = params.search;
       if (params?.status) queryParams.status = params.status;
+      if (params?.newsstand) queryParams.newsstand = params.newsstand;
       if (params?.type) queryParams.type = params.type;
       if (params?.application) queryParams.application = params.application;
       if (params?.contentTypeId) queryParams.contentTypeId = String(params.contentTypeId);
@@ -643,6 +646,27 @@ export const cmsService = {
   /**
    * Update a post
    */
+  async setNewsstand(
+    id: string,
+    action: "request" | "cancel" | "remove" | "accept" | "decline",
+  ): Promise<{ newsstandStatus: "none" | "pending" | "published" }> {
+    try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest(`/api/cms/posts/${id}/newsstand`, {
+          method: "PATCH",
+          body: JSON.stringify({ action }),
+        });
+      }
+      return await apiRequest(`cms/posts/${id}/newsstand`, {
+        method: "PATCH",
+        body: JSON.stringify({ action }),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to update newsstand status.");
+    }
+  },
+
   async updatePost(id: string, data: Partial<CreatePostDto>): Promise<PayloadPost> {
     try {
       if (typeof window !== "undefined") {

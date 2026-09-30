@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronUp,
   Globe,
-  Loader2,
   Mail,
   MapPin,
   Phone,
@@ -27,6 +26,7 @@ import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { Button } from "@workspace/ui/components/button";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Card,
   CardContent,
@@ -654,8 +654,21 @@ export function ProfileSpotlightBlock({ block }: { block: PageBlock }) {
   if (loading) {
     return (
       <section className="w-full">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+          <Skeleton className="h-6 w-56" />
+          {isSpotlight ? (
+            <>
+              <Skeleton className="aspect-video w-full justmy-corners-xl" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-24 w-full justmy-corners-xl" />
+            </>
+          ) : (
+            <div className="flex gap-4 overflow-hidden">
+              <Skeleton className="h-64 w-[260px] shrink-0 rounded-3xl" />
+              <Skeleton className="h-64 w-[260px] shrink-0 rounded-3xl" />
+              <Skeleton className="hidden h-64 w-[260px] shrink-0 rounded-3xl sm:block" />
+            </div>
+          )}
         </div>
       </section>
     );

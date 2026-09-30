@@ -4,11 +4,8 @@ import React from "react";
 import type { ProfileData } from "@/lib/store";
 import { MyCardMobileDefaultView } from "@/components/mycard/live-view-mobile-default";
 import { MyCardMobileBizView } from "@/components/mycard/live-view-mobile-biz";
-import { MyCardMobileFounderView } from "@/components/mycard/live-view-mobile-founder";
-import { MyCardMobileCommandView } from "@/components/mycard/live-view-mobile-command";
-import { MyCardMobileCityView } from "@/components/mycard/live-view-mobile-city";
-import { MyCardMobileNetworkView } from "@/components/mycard/live-view-mobile-network";
-import { DEFAULT_OS_NAME, OS_NAME } from "@/lib/os-types";
+import { MycardMobileFooter, MycardMobileSection, useMycardMobileSection } from "@/components/mycard/mycard-mobile-sections";
+import { resolveMycardLayout } from "@/lib/os-types";
 
 export interface MyCardMobileViewProps {
   data: ProfileData;
@@ -29,24 +26,23 @@ export interface MyCardMobileViewProps {
 }
 
 export function MyCardMobileView(props: MyCardMobileViewProps) {
-  const osName = (props.data.osName ?? DEFAULT_OS_NAME).trim().toUpperCase();
+  const section = useMycardMobileSection(props.data);
+  const body =
+    section !== "home" ? (
+      <MycardMobileSection data={props.data} section={section} ctaButtonClassName={props.ctaButtonClassName} />
+    ) : resolveMycardLayout(props.data.osName) === "biz" ? (
+      <MyCardMobileBizView {...props} />
+    ) : (
+      <MyCardMobileDefaultView {...props} />
+    );
 
-  switch (osName) {
-    // Future: add OS-specific mobile views here.
-    case OS_NAME.BIZ:
-       return <MyCardMobileBizView {...props} />;
-    case "FOUNDER":
-    case OS_NAME.COMMAND_PRO:
-    case OS_NAME.ENTERPRISE:
-       return <MyCardMobileFounderView {...props} />;
-    case "GROWTH":
-    case OS_NAME.COMMAND:
-       return <MyCardMobileCommandView {...props} />;
-    case OS_NAME.CITY:
-       return <MyCardMobileCityView {...props} />;
-    case OS_NAME.NETWORK:
-       return <MyCardMobileNetworkView {...props} />;
-    default:
-      return <MyCardMobileDefaultView {...props} />;
-  }
+  if (section === "asksky") return body;
+
+  return (
+    <div className="flex min-h-dvh flex-col">
+      <div className="flex-1">{body}</div>
+      <MycardMobileFooter registerHref={props.registerHref} />
+    </div>
+  );
 }
+

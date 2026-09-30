@@ -4,69 +4,38 @@ import * as React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  CreditCard,
-  HelpCircle,
   Home,
+  Info,
   LogIn,
-  MessageCircle,
   Presentation,
-  TrendingUp,
+  QrCode,
+  Sparkles,
   X,
 } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { createPortal } from "react-dom";
-import { useMycardPublicNavStore } from "@/lib/store/mycard-public-nav-store";
+import {
+  useMycardPublicNavStore,
+  type MycardSection,
+} from "@/lib/store/mycard-public-nav-store";
 import { DEFAULT_PROFILE_KIND } from "@/lib/os-types";
 
-type NavItem = {
-  label: string;
-  href: string;
-  icon: React.ReactNode;
-};
+const MENU_HINT_KEY = "justmy:mycard-menu-hint";
 
-function profileHomeHref(profileSlug: string): string {
-  const s = profileSlug.trim();
-  if (!s) return "/";
-  const seg = encodeURIComponent(s);
-  return `/${seg}`;
-}
+const SECTION_ITEMS: { id: MycardSection; label: string; icon: React.ReactNode; when?: "asksky" | "pitch" | "about" }[] = [
+  { id: "home", label: "Home", icon: <Home className="h-5 w-5 shrink-0" /> },
+  { id: "asksky", label: "AskSKY!", icon: <Sparkles className="h-5 w-5 shrink-0" />, when: "asksky" },
+  { id: "pitch", label: "Pitch", icon: <Presentation className="h-5 w-5 shrink-0" />, when: "pitch" },
+  { id: "about", label: "About", icon: <Info className="h-5 w-5 shrink-0" />, when: "about" },
+  { id: "connect", label: "Connect", icon: <QrCode className="h-5 w-5 shrink-0" /> },
+];
 
-function buildMenuItems(registerType: string, profileSlug: string): NavItem[] {
-  const t = registerType.trim() || DEFAULT_PROFILE_KIND;
-  const registerHref = `/register?type=${encodeURIComponent(t)}`;
-  const homeHref = profileHomeHref(profileSlug);
-  return [
-    {
-      label: "Home",
-      href: homeHref,
-      icon: <Home className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Pitch",
-      href: "/vision",
-      icon: <Presentation className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Connect",
-      href: "/lab/app-hub",
-      icon: <MessageCircle className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Help",
-      href: "/help",
-      icon: <HelpCircle className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Get myCARD",
-      href: registerHref,
-      icon: <CreditCard className="h-5 w-5 shrink-0" />,
-    },
-    {
-      label: "Login",
-      href: "/login",
-      icon: <LogIn className="h-5 w-5 shrink-0" />,
-    },
-  ];
+function menuItemClass(active: boolean): string {
+  return cn(
+    "flex w-full items-center gap-4 rounded-2xl rounded-br-none px-4 py-4 text-left md:py-5",
+    "bg-[#c4c4c4] text-[#333333] transition-colors hover:bg-[#d4d4d4]",
+    active && "bg-[#d4d4d4]"
+  );
 }
 
 export interface MycardPublicNavbarProps {
@@ -74,6 +43,8 @@ export interface MycardPublicNavbarProps {
   initialRegisterType?: string;
   /** From server; myCARD "Home" points to `/{slug}` */
   initialProfileSlug?: string;
+  /** Sit below the news header when that bar is on screen. */
+  belowNewsHeader?: boolean;
 }
 
 /**
@@ -83,28 +54,49 @@ export interface MycardPublicNavbarProps {
 export function MycardPublicNavbar({
   initialRegisterType = DEFAULT_PROFILE_KIND,
   initialProfileSlug = "",
+  belowNewsHeader = false,
 }: MycardPublicNavbarProps = {}) {
   const pathname = usePathname();
-  const registerTypeQuery = useMycardPublicNavStore((s) => s.registerTypeQuery);
-  const profileSlugFromStore = useMycardPublicNavStore((s) => s.profileSlug);
-  const registerType =
-    registerTypeQuery.trim() !== ""
-      ? registerTypeQuery
-      : initialRegisterType || DEFAULT_PROFILE_KIND;
-  const profileSlug =
-    profileSlugFromStore.trim() !== ""
-      ? profileSlugFromStore
-      : initialProfileSlug || "";
-  const menuItems = React.useMemo(
-    () => buildMenuItems(registerType, profileSlug),
-    [registerType, profileSlug]
+  const section = useMycardPublicNavStore((s) => s.section);
+  const nav = useMycardPublicNavStore((s) => s.nav);
+  const setSection = useMycardPublicNavStore((s) => s.setSection);
+  const sectionItems = React.useMemo(
+    () => SECTION_ITEMS.filter((item) => !item.when || nav[item.when]),
+    [nav]
   );
+  const [isNarrow, setIsNarrow] = React.useState(false);
   const [menuOpen, setMenuOpen] = React.useState(false);
+  const [showHint, setShowHint] = React.useState(false);
   const [portalTarget, setPortalTarget] = React.useState<HTMLElement | null>(null);
+  void initialRegisterType;
+  void initialProfileSlug;
+
+  React.useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 1023px)");
+    const sync = () => setIsNarrow(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   React.useEffect(() => {
     setPortalTarget(document.body);
+    try {
+      setShowHint(localStorage.getItem(MENU_HINT_KEY) !== "1");
+    } catch {
+      setShowHint(true);
+    }
   }, []);
+
+  function openMenu() {
+    setMenuOpen(true);
+    setShowHint(false);
+    try {
+      localStorage.setItem(MENU_HINT_KEY, "1");
+    } catch {
+      /* private mode */
+    }
+  }
 
   React.useEffect(() => {
     setMenuOpen(false);
@@ -128,17 +120,19 @@ export function MycardPublicNavbar({
     return () => document.removeEventListener("keydown", onKey);
   }, [menuOpen]);
 
+  if (!isNarrow) return null;
+
   return (
     <>
-      {/* Glass pill trigger — matches personalOS_myCARD_2 nav-menu sample (single control opens menu) */}
       <button
         type="button"
-        onClick={() => setMenuOpen(true)}
+        onClick={openMenu}
         aria-label="Open navigation menu"
         className={cn(
-          "fixed z-50 items-center gap-1 px-3 py-2",
-          "hidden lg:flex",
-          "top-[max(1rem,env(safe-area-inset-top))]",
+          "fixed z-50 flex items-center gap-1 px-3 py-2",
+          belowNewsHeader
+            ? "top-[max(1rem,env(safe-area-inset-top))] lg:top-[calc(var(--news-header-h,3.5rem)+0.75rem)]"
+            : "top-[max(1rem,env(safe-area-inset-top))]",
           "right-[max(1rem,env(safe-area-inset-right))]",
           "justmy-corners-lg border border-white/70 bg-card/92 shadow-lg cursor-pointer",
           "backdrop-blur-[20px]",
@@ -148,8 +142,13 @@ export function MycardPublicNavbar({
           WebkitBackdropFilter: "blur(20px)",
         }}
       >
-        <TrendingUp size={16} className="shrink-0 text-neutral-800/80" strokeWidth={2} />
-        <span className="ml-1 grid shrink-0 grid-cols-3 gap-[3px]" aria-hidden>
+        {showHint ? (
+          <span
+            aria-hidden
+            className="pointer-events-none absolute inset-0 justmy-corners-lg motion-safe:[animation:mycard-menu-hint_2s_ease-out_infinite]"
+          />
+        ) : null}
+        <span className="relative grid shrink-0 grid-cols-3 gap-[3px]" aria-hidden>
           {Array.from({ length: 9 }, (_, i) => (
             <span
               key={i}
@@ -159,7 +158,7 @@ export function MycardPublicNavbar({
         </span>
       </button>
 
-      {menuOpen && portalTarget
+      {menuOpen && portalTarget && isNarrow
         ? createPortal(
             <div
               className="fixed inset-0 z-[200] flex flex-col bg-[#2B2724]"
@@ -178,27 +177,34 @@ export function MycardPublicNavbar({
                 </button>
               </div>
 
-              <nav className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-6 pb-12 md:max-w-lg">
-                <ul className="flex flex-col gap-3 md:gap-4">
-                  {menuItems.map((item) => (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={() => setMenuOpen(false)}
-                        className={cn(
-                          "flex items-center gap-4 rounded-2xl rounded-br-none px-4 py-4 md:py-5",
-                          "bg-[#c4c4c4] text-[#333333] transition-colors hover:bg-[#d4d4d4]"
-                        )}
+              <nav className="mx-auto flex w-full max-w-md flex-col px-6 pb-12 pt-2 md:max-w-lg">
+                <ul className="flex flex-col gap-3">
+                  {sectionItems.map((item) => (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        aria-current={section === item.id ? "page" : undefined}
+                        onClick={() => {
+                          setSection(item.id);
+                          setMenuOpen(false);
+                        }}
+                        className={menuItemClass(section === item.id)}
                       >
                         <span className="text-[#333333]" aria-hidden>
                           {item.icon}
                         </span>
-                        <span className="text-base font-medium md:text-lg">
-                          {item.label}
-                        </span>
-                      </Link>
+                        <span className="text-base font-medium">{item.label}</span>
+                      </button>
                     </li>
                   ))}
+                  <li>
+                    <Link href="/login" onClick={() => setMenuOpen(false)} className={menuItemClass(false)}>
+                      <span className="text-[#333333]" aria-hidden>
+                        <LogIn className="h-5 w-5 shrink-0" />
+                      </span>
+                      <span className="text-base font-medium">Login</span>
+                    </Link>
+                  </li>
                 </ul>
               </nav>
             </div>,

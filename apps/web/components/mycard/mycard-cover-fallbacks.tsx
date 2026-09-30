@@ -54,16 +54,18 @@ export function MycardFallbackBanner({
 export function MycardProfileAvatar({
   name,
   photo,
+  fit = "cover",
 }: {
   name: string;
   photo?: string | null;
+  fit?: "cover" | "contain";
 }) {
   if (hasMycardMedia(photo)) {
     return (
       <img
         src={photo!}
         alt={name}
-        className="h-full w-full object-cover"
+        className={`block h-full w-full ${fit === "contain" ? "object-contain p-1.5" : "object-cover"}`}
       />
     );
   }
