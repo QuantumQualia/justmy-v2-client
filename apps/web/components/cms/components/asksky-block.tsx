@@ -13,14 +13,12 @@ function normalizeVariant(raw: unknown): AskSkyVariant {
 }
 
 export function AskSkyBlock({ block }: { block: PageBlock }) {
-  const profileSlug = String(block.askSkyProfileSlug ?? block.profileSlug ?? "").trim();
   const agentToken = String(block.askSkyAgentToken ?? block.agentToken ?? "").trim();
   const variant = normalizeVariant(block.askSkyVariant ?? block.variant);
-  const embedKey = block.id?.trim() || `asksky-${profileSlug || "anon"}-${agentToken.slice(0, 8)}`;
+  const embedKey = block.id?.trim() || `asksky-${agentToken.slice(0, 8)}`;
 
   return (
     <AskSkyWidget
-      profileSlug={profileSlug}
       agentToken={agentToken}
       variant={variant}
       embedKey={embedKey}

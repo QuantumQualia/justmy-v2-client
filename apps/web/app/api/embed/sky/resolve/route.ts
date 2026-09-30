@@ -9,17 +9,16 @@ export async function OPTIONS() {
 }
 
 export async function GET(request: NextRequest) {
-  const profileSlug = request.nextUrl.searchParams.get("profileSlug")?.trim() ?? "";
   const agentToken = request.nextUrl.searchParams.get("agentToken")?.trim() ?? "";
-  if (!profileSlug || !agentToken) {
+  if (!agentToken) {
     return NextResponse.json(
-      { message: "profileSlug and agentToken are required." },
+      { message: "agentToken is required." },
       { status: 400, headers: { ...EMBED_SKY_CORS_HEADERS } },
     );
   }
 
   const backendUrl = buildApiUrl("sky/resolve");
-  const search = new URLSearchParams({ profileSlug, agentToken });
+  const search = new URLSearchParams({ agentToken });
   const conversationId = request.nextUrl.searchParams.get("conversationId")?.trim() ?? "";
   const visitorToken = request.nextUrl.searchParams.get("visitorToken")?.trim() ?? "";
   if (conversationId && visitorToken) {

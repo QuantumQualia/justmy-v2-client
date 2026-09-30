@@ -31,13 +31,12 @@ function siteOrigin(): string {
   return (process.env.NEXT_PUBLIC_SITE_URL || "").replace(/\/$/, "");
 }
 
-function buildEmbedUrl(profileSlug: string, agentToken: string, variant: AskSkyVariant): string {
+function buildEmbedUrl(agentToken: string, variant: AskSkyVariant): string {
   const origin = siteOrigin();
-  if (!origin || !profileSlug.trim() || !agentToken.trim()) {
+  if (!origin || !agentToken.trim()) {
     return "";
   }
   const params = new URLSearchParams({
-    profileSlug: profileSlug.trim(),
     agentToken: agentToken.trim(),
     variant,
   });
@@ -48,33 +47,26 @@ function escapeHtmlAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
-function buildScriptSnippet(
-  origin: string,
-  profileSlug: string,
-  agentToken: string,
-  variant: AskSkyVariant,
-): string {
-  if (!origin || !profileSlug.trim() || !agentToken.trim()) {
+function buildScriptSnippet(origin: string, agentToken: string, variant: AskSkyVariant): string {
+  if (!origin || !agentToken.trim()) {
     return "";
   }
   const cacheBust =
-    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_ASKSKY_EMBED_SCRIPT_VERSION?.trim()) || "1";
+    (typeof process !== "undefined" && process.env.NEXT_PUBLIC_ASKSKY_EMBED_SCRIPT_VERSION?.trim()) || "2";
   const src = `${origin}/embed/asksky.js?v=${encodeURIComponent(cacheBust)}`;
-  
-  return `<script src="${escapeHtmlAttr(src)}" data-profile-slug="${escapeHtmlAttr(profileSlug.trim())}" data-agent-token="${escapeHtmlAttr(agentToken.trim())}" data-variant="${variant}" async ></script>`;
+
+  return `<script src="${escapeHtmlAttr(src)}" data-agent-token="${escapeHtmlAttr(agentToken.trim())}" data-variant="${variant}" async></script>`;
 }
 
 export interface AskSkyStaticEmbedDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  profileSlug: string;
   agent: AgentResponseDto | null;
 }
 
 export function AskSkyStaticEmbedDialog({
   open,
   onOpenChange,
-  profileSlug,
   agent,
 }: AskSkyStaticEmbedDialogProps) {
   const [variant, setVariant] = React.useState<AskSkyVariant>("inline");
@@ -86,18 +78,15 @@ export function AskSkyStaticEmbedDialog({
   }, [open, agent?.id]);
 
   const publicToken = React.useMemo(() => resolveAgentPublicIdentifier(agent), [agent]);
-  const slugOk = Boolean(profileSlug.trim());
   const tokenOk = Boolean(publicToken);
   const embedUrl = React.useMemo(
-    () => (slugOk && tokenOk && publicToken ? buildEmbedUrl(profileSlug, publicToken, variant) : ""),
-    [profileSlug, publicToken, slugOk, tokenOk, variant],
+    () => (tokenOk && publicToken ? buildEmbedUrl(publicToken, variant) : ""),
+    [publicToken, tokenOk, variant],
   );
   const scriptSnippet = React.useMemo(() => {
     const origin = siteOrigin();
-    return slugOk && tokenOk && publicToken
-      ? buildScriptSnippet(origin, profileSlug, publicToken, variant)
-      : "";
-  }, [profileSlug, publicToken, slugOk, tokenOk, variant]);
+    return tokenOk && publicToken ? buildScriptSnippet(origin, publicToken, variant) : "";
+  }, [publicToken, tokenOk, variant]);
 
   const copy = async (text: string, label: string) => {
     if (!text) return;
@@ -118,10 +107,9 @@ export function AskSkyStaticEmbedDialog({
             AskSKY! static embed
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">
-            Choose how AskSKY! should appear, then copy the preview URL or the script snippet. The preview URL uses{" "}
-            <span className="text-muted-foreground">profileSlug</span>, <span className="text-muted-foreground">agentToken</span>, and{" "}
-            <span className="text-muted-foreground">variant</span> as query parameters; the script embed uses the same values as{" "}
-            <span className="text-muted-foreground">data-*</span> attributes.
+            Choose how AskSKY! should appear, then copy the preview URL or the script snippet. Both use the agent
+            token and variant. The profile slug is not part of the embed, so renaming the profile does not require a
+            new snippet.
           </DialogDescription>
         </DialogHeader>
 
@@ -131,11 +119,6 @@ export function AskSkyStaticEmbedDialog({
             <span className="font-medium text-foreground">{agent?.name ?? "—"}</span>
           </div>
 
-          {!slugOk ? (
-            <p className="text-sm text-amber-800 dark:text-amber-200">
-              Your active profile has no slug. Open a profile with a slug, then try again.
-            </p>
-          ) : null}
           {!tokenOk ? (
             <p className="text-sm text-amber-800 dark:text-amber-200">
               This agent has no public token or identifier yet. Make the agent public or set a public identifier, then
@@ -151,7 +134,7 @@ export function AskSkyStaticEmbedDialog({
               <Select
                 value={variant}
                 onValueChange={(v) => setVariant(v as AskSkyVariant)}
-                disabled={!slugOk || !tokenOk}
+                disabled={!tokenOk}
               >
                 <SelectTrigger
                   id="asksky-embed-variant"

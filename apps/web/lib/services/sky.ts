@@ -34,8 +34,8 @@ async function skyHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
-function skyResolveKey(params: { profileSlug: string; agentToken: string }): string {
-  return `${params.profileSlug.trim()}\u0000${params.agentToken.trim()}`;
+function skyResolveKey(params: { agentToken: string }): string {
+  return params.agentToken.trim();
 }
 
 function skyGetConversationInflightKey(conversationId: number, visitorToken: string): string {
@@ -47,7 +47,6 @@ const skyResolveInflight = new Map<string, Promise<SkyResolveResponse>>();
 const skyResolveResult = new Map<string, SkyResolveResponse>();
 
 export async function skyResolve(params: {
-  profileSlug: string;
   agentToken: string;
   conversationId?: number | null;
   visitorToken?: string | null;
@@ -76,7 +75,6 @@ export async function skyResolve(params: {
 
   const url = buildApiUrl("sky/resolve");
   const search = new URLSearchParams({
-    profileSlug: params.profileSlug.trim(),
     agentToken: params.agentToken.trim(),
   });
   if (threadScoped) {

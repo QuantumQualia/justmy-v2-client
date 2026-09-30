@@ -1466,7 +1466,6 @@ export function ProfileAgentsPanel({
   profileName: profileNameProp,
 }: ProfileAgentsPanelProps = {}) {
   const profileNameFromStore = useProfileStore((state) => state.data.name);
-  const profileSlug = useProfileStore((state) => String(state.data.slug ?? "").trim());
   const profileName = profileNameProp ?? profileNameFromStore;
   const queryClient = useQueryClient();
 
@@ -2141,7 +2140,6 @@ export function ProfileAgentsPanel({
             setAskSkyEmbedAgent(null);
           }
         }}
-        profileSlug={profileSlug}
         agent={askSkyEmbedAgent}
       />
 
@@ -2293,9 +2291,9 @@ export function ProfileAgentsPanel({
               <CardTitle className="text-foreground">Agent management</CardTitle>
               <CardDescription className="max-w-2xl text-muted-foreground">
                 Create, edit, deactivate, or delete agents. Use <span className="text-muted-foreground">Embed</span> to build
-                a shareable AskSKY! page URL (with <span className="text-muted-foreground">profileSlug</span>,{" "}
-                <span className="text-muted-foreground">agentToken</span>, and <span className="text-muted-foreground">variant</span>
-                ) for iframes or other sites. Public identifiers are what AskSKY! needs to resolve the agent.
+                a shareable AskSKY! page URL (with <span className="text-muted-foreground">agentToken</span> and{" "}
+                <span className="text-muted-foreground">variant</span>) for iframes or other sites. The agent token is
+                what AskSKY! needs to resolve the agent.
               </CardDescription>
             </div>
             <Button

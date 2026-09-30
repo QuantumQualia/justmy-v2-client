@@ -287,7 +287,6 @@ function AskSkyTypingIndicator() {
 
 function AskSkyConversationView({
   resolve,
-  profileSlug,
   agentToken,
   embedKey,
   conversationLayout = "inline",
@@ -295,7 +294,6 @@ function AskSkyConversationView({
   embedAppOrigin,
 }: {
   resolve: SkyResolveResponse;
-  profileSlug: string;
   agentToken: string;
   embedKey: string;
   /** `"panel"` | `"embed"` = flex fill inside a fixed-height shell (chatbot panel or iframe). */
@@ -487,7 +485,6 @@ function AskSkyConversationView({
       }
       try {
         await sky.skyPostLeadCapture(cid, {
-          profileSlug,
           agentToken,
           visitorToken: vt,
           ...(args.formTitle?.trim() ? { formTitle: args.formTitle.trim() } : {}),
@@ -501,7 +498,7 @@ function AskSkyConversationView({
         setBanner(formatAskSkyUserFacingError(e));
       }
     },
-    [agentToken, profileSlug, sky],
+    [agentToken, sky],
   );
 
   const sendMessage = async (raw: string) => {
@@ -533,7 +530,6 @@ function AskSkyConversationView({
     try {
       await sky.streamSkyMessage(
         {
-          profileSlug,
           agentToken,
           message: trimmed,
           ...(conversationId != null && conversationId > 0 ? { conversationId } : {}),
@@ -698,7 +694,6 @@ function AskSkyConversationView({
     void (async () => {
       try {
         const refreshed = await sky.skyResolve({
-          profileSlug,
           agentToken,
           conversationId: cid,
           visitorToken: vt,
@@ -758,7 +753,7 @@ function AskSkyConversationView({
             {renderContactLeadCapture ? (
               renderContactLeadCapture({
                 contactForm: resolve.contactForm,
-                profileSlug,
+                profileSlug: resolve.slug,
                 agentToken,
                 visualVariant: leadVisualVariant,
                 persistLeadInConversation,
@@ -782,7 +777,6 @@ function AskSkyConversationView({
       isEmbedInline,
       leadVisualVariant,
       persistLeadInConversation,
-      profileSlug,
       renderContactLeadCapture,
       resolve.contactForm,
       visitorContactCaptured,
@@ -1054,7 +1048,6 @@ function AskSkyConversationView({
 
 function AskSkyResolvedCard({
   resolve,
-  profileSlug,
   agentToken,
   embedKey,
   embedFill,
@@ -1062,7 +1055,6 @@ function AskSkyResolvedCard({
   embedAppOrigin,
 }: {
   resolve: SkyResolveResponse;
-  profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
@@ -1083,7 +1075,6 @@ function AskSkyResolvedCard({
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AskSkyConversationView
           resolve={resolve}
-          profileSlug={profileSlug}
           agentToken={agentToken}
           embedKey={embedKey}
           conversationLayout={embedFill ? "embed" : "inline"}
@@ -1099,13 +1090,11 @@ function AskSkyResolvedCard({
 }
 
 function AskSkyChatbotPanel({
-  profileSlug,
   agentToken,
   embedKey,
   renderContactLeadCapture,
   embedAppOrigin,
 }: {
-  profileSlug: string;
   agentToken: string;
   embedKey: string;
   renderContactLeadCapture?: AskSkyRenderContactLeadCapture;
@@ -1128,7 +1117,6 @@ function AskSkyChatbotPanel({
       </div> */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <AskSkyResolveShell
-          profileSlug={profileSlug}
           agentToken={agentToken}
           embedKey={embedKey}
           embedFill
@@ -1141,14 +1129,12 @@ function AskSkyChatbotPanel({
 }
 
 function AskSkyResolveShell({
-  profileSlug,
   agentToken,
   embedKey,
   embedFill,
   renderContactLeadCapture,
   embedAppOrigin,
 }: {
-  profileSlug: string;
   agentToken: string;
   embedKey: string;
   compactHeader?: boolean;
@@ -1169,7 +1155,6 @@ function AskSkyResolveShell({
       const saved = loadPersisted(embedKey);
       try {
         const data = await sky.skyResolve({
-          profileSlug,
           agentToken,
           ...(saved
             ? {
@@ -1194,7 +1179,7 @@ function AskSkyResolveShell({
     return () => {
       cancelled = true;
     };
-  }, [profileSlug, agentToken, embedKey, sky]);
+  }, [agentToken, embedKey, sky]);
 
   if (loading) {
     return (
@@ -1227,7 +1212,6 @@ function AskSkyResolveShell({
   return (
     <AskSkyResolvedCard
       resolve={resolve}
-      profileSlug={profileSlug}
       agentToken={agentToken}
       embedKey={embedKey}
       compactHeader={false}
@@ -1258,7 +1242,6 @@ function AskSkyVoicePlaceholder() {
 }
 
 export interface AskSkyWidgetCoreProps {
-  profileSlug: string;
   agentToken: string;
   variant: AskSkyVariant;
   embedKey: string;
@@ -1278,7 +1261,6 @@ export interface AskSkyWidgetCoreProps {
 }
 
 function AskSkyWidgetInner({
-  profileSlug,
   agentToken,
   variant,
   embedKey,
@@ -1290,10 +1272,10 @@ function AskSkyWidgetInner({
   /** After first open, keep the panel mounted while closed so conversation state + `getConversation` are not re-run. */
   const [chatShellMounted, setChatShellMounted] = React.useState(false);
 
-  if (!profileSlug.trim() || !agentToken.trim()) {
+  if (!agentToken.trim()) {
     return (
       <div className="asksky-sky-banner mx-auto min-w-0 w-full max-w-2xl px-4 py-4 text-sm">
-        Configure profile slug and agent token for this AskSKY! block.
+        Configure an agent token for this AskSKY! block.
       </div>
     );
   }
@@ -1311,8 +1293,7 @@ function AskSkyWidgetInner({
             aria-hidden={!chatOpen}
           >
             <AskSkyChatbotPanel
-              key={`${profileSlug}:${agentToken}`}
-              profileSlug={profileSlug}
+              key={agentToken}
               agentToken={agentToken}
               embedKey={embedKey}
               renderContactLeadCapture={renderContactLeadCapture}
@@ -1348,7 +1329,6 @@ function AskSkyWidgetInner({
     return (
       <div className="asksky-embed-inline flex h-full min-h-0 max-h-full w-full max-w-none flex-1 flex-col gap-0 overflow-hidden py-0">
         <AskSkyResolveShell
-          profileSlug={profileSlug}
           agentToken={agentToken}
           embedKey={embedKey}
           embedFill
@@ -1362,7 +1342,6 @@ function AskSkyWidgetInner({
   return (
     <div className="asksky-sky-panel mx-auto min-w-0 w-full max-w-md gap-0 overflow-hidden py-0">
       <AskSkyResolveShell
-        profileSlug={profileSlug}
         agentToken={agentToken}
         embedKey={embedKey}
         renderContactLeadCapture={renderContactLeadCapture}

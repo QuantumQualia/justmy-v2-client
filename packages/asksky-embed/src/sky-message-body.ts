@@ -3,7 +3,6 @@ import type { SkyMessageRequest } from "./sky-types";
 /** POST /sky/messages body: omit `conversationId` / `visitorToken` on first message per API contract. */
 export function buildSkyMessageRequestBody(body: SkyMessageRequest): Record<string, string | number> {
   const out: Record<string, string | number> = {
-    profileSlug: body.profileSlug,
     agentToken: body.agentToken,
     message: body.message,
   };

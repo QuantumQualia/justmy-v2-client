@@ -16,19 +16,17 @@ function normalizeVariant(raw: string | null): AskSkyVariant {
 
 function AskSkyEmbedInner() {
   const searchParams = useSearchParams();
-  const profileSlug = searchParams.get("profileSlug")?.trim() ?? "";
   const agentToken = searchParams.get("agentToken")?.trim() ?? "";
   const variant = normalizeVariant(searchParams.get("variant"));
   const theme = parseAskSkyThemeAttr(searchParams.get("theme")) ?? "auto";
   const embedKey = React.useMemo(
-    () => `static-embed:${profileSlug || "x"}:${agentToken.slice(0, 16)}`,
-    [profileSlug, agentToken],
+    () => `static-embed:${agentToken.slice(0, 16)}`,
+    [agentToken],
   );
 
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-transparent">
       <AskSkyWidget
-        profileSlug={profileSlug}
         agentToken={agentToken}
         variant={variant}
         embedKey={embedKey}

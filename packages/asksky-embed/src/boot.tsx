@@ -38,10 +38,9 @@ function mountAskSkyFromScript(): void {
     return;
   }
   const origin = new URL(script.src).origin;
-  const profileSlug = script.dataset.profileSlug?.trim() ?? "";
   const agentToken = script.dataset.agentToken?.trim() ?? "";
   const variant = normalizeVariant(script.dataset.variant ?? "inline");
-  const embedKey = `script-embed:${profileSlug || "x"}:${agentToken.slice(0, 16)}`;
+  const embedKey = `script-embed:${agentToken.slice(0, 16)}`;
 
   const host = document.createElement("div");
   host.id = "asksky-embed-host";
@@ -105,7 +104,6 @@ function mountAskSkyFromScript(): void {
   createRoot(rootEl).render(
     <StrictMode>
       <AskSkyWidgetCore
-        profileSlug={profileSlug}
         agentToken={agentToken}
         variant={variant}
         embedKey={embedKey}

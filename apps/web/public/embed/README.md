@@ -12,7 +12,7 @@
 
 ### AskSKY!
 
-1. **Same host:** open `https://<your-site>/embed/partner-demo.html` after substituting slug and token in the HTML (or use the in-app “Script embed” snippet from AskSKY static embed).
+1. **Same host:** open `https://<your-site>/embed/partner-demo.html` after substituting the agent token in the HTML (or use the in-app “Script embed” snippet from AskSKY static embed). The embed identifies the agent by `agentToken` / `data-agent-token` only. Older snippets that still send `profileSlug` keep working; a renamed profile does not require a new snippet.
 2. **Cross-origin:** paste the script snippet on a page served from another domain; ensure CSP allows `script-src` and `connect-src` for your JustMy origin.
 3. **Variants:** set `data-variant` to `inline`, `chatbot`, or `voice` (voice shows the placeholder card).
 4. **Theme:** Sky chrome is light by default and adapts to the host page (background luminance, then `prefers-color-scheme`). Override with `data-theme="light"` or `data-theme="dark"` on the script tag (iframe: `?theme=light|dark`).

@@ -16,8 +16,8 @@ function embedApiBase(siteOrigin: string): string {
   return `${siteOrigin.replace(/\/$/, "")}/api/embed/sky`;
 }
 
-function skyResolveCacheKey(params: { profileSlug: string; agentToken: string }): string {
-  return `${params.profileSlug.trim()}\u0000${params.agentToken.trim()}`;
+function skyResolveCacheKey(params: { agentToken: string }): string {
+  return params.agentToken.trim();
 }
 
 function skyGetConversationInflightKey(conversationId: number, visitorToken: string): string {
@@ -35,7 +35,6 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
 
   return {
     async skyResolve(params: {
-      profileSlug: string;
       agentToken: string;
       conversationId?: number | null;
       visitorToken?: string | null;
@@ -63,7 +62,6 @@ export function createEmbedSkyTransport(siteOrigin: string): AskSkySkyTransport 
       }
 
       const search = new URLSearchParams({
-        profileSlug: params.profileSlug.trim(),
         agentToken: params.agentToken.trim(),
       });
       if (threadScoped) {

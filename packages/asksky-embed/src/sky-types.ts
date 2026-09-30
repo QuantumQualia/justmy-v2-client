@@ -70,7 +70,6 @@ export type SkyRetrievedDoc = {
 };
 
 export interface SkyMessageRequest {
-  profileSlug: string;
   agentToken: string;
   message: string;
   conversationId?: number | null;
@@ -126,7 +125,6 @@ export type SkySseDonePayload = {
 };
 
 export interface SkyLeadCaptureRequest {
-  profileSlug: string;
   agentToken: string;
   visitorToken: string;
   formTitle?: string;
@@ -150,7 +148,6 @@ export type SkyStreamHandlers = {
 
 export interface AskSkySkyTransport {
   skyResolve: (params: {
-    profileSlug: string;
     agentToken: string;
     /** When both set, suggestions regenerate from the thread’s prior visitor questions. */
     conversationId?: number | null;
