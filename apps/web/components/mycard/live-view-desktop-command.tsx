@@ -7,7 +7,7 @@ import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/com
 import type { ProfileData } from "@/lib/store";
 import { contentQueryKeys } from "@/lib/query/content-query-keys";
 import { contentService } from "@/lib/services/content";
-import { LegacyHtml } from "@/components/common/legacy-html";
+import { RawHtmlCssBlock } from "@/components/cms/components/raw-html-css-block";
 import { legacyPlainText } from "@/lib/legacy-html";
 
 interface MyCardDesktopDefaultViewProps {
@@ -115,7 +115,7 @@ export function MyCardDesktopCommandView({
 
             <div className="flex flex-col gap-1">
               <h2 className="text-center text-lg font-bold text-foreground font-serif">About</h2>
-              <LegacyHtml value={data.about} className="text-center text-sm text-foreground leading-relaxed" />
+              <RawHtmlCssBlock html={data.about ?? ""} />
             </div>
           </aside>
 
@@ -163,7 +163,7 @@ export function MyCardDesktopCommandView({
         <div className="pt-6">
           {activeTab === "about" && data.about ? (
             <div className="max-w-5xl space-y-4">
-              <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
+              <RawHtmlCssBlock html={data.about ?? ""} />
             </div>
           ) : null}
 

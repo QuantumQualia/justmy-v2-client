@@ -16,7 +16,7 @@ import {
   hasMycardMedia,
 } from "@/components/mycard/mycard-cover-fallbacks";
 import { cn } from "@workspace/ui/lib/utils";
-import { LegacyHtml } from "@/components/common/legacy-html";
+import { RawHtmlCssBlock } from "@/components/cms/components/raw-html-css-block";
 import type { ProfileData, SocialLink, Hotlink, SocialType } from "@/lib/store";
 import { useProfileStore } from "@/lib/store";
 import { profilesService } from "@/lib/services/profiles";
@@ -1979,10 +1979,10 @@ export default function InlineEdit({
               <>
                 {data.about ? (
                   isLight ? (
-                    <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
+                    <RawHtmlCssBlock html={data.about ?? ""} />
                   ) : (
                     <div className="p-5 bg-gradient-to-br from-card/60 via-card/40 to-card/30 rounded-xl border border-border/50 backdrop-blur-sm">
-                      <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
+                      <RawHtmlCssBlock html={data.about ?? ""} />
                     </div>
                   )
                 ) : (

@@ -5,7 +5,7 @@ import { MycardLiveContactBar } from "@/components/mycard/mycard-live-contact-ba
 import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
 import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
-import { LegacyHtml } from "@/components/common/legacy-html";
+import { RawHtmlCssBlock } from "@/components/cms/components/raw-html-css-block";
 import { legacyPlainText } from "@/lib/legacy-html";
 
 export function MyCardMobileCityView({
@@ -18,7 +18,6 @@ export function MyCardMobileCityView({
   taglineTextClass,
   aboutTitleTextClass,
   aboutCardClass,
-  aboutBodyTextClass,
   ctaButtonClassName,
   registerHref,
   footerAdUrl,
@@ -99,10 +98,10 @@ export function MyCardMobileCityView({
               <h2 className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}>About</h2>
 
               {isLightMycard ? (
-                <LegacyHtml value={data.about} className="text-sm text-foreground leading-relaxed" />
+                <RawHtmlCssBlock html={data.about ?? ""} />
               ) : (
                 <div className={aboutCardClass}>
-                  <LegacyHtml value={data.about} className={`text-sm ${aboutBodyTextClass} leading-relaxed`} />
+                  <RawHtmlCssBlock html={data.about ?? ""} />
                 </div>
               )}
             </div>
