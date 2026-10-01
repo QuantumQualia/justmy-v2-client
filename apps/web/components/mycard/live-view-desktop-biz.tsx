@@ -5,6 +5,7 @@ import { AdBanner } from "@/components/common/ad-banner";
 import { AskSkyWidget } from "@/components/asksky/asksky-widget";
 import { MycardAbout } from "@/components/mycard/mycard-about";
 import { MycardContentSections } from "@/components/mycard/mycard-content-sections";
+import { MycardRelatedCategories } from "@/components/mycard/mycard-related-categories";
 import { MycardGoogleRating } from "@/components/mycard/mycard-google-rating";
 import { MycardProfileAvatar } from "@/components/mycard/mycard-cover-fallbacks";
 import { MycardLiveContactBar } from "@/components/mycard/mycard-live-contact-bar";
@@ -126,6 +127,8 @@ export function MyCardDesktopBizView({
         ) : null}
 
         <MycardContentSections profileSlug={data.slug} layout="grid" collapsible />
+
+        <MycardRelatedCategories categories={data.relatedCategories} />
 
         {data.ad?.image ? (
           <AdBanner

@@ -4,7 +4,7 @@
  * Also provides reverse mapping from ProfileData to API DTOs
  */
 
-import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market, ProfileVideo, ProfileAskSkyAgent } from "./profile-store";
+import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market, ProfileVideo, ProfileAskSkyAgent, ProfileRelatedCategory } from "./profile-store";
 import type { ProfileKind } from "@/lib/os-types";
 import { normalizeProfileKindInput } from "@/lib/os-types";
 import type { UpdateProfileDto, SocialLinkDto, HotlinkDto, PhoneDto, LocationDto } from "../services/profiles";
@@ -190,6 +190,24 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
 
   const adImage = apiProfile.ad?.image?.trim();
 
+  const relatedRaw = (apiProfile as { relatedCategories?: unknown; categories?: unknown }).relatedCategories;
+  const categoryNames = (apiProfile as { categories?: unknown }).categories;
+  const relatedSource: Array<{ name?: string; slug?: string | null; legacyId?: number | null }> = Array.isArray(relatedRaw)
+    ? relatedRaw.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        return [item as { name?: string; slug?: string | null; legacyId?: number | null }];
+      })
+    : Array.isArray(categoryNames)
+      ? categoryNames.map((name) => ({ name: String(name ?? ""), slug: null, legacyId: null }))
+      : [];
+  const relatedCategories: ProfileRelatedCategory[] = relatedSource
+    .map((category) => ({
+      name: String(category.name || "").trim(),
+      slug: category.slug?.trim() || null,
+      legacyId: category.legacyId ?? null,
+    }))
+    .filter((category) => category.name);
+
   // Convert id from string to number if needed
   let profileId: number | undefined;
   if (apiProfile.id) {
@@ -240,6 +258,7 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
       ? { image: adImage, href: apiProfile.ad?.href ?? null, alt: apiProfile.ad?.alt ?? null }
       : null,
     agents,
+    relatedCategories,
   };
 }
 

@@ -262,6 +262,21 @@ export const profilesService = {
   /**
    * Get profile by slug (public endpoint)
    */
+  async getCategoryDirectory(key: string): Promise<{
+    category: { name: string; slug?: string | null; legacyId?: number | null };
+    profiles: Array<{ name: string; slug: string; tagline?: string | null; photo?: string | null }>;
+  } | null> {
+    try {
+      return await apiRequest(`profiles/category/${encodeURIComponent(key)}`, {
+        method: "GET",
+        skipAuth: true,
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError && error.statusCode === 404) return null;
+      throw error;
+    }
+  },
+
   async getProfileBySlug(slug: string): Promise<{ profile: any } | null> {
     try {
       return await apiRequest<{ profile: any }>(`profiles/slug/${slug}`, {

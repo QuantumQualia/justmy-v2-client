@@ -3,6 +3,7 @@
 import { AdBanner } from "@/components/common/ad-banner";
 import { MycardAbout } from "@/components/mycard/mycard-about";
 import { MycardContentSections } from "@/components/mycard/mycard-content-sections";
+import { MycardRelatedCategories } from "@/components/mycard/mycard-related-categories";
 import { MycardGoogleRating } from "@/components/mycard/mycard-google-rating";
 import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
 import { MycardVideo, profileVideo } from "@/components/mycard/mycard-video";
@@ -63,6 +64,8 @@ export function MyCardDesktopDefaultView({
         </header>
 
         <MycardContentSections profileSlug={data.slug} layout="grid" collapsible />
+
+        <MycardRelatedCategories categories={data.relatedCategories} />
 
         {data.ad?.image ? (
           <AdBanner

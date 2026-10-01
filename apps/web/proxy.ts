@@ -21,6 +21,7 @@ const publicRoutes = [
   "/try-free",
   "/p",
   "/blog",
+  "/category",
 ];
 
 /**
@@ -203,6 +204,7 @@ function isNewsHostAppPassthrough(pathname: string): boolean {
     "/p",
     "/embed",
     "/blog",
+    "/category",
   ];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }

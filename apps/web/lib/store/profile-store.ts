@@ -103,6 +103,13 @@ export interface ProfileData {
   videos?: ProfileVideo[];
   ad?: ProfileAd | null;
   agents?: ProfileAskSkyAgent[];
+  relatedCategories?: ProfileRelatedCategory[];
+}
+
+export interface ProfileRelatedCategory {
+  name: string;
+  slug?: string | null;
+  legacyId?: number | null;
 }
 
 interface ProfileStore {
