@@ -36,7 +36,7 @@ export function MyCardDesktopBizView({
   contactActions,
 }: MyCardDesktopBizViewProps) {
   const [askOpen, setAskOpen] = useState(false);
-  const agent = data.agents?.[0];
+  const agent = data.agents?.find((item) => item.agentToken?.trim());
   const pitch = profileVideo(data.videos, "PITCH");
   const brand = profileVideo(data.videos, "BRAND");
   const cardUrl = publicMycardUrl(data.slug);
@@ -78,16 +78,6 @@ export function MyCardDesktopBizView({
     </div>
   );
 
-  const askPanel =
-    askOpen && agent ? (
-      <AskSkyWidget
-        profileSlug={data.slug}
-        agentToken={agent.agentToken}
-        variant="inline"
-        embedKey={`mycard-${data.slug}-${agent.id}`}
-      />
-    ) : null;
-
   return (
     <div className={`${outerTextClass} mt-6 w-full`}>
       <div className="mx-auto w-full max-w-[1180px] space-y-8 px-4 pb-10 md:px-6">
@@ -112,11 +102,22 @@ export function MyCardDesktopBizView({
               />
               {actions}
             </aside>
-            <section className="flex h-full min-h-0 min-w-0 flex-col border-r border-border bg-black">
-              <div className="min-h-0 flex-1">
-                <MycardVideo url={pitch.videoUrl} title={pitch.title || "Pitch"} fill dark bare />
-              </div>
-              {askPanel}
+            <section className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden border-r border-border bg-black">
+              {askOpen && agent ? (
+                <div className="mycard-header-asksky flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-card">
+                  <AskSkyWidget
+                    profileSlug={data.slug}
+                    agentToken={agent.agentToken}
+                    variant="inline"
+                    embedFill
+                    embedKey={`mycard-${data.slug}-${agent.id}`}
+                  />
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1">
+                  <MycardVideo url={pitch.videoUrl} title={pitch.title || "Pitch"} fill dark bare />
+                </div>
+              )}
             </section>
             <aside className="flex min-w-0 items-center bg-muted p-8">
               <p className="text-2xl font-semibold leading-snug text-foreground">“{tagline}”</p>

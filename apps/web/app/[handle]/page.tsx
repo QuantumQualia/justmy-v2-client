@@ -7,7 +7,6 @@ import MyCardPageClient from "./page-client";
 import { PayloadPageRenderer } from "@/components/cms/payload-page-renderer";
 import { cmsService, ApiClientError } from "@/lib/services/cms";
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle";
-import { buildLocalBusinessJsonLd } from "@/lib/biz-os/json-ld";
 import { legacyPlainText } from "@/lib/legacy-html";
 
 interface MyCardPageProps {
@@ -214,16 +213,7 @@ export default async function MyCardPage({ params }: MyCardPageProps) {
   const profileData = await fetchPublicProfileByHandle(handle);
   
   if (profileData) {
-    const jsonLd = buildLocalBusinessJsonLd(profileData);
-    return (
-      <>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
-        <MyCardPageClient params={resolvedParams} initialData={profileData} />
-      </>
-    );
+    return <MyCardPageClient params={resolvedParams} initialData={profileData} />;
   }
 
   // Profile doesn't exist, check page (using cached function to avoid duplicate calls)

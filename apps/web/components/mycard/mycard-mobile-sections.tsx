@@ -191,7 +191,7 @@ function ConnectSection({ data }: { data: ProfileData }) {
           <p className="mt-1 text-sm text-muted-foreground">Send the card by message or social.</p>
         </div>
         {data.banner || data.photo ? (
-          <img src={data.banner || data.photo} alt="" className="justmy-corners-xl aspect-[16/7] w-full object-cover" />
+          <img src={data.banner || data.photo} alt="" className="justmy-corners-sm aspect-[16/7] w-full object-cover" />
         ) : null}
         <div className="flex flex-wrap items-center justify-center gap-3">
           <ShareIcon href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} label="Facebook" className="bg-[#1877F2]">

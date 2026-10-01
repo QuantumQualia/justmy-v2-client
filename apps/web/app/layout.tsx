@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import type { Metadata, Viewport } from "next"
 import { cookies, headers } from "next/headers"
 
+import { buildLocalBusinessJsonLd } from "@/lib/biz-os/json-ld"
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle"
 import { firstPathSegment, isLikelyHandlePath } from "@/lib/mycard/handle-route"
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile"
@@ -131,6 +132,7 @@ export default async function RootLayout({
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
   let initialMycardProfileSlug = ""
+  let mycardJsonLd: string | null = null
   if (!embedPath && isLikelyHandlePath(pathname)) {
     const handle = firstPathSegment(pathname)
     if (handle) {
@@ -141,6 +143,7 @@ export default async function RootLayout({
           registerTypeFromProfile(profile)
         )
         initialMycardProfileSlug = profile.slug || handle
+        mycardJsonLd = JSON.stringify(buildLocalBusinessJsonLd(profile)).replace(/</g, "\\u003c")
       }
     }
   }
@@ -166,6 +169,9 @@ export default async function RootLayout({
           isTryFreePage && "overflow-hidden",
         )}
       >
+        {mycardJsonLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: mycardJsonLd }} />
+        ) : null}
         <Providers>
           <NewsHostProvider value={newsHost}>
           <NewsMarketSiteProvider value={marketSiteHeader}>

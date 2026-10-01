@@ -38,7 +38,7 @@ export function AdBanner({
   className,
 }: AdBannerProps) {
   const imageArea = (
-    <div className="justmy-corners-xl relative aspect-[6/1] w-full overflow-hidden">
+    <div className="justmy-corners-sm relative aspect-[6/1] w-full overflow-hidden lg:justmy-corners-xl">
       {imageElement ?? (
         <Image
           src={imageSrc}
@@ -53,7 +53,7 @@ export function AdBanner({
   const wrappedImage = bannerLink ? (
     <Link
       href={bannerLink}
-      className="justmy-corners-xl block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+      className="justmy-corners-sm block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:justmy-corners-xl"
       aria-label={imageAlt || "Open banner link"}
     >
       {imageArea}

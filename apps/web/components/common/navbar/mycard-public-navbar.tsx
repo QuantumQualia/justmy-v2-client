@@ -134,7 +134,7 @@ export function MycardPublicNavbar({
             ? "top-[max(1rem,env(safe-area-inset-top))] lg:top-[calc(var(--news-header-h,3.5rem)+0.75rem)]"
             : "top-[max(1rem,env(safe-area-inset-top))]",
           "right-[max(1rem,env(safe-area-inset-right))]",
-          "justmy-corners-lg border border-white/70 bg-card/92 shadow-lg cursor-pointer",
+          "justmy-corners-sm border border-white/70 bg-card/92 shadow-lg cursor-pointer",
           "backdrop-blur-[20px]",
           "transition-colors hover:bg-card active:scale-[0.98]"
         )}
@@ -145,7 +145,7 @@ export function MycardPublicNavbar({
         {showHint ? (
           <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 justmy-corners-lg motion-safe:[animation:mycard-menu-hint_2s_ease-out_infinite]"
+            className="pointer-events-none absolute inset-0 justmy-corners-sm motion-safe:[animation:mycard-menu-hint_2s_ease-out_infinite]"
           />
         ) : null}
         <span className="relative grid shrink-0 grid-cols-3 gap-[3px]" aria-hidden>

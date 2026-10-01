@@ -244,17 +244,28 @@
   }
 }
 
+@utility justmy-corners-sm {
+  border-radius: 12px 12px 0px 12px;
+}
+@utility justmy-corners {
+  border-radius: 16px 16px 0px 16px;
+}
+@utility justmy-corners-lg {
+  border-radius: 20px 20px 0px 20px;
+}
+@utility justmy-corners-xl {
+  border-radius: 24px 24px 0px 24px;
+}
+
+/* Pitch-column AskSKY fills the header cell. The panel chrome stays square. */
+.mycard-header-asksky .asksky-embed-inline,
+.mycard-header-asksky .asksky-sky-panel {
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+}
+
 @layer utilities {
-  /* Sample JustMy proprietary corner geometry */
-  .justmy-corners {
-    border-radius: 16px 16px 0px 16px;
-  }
-  .justmy-corners-lg {
-    border-radius: 20px 20px 0px 20px;
-  }
-  .justmy-corners-xl {
-    border-radius: 24px 24px 0px 24px;
-  }
 
   .bg-brand-gradient {
     background-image: linear-gradient(to right, var(--primary), var(--cta-accent));

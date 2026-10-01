@@ -24,10 +24,10 @@ export function SkyAvatar({ className, size = 32, title = "Sky" }: SkyAvatarProp
     >
       <title>{title}</title>
       <defs>
-        <linearGradient id={gradientId} x1="12" y1="8" x2="56" y2="58" gradientUnits="userSpaceOnUse">
-          <stop stopColor="var(--primary)" />
-          <stop offset="0.55" stopColor="var(--primary)" />
-          <stop offset="1" stopColor="var(--accent)" />
+        <linearGradient id={gradientId} x1="8" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#a855f7" />
+          <stop offset="0.48" stopColor="#6366f1" />
+          <stop offset="1" stopColor="#38bdf8" />
         </linearGradient>
         <radialGradient id={glowId} cx="32" cy="22" r="28" gradientUnits="userSpaceOnUse">
           <stop stopColor="#fff" stopOpacity="0.35" />
