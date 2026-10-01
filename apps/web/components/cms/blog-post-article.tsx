@@ -235,11 +235,6 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
             </Button>
           </div>
         </div>
-        {tagline ? (
-          <p className="text-right text-sm leading-snug text-muted-foreground">
-            {tagline}
-          </p>
-        ) : null}
 
         {excerpt ? (
           <p className="text-base leading-relaxed text-foreground">{excerpt}</p>
