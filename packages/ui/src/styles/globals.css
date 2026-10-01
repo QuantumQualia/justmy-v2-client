@@ -257,6 +257,30 @@
   border-radius: 24px 24px 0px 24px;
 }
 
+/* Article HTML. Tailwind's base `a` rule sets color and underline to inherit. */
+.raw-html-root p,
+.prose p {
+  margin-bottom: 0.75rem;
+}
+.raw-html-root p:last-child,
+.prose p:last-child {
+  margin-bottom: 0;
+}
+.raw-html-root a:not([class]),
+.prose a {
+  color: var(--primary);
+  text-decoration-line: underline;
+  text-underline-offset: 2px;
+}
+.raw-html-root a:not([class]):hover,
+.prose a:hover {
+  color: color-mix(in oklch, var(--primary) 80%, var(--foreground));
+}
+.raw-html-root iframe {
+  max-width: 100%;
+  background-color: black;
+}
+
 /* Pitch-column AskSKY fills the header cell. The panel chrome stays square. */
 .mycard-header-asksky .asksky-embed-inline,
 .mycard-header-asksky .asksky-sky-panel {

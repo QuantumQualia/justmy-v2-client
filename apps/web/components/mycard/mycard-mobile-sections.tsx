@@ -100,8 +100,8 @@ function PitchSection({ data }: { data: ProfileData }) {
   const pitch = profileVideo(data.videos, "PITCH");
   if (!pitch?.videoUrl) return null;
   return (
-    <div className="mx-auto w-full max-w-xl">
-      <MycardVideo url={pitch.videoUrl} title={pitch.title || "Pitch"} natural dark />
+    <div className="mx-auto flex h-[calc(100dvh-var(--news-header-h,0px)-3.75rem)] w-full max-w-xl items-center justify-center bg-black pt-16">
+      <MycardVideo url={pitch.videoUrl} title={pitch.title || "Pitch"} contain dark bare />
     </div>
   );
 }

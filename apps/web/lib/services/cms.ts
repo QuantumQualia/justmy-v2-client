@@ -201,6 +201,8 @@ export interface PayloadPost {
   newsstandStatus?: "none" | "pending" | "published";
   authorId?: number;
   author?: PostAuthorProfile | null;
+  contentType?: { slug: string; name: string } | null;
+  details?: Record<string, string> | null;
   channelLabel?: string | null;
   publishedAt?: string | null;
   createdAt: string;

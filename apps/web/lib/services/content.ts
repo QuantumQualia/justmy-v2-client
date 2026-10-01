@@ -22,6 +22,9 @@ export interface ContentPostSummary {
   title?: string;
   slug?: string;
   excerpt?: string | null;
+  /** Direct video, or a shared link when that link is the video. */
+  videoUrl?: string | null;
+  externalUrl?: string | null;
   tags?: string[];
   status?: "draft" | "publish" | "archive";
   seo?: ContentPostSeoSummary | null;

@@ -16,7 +16,7 @@ export const revalidate = 300;
 const fetchPostBySlug = cache(async (slug: string) => {
   return unstable_cache(
     async () => cmsService.getPostBySlug(slug),
-    ["cms-post-by-slug", "author-v7", slug],
+    ["cms-post-by-slug", "author-v8", slug],
     {
       revalidate,
       tags: [`cms-post:${slug}`],

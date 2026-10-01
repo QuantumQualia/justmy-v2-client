@@ -7,6 +7,7 @@ import { FaLinkedin } from "react-icons/fa6";
 import { SiFacebook, SiInstagram, SiX, SiYoutube } from "react-icons/si";
 
 import { AdBanner } from "@/components/common/ad-banner";
+import { ReelPostHeader } from "@/components/cms/reel-post-header";
 import { BlocksRenderer } from "@/components/cms/blocks-renderer";
 import { openShare } from "@/components/common/share/share-store";
 import { legacyPlainText } from "@/lib/legacy-html";
@@ -75,6 +76,18 @@ function widenBlock(block: PageBlock): PageBlock {
   };
 }
 
+/** Share the header column. A second wrapper defaults to 1280px and sits wider than max-w-5xl. */
+function fitBlogColumn(block: PageBlock): PageBlock {
+  const widened = widenBlock(block);
+  return {
+    ...widened,
+    layout: {
+      ...widened.layout,
+      type: "full-width",
+    },
+  };
+}
+
 function socialIcon(name: string) {
   const key = name.toLowerCase();
   if (key.includes("facebook")) return <SiFacebook className="h-4 w-4" />;
@@ -132,7 +145,8 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
   const socials = (author?.socialLinks ?? []).filter((link) => link.link);
   const hotlinks = author ? uniqueHotlinks(author) : [];
   const ad = author?.ad?.image ? author.ad : null;
-  const blocks = (post.content ?? []).map(widenBlock);
+  const blocks = (post.content ?? []).map(fitBlogColumn);
+  const isReel = post.contentType?.slug?.toLowerCase() === "reel";
 
   const share = () => {
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -149,6 +163,9 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
     <article className="bg-background text-foreground">
       <div className="mx-auto w-full max-w-5xl space-y-5 px-4 py-5 sm:px-6 sm:py-8">
         <div className="space-y-2">
+          {isReel ? (
+            <ReelPostHeader post={post} description={excerpt} kicker={kicker} />
+          ) : (
           <header className="overflow-hidden justmy-corners-xl border border-border bg-card">
             {image ? (
               <div className="relative aspect-[4/3] sm:aspect-[2/1]">
@@ -177,6 +194,7 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
               </div>
             )}
           </header>
+          )}
 
           <div className="flex flex-wrap items-center justify-end gap-x-1 gap-y-1">
             {author ? (
@@ -236,7 +254,7 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
           </div>
         </div>
 
-        {excerpt ? (
+        {excerpt && !isReel ? (
           <p className="text-base leading-relaxed text-foreground">{excerpt}</p>
         ) : null}
 
@@ -259,15 +277,15 @@ export function BlogPostArticle({ post }: { post: PayloadPost }) {
             }))}
           />
         ) : null}
-      </div>
 
-      {hasBody ? (
-        <BlocksRenderer
-          blocks={blocks}
-          className="bg-background text-foreground"
-          emptyMessage="No content available for this post."
-        />
-      ) : null}
+        {hasBody ? (
+          <BlocksRenderer
+            blocks={blocks}
+            className="bg-background text-foreground"
+            emptyMessage="No content available for this post."
+          />
+        ) : null}
+      </div>
     </article>
   );
 }

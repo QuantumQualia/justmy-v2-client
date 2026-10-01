@@ -1,3 +1,5 @@
+import { safeVideoEmbedSrc } from "@/lib/utils/video";
+
 const DROP_WITH_CONTENT =
   /<(script|style|iframe|object|embed|form|noscript|textarea|select|button|input)\b[^>]*>[\s\S]*?<\/\1>/gi;
 
@@ -108,6 +110,7 @@ const RAW_DROP =
   /<(iframe|object|embed|form|noscript|textarea|select|button|input|link|meta)\b[^>]*>[\s\S]*?<\/\1>/gi;
 const RAW_DROP_VOID =
   /<(iframe|object|embed|form|noscript|link|meta|button|input|textarea|select)\b[^>]*\/?>/gi;
+
 const SCRIPT_TAG = /<script\b([^>]*)>([\s\S]*?)<\/script>|<script\b([^>]*)\/>/gi;
 const IFRAME_TAG = /<iframe\b([^>]*)>([\s\S]*?)<\/iframe>|<iframe\b([^>]*)\/?>/gi;
 
@@ -187,9 +190,11 @@ export function prepareRawHtml(value: string) {
   return { html: sanitizeRawHtml(withoutScripts), scripts, css: split.css };
 }
 
-function safeFirstPartyIframe(attrs: string) {
-  const src = attribute(attrs, "src").trim();
-  if (!src || !isFirstPartyScriptSrc(src)) return "";
+function safeContentIframe(attrs: string) {
+  const rawSrc = attribute(attrs, "src").trim();
+  const videoSrc = safeVideoEmbedSrc(rawSrc);
+  const src = videoSrc || (isFirstPartyScriptSrc(rawSrc) ? rawSrc : "");
+  if (!src) return "";
   const parts = [`src="${escapeAttr(src)}"`, `style="border:0"`];
   const width = attribute(attrs, "width").trim();
   const height = attribute(attrs, "height").trim();
@@ -199,20 +204,26 @@ function safeFirstPartyIframe(attrs: string) {
   if (title && title.length <= 200) parts.push(`title="${escapeAttr(title)}"`);
   const loading = attribute(attrs, "loading").trim().toLowerCase();
   if (loading === "lazy" || loading === "eager") parts.push(`loading="${loading}"`);
+  if (videoSrc) {
+    parts.push(
+      `allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"`,
+    );
+    parts.push(`referrerpolicy="strict-origin-when-cross-origin"`);
+  }
   return `<iframe ${parts.join(" ")}></iframe>`;
 }
 
 /**
  * Keep authored structure for the raw HTML block, including class and layout tags.
  * Inline scripts, foreign embeds, and event handlers are removed.
- * Iframes stay only when their src is justmy.com, a subdomain, or a path on this site.
+ * Iframes stay for justmy.com and for video hosts such as YouTube and Vimeo.
  */
 export function sanitizeRawHtml(value: string) {
   const iframes: string[] = [];
   let html = unwrapLegacyMarkup(value)
     .replace(SCRIPT_TAG, "")
     .replace(IFRAME_TAG, (_full, attrsA: string, _body: string, attrsB: string) => {
-      const safe = safeFirstPartyIframe(attrsA || attrsB || "");
+      const safe = safeContentIframe(attrsA || attrsB || "");
       if (!safe) return "";
       const marker = iframes.length;
       iframes.push(safe);

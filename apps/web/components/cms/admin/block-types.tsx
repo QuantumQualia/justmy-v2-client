@@ -51,7 +51,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     value: "raw-html-css-block",
     label: "Raw HTML & CSS",
     icon: <Code2 className="h-5 w-5" />,
-    description: "Paste HTML and optional CSS. It renders as written. Scope CSS under .raw-html-root. Scripts and iframes load only from https://justmy.com, a subdomain, or a path on this site. Inline scripts and other hosts are removed.",
+    description: "Paste HTML and optional CSS. It renders as written. Scope CSS under .raw-html-root. Scripts load only from https://justmy.com, a subdomain, or a path on this site. Video iframes from YouTube, Vimeo, and other video hosts are kept. Inline scripts and other hosts are removed.",
     category: "Content",
   },
   {

@@ -7,6 +7,7 @@ export function MycardVideo({
   title,
   fill = false,
   natural = false,
+  contain = false,
   dark = false,
   bare = false,
 }: {
@@ -16,18 +17,24 @@ export function MycardVideo({
   fill?: boolean;
   /** Keep the file's own aspect. Vertical pitch videos stay tall. */
   natural?: boolean;
+  /** Fit inside the parent. Mobile pitch uses this so a vertical video stays on screen. */
+  contain?: boolean;
   /** Letterbox on black. Pitch videos use this. */
   dark?: boolean;
   /** No own radius. The desktop header clips the shared corner. */
   bare?: boolean;
 }) {
   const embed = getVideoEmbedUrl(url);
-  const mediaClass = fill ? "h-full w-full object-contain" : natural ? "block h-auto w-full" : "aspect-video w-full";
+  const mediaClass = fill || contain
+    ? "max-h-full w-full object-contain"
+    : natural
+      ? "block h-auto w-full"
+      : "aspect-video w-full";
   const frameClass = [
     "overflow-hidden",
-    dark ? "bg-black" : "bg-card",
+    embed || dark ? "bg-black" : "bg-card",
     bare ? "" : "justmy-corners-xl shadow-card",
-    fill ? "flex h-full min-h-0" : "",
+    fill || contain ? "flex h-full min-h-0 w-full items-center justify-center" : "",
   ]
     .filter(Boolean)
     .join(" ");
@@ -37,7 +44,15 @@ export function MycardVideo({
         <iframe
           src={embed}
           title={title || "Video"}
-          className={fill ? "h-full w-full border-0" : natural ? "aspect-[9/16] w-full border-0" : "aspect-video w-full border-0"}
+          className={
+            fill
+              ? "h-full w-full border-0 bg-black"
+              : contain
+                ? "aspect-[9/16] h-full max-h-full w-auto max-w-full border-0 bg-black"
+                : natural
+                  ? "aspect-[9/16] w-full border-0 bg-black"
+                  : "aspect-video w-full border-0 bg-black"
+          }
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         />

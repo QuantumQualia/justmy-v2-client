@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Calendar,
   ChevronDown,
@@ -283,6 +283,60 @@ function watchOnLabel(url: string) {
   return "Watch";
 }
 
+function SpotlightContactLines({
+  icons,
+  expanded,
+  onToggle,
+  reserveToggle,
+}: {
+  icons: ReactNode[];
+  expanded: boolean;
+  onToggle: () => void;
+  reserveToggle: boolean;
+}) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [perLine, setPerLine] = useState(6);
+
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => {
+      const fit = Math.max(1, Math.floor((el.clientWidth + 8) / 40));
+      setPerLine((current) => (current === fit ? current : fit));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleTakesSlot = reserveToggle || icons.length > perLine;
+  const firstLineCount = toggleTakesSlot ? Math.max(1, perLine - 1) : icons.length;
+  const hidden = icons.slice(firstLineCount);
+  const secondLine = expanded ? hidden.slice(0, perLine) : [];
+  const showToggle = toggleTakesSlot;
+
+  return (
+    <div ref={boxRef} className="mt-2 space-y-2">
+      <div className="flex items-center gap-2">
+        {icons.slice(0, firstLineCount)}
+        {showToggle ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            className={ICON_BTN}
+            title={expanded ? "Show less" : "Show more"}
+            aria-expanded={expanded}
+          >
+            {expanded ? <ChevronUp className={ICON_SIZE} /> : <ChevronDown className={ICON_SIZE} />}
+          </button>
+        ) : null}
+      </div>
+      {secondLine.length > 0 ? <div className="flex items-center gap-2">{secondLine}</div> : null}
+    </div>
+  );
+}
+
 function SpotlightView({ profile }: { profile: PublicProfile }) {
   const video = profile.videos?.find((item) => item.videoUrl?.trim());
   const videoUrl = video?.videoUrl?.trim() || "";
@@ -315,17 +369,17 @@ function SpotlightView({ profile }: { profile: PublicProfile }) {
     <div className="w-full">
       <div className="justmy-corners-xl w-full overflow-hidden border border-border bg-card shadow-card">
         {embedUrl ? (
-          <div className="relative w-full bg-muted pt-[56.25%]">
+          <div className="relative w-full bg-black pt-[56.25%]">
             <iframe
               src={embedUrl}
               title={video?.title || profile.name || "Profile video"}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="absolute inset-0 h-full w-full border-0"
+              className="absolute inset-0 h-full w-full border-0 bg-black"
             />
           </div>
         ) : videoUrl ? (
-          <video src={videoUrl} controls className="aspect-video w-full bg-muted" />
+          <video src={videoUrl} controls className="aspect-video w-full bg-black" />
         ) : profile.banner ? (
           <img
             src={profile.banner}
@@ -353,30 +407,63 @@ function SpotlightView({ profile }: { profile: PublicProfile }) {
         ) : null}
       </div>
 
-      {adImage ? (
-        <div className="mt-4 w-full">
-          <AdBanner
-            imageSrc={adImage}
-            imageAlt={profile.ad?.alt || profile.name || "Ad"}
-            imageElement={
-              <img
-                src={adImage}
-                alt={profile.ad?.alt || ""}
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            }
-            bannerLink={profile.ad?.href || profileHref}
-            profileSlug={profile.slug}
-            hotlinks={hotlinks.map((link) => ({ label: link.label, href: link.link }))}
-          />
-        </div>
-      ) : null}
-
-      <div className="mt-4 flex items-center justify-end gap-4">
-        <div className="min-w-0 text-right">
+      <div className={adImage ? "mt-4 flex flex-col items-center gap-4 md:flex-row md:items-center" : "mt-4 flex items-center justify-end gap-4"}>
+        <div className={adImage ? "flex w-full max-w-md shrink-0 items-start gap-4 mb-5" : "flex shrink-0 items-center gap-4"}>
+        <a
+          href={profileHref}
+          className={adImage ? "block h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-card" : "order-last block h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-card"}
+          title={profile.name || profile.slug}
+        >
+          {profile.photo ? (
+            <img
+              src={profile.photo}
+              alt={profile.name || profile.slug}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+              {(profile.name || profile.slug || "?").charAt(0)}
+            </span>
+          )}
+        </a>
+        <div className={adImage ? "min-w-0 flex-1 text-left" : "min-w-0 text-right"}>
           {profile.name ? (
             <p className="text-sm font-semibold text-foreground">{profile.name}</p>
           ) : null}
+          {adImage ? (
+            <SpotlightContactLines
+              expanded={showContact}
+              onToggle={() => setShowContact((open) => !open)}
+              reserveToggle={hasContact}
+              icons={[
+                <button key="share" type="button" onClick={() => shareProfile(profile)} className={ICON_BTN} title="Share">
+                  <Share2 className={ICON_SIZE} />
+                </button>,
+                profile.email ? (
+                  <a key="email" href={`mailto:${profile.email}`} className={ICON_BTN} title="Email">
+                    <Mail className={ICON_SIZE} />
+                  </a>
+                ) : null,
+                profile.website ? (
+                  <a key="website" href={profile.website} target="_blank" rel="noreferrer" className={ICON_BTN} title="Website">
+                    <Globe className={ICON_SIZE} />
+                  </a>
+                ) : null,
+                ...socials.map((social) => (
+                  <a
+                    key={social.id || social.link}
+                    href={social.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={ICON_BTN}
+                    title={social.name || "Social"}
+                  >
+                    {spotlightSocialIcon(social.name || "")}
+                  </a>
+                )),
+              ].filter(Boolean)}
+            />
+          ) : (
           <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
             <button type="button" onClick={() => shareProfile(profile)} className={ICON_BTN} title="Share">
               <Share2 className={ICON_SIZE} />
@@ -415,6 +502,7 @@ function SpotlightView({ profile }: { profile: PublicProfile }) {
               </button>
             ) : null}
           </div>
+          )}
           {showContact && hasContact ? (
             <p className="mt-1 text-xs text-muted-foreground">
               {address ? (
@@ -431,23 +519,26 @@ function SpotlightView({ profile }: { profile: PublicProfile }) {
             </p>
           ) : null}
         </div>
-        <a
-          href={profileHref}
-          className="block h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-card"
-          title={profile.name || profile.slug}
-        >
-          {profile.photo ? (
-            <img
-              src={profile.photo}
-              alt={profile.name || profile.slug}
-              className="h-full w-full object-cover"
+        </div>
+        {adImage ? (
+          <div className="w-full min-w-0 flex-1">
+            <AdBanner
+              imageSrc={adImage}
+              imageAlt={profile.ad?.alt || profile.name || "Ad"}
+              imageElement={
+                <img
+                  src={adImage}
+                  alt={profile.ad?.alt || ""}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              }
+              bannerLink={profile.ad?.href || profileHref}
+              profileSlug={profile.slug}
+              hotlinks={hotlinks.map((link) => ({ label: link.label, href: link.link }))}
+              compact
             />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
-              {(profile.name || profile.slug || "?").charAt(0)}
-            </span>
-          )}
-        </a>
+          </div>
+        ) : null}
       </div>
 
       <SelectionPopover

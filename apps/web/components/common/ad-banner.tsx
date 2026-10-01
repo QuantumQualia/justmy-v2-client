@@ -23,6 +23,8 @@ export interface AdBannerProps {
   /** Hotlinks under the image, right-aligned */
   hotlinks: readonly AdBannerHotlink[];
   className?: string;
+  /** Keep the smaller shared corner. The default grows to the large corner on desktop. */
+  compact?: boolean;
 }
 
 /**
@@ -36,9 +38,11 @@ export function AdBanner({
   profileSlug,
   hotlinks,
   className,
+  compact = false,
 }: AdBannerProps) {
+  const corner = compact ? "justmy-corners-sm" : "justmy-corners-sm lg:justmy-corners-xl";
   const imageArea = (
-    <div className="justmy-corners-sm relative aspect-[6/1] w-full overflow-hidden lg:justmy-corners-xl">
+    <div className={cn(corner, "relative aspect-[6/1] w-full overflow-hidden")}>
       {imageElement ?? (
         <Image
           src={imageSrc}
@@ -53,7 +57,7 @@ export function AdBanner({
   const wrappedImage = bannerLink ? (
     <Link
       href={bannerLink}
-      className="justmy-corners-sm block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background lg:justmy-corners-xl"
+      className={cn(corner, "block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background")}
       aria-label={imageAlt || "Open banner link"}
     >
       {imageArea}
