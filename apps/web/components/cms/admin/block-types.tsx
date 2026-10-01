@@ -146,6 +146,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     category: "Media",
   },
   {
+    value: "hub-mini-block",
+    label: "Hub Mini",
+    icon: <Newspaper className="h-5 w-5" />,
+    description: "A short set of posts as magazine cards or a text list",
+    category: "Content",
+  },
+  {
     value: "weather-hero-block",
     label: "Weather Hero",
     icon: <Sun className="h-5 w-5" />,
@@ -283,6 +290,7 @@ export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((bloc
     "video-block",
     "lookbook-block",
     "profile-spotlight-block",
+    "hub-mini-block",
   ].includes(block.value)
 );
 
