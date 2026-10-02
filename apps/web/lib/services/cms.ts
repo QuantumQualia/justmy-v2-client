@@ -199,7 +199,8 @@ export interface PayloadPost {
   } | null;
   status: "draft" | "publish" | "archive" | "trash";
   newsstandStatus?: "none" | "pending" | "published";
-  authorId?: number;
+  authorId?: number | null;
+  userId?: number | null;
   author?: PostAuthorProfile | null;
   contentType?: { slug: string; name: string } | null;
   details?: Record<string, string> | null;

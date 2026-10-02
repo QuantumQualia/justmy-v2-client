@@ -225,6 +225,15 @@
     background-color: var(--scrollbar-thumb-hover);
   }
 
+  /*
+   * Tailwind's base rule sets headings to inherit. Raw HTML should keep the
+   * browser heading styles, and any CSS inside the block still overrides this.
+   */
+  .raw-html-root :is(h1, h2, h3, h4, h5, h6) {
+    font-size: revert-layer;
+    font-weight: revert-layer;
+  }
+
   /* AskSKY MAP tab — larger zoom controls */
   .asksky-business-map .leaflet-control-zoom a {
     width: 36px !important;
