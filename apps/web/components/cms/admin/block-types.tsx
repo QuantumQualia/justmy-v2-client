@@ -51,7 +51,7 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     value: "raw-html-css-block",
     label: "Raw HTML & CSS",
     icon: <Code2 className="h-5 w-5" />,
-    description: "Custom HTML fragment and optional CSS (trusted authors)",
+    description: "Paste HTML and optional CSS. It renders as written. Scope CSS under .raw-html-root. Scripts load only from https://justmy.com, a subdomain, or a path on this site. Video iframes from YouTube, Vimeo, and other video hosts are kept. Inline scripts and other hosts are removed.",
     category: "Content",
   },
   {
@@ -144,6 +144,13 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
     icon: <Image className="h-5 w-5" />,
     description: "Grid image lookbook with per-image metadata",
     category: "Media",
+  },
+  {
+    value: "hub-mini-block",
+    label: "Hub Mini",
+    icon: <Newspaper className="h-5 w-5" />,
+    description: "A short set of posts as magazine cards or a text list",
+    category: "Content",
   },
   {
     value: "weather-hero-block",
@@ -278,10 +285,12 @@ export const PAGE_BLOCK_TYPES: BlockTypeConfig[] = [
 export const POST_BLOCK_TYPES: BlockTypeConfig[] = PAGE_BLOCK_TYPES.filter((block) =>
   [
     "text-block",
+    "raw-html-css-block",
     "image-block",
     "video-block",
     "lookbook-block",
     "profile-spotlight-block",
+    "hub-mini-block",
   ].includes(block.value)
 );
 

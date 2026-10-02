@@ -37,13 +37,8 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import { toast } from "sonner";
 import { Button } from "@workspace/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@workspace/ui/components/card";
+import { cn } from "@workspace/ui/lib/utils";
+import { Card, CardContent } from "@workspace/ui/components/card";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/textarea";
@@ -54,7 +49,7 @@ import { cmsService } from "@/lib/services/cms";
 import type { PayloadPost } from "@/lib/services/cms";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
 import { DeployContentHubDialog } from "@/components/content/deploy-content-hub-dialog";
-import { PostEditorDialog, type PostType } from "@/components/content/post-editor-dialog";
+import { PostEditorDialog, preventDialogDismiss, type PostType } from "@/components/content/post-editor-dialog";
 import { useProfileStore } from "@/lib/store";
 import {
   contentService,
@@ -64,11 +59,8 @@ import {
   type TabPostResponseDto,
 } from "@/lib/services/content";
 
-/**
- * Buttons in this view use shadcn `Button` variants only — colors come from theme tokens
- * (`--primary`, `--destructive`, `--muted-foreground`, `--accent`, … in `packages/ui/src/styles/globals.css`).
- * Prefer `default` / `success` / `outline` / `ghost` / `destructive`; avoid raw `bg-*` / `text-*` palette classes on Button.
- */
+const hubPanelClass = "rounded-3xl border border-border bg-background";
+
 const TAB_REORDER_DEBOUNCE_MS = 2000;
 const TAB_REORDER_MAX_WAIT_MS = 5000;
 const TAB_POSTS_PAGE_SIZE = 10;
@@ -105,13 +97,13 @@ function SortablePostItem({
   };
   const status = item.post?.status ?? "draft";
   const statusColor =
-    status === "publish" ? "bg-green-500" : status === "archive" ? "bg-slate-400" : "bg-yellow-500";
+    status === "publish" ? "bg-primary" : status === "archive" ? "bg-muted-foreground" : "bg-accent";
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="group rounded-lg rounded-br-none border border-border bg-card p-3"
+      className="group rounded-2xl border border-border bg-card p-3"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2.5 min-w-0">
@@ -784,7 +776,10 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
+          onPointerDownOutside={preventDialogDismiss}
+          onInteractOutside={preventDialogDismiss}
+          onEscapeKeyDown={preventDialogDismiss}
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-background shadow-2xl shadow-black/40 p-0"
         >
           <div>
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -813,7 +808,6 @@ export function ContentHubView() {
                   value={hubFormTitle}
                   onChange={(e) => setHubFormTitle(e.target.value)}
                   placeholder="e.g. Main directory"
-                  className="rounded-lg rounded-br-none"
                   autoFocus
                 />
               </div>
@@ -826,7 +820,7 @@ export function ContentHubView() {
                   value={hubFormDescription}
                   onChange={(e) => setHubFormDescription(e.target.value)}
                   placeholder="Short description for this hub…"
-                  className="min-h-[88px] rounded-lg rounded-br-none"
+                  className="min-h-[88px]"
                 />
               </div>
             </div>
@@ -842,10 +836,9 @@ export function ContentHubView() {
               </Button>
               <Button
                 type="button"
-                variant="success"
                 onClick={() => void handleSubmitHubModal()}
                 disabled={hubModalSaving || !hubFormTitle.trim()}
-                className="rounded-lg rounded-br-none"
+                variant="primary"
               >
                 {hubModalSaving ? (
                   <>
@@ -874,7 +867,10 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
+          onPointerDownOutside={preventDialogDismiss}
+          onInteractOutside={preventDialogDismiss}
+          onEscapeKeyDown={preventDialogDismiss}
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-background shadow-2xl shadow-black/40 p-0"
         >
           <div>
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -903,7 +899,6 @@ export function ContentHubView() {
                   value={tabFormTitle}
                   onChange={(e) => setTabFormTitle(e.target.value)}
                   placeholder="e.g. Featured posts"
-                  className="rounded-lg rounded-br-none"
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && tabFormTitle.trim() && !tabModalSaving) {
@@ -926,10 +921,9 @@ export function ContentHubView() {
               </Button>
               <Button
                 type="button"
-                variant="success"
                 onClick={() => void handleSubmitTabModal()}
                 disabled={tabModalSaving || !tabFormTitle.trim()}
-                className="rounded-lg rounded-br-none"
+                variant="primary"
               >
                 {tabModalSaving ? (
                   <>
@@ -964,7 +958,10 @@ export function ContentHubView() {
       <Dialog open={typePickerOpen} onOpenChange={setTypePickerOpen}>
         <DialogContent
           showCloseButton={false}
-          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-card shadow-2xl shadow-black/40 p-0"
+          onPointerDownOutside={preventDialogDismiss}
+          onInteractOutside={preventDialogDismiss}
+          onEscapeKeyDown={preventDialogDismiss}
+          className="w-full max-w-md rounded-2xl rounded-br-none border border-input bg-background shadow-2xl shadow-black/40 p-0"
         >
           <div>
             <div className="flex items-center justify-between border-b border-border px-5 py-4">
@@ -987,9 +984,9 @@ export function ContentHubView() {
                   setTypePickerOpen(false);
                   openPostEditor("create", undefined, "standard");
                 }}
-                className="flex items-start gap-3 rounded-xl border border-input bg-muted/40 p-4 text-left transition-colors hover:border-emerald-500/50 hover:bg-emerald-500/[0.06]"
+                className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/30 hover:bg-secondary"
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-emerald-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-primary">
                   <FileText className="h-4 w-4" />
                 </span>
                 <span>
@@ -1005,9 +1002,9 @@ export function ContentHubView() {
                   setTypePickerOpen(false);
                   openPostEditor("create", undefined, "shared-from-url");
                 }}
-                className="flex items-start gap-3 rounded-xl border border-input bg-muted/40 p-4 text-left transition-colors hover:border-blue-500/50 hover:bg-blue-500/[0.06]"
+                className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-colors hover:border-primary/30 hover:bg-secondary"
               >
-                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted text-blue-400">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-muted text-primary">
                   <Link2 className="h-4 w-4" />
                 </span>
                 <span>
@@ -1032,7 +1029,10 @@ export function ContentHubView() {
       >
         <DialogContent
           showCloseButton={false}
-          className="w-[min(100%,20rem)] max-w-[20rem] gap-0 rounded-2xl rounded-br-none border border-border bg-muted p-0 shadow-2xl shadow-black/30 sm:max-w-[20rem]"
+          onPointerDownOutside={preventDialogDismiss}
+          onInteractOutside={preventDialogDismiss}
+          onEscapeKeyDown={preventDialogDismiss}
+          className="w-[min(100%,20rem)] max-w-[20rem] gap-0 rounded-2xl rounded-br-none border border-border bg-background p-0 shadow-2xl shadow-black/30 sm:max-w-[20rem]"
         >
           <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
             <DialogTitle className="text-base font-semibold tracking-tight text-foreground">
@@ -1143,22 +1143,23 @@ export function ContentHubView() {
         }
         onConfirm={handleConfirmDeletion}
       />
-      <div className="mx-auto max-w-[1400px]">
-        <Card className="overflow-hidden rounded-2xl rounded-br-none border border-border bg-card shadow-xl shadow-black/20 py-0 gap-0">
-          <CardHeader className="flex flex-col gap-4 border-b border-border/90 bg-card px-4 py-4 sm:flex-row sm:items-center sm:justify-between md:px-6">
-            <div className="space-y-1">
-              <CardTitle className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">
+      <div className="mx-auto w-full space-y-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+                Content
+              </p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
                 Content hub
-              </CardTitle>
-              <CardDescription className="text-sm text-muted-foreground">
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Manage hubs, tabs, and posts for your profile.
-              </CardDescription>
+              </p>
             </div>
             {allowsSubProfiles ? (
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="outline"
-                  className="rounded-lg rounded-br-none"
                   disabled={!selectedHub || selectedHub.isShared === true}
                   title={
                     !selectedHub
@@ -1174,13 +1175,13 @@ export function ContentHubView() {
                 </Button>
               </div>
             ) : null}
-          </CardHeader>
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12">
-            <aside className="border-b border-border/80 bg-muted lg:col-span-3 lg:border-b-0 lg:border-r lg:border-border">
-              <div className="flex flex-col gap-4 p-4 md:p-5 lg:min-h-[min(70vh,48rem)]">
-                <div className="rounded-2xl rounded-br-none border border-border bg-gradient-to-b from-muted/95 to-muted/95 p-4 shadow-inner">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
+          <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-12">
+            <aside className="lg:col-span-4">
+              <div className={cn(hubPanelClass, "flex flex-col gap-4 p-4 sm:p-5")}>
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                     Libraries
                   </p>
                   <h2 className="mt-1 text-sm font-semibold tracking-tight text-foreground">
@@ -1191,10 +1192,10 @@ export function ContentHubView() {
                   </p>
                   <Button
                     type="button"
-                    variant="success"
                     onClick={openHubModalCreate}
                     disabled={saving}
-                    className="mt-4 h-10 w-full rounded-lg rounded-br-none font-medium shadow-sm"
+                    variant="primary"
+                    className="mt-4 h-10 w-full"
                   >
                     {saving ? (
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -1205,7 +1206,7 @@ export function ContentHubView() {
                   </Button>
                 </div>
 
-                <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto rounded-xl rounded-br-none border border-border bg-muted p-2">
+                <nav className="flex min-h-0 flex-col gap-1">
                   {loading ? (
                     <div className="flex items-center justify-center gap-2 py-10 text-sm text-muted-foreground">
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -1222,9 +1223,9 @@ export function ContentHubView() {
                       return (
                         <div
                           key={hub.id}
-                          className={`group flex items-stretch gap-0.5 rounded-xl rounded-br-none border transition-colors ${active
-                            ? "border-emerald-500/40 bg-emerald-500/[0.08] ring-1 ring-emerald-500/25"
-                            : "border-transparent bg-transparent hover:bg-accent"
+                          className={`group flex items-stretch gap-0.5 rounded-2xl border transition-colors ${active
+                            ? "border-primary/30 bg-primary/10"
+                            : "border-transparent hover:bg-muted"
                             }`}
                         >
                           <button
@@ -1233,9 +1234,9 @@ export function ContentHubView() {
                             className="flex min-w-0 flex-1 items-center gap-3 rounded-l-xl rounded-br-none py-2.5 pl-3 pr-2 text-left"
                           >
                             <span
-                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg rounded-br-none border ${active
-                                ? "border-emerald-500/30 bg-emerald-500/15 text-emerald-400"
-                                : "border-input bg-muted/60 text-muted-foreground"
+                              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border ${active
+                                ? "border-primary/30 bg-background text-primary"
+                                : "border-border bg-muted text-muted-foreground"
                                 }`}
                             >
                               {active ? (
@@ -1292,45 +1293,41 @@ export function ContentHubView() {
               </div>
             </aside>
 
-            <section className="space-y-5 p-5 md:p-8 lg:col-span-9">
-              <div className="border-b border-border/80 pb-5">
-                <h1 className="text-2xl font-bold tracking-tight text-foreground md:text-3xl">
-                  {selectedHub ? selectedHub.title : "Your workspace"}
-                </h1>
-                <p className="mt-1 text-sm text-muted-foreground md:text-base">
-                  {selectedHub?.description?.trim()
-                    ? selectedHub.description
-                    : "Create tabs, add posts, and organize content by status."}
-                </p>
+            <section className="space-y-5 lg:col-span-8">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="min-w-0">
+                  <h2 className="text-xl font-semibold tracking-tight text-foreground">
+                    {selectedHub ? selectedHub.title : "Your workspace"}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {selectedHub?.description?.trim()
+                      ? selectedHub.description
+                      : "Create tabs, add posts, and organize content by status."}
+                  </p>
+                </div>
+                {selectedHub ? (
+                  <Button
+                    type="button"
+                    onClick={openTabModalCreate}
+                    disabled={saving}
+                    variant="primary"
+                  >
+                    <Plus className="mr-2 h-4 w-4" />
+                    Add tab
+                  </Button>
+                ) : null}
               </div>
 
               {!selectedHub ? (
-                <Card className="rounded-xl rounded-br-none">
-                  <CardContent className="p-6 text-sm text-muted-foreground">
-                    Select or create a content hub to begin.
-                  </CardContent>
-                </Card>
+                <div className={cn(hubPanelClass, "p-6 text-sm text-muted-foreground")}>
+                  Select or create a content hub to begin.
+                </div>
               ) : (
                 <>
-                  <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      variant="success"
-                      onClick={openTabModalCreate}
-                      disabled={saving}
-                      className="rounded-lg rounded-br-none"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Add tab
-                    </Button>
-                  </div>
-
                   {tabs.length === 0 ? (
-                    <Card className="rounded-xl rounded-br-none">
-                      <CardContent className="p-6 text-sm text-muted-foreground">
-                        No tabs in this hub yet.
-                      </CardContent>
-                    </Card>
+                    <div className={cn(hubPanelClass, "p-6 text-sm text-muted-foreground")}>
+                      No tabs in this hub yet.
+                    </div>
                   ) : (
                     <div className="space-y-4">
                       {tabs.map((tab) => {
@@ -1342,13 +1339,13 @@ export function ContentHubView() {
                         return (
                           <Card
                             key={tab.id}
-                            className="overflow-hidden rounded-xl rounded-br-none border-border bg-card py-0"
+                            className="overflow-hidden rounded-3xl border border-border bg-card py-0 shadow-sm"
                           >
                             <div
                               className={`flex items-center justify-between px-4 py-3 ${
                                 isSelected
-                                  ? "bg-success text-success-foreground"
-                                  : "bg-muted/80 text-foreground"
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-muted text-foreground"
                               }`}
                             >
                               <button
@@ -1381,8 +1378,8 @@ export function ContentHubView() {
                                   }}
                                   className={
                                     isSelected
-                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
-                                      : "h-7 w-7 p-0"
+                                      ? "h-7 w-7 p-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                                      : "h-7 w-7 p-0 text-muted-foreground"
                                   }
                                   title="Edit tab name"
                                 >
@@ -1394,8 +1391,8 @@ export function ContentHubView() {
                                   onClick={() => void handleMoveTab(tab.id, "up")}
                                   className={
                                     isSelected
-                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
-                                      : "h-7 w-7 p-0"
+                                      ? "h-7 w-7 p-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                                      : "h-7 w-7 p-0 text-muted-foreground"
                                   }
                                   title="Move up"
                                 >
@@ -1407,8 +1404,8 @@ export function ContentHubView() {
                                   onClick={() => void handleMoveTab(tab.id, "down")}
                                   className={
                                     isSelected
-                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15"
-                                      : "h-7 w-7 p-0"
+                                      ? "h-7 w-7 p-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                                      : "h-7 w-7 p-0 text-muted-foreground"
                                   }
                                   title="Move down"
                                 >
@@ -1420,8 +1417,8 @@ export function ContentHubView() {
                                   onClick={() => requestDeleteTab(tab.id)}
                                   className={
                                     isSelected
-                                      ? "h-7 w-7 p-0 hover:bg-success-foreground/15 hover:text-destructive"
-                                      : "h-7 w-7 p-0 hover:text-destructive"
+                                      ? "h-7 w-7 p-0 text-primary-foreground hover:bg-primary-foreground/15 hover:text-primary-foreground"
+                                      : "h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                                   }
                                   title="Delete tab"
                                 >
@@ -1441,13 +1438,12 @@ export function ContentHubView() {
                                         value={searchPosts}
                                         onChange={(e) => setSearchPosts(e.target.value)}
                                         placeholder="Search existing posts to add…"
-                                        className="pl-9 rounded-lg rounded-br-none"
+                                        className="pl-9"
                                       />
                                     </div>
                                     <Button
-                                      variant="success"
                                       onClick={() => setTypePickerOpen(true)}
-                                      className="rounded-lg rounded-br-none"
+                                      variant="primary"
                                     >
                                       <Plus className="h-4 w-4 mr-2" />
                                       Create Post
@@ -1467,10 +1463,10 @@ export function ContentHubView() {
                                         filteredPostOptions.map((post) => {
                                           const statusColor =
                                             post.status === "publish"
-                                              ? "bg-green-500"
+                                              ? "bg-primary"
                                               : post.status === "archive"
-                                                ? "bg-slate-400"
-                                                : "bg-yellow-500";
+                                                ? "bg-muted-foreground"
+                                                : "bg-accent";
                                           return (
                                             <div
                                               key={post.id}
@@ -1509,31 +1505,28 @@ export function ContentHubView() {
 
                                 {/* ── Status filter + search ── */}
                                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                                  <div className="flex items-center gap-2 text-xs">
+                                  <div className="flex items-center gap-1 text-xs">
                                     {(["all", "draft", "publish", "archive"] as const).map((f) => {
-                                      const colors: Record<string, string> = {
-                                        all: "text-foreground",
-                                        draft: "text-yellow-400",
-                                        publish: "text-green-400",
-                                        archive: "text-foreground",
-                                      };
                                       const labels: Record<string, string> = {
                                         all: "All",
                                         draft: "Draft",
                                         publish: "Published",
                                         archive: "Archived",
                                       };
+                                      const active = tabPostStatusFilter === f;
                                       return (
-                                        <React.Fragment key={f}>
-                                          {f !== "all" && <span className="text-muted-foreground">|</span>}
-                                          <button
-                                            type="button"
-                                            onClick={() => setTabPostStatusFilter(f)}
-                                            className={tabPostStatusFilter === f ? colors[f] : "text-muted-foreground"}
-                                          >
-                                            {labels[f]}
-                                          </button>
-                                        </React.Fragment>
+                                        <button
+                                          key={f}
+                                          type="button"
+                                          onClick={() => setTabPostStatusFilter(f)}
+                                          className={
+                                            active
+                                              ? "rounded-full bg-primary px-2.5 py-1 font-medium text-primary-foreground"
+                                              : "rounded-full px-2.5 py-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                                          }
+                                        >
+                                          {labels[f]}
+                                        </button>
                                       );
                                     })}
                                   </div>
@@ -1543,7 +1536,7 @@ export function ContentHubView() {
                                       value={tabPostsSearch}
                                       onChange={(e) => setTabPostsSearch(e.target.value)}
                                       placeholder="Search tab posts…"
-                                      className="h-8 pl-8 text-xs rounded-lg rounded-br-none"
+                                      className="h-8 pl-8 text-xs"
                                     />
                                   </div>
                                 </div>
@@ -1635,7 +1628,6 @@ export function ContentHubView() {
               )}
             </section>
           </div>
-        </Card>
       </div>
     </div>
   );

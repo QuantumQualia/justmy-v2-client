@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@workspace/ui/components/button";
+import { Input } from "@workspace/ui/components/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@workspace/ui/components/select";
 import { bizOsService } from "@/lib/services/biz-os";
 import { useBizOsFetch } from "@/components/biz-os/use-biz-os-profile";
 import {
@@ -79,7 +87,7 @@ export default function CampaignsPage() {
       <BizOsCard>
         {sov ? (
           <div>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-muted-foreground">
               Market share of AI voice {sov.clientShare}% · rank #{sov.rank}
             </p>
             <div className="mt-2">
@@ -90,35 +98,33 @@ export default function CampaignsPage() {
                 {sov.clientName}: {sov.clientShare}%
               </p>
               {sov.competitors.map((c) => (
-                <p key={c.name} className="text-slate-600">
+                <p key={c.name} className="text-muted-foreground">
                   {c.name}: {c.share}%
                 </p>
               ))}
             </div>
           </div>
         ) : (
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted-foreground">
             Add up to two competitor names, then re-run SkySCAN for share of voice.
           </p>
         )}
         {targets.length ? (
-          <ul className="mt-3 space-y-1 text-sm text-slate-600">
+          <ul className="mt-3 space-y-1 text-sm text-muted-foreground">
             {targets.map((t) => (
               <li key={t.label}>
-                <span className="font-medium text-slate-800">{t.kind}:</span> {t.label}
+                <span className="font-medium text-foreground">{t.kind}:</span> {t.label}
               </li>
             ))}
           </ul>
         ) : null}
         <div className="mt-4 grid gap-2 sm:grid-cols-2">
-          <input
-            className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
+          <Input
             placeholder="Competitor 1 name"
             value={comp1}
             onChange={(e) => setComp1(e.target.value)}
           />
-          <input
-            className="rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
+          <Input
             placeholder="Competitor 2 name"
             value={comp2}
             onChange={(e) => setComp2(e.target.value)}
@@ -128,13 +134,15 @@ export default function CampaignsPage() {
           {savingCampaign ? "Saving…" : "Save competitors"}
         </Button>
         {campaigns.length ? (
-          <label className="mt-3 block text-sm text-slate-600">
+          <label className="mt-3 block text-sm text-muted-foreground">
             Active campaign
-            <select
-              className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-base md:text-sm"
-              value={campaigns.find((c) => c.status === "active")?.id || ""}
-              onChange={(e) => {
-                const id = Number(e.target.value);
+            <Select
+              value={(() => {
+                const active = campaigns.find((c) => c.status === "active")?.id;
+                return active ? String(active) : undefined;
+              })()}
+              onValueChange={(value) => {
+                const id = Number(value);
                 const row = campaigns.find((c) => c.id === id);
                 if (!row || !profileId) return;
                 void bizOsService
@@ -155,12 +163,17 @@ export default function CampaignsPage() {
                   });
               }}
             >
-              {campaigns.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="mt-1">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {campaigns.map((c) => (
+                  <SelectItem key={c.id} value={String(c.id)}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </label>
         ) : null}
       </BizOsCard>

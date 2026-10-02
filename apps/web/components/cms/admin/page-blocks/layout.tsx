@@ -133,7 +133,7 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
               },
             });
           }}
-          className="h-6 w-6 p-0 ml-2 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+          className="h-6 w-6 p-0 ml-2 text-destructive hover:text-red-300 hover:bg-red-900/20"
           title="Delete Column"
         >
           <Trash2 className="h-3 w-3" />

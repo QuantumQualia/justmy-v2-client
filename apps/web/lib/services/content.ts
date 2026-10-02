@@ -22,6 +22,9 @@ export interface ContentPostSummary {
   title?: string;
   slug?: string;
   excerpt?: string | null;
+  /** Direct video, or a shared link when that link is the video. */
+  videoUrl?: string | null;
+  externalUrl?: string | null;
   tags?: string[];
   status?: "draft" | "publish" | "archive";
   seo?: ContentPostSeoSummary | null;
@@ -149,6 +152,24 @@ export function resolveContentNumericId(id: unknown): number | null {
     if (Number.isFinite(n)) return n;
   }
   return null;
+}
+
+export interface ContentTypeDto {
+  id: number;
+  name: string;
+  slug: string;
+  application: "CONTENT_HUB" | "INFO_HUB" | string;
+  isDynamic: boolean;
+}
+
+export interface ContentRecordDto {
+  id: number;
+  payloadPostId: number;
+  contentTypeId: number | null;
+  details: Record<string, unknown> | null;
+  contentType?: ContentTypeDto | null;
+  markets?: Array<{ marketId: number; market?: { id: number; name: string } }>;
+  channels?: Array<{ channelId: number; channel?: { id: number; name: string } }>;
 }
 
 export const contentService = {
@@ -432,6 +453,63 @@ export const contentService = {
       if (error instanceof ApiClientError) throw error;
       throw new ApiClientError("Failed to remove post from tab.");
     }
+  },
+
+  async listContentTypes(application?: string): Promise<ContentTypeDto[]> {
+    const params: Record<string, string> = {};
+    if (application) params.application = application;
+    const response = await apiRequest<{ types: ContentTypeDto[] }>("content/types", {
+      method: "GET",
+      params,
+    });
+    return response.types ?? [];
+  },
+
+  async getContentRecord(postId: number): Promise<ContentRecordDto | null> {
+    const response = await apiRequest<{ record: ContentRecordDto | null }>(
+      `content/records/post/${postId}`,
+      { method: "GET" },
+    );
+    return response.record ?? null;
+  },
+
+  async listCategories(): Promise<Array<{ id: number; name: string; description?: string | null }>> {
+    const response = await apiRequest<{ categories: Array<{ id: number; name: string; description?: string | null }> }>(
+      "content/categories",
+      { method: "GET" },
+    );
+    return response.categories ?? [];
+  },
+
+  async createCategory(input: { name: string; description?: string }) {
+    const response = await apiRequest<{ category: { id: number; name: string } }>("content/categories", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return response.category;
+  },
+
+  async listCollections(): Promise<Array<{ id: number; name: string; description?: string | null }>> {
+    const response = await apiRequest<{ collections: Array<{ id: number; name: string; description?: string | null }> }>(
+      "content/collections",
+      { method: "GET" },
+    );
+    return response.collections ?? [];
+  },
+
+  async createCollection(input: { name: string; description?: string }) {
+    const response = await apiRequest<{ collection: { id: number; name: string } }>("content/collections", {
+      method: "POST",
+      body: JSON.stringify(input),
+    });
+    return response.collection;
+  },
+
+  async listChannels(): Promise<Array<{ id: number; name: string }>> {
+    const response = await apiRequest<{ channels: Array<{ id: number; name: string }> }>("content/channels", {
+      method: "GET",
+    });
+    return response.channels ?? [];
   },
 
 };

@@ -15,6 +15,16 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@workspace/ui/components/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogTitle,
@@ -27,15 +37,23 @@ import {
   type PayloadPost,
   type PageBlock,
 } from "@/lib/services/cms";
+import { NewsstandControl } from "@/components/content/newsstand-control";
 import { uploadBase64Image } from "@/lib/api-client";
 import { TagInput } from "@/components/ui/tag-input";
 import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
 import { readFileAsDataUrl } from "@/lib/read-image-files";
 import { PageBlockEditor } from "@/components/cms/admin/page-block-editor";
+import { isPlatformAdmin, type StoredAuthUser } from "@/lib/auth/session-user";
+import { tokenStorage } from "@/lib/storage/token-storage";
 import { PostBlockSelector } from "@/components/cms/admin/post-block-selector";
 import { cn } from "@workspace/ui/lib/utils";
 
 export type PostType = "standard" | "shared-from-url";
+
+/** Content hub dialogs stay open until a close or cancel button is used. */
+export function preventDialogDismiss(event: { preventDefault: () => void }) {
+  event.preventDefault();
+}
 
 export interface PostEditorDialogProps {
   open: boolean;
@@ -55,7 +73,7 @@ interface PostFormData {
   externalUrl: string;
   excerpt: string;
   tags: string[];
-  status: "draft" | "publish" | "archive";
+  status: "draft" | "publish" | "archive" | "trash";
   seo: {
     title: string;
     description: string;
@@ -74,6 +92,10 @@ const EMPTY_FORM: PostFormData = {
   seo: { title: "", description: "", keywords: "", ogImage: "" },
 };
 
+function editorSnapshot(form: PostFormData, blocks: PageBlock[]) {
+  return JSON.stringify({ form, blocks });
+}
+
 const generateSlug = (title: string) =>
   title
     .toLowerCase()
@@ -91,13 +113,18 @@ export function PostEditorDialog({
 }: PostEditorDialogProps) {
   const [postType, setPostType] = React.useState<PostType>(initialPostType);
   const [formData, setFormData] = React.useState<PostFormData>({ ...EMPTY_FORM });
+  const [newsstandStatus, setNewsstandStatus] = React.useState<"none" | "pending" | "published">("none");
   const [content, setContent] = React.useState<PageBlock[]>([]);
   const [isSharedPost, setIsSharedPost] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [loadingPost, setLoadingPost] = React.useState(false);
+  const [savedSnapshot, setSavedSnapshot] = React.useState<string | null>(null);
+  const [confirmDiscard, setConfirmDiscard] = React.useState(false);
+  const [isSiteAdmin, setIsSiteAdmin] = React.useState(false);
   const loadedRef = React.useRef<string | null>(null);
 
   const [ogImagePreview, setOgImagePreview] = React.useState<string | null>(null);
+  const [ogLightboxOpen, setOgLightboxOpen] = React.useState(false);
   const [ogInsertOpen, setOgInsertOpen] = React.useState(false);
   const [ogImageKey, setOgImageKey] = React.useState<string | null>(null);
   const [uploadingOgImage, setUploadingOgImage] = React.useState(false);
@@ -105,16 +132,22 @@ export function PostEditorDialog({
   React.useEffect(() => {
     if (!open) {
       loadedRef.current = null;
+      setSavedSnapshot(null);
+      setConfirmDiscard(false);
       return;
     }
 
+    setIsSiteAdmin(isPlatformAdmin(tokenStorage.getUserSync<StoredAuthUser>()));
+
     if (mode === "create") {
+      const nextForm = { ...EMPTY_FORM };
       setPostType(initialPostType);
-      setFormData({ ...EMPTY_FORM });
+      setFormData(nextForm);
       setContent([]);
       setIsSharedPost(false);
       setOgImageKey(null);
       setOgImagePreview(null);
+      setSavedSnapshot(editorSnapshot(nextForm, []));
       loadedRef.current = null;
       return;
     }
@@ -122,6 +155,7 @@ export function PostEditorDialog({
     if (mode === "edit" && editPostId && loadedRef.current !== editPostId) {
       loadedRef.current = editPostId;
       setLoadingPost(true);
+      setSavedSnapshot(null);
       setOgImageKey(null);
       setOgImagePreview(null);
       cmsService
@@ -134,21 +168,28 @@ export function PostEditorDialog({
             typeof post.seo?.ogImage === "string"
               ? post.seo.ogImage
               : post.seo?.ogImage?.url || "";
-          setFormData({
+          const nextForm: PostFormData = {
             title: post.title || "",
             slug: post.slug || "",
             externalUrl: post.externalUrl || "",
             excerpt: post.excerpt ?? "",
             tags: post.tags ?? [],
-            status: post.status ?? "draft",
+            status:
+              post.status === "publish" || post.status === "archive" || post.status === "trash"
+                ? post.status
+                : "draft",
             seo: {
               title: post.seo?.title || "",
               description: post.seo?.description || "",
               keywords: post.seo?.keywords || "",
               ogImage: ogImg,
             },
-          });
-          setContent((post.content || []) as PageBlock[]);
+          };
+          const nextContent = (post.content || []) as PageBlock[];
+          setFormData(nextForm);
+          setNewsstandStatus(post.newsstandStatus ?? "none");
+          setContent(nextContent);
+          setSavedSnapshot(editorSnapshot(nextForm, nextContent));
         })
         .catch((err) => {
           console.error("Failed to load post:", err);
@@ -158,9 +199,21 @@ export function PostEditorDialog({
     }
   }, [open, mode, editPostId, initialPostType]);
 
+  const isDirty =
+    savedSnapshot !== null && editorSnapshot(formData, content) !== savedSnapshot;
+
+  const forceClose = () => {
+    setConfirmDiscard(false);
+    onOpenChange(false);
+  };
+
   const close = () => {
     if (saving) return;
-    onOpenChange(false);
+    if (isDirty) {
+      setConfirmDiscard(true);
+      return;
+    }
+    forceClose();
   };
 
   const handleSubmit = async () => {
@@ -224,9 +277,10 @@ export function PostEditorDialog({
         toast.success("Post saved");
       }
 
+      setSavedSnapshot(editorSnapshot(formData, content));
       await Promise.resolve(onSaved(savedPost));
       if (!(mode === "create" && keepOpenAfterCreate)) {
-        close();
+        forceClose();
       }
     } catch (error) {
       console.error("Failed to save post:", error);
@@ -250,7 +304,7 @@ export function PostEditorDialog({
     const defaultStyles = {
       paddingTop: "16px",
       paddingBottom: "16px",
-      maxWidth: "48rem",
+      maxWidth: "64rem",
     } as PageBlock["styles"];
 
     let newBlock: PageBlock;
@@ -385,16 +439,20 @@ export function PostEditorDialog({
     <Dialog open={open} onOpenChange={(o) => { if (!o && !saving) close(); }}>
       <DialogContent
         showCloseButton={false}
+        onPointerDownOutside={preventDialogDismiss}
+        onInteractOutside={preventDialogDismiss}
+        onEscapeKeyDown={preventDialogDismiss}
         className={cn(
-          "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl rounded-br-none border border-border bg-card p-0 shadow-2xl shadow-black/40",
+          "flex min-h-0 w-full flex-col overflow-hidden rounded-2xl rounded-br-none border border-border bg-background p-0 shadow-2xl shadow-black/40",
           isSimplifiedSharedCreate
             ? "max-h-[min(90dvh,560px)] sm:max-w-lg"
-            : "max-h-[min(92dvh,920px)] w-[calc(100vw-1rem)] sm:max-w-[min(100vw-2rem,1200px)]"
+            : "h-[min(92dvh,920px)] max-h-[min(92dvh,920px)] w-full sm:max-w-[min(100%-1rem,1200px)]"
         )}
       >
         {/* Header */}
         <div className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-3 sm:px-5 sm:py-4">
-          <DialogTitle className="min-w-0 flex-1 truncate text-left text-foreground">
+          <DialogTitle className="flex min-w-0 flex-1 items-center gap-2 truncate text-left text-foreground">
+            <span className="truncate">
             {mode === "create"
               ? postType === "shared-from-url"
                 ? "Create shared post from URL"
@@ -402,6 +460,10 @@ export function PostEditorDialog({
               : isSharedPost
                 ? "Edit shared post"
                 : "Edit post"}
+            </span>
+            {isDirty ? (
+              <span className="shrink-0 text-xs font-medium text-muted-foreground">Unsaved changes</span>
+            ) : null}
           </DialogTitle>
           <div className="flex shrink-0 items-center gap-1">
             {mode === "edit" &&
@@ -431,7 +493,7 @@ export function PostEditorDialog({
               variant="ghost"
               size="icon"
               onClick={close}
-              className="h-8 w-8 rounded-lg rounded-br-none text-muted-foreground hover:bg-accent hover:text-foreground"
+              className="h-8 w-8 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground"
               aria-label="Close"
               disabled={saving}
             >
@@ -440,19 +502,19 @@ export function PostEditorDialog({
           </div>
         </div>
 
-        {/* Scrollable body — min-h-0 lets flex children shrink so overflow-y works on mobile */}
+        {/* Body fills the dialog. Settings and the block list scroll on their own so Add Block stays put. */}
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
-          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5 sm:py-5">
+          <div className="flex min-h-0 flex-1 flex-col overflow-hidden px-4 py-4 sm:px-5 sm:py-5">
           {loadingPost ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
+              <Loader2 className="h-6 w-6 animate-spin text-primary" />
               <span className="ml-3 text-sm text-muted-foreground">Loading post…</span>
             </div>
           ) : isSimplifiedSharedCreate ? (
             <fieldset disabled={saving} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="peExternalUrl" className="text-foreground">
-                  External URL <span className="text-red-400">*</span>
+                  External URL <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="peExternalUrl"
@@ -460,7 +522,6 @@ export function PostEditorDialog({
                   value={formData.externalUrl}
                   onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
                   placeholder="https://example.com/article"
-                  className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                   autoFocus
                 />
                 <p className="text-xs text-muted-foreground">
@@ -472,11 +533,19 @@ export function PostEditorDialog({
           ) : (
             <div
               className={cn(
-                "flex flex-col gap-6",
-                isStandard && "lg:grid lg:grid-cols-12 lg:items-start lg:gap-8"
+                "flex min-h-0 min-w-0 flex-1 flex-col gap-6 overflow-hidden",
+                isStandard &&
+                  "lg:grid lg:h-full lg:w-full lg:min-h-0 lg:min-w-0 lg:grid-cols-12 lg:grid-rows-[minmax(0,1fr)] lg:items-stretch lg:gap-8"
               )}
             >
-              <div className={cn("space-y-6", isStandard && "lg:col-span-5")}>
+              <div
+                className={cn(
+                  "min-h-0 min-w-0 space-y-6 overflow-y-auto overscroll-contain",
+                  isStandard
+                    ? "max-h-[40%] shrink-0 lg:col-span-5 lg:max-h-none"
+                    : "flex-1",
+                )}
+              >
               {/* ── Post settings ── */}
               <fieldset disabled={saving} className="space-y-4">
                 <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
@@ -488,7 +557,7 @@ export function PostEditorDialog({
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="peTitle" className="text-foreground">
-                          Title <span className="text-red-400">*</span>
+                          Title <span className="text-destructive">*</span>
                         </Label>
                         <Input
                           id="peTitle"
@@ -500,7 +569,6 @@ export function PostEditorDialog({
                             }
                           }}
                           placeholder="Post title"
-                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                           autoFocus={mode === "create"}
                         />
                       </div>
@@ -521,7 +589,6 @@ export function PostEditorDialog({
                             }
                           }}
                           placeholder="my-post"
-                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                     </div>
@@ -532,7 +599,7 @@ export function PostEditorDialog({
                         value={formData.excerpt}
                         onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                         placeholder="Short excerpt…"
-                        className="min-h-[80px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
+                        className="min-h-[80px] resize-none"
                       />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -543,23 +610,23 @@ export function PostEditorDialog({
                         onChange={(tags) => setFormData({ ...formData, tags })}
                         placeholder="Add tag (Enter or comma)"
                         className="text-foreground"
-                        inputClassName="border-input bg-background"
                       />
                       <div className="space-y-2">
                         <Label className="text-foreground">Status</Label>
                         <Select
                           value={formData.status}
                           onValueChange={(v) =>
-                            setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
+                            setFormData({ ...formData, status: v as PostFormData["status"] })
                           }
                         >
-                          <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
+                          <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="draft">Draft</SelectItem>
                             <SelectItem value="publish">Publish</SelectItem>
                             <SelectItem value="archive">Archive</SelectItem>
+                            <SelectItem value="trash">Trash</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
@@ -575,13 +642,12 @@ export function PostEditorDialog({
                           value={formData.title}
                           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                           placeholder="Post title"
-                          className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         />
                       </div>
                     )}
                     <div className="space-y-2">
                       <Label htmlFor="peExternalUrl" className="text-foreground">
-                        External URL {mode === "create" && <span className="text-red-400">*</span>}
+                        External URL {mode === "create" && <span className="text-destructive">*</span>}
                       </Label>
                       <Input
                         id="peExternalUrl"
@@ -589,7 +655,6 @@ export function PostEditorDialog({
                         value={formData.externalUrl}
                         onChange={(e) => setFormData({ ...formData, externalUrl: e.target.value })}
                         placeholder="https://example.com/article"
-                        className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                         autoFocus={mode === "create"}
                         readOnly={mode === "edit"}
                       />
@@ -608,7 +673,7 @@ export function PostEditorDialog({
                             value={formData.excerpt}
                             onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                             placeholder="Short excerpt…"
-                            className="min-h-[80px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
+                            className="min-h-[80px] resize-none"
                           />
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -619,23 +684,23 @@ export function PostEditorDialog({
                             onChange={(tags) => setFormData({ ...formData, tags })}
                             placeholder="Add tag (Enter or comma)"
                             className="text-foreground"
-                            inputClassName="border-input bg-background"
                           />
                           <div className="space-y-2">
                             <Label className="text-foreground">Status</Label>
                             <Select
                               value={formData.status}
                               onValueChange={(v) =>
-                                setFormData({ ...formData, status: v as "draft" | "publish" | "archive" })
+                                setFormData({ ...formData, status: v as PostFormData["status"] })
                               }
                             >
-                              <SelectTrigger className="rounded-lg rounded-br-none border-input bg-background text-foreground">
+                              <SelectTrigger>
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectItem value="draft">Draft</SelectItem>
                                 <SelectItem value="publish">Publish</SelectItem>
                                 <SelectItem value="archive">Archive</SelectItem>
+                                <SelectItem value="trash">Trash</SelectItem>
                               </SelectContent>
                             </Select>
                           </div>
@@ -645,6 +710,13 @@ export function PostEditorDialog({
                   </>
                 )}
               </fieldset>
+
+              <NewsstandControl
+                postId={editPostId}
+                status={formData.status}
+                newsstandStatus={newsstandStatus}
+                onChange={setNewsstandStatus}
+              />
 
               {/* ── SEO ── */}
               <fieldset disabled={saving} className="space-y-4">
@@ -661,7 +733,6 @@ export function PostEditorDialog({
                         setFormData({ ...formData, seo: { ...formData.seo, title: e.target.value } })
                       }
                       placeholder="Override page title for search engines"
-                      className="rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground"
                     />
                   </div>
                   <TagInput
@@ -680,7 +751,6 @@ export function PostEditorDialog({
                     }
                     placeholder="Add keyword"
                     className="text-foreground"
-                    inputClassName="border-input bg-background"
                   />
                 </div>
                 <div className="space-y-2">
@@ -695,37 +765,50 @@ export function PostEditorDialog({
                       })
                     }
                     placeholder="Description for search results…"
-                    className="min-h-[60px] rounded-lg rounded-br-none border-input bg-background text-foreground placeholder:text-muted-foreground resize-none"
+                    className="min-h-[60px] resize-none"
                   />
                 </div>
                 <div className="space-y-2">
                   <Label className="text-foreground">OG Image</Label>
-                  <button
-                    type="button"
-                    onClick={() => setOgInsertOpen(true)}
-                    className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-input bg-background text-left transition-colors hover:border-blue-500/70 hover:bg-muted"
-                  >
+                  <div className="overflow-hidden rounded-xl border border-border bg-background">
                     {formData.seo.ogImage ? (
                       <>
                         <img
                           src={formData.seo.ogImage}
                           alt="OG preview"
-                          className="w-full object-cover"
+                          className="h-36 w-full object-cover"
                         />
-                        <div className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 transition-opacity group-hover:opacity-100">
-                          <span className="rounded-full border border-slate-600 bg-black/70 px-3 py-1.5 text-xs font-medium text-slate-100">
+                        <div className="flex justify-end gap-2 border-t border-border px-3 py-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setOgLightboxOpen(true)}
+                          >
+                            Preview
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setOgInsertOpen(true)}
+                          >
                             Change image
-                          </span>
+                          </Button>
                         </div>
                       </>
                     ) : (
-                      <div className="flex h-36 flex-col items-center justify-center gap-2 text-muted-foreground">
+                      <button
+                        type="button"
+                        onClick={() => setOgInsertOpen(true)}
+                        className="flex h-36 w-full cursor-pointer flex-col items-center justify-center gap-2 text-muted-foreground transition-colors hover:bg-muted"
+                      >
                         <ImageIcon className="h-6 w-6 text-muted-foreground" />
                         <span className="text-xs font-medium">Add OG image</span>
                         <span className="text-[11px] text-muted-foreground">1200 × 630 recommended</span>
-                      </div>
+                      </button>
                     )}
-                  </button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Used for social sharing (Open Graph image).
                   </p>
@@ -735,37 +818,33 @@ export function PostEditorDialog({
 
               {/* ── Content blocks: header always visible; list scrolls (esp. mobile) ── */}
               {isStandard && (
-                <div className="flex min-h-0 flex-col lg:col-span-7 lg:h-full lg:self-stretch lg:border-l lg:border-border/60 lg:pl-8">
+                <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden lg:col-span-7">
                   <fieldset
                     disabled={saving}
-                    className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-border bg-muted/50 lg:min-h-[min(70vh,640px)]"
+                    className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden rounded-3xl border border-border bg-card"
                   >
                     <legend className="sr-only">Content blocks</legend>
-                    <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted px-3 py-2.5">
-                      <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    <div className="flex min-w-0 shrink-0 flex-wrap items-center justify-between gap-2 border-b border-border bg-muted px-4 py-3">
+                      <h3 className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                         Content blocks ({content.length})
                       </h3>
                       <PostBlockSelector onSelect={handleAddBlock} size="sm" />
                     </div>
-                    <div
-                      className={cn(
-                        "min-h-[12rem] flex-1 touch-pan-y overflow-x-auto overflow-y-auto px-3 py-3",
-                        "max-h-[min(52vh,420px)] sm:max-h-[min(56vh,480px)]",
-                        "lg:min-h-0 lg:max-h-none"
-                      )}
-                    >
+                    <div className="min-h-0 min-w-0 flex-1 touch-pan-y overflow-x-auto overflow-y-auto overscroll-contain px-3 py-3">
                       {content.length === 0 ? (
-                        <div className="rounded-lg border border-dashed border-border bg-muted/50 py-8 text-center text-muted-foreground">
-                          <p className="text-sm">No content blocks yet.</p>
+                        <div className="rounded-2xl border border-dashed border-border bg-muted py-10 text-center text-muted-foreground">
+                          <p className="text-sm text-foreground">No content blocks yet.</p>
                           <p className="mt-1 text-xs">
-                            Use <span className="text-muted-foreground">Add block</span> to get started.
+                            Use <span className="font-medium text-foreground">Add block</span> to get started.
                           </p>
                         </div>
                       ) : (
                         <div className="space-y-3 pb-1">
                           {content.map((block, index) => (
-                            <PageBlockEditor
+                              <PageBlockEditor
                               key={block.id || index}
+                              surface="light"
+                              showLayoutControls={isSiteAdmin}
                               block={block}
                               index={index}
                               onUpdate={(updatedBlock) => handleUpdateBlock(index, updatedBlock)}
@@ -795,15 +874,14 @@ export function PostEditorDialog({
             variant="outline"
             onClick={close}
             disabled={saving}
-            className="rounded-lg rounded-br-none border-border text-foreground hover:bg-accent"
           >
             Cancel
           </Button>
           <Button
             type="button"
+            variant="primary"
             onClick={() => void handleSubmit()}
             disabled={saving || !canSubmit || loadingPost}
-            className="rounded-lg rounded-br-none bg-blue-600 text-white hover:bg-blue-700"
           >
             {saving ? (
               <>
@@ -843,15 +921,54 @@ export function PostEditorDialog({
           />
         )}
 
+        {ogLightboxOpen && formData.seo.ogImage ? (
+          <div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-background/90 p-4"
+            onClick={() => setOgLightboxOpen(false)}
+          >
+            <div
+              className="flex max-h-full w-full max-w-3xl flex-col gap-3"
+              onClick={(event) => event.stopPropagation()}
+            >
+              <img
+                src={formData.seo.ogImage}
+                alt="OG image preview"
+                className="max-h-[70vh] w-full object-contain"
+              />
+              <div className="flex justify-end">
+                <Button type="button" variant="outline" size="sm" onClick={() => setOgLightboxOpen(false)}>
+                  Close preview
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {uploadingOgImage && (
           <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-2xl">
             <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
-              <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
               <span className="text-sm text-foreground">Processing image…</span>
             </div>
           </div>
         )}
       </DialogContent>
+      <AlertDialog open={confirmDiscard} onOpenChange={setConfirmDiscard}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard unsaved changes?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This post has edits that are not saved. Closing now drops those changes.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep editing</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={forceClose}>
+              Discard
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }

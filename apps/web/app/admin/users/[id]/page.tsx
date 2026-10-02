@@ -175,7 +175,7 @@ export default function EditUserPage() {
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-red-400">
+          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-destructive">
             {error}
           </div>
         )}
@@ -194,7 +194,7 @@ export default function EditUserPage() {
                   variant="outline"
                   onClick={handleLoginAs}
                   disabled={saving || impersonating || !formData}
-                  className="border-emerald-700 text-emerald-400 hover:bg-emerald-950 disabled:opacity-50"
+                  className="border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
                 >
                   {impersonating ? (
                     <>
@@ -211,7 +211,7 @@ export default function EditUserPage() {
                 <Button
                   onClick={handleSave}
                   disabled={saving || impersonating || !formData}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50"
+                  className="disabled:opacity-50"
                 >
                 {saving ? (
                   <>

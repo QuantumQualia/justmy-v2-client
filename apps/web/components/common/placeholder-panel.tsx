@@ -15,8 +15,8 @@ interface PlaceholderPanelProps {
  */
 export function PlaceholderPanel({ text = "Coming Soon" }: PlaceholderPanelProps) {
   return (
-    <section className="relative w-full overflow-hidden rounded-lg rounded-br-none border border-dashed border-slate-600 bg-slate-800/30 py-8 text-center">
-      <p className="text-sm text-slate-500">{text}</p>
+    <section className="relative w-full overflow-hidden rounded-lg rounded-br-none border border-dashed border-slate-600 bg-muted/30 py-8 text-center">
+      <p className="text-sm text-muted-foreground">{text}</p>
     </section>
   );
 }

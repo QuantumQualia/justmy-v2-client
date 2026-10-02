@@ -94,18 +94,18 @@ function PricingSkeleton() {
   return (
     <BizOsPage aria-busy="true">
       <div className="space-y-2">
-        <div className="h-3 w-20 animate-pulse rounded bg-violet-100" />
-        <div className="h-8 w-64 max-w-full animate-pulse rounded-lg bg-slate-200/80" />
-        <div className="h-4 w-96 max-w-full animate-pulse rounded bg-slate-200/60" />
+        <div className="h-3 w-20 animate-pulse rounded bg-secondary" />
+        <div className="h-8 w-64 max-w-full animate-pulse rounded-lg bg-muted" />
+        <div className="h-4 w-96 max-w-full animate-pulse rounded bg-muted" />
       </div>
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         {Array.from({ length: 4 }).map((_, i) => (
           <BizOsCard key={i}>
             <div className="space-y-4">
-              <div className="h-10 w-10 animate-pulse rounded-2xl bg-slate-100" />
-              <div className="h-5 w-2/3 animate-pulse rounded bg-slate-100" />
-              <div className="h-10 w-1/2 animate-pulse rounded bg-slate-100" />
-              <div className="h-10 w-full animate-pulse rounded-full bg-slate-100" />
+              <div className="h-10 w-10 animate-pulse rounded-2xl bg-muted" />
+              <div className="h-5 w-2/3 animate-pulse rounded bg-muted" />
+              <div className="h-10 w-1/2 animate-pulse rounded bg-muted" />
+              <div className="h-10 w-full animate-pulse rounded-full bg-muted" />
             </div>
           </BizOsCard>
         ))}
@@ -151,7 +151,7 @@ export default function BizOsPricingPage() {
           title="Couldn’t load plans"
           body="Stripe catalog didn’t come back. Try again in a moment."
           action={
-            <Button className="rounded-full bg-violet-600 hover:bg-violet-700" onClick={() => void refetch()}>
+            <Button className="rounded-full bg-primary hover:bg-primary/90" onClick={() => void refetch()}>
               Try again
             </Button>
           }
@@ -171,7 +171,7 @@ export default function BizOsPricingPage() {
             : "Claim a free Biz OS listing first, then subscribe to Command, Command PRO, or Enterprise. Amounts come from Stripe."
         }
         actions={
-          <div className="inline-flex rounded-full border border-slate-200 bg-slate-50 p-1">
+          <div className="inline-flex rounded-full border border-border bg-muted p-1">
             {(["month", "year"] as const).map((value) => {
               const active = interval === value;
               return (
@@ -182,12 +182,12 @@ export default function BizOsPricingPage() {
                   onClick={() => setInterval(value)}
                   className={cn(
                     "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
-                    active ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-800",
+                    active ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {value === "month" ? "Monthly" : "Annual"}
                   {value === "year" && savePercent != null ? (
-                    <span className="ml-1.5 text-[11px] font-semibold text-violet-600">Save {savePercent}%</span>
+                    <span className="ml-1.5 text-[11px] font-semibold text-primary">Save {savePercent}%</span>
                   ) : null}
                 </button>
               );
@@ -216,13 +216,13 @@ export default function BizOsPricingPage() {
               key={osName}
               className={cn(
                 "relative flex flex-col",
-                isCurrent && "border-violet-400 ring-2 ring-violet-200",
-                featured && "border-violet-300 bg-linear-to-b from-violet-50/90 to-white xl:-mt-2 xl:mb-[-8px] xl:shadow-[0_18px_50px_-28px_rgba(76,29,149,0.55)]",
-                isFree && !isCurrent && "bg-slate-50/80",
+                isCurrent && "border-primary ring-2 ring-ring",
+                featured && "border-primary/40 bg-linear-to-b from-secondary to-card xl:-mt-2 xl:mb-[-8px] xl:shadow-card",
+                isFree && !isCurrent && "bg-muted/80",
               )}
             >
               {featured ? (
-                <p className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-violet-600 px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-white shadow-sm">
+                <p className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary-foreground shadow-sm">
                   Most popular
                 </p>
               ) : null}
@@ -231,34 +231,34 @@ export default function BizOsPricingPage() {
                 <span
                   className={cn(
                     "inline-flex h-10 w-10 items-center justify-center rounded-2xl",
-                    featured || isCurrent ? "bg-violet-600 text-white" : "bg-violet-50 text-violet-600",
+                    featured || isCurrent ? "bg-primary text-primary-foreground" : "bg-secondary text-primary",
                   )}
                 >
                   <Icon className="h-5 w-5" />
                 </span>
                 {isCurrent ? (
-                  <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-violet-700">
+                  <span className="rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-primary">
                     Current
                   </span>
                 ) : null}
               </div>
 
-              <h2 className="mt-4 text-lg font-semibold text-slate-900">{displayName(osName, plan?.productName)}</h2>
-              <p className="mt-1 text-sm text-slate-500">{meta.blurb}</p>
+              <h2 className="mt-4 text-lg font-semibold text-foreground">{displayName(osName, plan?.productName)}</h2>
+              <p className="mt-1 text-sm text-muted-foreground">{meta.blurb}</p>
 
               <div className="mt-5">
                 {isFree ? (
                   <>
-                    <p className="text-3xl font-bold tracking-tight text-slate-900">$0</p>
-                    <p className="mt-1 text-sm text-slate-500">Included with claim</p>
+                    <p className="text-3xl font-bold tracking-tight text-foreground">$0</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Included with claim</p>
                   </>
                 ) : price ? (
                   <>
-                    <p className="text-3xl font-bold tracking-tight text-slate-900">
+                    <p className="text-3xl font-bold tracking-tight text-foreground">
                       {formatMoney(monthlyEquivalent, price.currency)}
-                      <span className="text-sm font-normal text-slate-500">/mo</span>
+                      <span className="text-sm font-normal text-muted-foreground">/mo</span>
                     </p>
-                    <p className="mt-1 text-sm text-slate-500">
+                    <p className="mt-1 text-sm text-muted-foreground">
                       {billedYearly
                         ? `${formatMoney(price.amount, price.currency)} billed yearly`
                         : "Billed monthly"}
@@ -266,8 +266,8 @@ export default function BizOsPricingPage() {
                   </>
                 ) : (
                   <>
-                    <p className="text-3xl font-bold tracking-tight text-slate-400">—</p>
-                    <p className="mt-1 text-sm text-slate-500">No Stripe price yet</p>
+                    <p className="text-3xl font-bold tracking-tight text-muted-foreground">—</p>
+                    <p className="mt-1 text-sm text-muted-foreground">No Stripe price yet</p>
                   </>
                 )}
               </div>
@@ -276,13 +276,13 @@ export default function BizOsPricingPage() {
                 {previousOs ? (
                   <li className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <span className="font-medium text-slate-800">Everything in {planOsLabel(previousOs)}</span>
+                    <span className="font-medium text-foreground">Everything in {planOsLabel(previousOs)}</span>
                   </li>
                 ) : null}
                 {introduced.map((feature) => (
                   <li key={feature.id} className="flex items-start gap-2 text-sm">
                     <Check className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
-                    <span className="text-slate-700">
+                    <span className="text-foreground">
                       {featureLabelOnPlan(feature, planOs)}
                       {feature.comingSoon ? (
                         <ComingSoonBadge className="ml-2 align-middle" />
@@ -307,8 +307,8 @@ export default function BizOsPricingPage() {
                   className={cn(
                     "w-full rounded-full",
                     featured
-                      ? "bg-violet-600 hover:bg-violet-700"
-                      : "bg-slate-900 text-white hover:bg-slate-800",
+                      ? "bg-primary hover:bg-primary/90"
+                      : "bg-card text-white hover:bg-muted",
                   )}
                   disabled={checkout.isPending || !signedInBusiness}
                   onClick={() => checkout.mutate(price.priceId)}
@@ -318,8 +318,8 @@ export default function BizOsPricingPage() {
                     : `Switch to ${displayName(osName)}`}
                 </Button>
               ) : (
-                <p className="text-xs leading-relaxed text-slate-500">
-                  Add a Stripe product with metadata <span className="font-medium text-slate-700">osName={osName}</span>.
+                <p className="text-xs leading-relaxed text-muted-foreground">
+                  Add a Stripe product with metadata <span className="font-medium text-foreground">osName={osName}</span>.
                 </p>
               )}
             </BizOsCard>
@@ -328,7 +328,7 @@ export default function BizOsPricingPage() {
       </div>
 
       {signedInBusiness ? null : (
-        <p className="text-sm text-slate-500">Sign in with a business listing to subscribe.</p>
+        <p className="text-sm text-muted-foreground">Sign in with a business listing to subscribe.</p>
       )}
     </BizOsPage>
   );

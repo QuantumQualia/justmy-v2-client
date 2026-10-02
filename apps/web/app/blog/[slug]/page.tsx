@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 import { cmsService } from "@/lib/services/cms";
-import { PayloadPostRenderer } from "@/components/cms/payload-post-renderer";
+import { BlogPostArticle } from "@/components/cms/blog-post-article";
 import { SharedPostRedirector } from "@/components/cms/shared-post-redirector";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 interface BlogPostPageProps {
   params: Promise<{ slug: string }>;
@@ -14,14 +15,8 @@ export const revalidate = 300;
 
 const fetchPostBySlug = cache(async (slug: string) => {
   return unstable_cache(
-    async () => {
-      try {
-        return await cmsService.getPostBySlug(slug);
-      } catch {
-        return null;
-      }
-    },
-    ["cms-post-by-slug", slug],
+    async () => cmsService.getPostBySlug(slug),
+    ["cms-post-by-slug", "author-v9", slug],
     {
       revalidate,
       tags: [`cms-post:${slug}`],
@@ -45,7 +40,7 @@ export async function generateMetadata({
 
   const title = post.seo?.title || post.title;
   const description =
-    post.seo?.description || post.excerpt || `Read ${post.title}`;
+    legacyPlainText(post.seo?.description || post.excerpt) || `Read ${post.title}`;
   const image =
     typeof post.seo?.ogImage === "string"
       ? post.seo.ogImage
@@ -100,7 +95,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <div className="max-w-3xl text-center">
             <h1 className="text-3xl font-bold">{post.seo?.title || post.title}</h1>
             {post.excerpt && (
-              <p className="mt-4 text-muted-foreground">{post.excerpt}</p>
+              <p className="mt-4 text-muted-foreground">{legacyPlainText(post.excerpt)}</p>
             )}
             <a
               href={post.externalUrl}
@@ -114,5 +109,5 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     );
   }
 
-  return <PayloadPostRenderer post={post} />;
+  return <BlogPostArticle post={post} />;
 }

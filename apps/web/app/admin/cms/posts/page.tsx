@@ -7,18 +7,23 @@ import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { cmsService } from "@/lib/services/cms";
 import type { PayloadPost } from "@/lib/services/cms";
+import { contentService, type ContentTypeDto } from "@/lib/services/content";
+import { marketsService } from "@/lib/services/markets";
+import { legacyPlainText } from "@/lib/legacy-html";
 import { useRouter } from "next/navigation";
 
-const STATUS_LABELS: Record<PayloadPost["status"], string> = {
+const STATUS_LABELS: Record<string, string> = {
   draft: "Draft",
   publish: "Published",
   archive: "Archived",
+  trash: "Trash",
 };
 
-const STATUS_BADGE_CLASSES: Record<PayloadPost["status"], string> = {
-  draft: "bg-yellow-500/20 text-yellow-400",
-  publish: "bg-green-500/20 text-green-400",
-  archive: "bg-slate-500/20 text-muted-foreground",
+const STATUS_BADGE_CLASSES: Record<string, string> = {
+  draft: "bg-muted text-muted-foreground",
+  publish: "bg-secondary text-foreground",
+  archive: "bg-muted text-muted-foreground",
+  trash: "bg-destructive/15 text-destructive",
 };
 
 export default function CmsPostsPage() {
@@ -29,14 +34,30 @@ export default function CmsPostsPage() {
   const [totalPages, setTotalPages] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [limit] = useState(20);
+  const [status, setStatus] = useState("");
+  const [newsstand, setNewsstand] = useState("");
+  const [application, setApplication] = useState("");
+  const [contentTypeId, setContentTypeId] = useState("");
+  const [postType, setPostType] = useState("");
+  const [marketId, setMarketId] = useState("");
+  const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
+  const [markets, setMarkets] = useState<Array<{ id: number; name: string }>>([]);
   const loadedForRef = useRef<string | null>(null);
 
   useEffect(() => {
-    const key = `${currentPage}:${search}`;
+    contentService.listContentTypes().then(setContentTypes).catch(() => setContentTypes([]));
+    marketsService
+      .getMarkets({ limit: 200, page: 1 })
+      .then((page) => setMarkets((page?.data ?? []).map((market) => ({ id: market.id, name: market.name }))))
+      .catch(() => setMarkets([]));
+  }, []);
+
+  useEffect(() => {
+    const key = `${currentPage}:${search}:${status}:${newsstand}:${application}:${contentTypeId}:${postType}:${marketId}`;
     if (loadedForRef.current === key) return;
     loadedForRef.current = key;
     loadPosts();
-  }, [currentPage, search]);
+  }, [currentPage, search, status, newsstand, application, contentTypeId, postType, marketId]);
 
   const loadPosts = async () => {
     try {
@@ -45,6 +66,12 @@ export default function CmsPostsPage() {
         page: currentPage,
         limit,
         search: search || undefined,
+        status: status || undefined,
+        newsstand: newsstand || undefined,
+        type: postType || undefined,
+        application: application || undefined,
+        contentTypeId: contentTypeId ? Number(contentTypeId) : undefined,
+        marketId: marketId ? Number(marketId) : undefined,
       });
       setPosts(response.docs || []);
       setTotalPages(response.totalPages || 0);
@@ -91,15 +118,54 @@ export default function CmsPostsPage() {
         </div>
 
         <div className="border border-border rounded-xl bg-muted p-6">
-          <div className="mb-4">
+          <div className="mb-4 space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setCurrentPage(1);
+                  setSearch(e.target.value);
+                }}
                 placeholder="Search posts..."
                 className="pl-10"
               />
+            </div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-5">
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={status} onChange={(e) => { setCurrentPage(1); setStatus(e.target.value); }}>
+                <option value="">All statuses</option>
+                <option value="draft">Draft</option>
+                <option value="publish">Publish</option>
+                <option value="archive">Archive</option>
+                <option value="trash">Trash</option>
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={newsstand} onChange={(e) => { setCurrentPage(1); setNewsstand(e.target.value); }}>
+                <option value="">All newsstand</option>
+                <option value="pending">Newsstand requests</option>
+                <option value="published">On newsstand</option>
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={application} onChange={(e) => { setCurrentPage(1); setApplication(e.target.value); }}>
+                <option value="">All hubs</option>
+                <option value="CONTENT_HUB">Content hub</option>
+                <option value="INFO_HUB">Info hub</option>
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={contentTypeId} onChange={(e) => { setCurrentPage(1); setContentTypeId(e.target.value); }}>
+                <option value="">All content types</option>
+                {contentTypes.map((type) => (
+                  <option key={type.id} value={type.id}>{type.name}</option>
+                ))}
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={postType} onChange={(e) => { setCurrentPage(1); setPostType(e.target.value); }}>
+                <option value="">Articles and shared</option>
+                <option value="ARTICLE">Article</option>
+                <option value="SHARED">Shared</option>
+              </select>
+              <select className="h-10 rounded-md border border-border bg-background px-3 text-sm" value={marketId} onChange={(e) => { setCurrentPage(1); setMarketId(e.target.value); }}>
+                <option value="">All markets</option>
+                {markets.map((market) => (
+                  <option key={market.id} value={market.id}>{market.name}</option>
+                ))}
+              </select>
             </div>
           </div>
 
@@ -132,7 +198,7 @@ export default function CmsPostsPage() {
                         </div>
                         {(post.excerpt || post.tags?.length) && (
                           <p className="text-sm text-muted-foreground mt-1">
-                            {[post.excerpt, post.tags?.length ? post.tags.join(", ") : ""]
+                            {[legacyPlainText(post.excerpt), post.tags?.length ? post.tags.join(", ") : ""]
                               .filter(Boolean)
                               .join(" · ")}
                           </p>
@@ -161,7 +227,7 @@ export default function CmsPostsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(post.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
                           title="Delete post"
                         >
                           <Trash2 className="h-4 w-4" />

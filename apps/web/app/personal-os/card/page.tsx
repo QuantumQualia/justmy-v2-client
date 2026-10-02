@@ -19,9 +19,9 @@ const InlineEdit = dynamic(() => import("@/components/mycard/inline-edit-view"),
   ssr: false,
   loading: () => (
     <div className="space-y-3 p-6">
-      <div className="h-48 animate-pulse rounded-2xl bg-slate-100" />
-      <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
-      <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+      <div className="h-48 animate-pulse rounded-2xl bg-muted" />
+      <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
     </div>
   ),
 });
@@ -48,13 +48,13 @@ function PersonalOsCardInner() {
       <div className="shrink-0 space-y-2 sm:space-y-3">
         <div className="flex items-center justify-between gap-2">
           <div className="min-w-0">
-            <p className="hidden text-[11px] font-semibold uppercase tracking-[0.16em] text-violet-600 lg:block">
+            <p className="hidden text-[11px] font-semibold uppercase tracking-[0.16em] text-primary lg:block">
               Studio
             </p>
-            <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl lg:mt-1 lg:text-3xl">
+            <h1 className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:mt-1 lg:text-3xl">
               Your myCARD
             </h1>
-            <p className="mt-1 hidden text-sm leading-relaxed text-slate-500 lg:block">
+            <p className="mt-1 hidden text-sm leading-relaxed text-muted-foreground lg:block">
               Edit on the left. Sky drafts copy and contact on the right — nothing publishes until you apply.
             </p>
           </div>
@@ -85,9 +85,9 @@ function PersonalOsCardInner() {
             mobilePane === "editor" ? "flex" : "max-lg:!hidden",
           )}
         >
-          <div className="hidden shrink-0 border-b border-slate-100 px-5 py-3 lg:block">
+          <div className="hidden shrink-0 border-b border-border px-5 py-3 lg:block">
             <p className="text-sm font-semibold">Editor</p>
-            <p className="text-xs text-slate-500">Tap fields on the card to edit.</p>
+            <p className="text-xs text-muted-foreground">Tap fields on the card to edit.</p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="mx-auto w-full max-w-[375px] px-3 py-3 sm:px-0 sm:py-4">

@@ -209,7 +209,7 @@ export function UserList() {
           const user = row.original
           if (user.deletedAt) {
             return (
-              <Badge variant="destructive" className="bg-red-900/30 text-red-400 border-red-800">
+              <Badge variant="destructive" className="bg-red-900/30 text-destructive border-red-800">
                 Deleted
               </Badge>
             )
@@ -222,7 +222,7 @@ export function UserList() {
             )
           }
           return (
-            <Badge className="bg-emerald-600/20 text-emerald-400 border-emerald-600/50">
+            <Badge className="bg-success/15 text-success border-emerald-600/50">
               Active
             </Badge>
           )
@@ -238,7 +238,7 @@ export function UserList() {
               variant={count > 0 ? "default" : "outline"}
               className={
                 count > 0
-                  ? "bg-emerald-900/50 text-emerald-400 border-emerald-800"
+                  ? "bg-emerald-900/50 text-success border-emerald-800"
                   : "bg-muted text-muted-foreground border-border"
               }
             >
@@ -278,7 +278,7 @@ export function UserList() {
                   size="sm"
                   onClick={() => handleLoginAs(user)}
                   disabled={isLoading}
-                  className="h-8 w-8 p-0 text-muted-foreground hover:text-emerald-400 hover:bg-accent disabled:opacity-50"
+                  className="h-8 w-8 p-0 text-muted-foreground hover:text-success hover:bg-accent disabled:opacity-50"
                   title="Log in as user"
                 >
                   {isLoading ? (
@@ -294,7 +294,7 @@ export function UserList() {
                   size="sm"
                   onClick={() => handleRestore(user.id)}
                   disabled={isLoading}
-                  className="h-8 w-8 p-0 border-emerald-700 text-emerald-400 hover:bg-emerald-950 disabled:opacity-50"
+                  className="h-8 w-8 p-0 border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
                   title="Restore user"
                 >
                   {isLoading ? (
@@ -311,7 +311,7 @@ export function UserList() {
                       size="sm"
                       onClick={() => handleUnblock(user.id)}
                       disabled={isLoading}
-                      className="h-8 w-8 p-0 border-emerald-700 text-emerald-400 hover:bg-emerald-950 disabled:opacity-50"
+                      className="h-8 w-8 p-0 border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
                       title="Unblock user"
                     >
                       {isLoading ? (
@@ -341,7 +341,7 @@ export function UserList() {
                     size="sm"
                     onClick={() => handleDelete(user.id)}
                     disabled={isLoading}
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-red-400 hover:bg-accent disabled:opacity-50"
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-accent disabled:opacity-50"
                     title="Delete user"
                   >
                     {isLoading ? (
@@ -381,7 +381,7 @@ export function UserList() {
                 setIncludeDeleted(checked)
                 setCurrentPage(1)
               }}
-              className="data-[state=checked]:bg-emerald-600 data-[state=unchecked]:bg-input"
+              className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
             />
             <Label htmlFor="include-deleted" className="text-sm text-muted-foreground cursor-pointer">
               Include Deleted

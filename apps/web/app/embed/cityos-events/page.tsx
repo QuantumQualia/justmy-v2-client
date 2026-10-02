@@ -10,7 +10,7 @@ export default async function EmbedCityOsEventsPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-[120px] items-center justify-center text-sm text-slate-400">Loading…</div>
+        <div className="flex min-h-[120px] items-center justify-center text-sm text-muted-foreground">Loading…</div>
       }
     >
       <CityOsEventsEmbedClient referrerHintDomain={referrerHintDomain} />

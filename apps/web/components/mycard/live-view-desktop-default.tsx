@@ -1,13 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { MyCardContentDesktopView } from "@/components/mycard/mycard-content-desktop-view";
+import { AdBanner } from "@/components/common/ad-banner";
+import { MycardAbout } from "@/components/mycard/mycard-about";
+import { MycardContentSections } from "@/components/mycard/mycard-content-sections";
+import { MycardRelatedCategories } from "@/components/mycard/mycard-related-categories";
+import { MycardGoogleRating } from "@/components/mycard/mycard-google-rating";
 import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
+import { MycardVideo, profileVideo } from "@/components/mycard/mycard-video";
+import { legacyPlainText } from "@/lib/legacy-html";
 import type { ProfileData } from "@/lib/store";
-import { contentQueryKeys } from "@/lib/query/content-query-keys";
-import { contentService } from "@/lib/services/content";
-import { PROFILE_KIND } from "@/lib/os-types";
+
+const DEFAULT_TAGLINE = "Let's connect.";
+const contactRowClass =
+  "flex flex-nowrap items-center gap-2 overflow-x-auto py-3 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden";
 
 interface MyCardDesktopDefaultViewProps {
   data: ProfileData;
@@ -21,169 +26,66 @@ interface MyCardDesktopDefaultViewProps {
 
 export function MyCardDesktopDefaultView({
   data,
-  usePublicNavbar,
   outerTextClass,
-  avatarOuterClass,
-  ctaButtonClassName,
-  registerHref,
   contactActions,
 }: MyCardDesktopDefaultViewProps) {
-  const [activeTab, setActiveTab] = useState<string>("about");
-  const variant = usePublicNavbar ? "light" : "dark";
-
-  const hubQuery = useQuery({
-    queryKey: contentQueryKeys.hubPublic(data.slug),
-    queryFn: () => contentService.getPublicHubsBySlug(data.slug),
-    enabled: data.slug.trim().length > 0,
-  });
-
-  const dynamicContentTabs = useMemo(() => {
-    const hubs = hubQuery.data ?? [];
-    const tabs = hubs[0]?.tabs ?? [];
-    return [...tabs].sort(
-      (a, b) =>
-        (a.position ?? Number.MAX_SAFE_INTEGER) -
-        (b.position ?? Number.MAX_SAFE_INTEGER)
-    );
-  }, [hubQuery.data]);
-
-  const selectedDynamicTabId = activeTab.startsWith("tab:") ? Number(activeTab.slice(4)) : null;
-  const selectedDynamicTab = dynamicContentTabs.find((tab) => tab.id === selectedDynamicTabId) ?? null;
-  const desktopTabs = useMemo(
-    () => [
-      { key: "about", label: "About" },
-      ...dynamicContentTabs.filter((tab) => tab.postCount > 0).map((tab) => ({
-        key: `tab:${tab.id}`,
-        label: tab.title,
-      })),
-    ],
-    [dynamicContentTabs]
-  );
+  const brand = profileVideo(data.videos, "BRAND");
+  const tagline = legacyPlainText(data.tagline) || DEFAULT_TAGLINE;
 
   return (
-    <div className={`${outerTextClass} w-full mt-6`}>
-      <div className="mx-auto w-full max-w-[1180px] px-4 pb-10 md:px-6">
-        <div className="grid gap-4 lg:grid-cols-[330px_minmax(0,1fr)]">
-          <aside
-            className="h-full overflow-y-auto p-5 justmy-corners !rounded-tr-none space-y-5 max-h-[500px]"
-            style={{
-              background: "var(--glass-bg)",
-              backdropFilter: "blur(18px)",
-              WebkitBackdropFilter: "blur(18px)",
-              border: "1px solid var(--glass-border)",
-            }}
-          >
-            <div className="relative">
-              <div className="relative flex justify-center">
-                <div className={`h-24 w-24 overflow-hidden rounded-full ${avatarOuterClass}`}>
-                  <MycardProfileAvatar name={data.name} photo={data.photo} />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap justify-center gap-2">{contactActions}</div>
-
-            <div className="flex flex-col gap-2">
-              {data.hotlinks.map((hotlink) => (
-                <a
-                  key={hotlink.id}
-                  href={hotlink.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={hotlink.url ? `${hotlink.title} — ${hotlink.url}` : hotlink.title}
-                  className={ctaButtonClassName}
-                >
-                  <span className="min-w-0 truncate">{hotlink.title}</span>
-                </a>
-              ))}
-              <button type="button" className={ctaButtonClassName}>
-                Save to Contacts
-              </button>
-              <button type="button" className={ctaButtonClassName}>
-                Send myCARD
-              </button>
-
-              <a
-                href={registerHref}
-                title="Get myCARD Free"
-                className={ctaButtonClassName}
-              >
-                <span className="min-w-0 truncate">Get myCARD Free</span>
-              </a>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <h2 className="text-center text-lg font-bold text-foreground font-serif">About</h2>
-              <p className="text-center text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {data.about}
-              </p>
-            </div>
-          </aside>
-
-          <section className="overflow-hidden justmy-corners relative min-h-[410px]">
-            {hasMycardMedia(data.banner) ? (
-              <img
-                src={data.banner}
-                alt=""
-                className="h-full min-h-[410px] w-full object-cover"
-              />
-            ) : (
-              <MycardFallbackBanner name={data.name} className="h-full min-h-[410px] w-full" />
-            )}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
-            <div className="absolute bottom-0 left-0 right-0 p-6 md:p-8">
-              <h1 className="text-3xl font-bold text-white font-serif md:text-4xl">
-                {data.name}
-              </h1>
-              <p className="mt-2 text-sm text-white/85 md:text-base">{data.tagline}</p>
-            </div>
-          </section>
-        </div>
-
-        <div className="mt-8 border-b border-border">
-          <div
-            className="grid w-full text-sm"
-            style={{
-              gridTemplateColumns: `repeat(${Math.max(desktopTabs.length, 1)}, minmax(0, 1fr))`,
-            }}
-          >
-            {desktopTabs.map((tab) => (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActiveTab(tab.key)}
-                className={`w-full min-w-0 px-3 py-3 text-center transition-colors cursor-pointer ${activeTab === tab.key ? "text-foreground border-b-2 border-accent" : "text-muted-foreground hover:text-foreground"}`}
-                title={tab.label}
-              >
-                <span className="block truncate">{tab.label}</span>
-              </button>
-            ))}
+    <div className={`${outerTextClass} mt-6 w-full`}>
+      <div className="mx-auto w-full max-w-[1180px] space-y-8 px-4 pb-10 md:px-6">
+        <header className="space-y-4">
+          <div>
+            <h1 className="text-3xl font-bold text-foreground">{data.name}</h1>
+            <p className="mt-1 text-sm text-muted-foreground">{tagline}</p>
           </div>
-        </div>
-
-        <div className="pt-6">
-          {activeTab === "about" && data.about ? (
-            <div className="max-w-5xl space-y-4">
-              <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                {data.about}
-              </p>
+          <div className="justmy-corners-xl overflow-hidden bg-muted shadow-card">
+            {hasMycardMedia(data.banner) ? (
+              <img src={data.banner} alt="" className="aspect-[16/7] w-full object-cover" />
+            ) : (
+              <MycardFallbackBanner name={data.name} className="aspect-[16/7] w-full" />
+            )}
+          </div>
+          <div className="flex items-center gap-5">
+            <div className="size-20 shrink-0 overflow-hidden rounded-full bg-card ring-2 ring-border">
+              <MycardProfileAvatar name={data.name} photo={data.photo} fit="contain" />
             </div>
-          ) : null}
-
-          {selectedDynamicTab && data.type === PROFILE_KIND.PERSONAL ? (
-            <MyCardContentDesktopView
-              profileType={data.type}
-              profileSlug={data.slug}
-              profileName={data.name}
-              profilePhoto={data.photo}
-              variant={variant}
-              selectedTabId={selectedDynamicTab.id}
-              selectedTabTitle={selectedDynamicTab.title}
+            <div className={`min-w-0 flex-1 ${contactRowClass}`}>{contactActions}</div>
+            <MycardGoogleRating
+              rating={data.googleStarRating}
+              count={data.googleRatingCount}
+              placeId={data.googlePlaceId}
+              reviewLink={data.googleReviewLink}
+              variant="light"
+              className="shrink-0 justify-end"
             />
-          ) : null}
-        </div>
+          </div>
+        </header>
+
+        <MycardContentSections profileSlug={data.slug} layout="grid" collapsible />
+
+        <MycardRelatedCategories categories={data.relatedCategories} />
+
+        {data.ad?.image ? (
+          <AdBanner
+            imageSrc={data.ad.image}
+            imageAlt={data.ad.alt || data.name}
+            bannerLink={data.ad.href || undefined}
+            profileSlug={data.slug}
+            hotlinks={data.hotlinks.map((hotlink) => ({ label: hotlink.title, href: hotlink.url }))}
+          />
+        ) : null}
+
+        <MycardAbout about={data.about} />
+
+        {brand?.videoUrl ? (
+          <section className="space-y-3">
+            <h2 className="text-xl font-bold text-foreground">{data.name} Video Spotlight</h2>
+            <MycardVideo url={brand.videoUrl} title={brand.title || `${data.name} Video Spotlight`} />
+          </section>
+        ) : null}
       </div>
     </div>
   );
 }
-

@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { Button } from "@workspace/ui/components/button";
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { AuthSocialButtons } from "@/components/auth/auth-social-buttons";
@@ -47,10 +48,7 @@ type AuthDialogProps = {
 };
 
 const inputClass =
-  "h-10 rounded-lg border border-slate-200 bg-white text-slate-900 shadow-none placeholder:text-slate-400 focus-visible:border-violet-300 focus-visible:ring-2 focus-visible:ring-violet-200/70 dark:bg-white dark:text-slate-900 dark:placeholder:text-slate-400 [&:-webkit-autofill]:shadow-[inset_0_0_0_1000px_#fff]";
-
-const aiButtonClass =
-  "inline-flex h-11 w-full items-center justify-center rounded-full bg-linear-to-r from-violet-600 to-cyan-400 text-sm font-semibold text-white shadow-md shadow-violet-500/25 transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60";
+  "h-10 border-border bg-card text-foreground shadow-none placeholder:text-muted-foreground dark:bg-card";
 
 type PanelCoords = {
   top: number;
@@ -238,7 +236,7 @@ export function AuthDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
-        className="light top-0 right-0 left-auto flex max-h-[min(90dvh,44rem)] w-[min(100%-1.5rem,28rem)] translate-x-0 translate-y-0 flex-col overflow-hidden border-slate-200 bg-white p-6 text-slate-900 shadow-xl origin-top-right sm:max-w-md"
+        className="top-0 right-0 left-auto flex max-h-[min(90dvh,44rem)] w-[min(100%-1.5rem,28rem)] translate-x-0 translate-y-0 flex-col overflow-hidden border-border bg-card p-6 text-foreground shadow-xl origin-top-right sm:max-w-md"
         showCloseButton={false}
         onPointerDownOutside={(event) => event.preventDefault()}
         onInteractOutside={(event) => event.preventDefault()}
@@ -262,25 +260,27 @@ export function AuthDialog({
         }
       >
         <DialogClose asChild>
-          <button
+          <Button
             type="button"
-            className="absolute top-3 right-3 z-10 flex h-8 w-8 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 shadow-sm transition hover:bg-slate-50 hover:text-slate-800"
+            variant="outline"
+            size="icon"
+            className="absolute top-3 right-3 z-10"
             aria-label="Close"
           >
             <X className="h-4 w-4" strokeWidth={2.25} />
-          </button>
+          </Button>
         </DialogClose>
         <div className="scrollbar-hide min-h-0 flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-1 [-webkit-overflow-scrolling:touch]">
           <div className="flex flex-col gap-5 pb-4">
           <AuthIntroVideo />
 
           <DialogHeader className="gap-1.5 text-center sm:text-center">
-            <DialogTitle className="text-2xl font-bold tracking-tight text-slate-900">
+            <DialogTitle className="text-2xl font-bold tracking-tight text-foreground">
               {isRegister
                 ? `Create ${profileKindDisplayShort(profileKind)} Account`
                 : "Welcome back"}
             </DialogTitle>
-            <DialogDescription className="text-sm text-slate-500">
+            <DialogDescription className="text-sm text-muted-foreground">
               {isRegister
                 ? "Join your local City OS to connect and save."
                 : "Sign in to continue."}
@@ -288,7 +288,7 @@ export function AuthDialog({
           </DialogHeader>
 
           {error ? (
-            <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               {error}
             </div>
           ) : null}
@@ -300,10 +300,11 @@ export function AuthDialog({
             showApple={APPLE_SIGN_IN_ENABLED}
           />
 
-          <button
+          <Button
             type="button"
+            variant="ghost"
             onClick={() => setEmailOpen((openEmail) => !openEmail)}
-            className="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-800"
+            className="w-full"
             aria-expanded={emailOpen}
           >
             Or continue with email
@@ -311,14 +312,14 @@ export function AuthDialog({
               className={`h-4 w-4 transition ${emailOpen ? "rotate-180" : ""}`}
               aria-hidden
             />
-          </button>
+          </Button>
 
           {emailOpen ? (
             <form onSubmit={handleSubmit} className="space-y-3.5">
               {isRegister ? (
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
-                    <Label htmlFor="auth-first-name" className="text-slate-700">
+                    <Label htmlFor="auth-first-name" className="text-foreground">
                       First Name
                     </Label>
                     <Input
@@ -333,7 +334,7 @@ export function AuthDialog({
                     />
                   </div>
                   <div className="space-y-1.5">
-                    <Label htmlFor="auth-last-name" className="text-slate-700">
+                    <Label htmlFor="auth-last-name" className="text-foreground">
                       Last Name
                     </Label>
                     <Input
@@ -351,7 +352,7 @@ export function AuthDialog({
               ) : null}
 
               <div className="space-y-1.5">
-                <Label htmlFor="auth-email" className="text-slate-700">
+                <Label htmlFor="auth-email" className="text-foreground">
                   Email Address
                 </Label>
                 <Input
@@ -369,13 +370,13 @@ export function AuthDialog({
 
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="auth-password" className="text-slate-700">
+                  <Label htmlFor="auth-password" className="text-foreground">
                     Password
                   </Label>
                   {!isRegister ? (
                     <Link
                       href="/forgot-password"
-                      className="text-xs font-medium text-violet-600 hover:text-violet-500"
+                      className="text-xs font-medium text-primary hover:text-primary"
                     >
                       Forgot password?
                     </Link>
@@ -400,9 +401,9 @@ export function AuthDialog({
                   <div className="space-y-1.5">
                     <Label
                       htmlFor="auth-zip"
-                      className="flex items-center gap-1.5 text-slate-700"
+                      className="flex items-center gap-1.5 text-foreground"
                     >
-                      <MapPin className="h-3 w-3 text-violet-500" aria-hidden />
+                      <MapPin className="h-3 w-3 text-primary" aria-hidden />
                       Zip Code
                     </Label>
                     <Input
@@ -417,13 +418,13 @@ export function AuthDialog({
                         setFormData({ ...formData, zipCode: e.target.value })
                       }
                     />
-                    <p className="text-[11px] text-slate-400">
+                    <p className="text-[11px] text-muted-foreground">
                       We use this to connect you to your local Market.
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label htmlFor="auth-referral" className="text-xs text-slate-500">
+                    <Label htmlFor="auth-referral" className="text-xs text-muted-foreground">
                       Referral Code (Optional)
                     </Label>
                     <Input
@@ -439,7 +440,7 @@ export function AuthDialog({
                 </>
               ) : null}
 
-              <button type="submit" className={aiButtonClass} disabled={loading}>
+              <Button type="submit" className="h-11 w-full" disabled={loading}>
                 {loading ? (
                   <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 ) : isRegister ? (
@@ -447,17 +448,18 @@ export function AuthDialog({
                 ) : (
                   "Sign In"
                 )}
-              </button>
+              </Button>
             </form>
           ) : null}
 
-          <p className="text-center text-sm text-slate-500">
+          <p className="text-center text-sm text-muted-foreground">
             {isRegister ? (
               <>
                 Already have an account?{" "}
-                <button
+                <Button
                   type="button"
-                  className="font-semibold text-violet-600 hover:text-violet-500"
+                  variant="link"
+                  className="h-auto px-0 font-semibold"
                   onClick={() => {
                     setMode("login");
                     setError("");
@@ -465,21 +467,22 @@ export function AuthDialog({
                   }}
                 >
                   Sign in
-                </button>
+                </Button>
               </>
             ) : (
               <>
                 Don&apos;t have an account?{" "}
-                <button
+                <Button
                   type="button"
-                  className="font-semibold text-violet-600 hover:text-violet-500"
+                  variant="link"
+                  className="h-auto px-0 font-semibold"
                   onClick={() => {
                     setMode("register");
                     setError("");
                   }}
                 >
                   Create account
-                </button>
+                </Button>
               </>
             )}
           </p>
@@ -496,7 +499,7 @@ function AuthIntroVideo() {
   const src = `https://www.youtube.com/embed/${AUTH_INTRO_YOUTUBE_ID}?rel=0&modestbranding=1`;
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-none bg-slate-900">
+    <div className="relative aspect-video w-full overflow-hidden rounded-tl-xl rounded-tr-xl rounded-bl-xl rounded-br-none bg-card">
       <iframe
         src={src}
         title="JustMy intro video"

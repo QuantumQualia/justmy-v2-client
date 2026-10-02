@@ -41,17 +41,6 @@ export function NewsStandChrome() {
   const activeConversationId = useNewsNavPageStore((s) => s.activeConversationId);
 
   useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    html.classList.add("news-light-html");
-    body.classList.add("news-light-body");
-    return () => {
-      html.classList.remove("news-light-html");
-      body.classList.remove("news-light-body");
-    };
-  }, []);
-
-  useEffect(() => {
     const markReady = () => {
       useNewsZipStore.getState().setHasHydrated(true);
     };
@@ -95,7 +84,7 @@ export function NewsStandChrome() {
       <header
         data-site-chrome
         className={cn(
-          "sticky top-[var(--impersonation-banner-h,0px)] z-40 h-14 border-b border-slate-200/80 bg-[#f3f4f6]/90",
+          "sticky top-[var(--impersonation-banner-h,0px)] z-40 h-14 border-b border-border bg-card/90",
           hideOnMobile && "max-lg:hidden",
         )}
       />

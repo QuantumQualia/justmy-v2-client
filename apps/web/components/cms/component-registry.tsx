@@ -36,6 +36,7 @@ import { AgentsManagementBlock } from "./components/agents-management-block";
 import { MyformManagementBlock } from "./components/myform-management-block";
 import { AskSkyBlock } from "./components/asksky-block";
 import { ProfileSpotlightBlock } from "./components/profile-spotlight-block";
+import { HubMiniBlock } from "./components/hub-mini-block";
 import { compileBlockStyles, compileContainerWrapper } from "./block-responsive-styles";
 import type { PageBlock } from "@/lib/services/cms";
 
@@ -100,6 +101,7 @@ export const ComponentRegistry: Record<string, React.ComponentType<any>> = {
   "asksky-block": AskSkyBlock,
   "sub-profiles-block": SubProfilesBlock,
   "profile-spotlight-block": ProfileSpotlightBlock,
+  "hub-mini-block": HubMiniBlock,
 };
 
 const componentBlocks = new Set([
@@ -132,6 +134,7 @@ const componentBlocks = new Set([
   "asksky-block",
   "sub-profiles-block",
   "profile-spotlight-block",
+  "hub-mini-block",
 ]);
 
 /**

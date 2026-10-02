@@ -394,15 +394,8 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
     <div className="space-y-4">
       <Card className="border-border bg-muted text-foreground">
         <CardContent className="space-y-4 p-4 pt-4">
-          <p className="text-sm text-muted-foreground">
-            AskSKY! resolves the profile and agent, then streams answers over SSE.{" "}
-            <span className="font-medium text-muted-foreground">Profile</span> and{" "}
-            <span className="font-medium text-muted-foreground">agent</span> are required for this block to work on published
-            pages.
-          </p>
-
           {profilesLoadFailed && !loadingProfiles && profileMenuOpen ? (
-            <div className="rounded-lg border border-red-500/35 bg-red-500/10 px-3 py-2 text-sm text-red-100">
+            <div className="rounded-lg border border-red-500/35 bg-destructive/10 px-3 py-2 text-sm text-red-100">
               Could not load profiles from <span className="font-medium text-foreground">GET /profiles/admin</span>. Confirm
               you are signed in with permission to use the admin profile list.
             </div>
@@ -416,7 +409,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
 
           <div className="space-y-2">
             <Label htmlFor="asksky-profile-select" className="text-foreground">
-              Profile <span className="text-red-400">*</span>
+              Profile <span className="text-destructive">*</span>
             </Label>
             <Select
               value={profileSlug || undefined}
@@ -511,7 +504,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
 
           <div className="space-y-2">
             <Label htmlFor="asksky-agent-select" className="text-foreground">
-              Agent <span className="text-red-400">*</span>
+              Agent <span className="text-destructive">*</span>
             </Label>
             <Select
               value={agentToken || undefined}

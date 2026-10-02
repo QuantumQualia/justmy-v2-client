@@ -1,28 +1,32 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   Calendar,
-  ExternalLink,
+  ChevronDown,
+  ChevronUp,
   Globe,
-  Loader2,
   Mail,
   MapPin,
   Phone,
   Share2,
   X,
 } from "lucide-react";
+import { FaLinkedin } from "react-icons/fa6";
+import { SiFacebook, SiInstagram, SiTiktok, SiX, SiYoutube } from "react-icons/si";
 import type { PageBlock } from "@/lib/services/cms";
+import { legacyPlainText } from "@/lib/legacy-html";
 import { profilesService } from "@/lib/services/profiles";
 import { getVideoEmbedUrl } from "@/lib/utils/video";
+import { AdBanner } from "@/components/common/ad-banner";
 import { openShare } from "@/components/common/share/share-store";
-import { AdBanner, type AdBannerHotlink } from "@/components/common/ad-banner";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { FreeMode, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/free-mode";
 import "swiper/css/pagination";
 import { Button } from "@workspace/ui/components/button";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import {
   Card,
   CardContent,
@@ -68,10 +72,12 @@ interface PublicProfile {
   calendarLink?: string | null;
   photo?: string | null;
   banner?: string | null;
-  videos?: { id: string; videoUrl: string; title?: string }[];
+  videos?: { id: string; videoUrl: string; title?: string; description?: string }[];
+  socialLinks?: { id?: string; name?: string; link?: string }[];
   phones?: PublicProfilePhone[];
   locations?: PublicProfileLocation[];
   hotlinks?: PublicProfileHotlink[];
+  ad?: { image?: string | null; href?: string | null; alt?: string | null } | null;
   [key: string]: any;
 }
 
@@ -98,28 +104,6 @@ function shareProfile(profile: PublicProfile) {
     url: `${typeof window !== "undefined" ? window.location.origin : ""}/${profile.slug}`,
     imageUrl: profile.banner || profile.photo || undefined,
   });
-}
-
-function buildAdBannerHotlinks(
-  profile: PublicProfile,
-): [AdBannerHotlink, AdBannerHotlink, AdBannerHotlink] | null {
-  const raw = (profile.hotlinks ?? []).map((h) => ({
-    label: h.label,
-    href: h.link,
-  }));
-
-  const defaults: AdBannerHotlink[] = [
-    { label: "View Profile", href: `/${profile.slug}` },
-  ];
-  if (profile.website) {
-    defaults.push({ label: "Website", href: profile.website });
-  }
-  defaults.push({ label: "Share", href: `/${profile.slug}` });
-
-  const combined = [...raw, ...defaults];
-  if (combined.length < 3) return null;
-
-  return [combined[0]!, combined[1]!, combined[2]!];
 }
 
 // --- Sub-components ---
@@ -282,102 +266,308 @@ function ContactBar({ profile }: { profile: PublicProfile }) {
   );
 }
 
-function SpotlightView({ profile }: { profile: PublicProfile }) {
-  const videoUrl = profile.videos?.[0]?.videoUrl?.trim() || 'https://www.youtube.com/watch?v=wDchsz8nmbo';
-  const adHotlinks = buildAdBannerHotlinks(profile);
+function spotlightSocialIcon(name: string) {
+  const key = name.toLowerCase();
+  if (key.includes("facebook")) return <SiFacebook className="h-3.5 w-3.5" />;
+  if (key.includes("instagram")) return <SiInstagram className="h-3.5 w-3.5" />;
+  if (key.includes("linkedin")) return <FaLinkedin className="h-3.5 w-3.5" />;
+  if (key.includes("youtube")) return <SiYoutube className="h-3.5 w-3.5" />;
+  if (key.includes("tiktok")) return <SiTiktok className="h-3.5 w-3.5" />;
+  if (key === "x" || key.includes("twitter")) return <SiX className="h-3.5 w-3.5" />;
+  return <Globe className="h-3.5 w-3.5" />;
+}
+
+function watchOnLabel(url: string) {
+  if (/youtu\.?be/i.test(url)) return "Watch on YouTube";
+  if (/vimeo/i.test(url)) return "Watch on Vimeo";
+  return "Watch";
+}
+
+function SpotlightContactLines({
+  icons,
+  expanded,
+  onToggle,
+  reserveToggle,
+}: {
+  icons: ReactNode[];
+  expanded: boolean;
+  onToggle: () => void;
+  reserveToggle: boolean;
+}) {
+  const boxRef = useRef<HTMLDivElement>(null);
+  const [perLine, setPerLine] = useState(6);
+
+  useLayoutEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    const measure = () => {
+      const fit = Math.max(1, Math.floor((el.clientWidth + 8) / 40));
+      setPerLine((current) => (current === fit ? current : fit));
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  const toggleTakesSlot = reserveToggle || icons.length > perLine;
+  const firstLineCount = toggleTakesSlot ? Math.max(1, perLine - 1) : icons.length;
+  const hidden = icons.slice(firstLineCount);
+  const secondLine = expanded ? hidden.slice(0, perLine) : [];
+  const showToggle = toggleTakesSlot;
 
   return (
-    <Card className="overflow-hidden border-border py-0 rounded-br-none">
-      {/* Hero: video or banner */}
-      {videoUrl ? (
-        <div className="relative w-full bg-muted pt-[56.25%]">
-          {getVideoEmbedUrl(videoUrl) ? (
+    <div ref={boxRef} className="mt-2 space-y-2">
+      <div className="flex items-center gap-2">
+        {icons.slice(0, firstLineCount)}
+        {showToggle ? (
+          <button
+            type="button"
+            onClick={onToggle}
+            className={ICON_BTN}
+            title={expanded ? "Show less" : "Show more"}
+            aria-expanded={expanded}
+          >
+            {expanded ? <ChevronUp className={ICON_SIZE} /> : <ChevronDown className={ICON_SIZE} />}
+          </button>
+        ) : null}
+      </div>
+      {secondLine.length > 0 ? <div className="flex items-center gap-2">{secondLine}</div> : null}
+    </div>
+  );
+}
+
+function SpotlightView({ profile }: { profile: PublicProfile }) {
+  const video = profile.videos?.find((item) => item.videoUrl?.trim());
+  const videoUrl = video?.videoUrl?.trim() || "";
+  const embedUrl = videoUrl ? getVideoEmbedUrl(videoUrl) : null;
+  const caption = (video?.title || video?.description || profile.tagline || "").trim();
+  const socials = (profile.socialLinks ?? []).filter((link) => link.link);
+  const phones = profile.phones ?? [];
+  const locations = profile.locations ?? [];
+  const address = locations.find((location) => location.address?.trim())?.address?.trim() || "";
+  const phone = phones.find((item) => item.number?.trim())?.number?.trim() || "";
+  const hasContact = Boolean(address || phone);
+  const adImage = profile.ad?.image?.trim() || "";
+  const hotlinks = (profile.hotlinks ?? []).filter((link) => link.label && link.link);
+  const [showContact, setShowContact] = useState(false);
+  const [showPhones, setShowPhones] = useState(false);
+  const [showLocations, setShowLocations] = useState(false);
+  const profileHref = `/${profile.slug}`;
+
+  const openPhone = () => {
+    if (phones.length > 1) setShowPhones(true);
+    else if (phone) window.location.href = `tel:${phone}`;
+  };
+
+  const openAddress = () => {
+    if (locations.length > 1) setShowLocations(true);
+    else if (locations[0]) openMapsForLocation(locations[0]);
+  };
+
+  return (
+    <div className="w-full">
+      <div className="justmy-corners-xl w-full overflow-hidden border border-border bg-card shadow-card">
+        {embedUrl ? (
+          <div className="relative w-full bg-black pt-[56.25%]">
             <iframe
-              src={getVideoEmbedUrl(videoUrl)!}
-              title="Profile video"
+              src={embedUrl}
+              title={video?.title || profile.name || "Profile video"}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="absolute inset-0 h-full w-full border-0"
+              className="absolute inset-0 h-full w-full border-0 bg-black"
             />
-          ) : (
-            <video
-              src={videoUrl}
-              controls
-              className="absolute inset-0 h-full w-full"
-            />
-          )}
-        </div>
-      ) : profile.banner ? (
-        <div className="relative w-full">
+          </div>
+        ) : videoUrl ? (
+          <video src={videoUrl} controls className="aspect-video w-full bg-black" />
+        ) : profile.banner ? (
           <img
             src={profile.banner}
             alt={profile.name || profile.slug}
-            className="w-full object-cover"
+            className="aspect-video w-full object-cover"
           />
-        </div>
-      ) : null}
+        ) : null}
 
-      <CardContent className="space-y-4 px-5 pb-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          {/* Left: photo + name + contact bar */}
-          <div className="flex items-center gap-4">
-            <a
-              href={`/${profile.slug}`}
-              target="_blank"
-              rel="noreferrer"
-              className="block h-24 w-24 flex-shrink-0 overflow-hidden rounded-full border-2 border-border bg-muted shadow transition-transform hover:scale-105"
-            >
-              {profile.photo ? (
-                <img
-                  src={profile.photo}
-                  alt={profile.name || profile.slug}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-muted-foreground">
-                  {(profile.name || profile.slug || "?").charAt(0)}
-                </div>
-              )}
-            </a>
-
-            <div className="min-w-0 flex-1 space-y-2">
-              <h3 className="text-base font-bold leading-tight text-foreground">
-                {profile.name || profile.slug}
-              </h3>
-              <ContactBar profile={profile} />
-            </div>
-          </div>
-
-          {/* View Profile button: bottom on mobile, right on desktop */}
-          <div className="mx-auto sm:ml-auto sm:mr-0 sm:flex-shrink-0">
-            <Button asChild size="sm" variant="outline" className="h-8 text-xs">
-              <a href={`/${profile.slug}`} target="_blank" rel="noreferrer">
-                <ExternalLink className="mr-1.5 h-3 w-3" />
-                View Profile
+        {caption || videoUrl ? (
+          <div className="flex items-center justify-between gap-3 bg-black px-4 py-3 text-white">
+            <p className="min-w-0 text-xs font-medium uppercase tracking-[0.14em]">
+              {caption}
+            </p>
+            {videoUrl ? (
+              <a
+                href={videoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 text-[11px] text-white/80 hover:text-white hover:underline"
+              >
+                {watchOnLabel(videoUrl)}
               </a>
-            </Button>
+            ) : null}
           </div>
-        </div>
+        ) : null}
+      </div>
 
-        {/* Ad banner with hotlinks */}
-        {profile.banner && adHotlinks && (
-          <AdBanner
-            imageSrc={profile.banner}
-            imageAlt={`${profile.name || profile.slug} banner`}
-            imageElement={
-              <img
-                src={profile.banner}
-                alt={`${profile.name || profile.slug} banner`}
-                className="h-full w-full rounded-lg rounded-br-none object-cover mt-5"
-              />
-            }
-            bannerLink={`/${profile.slug}`}
-            profileSlug={profile.slug}
-            hotlinks={adHotlinks}
-          />
-        )}
-      </CardContent>
-    </Card>
+      <div className={adImage ? "mt-4 flex flex-col items-center gap-4 md:flex-row md:items-center" : "mt-4 flex items-center justify-end gap-4"}>
+        <div className={adImage ? "flex w-full max-w-md shrink-0 items-center gap-4 mb-5" : "flex shrink-0 items-center gap-4"}>
+        <a
+          href={profileHref}
+          className={adImage ? "block h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-card" : "order-last block h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-card"}
+          title={profile.name || profile.slug}
+        >
+          {profile.photo ? (
+            <img
+              src={profile.photo}
+              alt={profile.name || profile.slug}
+              className="h-full w-full object-cover"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center text-sm font-semibold text-muted-foreground">
+              {(profile.name || profile.slug || "?").charAt(0)}
+            </span>
+          )}
+        </a>
+        <div className={adImage ? "min-w-0 flex-1 text-left" : "min-w-0 text-right"}>
+          {profile.name ? (
+            <p className="text-sm font-semibold text-foreground">{profile.name}</p>
+          ) : null}
+          {adImage ? (
+            <SpotlightContactLines
+              expanded={showContact}
+              onToggle={() => setShowContact((open) => !open)}
+              reserveToggle={hasContact}
+              icons={[
+                <button key="share" type="button" onClick={() => shareProfile(profile)} className={ICON_BTN} title="Share">
+                  <Share2 className={ICON_SIZE} />
+                </button>,
+                profile.email ? (
+                  <a key="email" href={`mailto:${profile.email}`} className={ICON_BTN} title="Email">
+                    <Mail className={ICON_SIZE} />
+                  </a>
+                ) : null,
+                profile.website ? (
+                  <a key="website" href={profile.website} target="_blank" rel="noreferrer" className={ICON_BTN} title="Website">
+                    <Globe className={ICON_SIZE} />
+                  </a>
+                ) : null,
+                ...socials.map((social) => (
+                  <a
+                    key={social.id || social.link}
+                    href={social.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    className={ICON_BTN}
+                    title={social.name || "Social"}
+                  >
+                    {spotlightSocialIcon(social.name || "")}
+                  </a>
+                )),
+              ].filter(Boolean)}
+            />
+          ) : (
+          <div className="mt-2 flex flex-wrap items-center justify-end gap-2">
+            <button type="button" onClick={() => shareProfile(profile)} className={ICON_BTN} title="Share">
+              <Share2 className={ICON_SIZE} />
+            </button>
+            {profile.email ? (
+              <a href={`mailto:${profile.email}`} className={ICON_BTN} title="Email">
+                <Mail className={ICON_SIZE} />
+              </a>
+            ) : null}
+            {profile.website ? (
+              <a href={profile.website} target="_blank" rel="noreferrer" className={ICON_BTN} title="Website">
+                <Globe className={ICON_SIZE} />
+              </a>
+            ) : null}
+            {socials.map((social) => (
+              <a
+                key={social.id || social.link}
+                href={social.link}
+                target="_blank"
+                rel="noreferrer"
+                className={ICON_BTN}
+                title={social.name || "Social"}
+              >
+                {spotlightSocialIcon(social.name || "")}
+              </a>
+            ))}
+            {hasContact ? (
+              <button
+                type="button"
+                onClick={() => setShowContact((open) => !open)}
+                className={ICON_BTN}
+                title="Learn more"
+                aria-expanded={showContact}
+              >
+                {showContact ? <ChevronUp className={ICON_SIZE} /> : <ChevronDown className={ICON_SIZE} />}
+              </button>
+            ) : null}
+          </div>
+          )}
+          {showContact && hasContact ? (
+            <p className="mt-1 text-xs text-muted-foreground">
+              {address ? (
+                <button type="button" onClick={openAddress} className="hover:text-foreground hover:underline">
+                  {address}
+                </button>
+              ) : null}
+              {address && phone ? <span aria-hidden> · </span> : null}
+              {phone ? (
+                <button type="button" onClick={openPhone} className="hover:text-foreground hover:underline">
+                  {phone}
+                </button>
+              ) : null}
+            </p>
+          ) : null}
+        </div>
+        </div>
+        {adImage ? (
+          <div className="w-full min-w-0 flex-1">
+            <AdBanner
+              imageSrc={adImage}
+              imageAlt={profile.ad?.alt || profile.name || "Ad"}
+              imageElement={
+                <img
+                  src={adImage}
+                  alt={profile.ad?.alt || ""}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              }
+              bannerLink={profile.ad?.href || profileHref}
+              profileSlug={profile.slug}
+              hotlinks={hotlinks.map((link) => ({ label: link.label, href: link.link }))}
+              compact
+            />
+          </div>
+        ) : null}
+      </div>
+
+      <SelectionPopover
+        isOpen={showPhones}
+        onClose={() => setShowPhones(false)}
+        title="Select Phone Number"
+        icon={<Phone className="h-4 w-4" />}
+        items={phones.map((item) => ({ id: item.id, label: item.number, subtitle: item.type || undefined }))}
+        onSelect={(id) => {
+          const found = phones.find((item) => item.id === id);
+          if (found) window.location.href = `tel:${found.number}`;
+        }}
+      />
+      <SelectionPopover
+        isOpen={showLocations}
+        onClose={() => setShowLocations(false)}
+        title="Select Address"
+        icon={<MapPin className="h-4 w-4" />}
+        items={locations.map((location, index) => ({
+          id: location.id,
+          label: location.title || `Address ${index + 1}`,
+          subtitle: location.address || undefined,
+        }))}
+        onSelect={(id) => {
+          const found = locations.find((location) => location.id === id);
+          if (found) openMapsForLocation(found);
+        }}
+      />
+    </div>
   );
 }
 
@@ -422,7 +612,7 @@ function FeedProfileCard({ profile }: { profile: PublicProfile }) {
 
         {(profile.about || profile.tagline) && (
           <p className="mt-1 line-clamp-3 text-xs leading-relaxed text-muted-foreground">
-            {profile.about || profile.tagline}
+            {legacyPlainText(profile.about || profile.tagline)}
           </p>
         )}
 
@@ -523,13 +713,11 @@ export function ProfileSpotlightBlock({ block }: { block: PageBlock }) {
           if (p?.slug) bySlug.set(p.slug, p as PublicProfile);
         }
 
-        setPrimaryProfile(
-          primarySlug
-            ? bySlug.get(primarySlug) ?? { slug: primarySlug }
-            : null,
-        );
+        setPrimaryProfile(primarySlug ? bySlug.get(primarySlug) ?? null : null);
         setFeedProfiles(
-          feedSlugs.map((s) => bySlug.get(s) ?? { slug: s }),
+          feedSlugs
+            .map((slug) => bySlug.get(slug))
+            .filter((profile): profile is PublicProfile => Boolean(profile)),
         );
       } catch {
         if (cancelled) return;
@@ -557,8 +745,21 @@ export function ProfileSpotlightBlock({ block }: { block: PageBlock }) {
   if (loading) {
     return (
       <section className="w-full">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-center py-12">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+          <Skeleton className="h-6 w-56" />
+          {isSpotlight ? (
+            <>
+              <Skeleton className="aspect-video w-full justmy-corners-xl" />
+              <Skeleton className="h-8 w-full" />
+              <Skeleton className="h-24 w-full justmy-corners-xl" />
+            </>
+          ) : (
+            <div className="flex gap-4 overflow-hidden">
+              <Skeleton className="h-64 w-[260px] shrink-0 rounded-3xl" />
+              <Skeleton className="h-64 w-[260px] shrink-0 rounded-3xl" />
+              <Skeleton className="hidden h-64 w-[260px] shrink-0 rounded-3xl sm:block" />
+            </div>
+          )}
         </div>
       </section>
     );

@@ -89,7 +89,7 @@ export default function RegisterForm() {
   return (
     <Card className="w-full max-w-md shadow-lg">
       <CardHeader className="text-center">
-        <div className="mx-auto h-12 w-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
+        <div className="mx-auto h-12 w-12 bg-primary rounded-full flex items-center justify-center mb-4">
           {isBusiness ? <Briefcase className="h-6 w-6 text-white" /> : <User className="h-6 w-6 text-white" />}
         </div>
         <CardTitle className="text-2xl font-bold">
@@ -103,7 +103,7 @@ export default function RegisterForm() {
       </CardHeader>
       <CardContent className="space-y-4">
         {oauth.error ? (
-          <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+          <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/40 text-destructive text-sm">
             {oauth.error}
           </div>
         ) : null}
@@ -175,11 +175,11 @@ export default function RegisterForm() {
           {/* CONDITIONAL: BUSINESS NAME */}
           {isBusiness && (
             <div className="pt-4 border-t border-border animate-in fade-in slide-in-from-top-2 space-y-2">
-              <Label className="text-emerald-400 font-bold">Business Name</Label>
+              <Label className="text-success font-bold">Business Name</Label>
               <Input 
                 required 
                 placeholder="e.g. Joe's Pizza"
-                className="border-emerald-500/50 focus:border-emerald-500"
+                className="border-success/40 focus:border-success"
                 onChange={(e) => setFormData({...formData, businessName: e.target.value})}
               />
             </div>
@@ -194,13 +194,13 @@ export default function RegisterForm() {
               onChange={(e) => setFormData({...formData, referralCode: e.target.value})}
             />
             {referralCodeFromUrl && (
-              <p className="text-[10px] text-emerald-400">Referral code detected from link</p>
+              <p className="text-[10px] text-success">Referral code detected from link</p>
             )}
           </div>
 
           <Button 
             type="submit" 
-            className="cursor-pointer w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold mt-4 h-12 text-lg" 
+            className="cursor-pointer w-full mt-4 h-12 text-lg" 
             disabled={oauth.loading}
           >
             {oauth.loading ? "Creating Account..." : "Get Started"}
@@ -209,7 +209,7 @@ export default function RegisterForm() {
           <div className="text-center text-sm text-muted-foreground pt-4 border-t border-border">
             <p>
               Already have an account?{" "}
-              <Link href="/login" className="text-emerald-500 hover:text-emerald-400 font-medium">
+              <Link href="/login" className="text-primary hover:text-primary/80 font-medium">
                 Sign in
               </Link>
             </p>

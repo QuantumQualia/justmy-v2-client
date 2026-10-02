@@ -155,21 +155,21 @@ export function DynamicForm({
 
   const embed = variant === "embed";
 
-  const labelCls = embed ? "asksky-glass-muted" : "text-slate-200";
+  const labelCls = embed ? "asksky-glass-muted" : "text-foreground";
   const titleCls = embed ? "asksky-glass-empty-title" : "text-white";
   const fieldHeaderCls = embed ? "asksky-glass-empty-title" : "text-white";
-  const hintCls = embed ? "asksky-glass-muted" : "text-slate-400";
+  const hintCls = embed ? "asksky-glass-muted" : "text-muted-foreground";
   const inlineErrCls = embed
     ? "asksky-glass-error border px-2 py-1.5 text-xs"
-    : "rounded-md border border-red-500/30 bg-red-500/10 px-2 py-1.5 text-xs text-red-200";
+    : "rounded-md border border-red-500/30 bg-destructive/10 px-2 py-1.5 text-xs text-red-200";
   const emptyFieldsCls = embed
     ? "asksky-glass-banner border px-3 py-2 text-sm"
     : "rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-200";
-  const inputBase = embed ? "asksky-glass-input text-base md:text-sm" : "border-slate-700 bg-slate-900 text-white";
+  const inputBase = embed ? "asksky-glass-input text-base md:text-sm" : "border-border bg-card text-white";
   const inputSm = cn("h-9", inputBase);
   const textareaCls = cn(
     "min-h-[88px] text-base md:text-sm",
-    embed ? "asksky-glass-input" : "border-slate-700 bg-slate-900 text-white",
+    embed ? "asksky-glass-input" : "border-border bg-card text-white",
   );
 
   if (fields.length === 0) {
@@ -191,7 +191,7 @@ export function DynamicForm({
         const commonLabel = (
           <Label htmlFor={`df-${f.id}`} className={cn("text-xs", labelCls)}>
             {label}
-            {f.required ? <span className="text-red-400"> *</span> : null}
+            {f.required ? <span className="text-destructive"> *</span> : null}
           </Label>
         );
 
@@ -260,14 +260,14 @@ export function DynamicForm({
             : [{ value: "__empty__", label: ph || "Add options in the form builder" }];
           const current = String(values[f.id] ?? "");
           const fieldSetClass = embed
-            ? "border-white/12 bg-slate-950/35 backdrop-blur-sm"
-            : "border-slate-700/50 bg-slate-900/40";
-          const labelClass = cn("text-sm", embed ? "text-slate-100" : "text-slate-200");
+            ? "border-white/12 bg-background/35 backdrop-blur-sm"
+            : "border-border/50 bg-card/40";
+          const labelClass = cn("text-sm", embed ? "text-foreground" : "text-foreground");
           return (
             <fieldset key={f.id} disabled={disabled || submitting || !f.options?.length} className="space-y-2">
               <legend className={cn("mb-1 text-xs", labelCls)}>
                 {label}
-                {f.required ? <span className="text-red-400"> *</span> : null}
+                {f.required ? <span className="text-destructive"> *</span> : null}
               </legend>
               <div className={cn("space-y-2 rounded-lg border p-3", fieldSetClass)}>
                 {opts.map((o) => {
@@ -277,7 +277,7 @@ export function DynamicForm({
                       key={o.value}
                       className={cn(
                         "flex cursor-pointer items-center gap-2.5 rounded-md px-1 py-0.5",
-                        disabledOpt ? "cursor-not-allowed opacity-60" : "hover:bg-white/5",
+                        disabledOpt ? "cursor-not-allowed opacity-60" : "hover:bg-card/5",
                       )}
                     >
                       <input
@@ -288,7 +288,7 @@ export function DynamicForm({
                         disabled={disabledOpt}
                         onChange={() => setField(f.id, disabledOpt ? "" : o.value)}
                         className={cn(
-                          "h-4 w-4 shrink-0 border-slate-500 bg-slate-900",
+                          "h-4 w-4 shrink-0 border-border bg-card",
                           embed ? "border-zinc-500 text-emerald-500 accent-emerald-500" : "accent-emerald-500",
                         )}
                       />
@@ -312,7 +312,7 @@ export function DynamicForm({
               />
               <Label htmlFor={`df-${f.id}`} className={cn("text-xs", labelCls)}>
                 {label}
-                {f.required ? <span className="text-red-400"> *</span> : null}
+                {f.required ? <span className="text-destructive"> *</span> : null}
               </Label>
             </div>
           );
@@ -365,7 +365,7 @@ export function DynamicForm({
                   setField(f.id, file ? file.name : "");
                 }}
                 className={cn(
-                  "h-auto min-h-9 cursor-pointer py-1.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-emerald-600 file:px-3 file:py-1 file:text-xs file:font-medium file:text-white hover:file:bg-emerald-500",
+                  "h-auto min-h-9 cursor-pointer py-1.5 text-sm file:mr-3 file:rounded-md file:border-0 file:bg-primary file:px-3 file:py-1 file:text-xs file:font-medium file:text-primary-foreground hover:file:bg-success",
                   embed ? "asksky-glass-input" : inputSm,
                 )}
               />

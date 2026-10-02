@@ -174,10 +174,10 @@ export function MobileSidebar({
               "w-full flex items-center justify-between px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
               level === 0
                 ? isActive
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  ? "bg-success/10 text-success border border-success/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
                 : isActive
-                  ? "bg-accent text-emerald-400"
+                  ? "bg-accent text-success"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
             )}
             style={{ paddingLeft: `${1 + level * 1}rem` }}
@@ -209,10 +209,10 @@ export function MobileSidebar({
           "w-full flex items-center px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
           level === 0
             ? isActive
-              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+              ? "bg-success/10 text-success border border-success/20"
               : "text-muted-foreground hover:bg-accent hover:text-foreground"
             : isActive
-              ? "bg-accent text-emerald-400"
+              ? "bg-accent text-success"
               : "text-muted-foreground hover:bg-accent hover:text-foreground"
         )}
         style={{ paddingLeft: `${1 + level * 1}rem` }}
@@ -335,7 +335,7 @@ export function MobileSidebar({
                 "w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors cursor-pointer",
                 pathname === "/lab/app-hub" ||
                   pathname?.startsWith("/lab/app-hub/")
-                  ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                  ? "bg-success/10 text-success border border-success/20"
                   : "text-muted-foreground hover:bg-accent hover:text-foreground"
               )}
             >
@@ -345,7 +345,7 @@ export function MobileSidebar({
 
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors cursor-pointer text-red-400 hover:bg-red-500/10 hover:text-red-300"
+              className="w-full flex items-center gap-3 px-4 py-3 text-left rounded-lg transition-colors cursor-pointer text-destructive hover:bg-destructive/10 hover:text-red-300"
             >
               <LogOut className="h-5 w-5" />
               <span className="font-medium">Logout</span>

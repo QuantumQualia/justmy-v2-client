@@ -272,7 +272,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
     return {
       label: "Live",
       variant: "secondary" as const,
-      className: "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20",
+      className: "bg-success/10 text-success border border-success/20",
     };
   };
 
@@ -288,8 +288,8 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
         className={[
           "border border-border rounded-xl px-3 sm:px-4 py-1.5 sm:py-2 mb-2 last:border-b",
           "bg-gradient-to-r from-muted/60 to-muted/30",
-          "hover:border-emerald-500/60 transition-all duration-200 cursor-pointer",
-          isNewlyInstalled ? "ring-2 ring-emerald-500/70 ring-offset-2 ring-offset-background" : "",
+          "hover:border-success/60 transition-all duration-200 cursor-pointer",
+          isNewlyInstalled ? "ring-2 ring-success/70 ring-offset-2 ring-offset-background" : "",
         ]
           .filter(Boolean)
           .join(" ")}
@@ -336,7 +336,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                   variant="outline"
                   size="sm"
                   type="button"
-                  className="cursor-pointer border-border bg-muted text-foreground hover:border-emerald-500/50 hover:bg-accent hover:text-accent-foreground inline-flex items-center gap-2 rounded-full px-4 transition-colors"
+                  className="cursor-pointer border-border bg-muted text-foreground hover:border-success/40 hover:bg-accent hover:text-accent-foreground inline-flex items-center gap-2 rounded-full px-4 transition-colors"
                   onClick={() => handlePreview(app)}
                 >
                   <Play className="h-3 w-3" />
@@ -352,7 +352,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                     variant="default"
                     size="sm"
                     type="button"
-                    className="cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-black inline-flex items-center gap-2 rounded-full px-4"
+                    className="cursor-pointer bg-success hover:bg-success text-black inline-flex items-center gap-2 rounded-full px-4"
                     onClick={() => handleInstall(app.id)}
                   >
                     <Plus className="h-3 w-3" />
@@ -368,7 +368,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                       variant="default"
                       size="sm"
                       type="button"
-                      className="cursor-pointer bg-emerald-500 hover:bg-emerald-400 text-black inline-flex items-center gap-2 rounded-full px-4"
+                      className="cursor-pointer bg-success hover:bg-success text-black inline-flex items-center gap-2 rounded-full px-4"
                       onClick={() => handleOpen(app)}
                     >
                       <span className="text-xs font-semibold uppercase tracking-[0.16em]">
@@ -379,7 +379,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
                       variant="outline"
                       size="sm"
                       type="button"
-                      className="cursor-pointer border-border bg-muted text-muted-foreground hover:border-red-500/50 hover:bg-red-950/30 hover:text-red-300 inline-flex items-center gap-2 rounded-full px-4 transition-colors"
+                      className="cursor-pointer border-border bg-muted text-muted-foreground hover:border-destructive/40 hover:bg-red-950/30 hover:text-red-300 inline-flex items-center gap-2 rounded-full px-4 transition-colors"
                       onClick={() => handleUninstall(app.id)}
                     >
                       <Minus className="h-3 w-3" />
@@ -401,7 +401,7 @@ export const AppHub: React.FC<AppHubProps> = ({ initialApps }) => {
     <div className="min-h-[calc(100vh-4.1rem)] bg-background text-foreground px-4 py-6 sm:px-6 sm:py-10 font-sans">
       <div className="max-w-3xl mx-auto space-y-8 sm:space-y-10">
         <header className="space-y-2 sm:space-y-3">
-          <div className="text-xs sm:text-sm font-semibold tracking-[0.22em] text-emerald-400 uppercase">
+          <div className="text-xs sm:text-sm font-semibold tracking-[0.22em] text-success uppercase">
             Personal OS
           </div>
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight">

@@ -49,6 +49,27 @@ export interface Address {
   longitude?: string;
 }
 
+export interface ProfileVideo {
+  id: string;
+  type: string;
+  title?: string;
+  description?: string;
+  videoUrl: string;
+}
+
+export interface ProfileAd {
+  image: string;
+  href?: string | null;
+  alt?: string | null;
+}
+
+export interface ProfileAskSkyAgent {
+  id: string;
+  name: string;
+  agentToken: string;
+  greetingMessage?: string | null;
+}
+
 export interface ProfileData {
   id?: number; // Profile ID for API calls
   osId?: string; // Operating System ID
@@ -78,6 +99,17 @@ export interface ProfileData {
   googleStarRating?: string | null;
   googleRatingCount?: number | null;
   googlePlaceId?: string | null;
+  googleReviewLink?: string | null;
+  videos?: ProfileVideo[];
+  ad?: ProfileAd | null;
+  agents?: ProfileAskSkyAgent[];
+  relatedCategories?: ProfileRelatedCategory[];
+}
+
+export interface ProfileRelatedCategory {
+  name: string;
+  slug?: string | null;
+  legacyId?: number | null;
 }
 
 interface ProfileStore {

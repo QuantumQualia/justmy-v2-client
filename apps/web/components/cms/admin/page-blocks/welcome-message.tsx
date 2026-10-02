@@ -20,14 +20,7 @@ export function WelcomeMessageBlockEditor({ block, onUpdate }: WelcomeMessageBlo
 
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-muted rounded-lg border border-border space-y-3">
-        <p className="text-sm text-muted-foreground">
-          This block renders the AI-powered welcome message card.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          You can optionally override the link destination for the call-to-action.
-        </p>
-      </div>
+      
 
       <div className="space-y-2">
         <Label className="text-muted-foreground">Weather page link (optional)</Label>

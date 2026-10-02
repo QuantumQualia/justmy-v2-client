@@ -100,10 +100,10 @@ export function AskSkyStaticEmbedDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-white text-foreground shadow-xl dark:bg-card sm:max-w-lg">
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-border bg-card text-foreground shadow-xl dark:bg-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Link2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <Link2 className="h-5 w-5 text-emerald-600 dark:text-success" />
             AskSKY! static embed
           </DialogTitle>
           <DialogDescription className="text-muted-foreground">

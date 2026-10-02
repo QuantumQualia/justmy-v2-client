@@ -82,10 +82,10 @@ export function AskSkyEventsCarousel({ market }: AskSkyEventsCarouselProps) {
   return (
     <section className="relative mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden px-3 pb-6 pt-2 sm:px-6 sm:pb-10">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="font-serif text-[1.55rem] leading-snug tracking-tight text-slate-900 sm:text-[2rem] sm:leading-tight">
+        <h2 className="font-serif text-[1.55rem] leading-snug tracking-tight text-foreground sm:text-[2rem] sm:leading-tight">
           {city} is showing off tonight. Here is where you should be.
         </h2>
-        <p className="mt-3 text-sm text-slate-500 sm:text-[15px]">
+        <p className="mt-3 text-sm text-muted-foreground sm:text-[15px]">
           AskSKY! paired tonight&apos;s top events with nearby OpenTable
           reservation slots.
         </p>
@@ -123,7 +123,7 @@ export function AskSkyEventsCarousel({ market }: AskSkyEventsCarouselProps) {
           </Swiper>
           <div
             ref={setPaginationEl}
-            className="asksky-events-pagination mt-5 flex min-h-6 items-center justify-center gap-1.5 [&>.swiper-pagination-bullet]:h-2 [&>.swiper-pagination-bullet]:w-2 [&>.swiper-pagination-bullet]:rounded-full [&>.swiper-pagination-bullet]:bg-slate-300 [&>.swiper-pagination-bullet]:opacity-100 [&>.swiper-pagination-bullet]:transition-all [&>.swiper-pagination-bullet-active]:scale-125 [&>.swiper-pagination-bullet-active]:bg-violet-500"
+            className="asksky-events-pagination mt-5 flex min-h-6 items-center justify-center gap-1.5 [&>.swiper-pagination-bullet]:h-2 [&>.swiper-pagination-bullet]:w-2 [&>.swiper-pagination-bullet]:rounded-full [&>.swiper-pagination-bullet]:bg-slate-300 [&>.swiper-pagination-bullet]:opacity-100 [&>.swiper-pagination-bullet]:transition-all [&>.swiper-pagination-bullet-active]:scale-125 [&>.swiper-pagination-bullet-active]:bg-primary"
             aria-hidden
           />
         </div>
@@ -150,8 +150,8 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
   }
 
   return (
-    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200/90 bg-white shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)]">
-      <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-slate-200">
+    <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_18px_40px_-28px_rgba(15,23,42,0.28)]">
+      <div className="relative aspect-[16/10] w-full shrink-0 overflow-hidden bg-muted">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={event.imageUrl}
@@ -190,12 +190,12 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
               href={event.ticketUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-violet-500"
+              className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-white transition hover:bg-primary/90"
             >
               Get Tickets →
             </a>
           ) : (
-            <span className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl bg-violet-600/40 px-4 py-3 text-sm font-semibold text-white/80">
+            <span className="inline-flex min-w-0 flex-1 items-center justify-center rounded-xl bg-primary/40 px-4 py-3 text-sm font-semibold text-white/80">
               Get Tickets →
             </span>
           )}
@@ -203,7 +203,7 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
             <button
               type="button"
               onClick={handleShare}
-              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-slate-200 px-3 py-3 text-xs font-medium text-slate-600 transition hover:border-violet-300 hover:bg-violet-50 hover:text-violet-700"
+              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-xl border border-border px-3 py-3 text-xs font-medium text-muted-foreground transition hover:border-primary/40 hover:bg-secondary hover:text-primary"
               aria-label={`Share ${event.title}`}
             >
               <Share2 className="h-3.5 w-3.5" aria-hidden />
@@ -213,9 +213,9 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
         </div>
 
         {dining ? (
-          <div className="mt-3.5 border-t border-slate-100 pt-3.5">
+          <div className="mt-3.5 border-t border-border pt-3.5">
             <div className="flex items-start gap-3">
-              <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+              <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
                 {dining.imageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -224,23 +224,23 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
                     className="h-full w-full object-cover"
                   />
                 ) : (
-                  <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-slate-400">
+                  <span className="flex h-full w-full items-center justify-center text-xs font-semibold text-muted-foreground">
                     {dining.name.slice(0, 1).toUpperCase()}
                   </span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-semibold text-slate-900">
+                <p className="truncate text-sm font-semibold text-foreground">
                   {dining.name}
                   {distance ? (
-                    <span className="font-normal text-slate-500">
+                    <span className="font-normal text-muted-foreground">
                       {" "}
                       {distance}
                     </span>
                   ) : null}
                 </p>
                 {dining.reservationLabel ? (
-                  <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-slate-500 sm:text-[13px]">
+                  <p className="mt-1 inline-flex items-center gap-1.5 text-xs text-muted-foreground sm:text-[13px]">
                     <Clock
                       className="h-3.5 w-3.5 shrink-0 text-cyan-500"
                       aria-hidden
@@ -256,12 +256,12 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
                 href={dining.reserveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#d9f4f2] px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-[#c8eeeb]"
+                className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#d9f4f2] px-4 py-3 text-sm font-semibold text-foreground transition hover:bg-[#c8eeeb]"
               >
                 Reserve via OpenTable →
               </a>
             ) : (
-              <span className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#d9f4f2]/70 px-4 py-3 text-sm font-semibold text-slate-500">
+              <span className="mt-3 inline-flex w-full items-center justify-center rounded-xl bg-[#d9f4f2]/70 px-4 py-3 text-sm font-semibold text-muted-foreground">
                 Reserve via OpenTable →
               </span>
             )}
@@ -275,12 +275,12 @@ function EventDealCard({ event }: { event: CityOsEvent }) {
 function EventCardSkeleton({ className = "" }: { className?: string }) {
   return (
     <div
-      className={`animate-pulse overflow-hidden rounded-2xl border border-slate-200/90 bg-white ${className}`}
+      className={`animate-pulse overflow-hidden rounded-2xl border border-border/90 bg-card ${className}`}
     >
-      <div className="aspect-[16/10] bg-slate-200" />
+      <div className="aspect-[16/10] bg-muted" />
       <div className="space-y-3 p-4">
-        <div className="h-11 rounded-xl bg-slate-200" />
-        <div className="h-16 rounded-xl bg-slate-100" />
+        <div className="h-11 rounded-xl bg-muted" />
+        <div className="h-16 rounded-xl bg-muted" />
       </div>
     </div>
   );

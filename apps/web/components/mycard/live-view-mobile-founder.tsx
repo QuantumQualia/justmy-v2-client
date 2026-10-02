@@ -5,6 +5,8 @@ import { MycardLiveContactBar } from "@/components/mycard/mycard-live-contact-ba
 import { MycardFallbackBanner, MycardProfileAvatar, hasMycardMedia } from "@/components/mycard/mycard-cover-fallbacks";
 import { PROFILE_KIND } from "@/lib/os-types";
 import type { MyCardMobileViewProps } from "@/components/mycard/live-view-mobile";
+import { RawHtmlCssBlock } from "@/components/cms/components/raw-html-css-block";
+import { legacyPlainText } from "@/lib/legacy-html";
 
 export function MyCardMobileFounderView({
   data,
@@ -16,7 +18,6 @@ export function MyCardMobileFounderView({
   taglineTextClass,
   aboutTitleTextClass,
   aboutCardClass,
-  aboutBodyTextClass,
   ctaButtonClassName,
   registerHref,
   footerAdUrl,
@@ -61,7 +62,7 @@ export function MyCardMobileFounderView({
             <h1 className={`text-xl md:text-2xl font-bold ${nameTextClass} font-serif`}>
               {data.name}
             </h1>
-            <p className={`text-sm ${taglineTextClass} break-words`}>{data.tagline}</p>
+            <p className={`text-sm ${taglineTextClass} break-words`}>{legacyPlainText(data.tagline)}</p>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -96,14 +97,10 @@ export function MyCardMobileFounderView({
               <h2 className={`text-xl font-bold ${aboutTitleTextClass} font-serif`}>About</h2>
 
               {isLightMycard ? (
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">
-                  {data.about}
-                </p>
+                <RawHtmlCssBlock html={data.about ?? ""} />
               ) : (
                 <div className={aboutCardClass}>
-                  <p className={`text-sm ${aboutBodyTextClass} leading-relaxed whitespace-pre-wrap`}>
-                    {data.about}
-                  </p>
+                  <RawHtmlCssBlock html={data.about ?? ""} />
                 </div>
               )}
             </div>

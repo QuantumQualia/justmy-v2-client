@@ -58,7 +58,7 @@ export function CityOsInlineRoot({
 
   if (!data) {
     return (
-      <div className="flex min-h-[120px] items-center justify-center bg-[linear-gradient(to_bottom_right,#020618,#0a1628,#0f172b)] p-4 text-sm text-slate-400">
+      <div className="flex min-h-[120px] items-center justify-center bg-[linear-gradient(to_bottom_right,#020618,#0a1628,#0f172b)] p-4 text-sm text-muted-foreground">
         Loading…
       </div>
     );

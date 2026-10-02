@@ -14,9 +14,9 @@ const InlineEdit = dynamic(() => import("@/components/mycard/inline-edit-view"),
   ssr: false,
   loading: () => (
     <div className="space-y-3 p-6">
-      <div className="h-48 animate-pulse rounded-2xl bg-slate-100" />
-      <div className="h-4 w-2/3 animate-pulse rounded bg-slate-100" />
-      <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+      <div className="h-48 animate-pulse rounded-2xl bg-muted" />
+      <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
     </div>
   ),
 });
@@ -69,7 +69,7 @@ function OnboardInner() {
                 href={liveUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-violet-300"
+                className="rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:border-primary/40"
               >
                 Open live myCARD
               </a>
@@ -88,9 +88,9 @@ function OnboardInner() {
           padded={false}
           className="flex min-h-0 flex-col overflow-hidden"
         >
-          <div className="shrink-0 border-b border-slate-100 px-5 py-3">
+          <div className="shrink-0 border-b border-border px-5 py-3">
             <p className="text-sm font-semibold">Editor</p>
-            <p className="text-xs text-slate-500">Tap fields on the card to edit. Open live myCARD to see the public page.</p>
+            <p className="text-xs text-muted-foreground">Tap fields on the card to edit. Open live myCARD to see the public page.</p>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
             <div className="mx-auto max-w-[375px] py-4">

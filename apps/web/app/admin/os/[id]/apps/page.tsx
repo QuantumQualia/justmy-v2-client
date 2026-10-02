@@ -232,7 +232,7 @@ export default function OSAppManagerPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveApp(config.appId)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                        className="text-destructive hover:text-red-300 hover:bg-destructive/10"
                       >
                         Remove
                       </Button>

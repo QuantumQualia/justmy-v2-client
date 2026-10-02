@@ -30,7 +30,7 @@ export function AskSkyClaimCta({
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-10 top-0 h-64 w-64 rounded-full bg-violet-600/30 blur-3xl"
+          className="pointer-events-none absolute -right-10 top-0 h-64 w-64 rounded-full bg-primary/30 blur-3xl"
         />
         <div
           aria-hidden
@@ -38,7 +38,7 @@ export function AskSkyClaimCta({
         />
 
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center">
-          <span className="inline-flex items-center rounded-full border border-white/20 bg-white/5 px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/85 sm:text-[11px]">
+          <span className="inline-flex items-center rounded-full border border-white/20 bg-card/5 px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/85 sm:text-[11px]">
             1,000 Free Biz OS Packages
           </span>
 
@@ -56,13 +56,13 @@ export function AskSkyClaimCta({
             <button
               type="button"
               onClick={onClaim}
-              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110 sm:px-7 sm:text-base"
+              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-110 sm:px-7 sm:text-base"
             >
               <span className="relative inline-flex h-5 w-5 items-center justify-center">
                 <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
                 <span
                   aria-hidden
-                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white"
+                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-card"
                 />
               </span>
               Claim Your Free Dot Hub
@@ -71,13 +71,13 @@ export function AskSkyClaimCta({
           ) : (
             <Link
               href={href}
-              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-linear-to-r from-violet-600 to-cyan-400 px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:brightness-110 sm:px-7 sm:text-base"
+              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-110 sm:px-7 sm:text-base"
             >
               <span className="relative inline-flex h-5 w-5 items-center justify-center">
                 <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
                 <span
                   aria-hidden
-                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-white"
+                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-card"
                 />
               </span>
               Claim Your Free Dot Hub

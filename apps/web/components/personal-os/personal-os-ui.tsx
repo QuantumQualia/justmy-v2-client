@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, CreditCard, Home, Radio } from "lucide-react";
+import { CalendarDays, CreditCard, FileText, Home, Radio } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { navIsActive } from "@/components/biz-os/biz-os-ui";
 
@@ -11,6 +11,7 @@ export const PERSONAL_OS_NAV = [
   { href: "/personal-os/plans", label: "myPLANS", icon: CalendarDays },
   { href: "/personal-os/daily-drop", label: "Daily Drop", icon: Radio },
   { href: "/personal-os/card", label: "myCARD", icon: CreditCard },
+  { href: "/personal-os/content", label: "Content", icon: FileText },
 ] as const;
 
 export function PersonalOsSubnav() {
@@ -18,7 +19,7 @@ export function PersonalOsSubnav() {
 
   return (
     <nav
-      className="border-b border-violet-100/80 bg-white/90 backdrop-blur-md"
+      className="border-b border-primary/20 bg-card/90 backdrop-blur-md"
       aria-label="Personal OS"
     >
       <div className="mx-auto flex max-w-6xl gap-1 overflow-x-auto px-4 py-2">
@@ -32,8 +33,8 @@ export function PersonalOsSubnav() {
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors",
                 active
-                  ? "bg-violet-600 text-white shadow-sm shadow-violet-600/20"
-                  : "text-slate-600 hover:bg-violet-50 hover:text-violet-800",
+                  ? "bg-primary text-primary-foreground shadow-sm shadow-primary/20"
+                  : "text-muted-foreground hover:bg-secondary hover:text-primary",
               )}
             >
               <Icon className="h-3.5 w-3.5" />

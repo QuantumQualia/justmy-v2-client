@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription } from "@workspace/ui/components/card";
 import { Label } from "@workspace/ui/components/label";
 import { Input } from "@workspace/ui/components/input";
 import type { PageBlock } from "@/lib/services/cms";
@@ -43,17 +42,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
 
   return (
     <div className="space-y-4">
-      <Card className="bg-muted border-border text-foreground">
-        <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Ad banner with an image, profile slug, and up to 3 hotlinks.
-          </p>
-          <CardDescription className="text-xs text-muted-foreground">
-            Banner type can be Custom, Market Sponsor, or Profile. Future types can be added without
-            changing this block.
-          </CardDescription>
-        </CardContent>
-      </Card>
+      
 
       {/* Banner type */}
       <div className="space-y-2">

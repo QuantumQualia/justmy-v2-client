@@ -25,12 +25,20 @@ import {
   SelectValue,
 } from "@workspace/ui/components/select";
 import { cmsService } from "@/lib/services/cms";
+import { contentService, type ContentTypeDto } from "@/lib/services/content";
+import {
+  ContentTypeFields,
+  detailsFromRecord,
+  type ContentDetails,
+} from "@/components/cms/admin/content-type-fields";
+import { marketsService } from "@/lib/services/markets";
 import { uploadBase64Image } from "@/lib/api-client";
 import { ImageCropModal, ImageInsertDialog } from "@/components/common/image-dialogs";
 import { readFileAsDataUrl } from "@/lib/read-image-files";
 import type { PayloadPost, PageBlock } from "@/lib/services/cms";
 import { PageBlockEditor } from "@/components/cms/admin/page-block-editor";
 import { PostBlockSelector } from "@/components/cms/admin/post-block-selector";
+import { NewsstandControl } from "@/components/content/newsstand-control";
 
 export default function EditPostPage() {
   const router = useRouter();
@@ -49,7 +57,7 @@ export default function EditPostPage() {
     externalUrl: "",
     excerpt: "",
     tags: [] as string[],
-    status: "draft" as "draft" | "publish" | "archive",
+    status: "draft" as PayloadPost["status"],
     seo: {
       title: "",
       description: "",
@@ -60,6 +68,16 @@ export default function EditPostPage() {
   const [content, setContent] = useState<PageBlock[]>([]);
   const loadedForRef = useRef<string | null>(null);
   const isSharedPost = post?.type === "SHARED";
+  const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
+  const [contentTypeId, setContentTypeId] = useState("");
+  const [details, setDetails] = useState<ContentDetails>({});
+  const [marketIds, setMarketIds] = useState<number[]>([]);
+  const [markets, setMarkets] = useState<Array<{ id: number; name: string }>>([]);
+  const [channelIds, setChannelIds] = useState<number[]>([]);
+  const [channels, setChannels] = useState<Array<{ id: number; name: string }>>([]);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [newsstandStatus, setNewsstandStatus] = useState<"none" | "pending" | "published">("none");
+  const selectedType = contentTypes.find((type) => String(type.id) === contentTypeId);
 
   const handleReorderBlock = (fromIndex: number, toIndex: number) => {
     setContent((prev) => {
@@ -96,7 +114,10 @@ export default function EditPostPage() {
         externalUrl: data.externalUrl || "",
         excerpt: data.excerpt ?? "",
         tags: data.tags ?? [],
-        status: data.status ?? "draft",
+        status:
+          data.status === "publish" || data.status === "archive" || data.status === "trash"
+            ? data.status
+            : "draft",
         seo: {
           title: data.seo?.title || "",
           description: data.seo?.description || "",
@@ -107,7 +128,24 @@ export default function EditPostPage() {
               : data.seo?.ogImage?.url || "",
         },
       });
+      setNewsstandStatus(data.newsstandStatus ?? "none");
       setContent((data.content || []) as PageBlock[]);
+      setVideoUrl(data.videoUrl || "");
+      const [types, record, marketPage, channelRows] = await Promise.all([
+        contentService.listContentTypes().catch(() => []),
+        contentService.getContentRecord(Number(postId)).catch(() => null),
+        marketsService.getMarkets({ limit: 200, page: 1 }).catch(() => null),
+        contentService.listChannels().catch(() => []),
+      ]);
+      setContentTypes(types);
+      setMarkets((marketPage?.data ?? []).map((market) => ({ id: market.id, name: market.name })));
+      setChannels(channelRows);
+      if (record) {
+        setContentTypeId(record.contentTypeId ? String(record.contentTypeId) : "");
+        setDetails(detailsFromRecord(record.details));
+        setMarketIds((record.markets ?? []).map((row) => row.marketId));
+        setChannelIds((record.channels ?? []).map((row) => row.channelId));
+      }
     } catch (error) {
       console.error("Failed to load post:", error);
       toast.error("Failed to load post");
@@ -135,6 +173,11 @@ export default function EditPostPage() {
           tags: tags?.length ? tags : undefined,
           status: rest.status,
           seo: seoPayload,
+          videoUrl: videoUrl.trim() || undefined,
+          contentTypeId: contentTypeId ? Number(contentTypeId) : null,
+          details,
+          marketIds,
+          channelIds,
         });
         setPost(updatedPost);
       } else {
@@ -144,6 +187,11 @@ export default function EditPostPage() {
           content,
           tags: tags?.length ? tags : undefined,
           seo: seoPayload,
+          videoUrl: videoUrl.trim() || undefined,
+          contentTypeId: contentTypeId ? Number(contentTypeId) : null,
+          details,
+          marketIds,
+          channelIds,
         });
         // Backend may adjust slug for uniqueness; reflect it in UI.
         setPost(updatedPost);
@@ -166,7 +214,7 @@ export default function EditPostPage() {
     const defaultStyles = {
       paddingTop: "16px",
       paddingBottom: "16px",
-      maxWidth: "48rem",
+      maxWidth: "64rem",
     } as PageBlock["styles"];
 
     let newBlock: PageBlock;
@@ -407,7 +455,7 @@ export default function EditPostPage() {
                     onValueChange={(value) =>
                       setFormData({
                         ...formData,
-                        status: value as "draft" | "publish" | "archive",
+                        status: value as PayloadPost["status"],
                       })
                     }
                   >
@@ -421,8 +469,84 @@ export default function EditPostPage() {
                       <SelectItem value="draft">Draft</SelectItem>
                       <SelectItem value="publish">Publish</SelectItem>
                       <SelectItem value="archive">Archive</SelectItem>
+                      <SelectItem value="trash">Trash</SelectItem>
                     </SelectContent>
                   </Select>
+                  <NewsstandControl
+                    postId={postId}
+                    status={formData.status}
+                    newsstandStatus={newsstandStatus}
+                    allowAdmin
+                    onChange={setNewsstandStatus}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Video URL</Label>
+                  <Input value={videoUrl} onChange={(e) => setVideoUrl(e.target.value)} placeholder="Video used inside this post" />
+                </div>
+                <div className="space-y-2">
+                  <Label>Content type</Label>
+                  <Select value={contentTypeId} onValueChange={setContentTypeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a content type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {contentTypes.map((type) => (
+                        <SelectItem key={type.id} value={String(type.id)}>
+                          {type.application === "INFO_HUB" ? "Info" : "Content"} · {type.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {selectedType ? (
+                  <ContentTypeFields slug={selectedType.slug} details={details} onChange={setDetails} />
+                ) : null}
+                <div className="space-y-2">
+                  <Label>Markets</Label>
+                  <div className="max-h-40 space-y-1 overflow-auto rounded-md border border-border p-2">
+                    {markets.map((market) => (
+                      <label key={market.id} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={marketIds.includes(market.id)}
+                          onChange={(e) =>
+                            setMarketIds((prev) =>
+                              e.target.checked
+                                ? [...prev, market.id]
+                                : prev.filter((id) => id !== market.id),
+                            )
+                          }
+                        />
+                        {market.name}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>Channels</Label>
+                  <div className="max-h-40 space-y-1 overflow-auto rounded-md border border-border p-2">
+                    {channels.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No channels yet</p>
+                    ) : (
+                      channels.map((channel) => (
+                        <label key={channel.id} className="flex items-center gap-2 text-sm">
+                          <input
+                            type="checkbox"
+                            checked={channelIds.includes(channel.id)}
+                            onChange={(e) =>
+                              setChannelIds((prev) =>
+                                e.target.checked
+                                  ? [...prev, channel.id]
+                                  : prev.filter((id) => id !== channel.id),
+                              )
+                            }
+                          />
+                          {channel.name}
+                        </label>
+                      ))
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

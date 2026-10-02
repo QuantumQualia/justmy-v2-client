@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google"
 import type { Metadata, Viewport } from "next"
 import { cookies, headers } from "next/headers"
 
+import { buildLocalBusinessJsonLd } from "@/lib/biz-os/json-ld"
 import { fetchPublicProfileByHandle } from "@/lib/mycard/fetch-public-profile-by-handle"
 import { firstPathSegment, isLikelyHandlePath } from "@/lib/mycard/handle-route"
 import { registerTypeFromProfile } from "@/lib/mycard/register-type-from-profile"
@@ -11,10 +12,12 @@ import "@workspace/ui/globals.css"
 import { cn } from "@workspace/ui/lib/utils"
 import { Providers } from "@/components/providers"
 import { Navbar } from "@/components/common/navbar/navbar"
+import { MycardPublicNavbar } from "@/components/common/navbar/mycard-public-navbar"
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
 import { NewsStandChrome } from "@/components/news/news-stand-chrome"
+import { SiteFooter } from "@/components/common/site-footer"
 import { isNewsHost } from "@/lib/hosts"
-import { NewsHostProvider } from "@/lib/news/news-host-context"
+import { NewsHostProvider, NewsMarketSiteProvider } from "@/lib/news/news-host-context"
 
 // Configure fonts with fallback to handle network issues during build
 const fontSans = Geist({
@@ -92,7 +95,8 @@ export default async function RootLayout({
 
   const headerList = await headers()
   const pathname = headerList.get("x-pathname") ?? ""
-  const newsHost = isNewsHost(headerList.get("host"))
+  const marketSiteHeader = headerList.get("x-market-site")
+  const newsHost = isNewsHost(headerList.get("host")) || Boolean(marketSiteHeader)
   const embedPath = pathname.startsWith("/embed/")
   const isTryFreePage =
     pathname === "/try-free" || pathname.startsWith("/try-free/")
@@ -115,11 +119,21 @@ export default async function RootLayout({
   const embedMyForm = pathname.startsWith("/embed/myform")
   const embedTransparentHost = embedAskSky || embedMyForm
   const showNewsStandChrome = newsHost && !embedPath
+  const showSiteFooter =
+    !embedPath &&
+    !isTryFreePage &&
+    !pathname.startsWith("/admin") &&
+    !pathname.startsWith("/biz-os") &&
+    !pathname.startsWith("/personal-os") &&
+    !pathname.startsWith("/verify-email") &&
+    pathname !== "/p" &&
+    !pathname.startsWith("/p/")
   let initialMycardPublicNav = false
   /** User-facing `register?type=` slug (may be an alias, e.g. `command` for growth). */
   let initialMycardRegisterType: string = DEFAULT_PROFILE_KIND
   let initialMycardProfileSlug = ""
-  if (!hideSiteChrome && isLikelyHandlePath(pathname)) {
+  let mycardJsonLd: string | null = null
+  if (!embedPath && isLikelyHandlePath(pathname)) {
     const handle = firstPathSegment(pathname)
     if (handle) {
       const profile = await fetchPublicProfileByHandle(handle)
@@ -129,6 +143,7 @@ export default async function RootLayout({
           registerTypeFromProfile(profile)
         )
         initialMycardProfileSlug = profile.slug || handle
+        mycardJsonLd = JSON.stringify(buildLocalBusinessJsonLd(profile)).replace(/</g, "\\u003c")
       }
     }
   }
@@ -154,15 +169,26 @@ export default async function RootLayout({
           isTryFreePage && "overflow-hidden",
         )}
       >
+        {mycardJsonLd ? (
+          <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: mycardJsonLd }} />
+        ) : null}
         <Providers>
           <NewsHostProvider value={newsHost}>
+          <NewsMarketSiteProvider value={marketSiteHeader}>
             <a
               href="#site-main"
-              className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
+              className="sr-only focus:not-sr-only focus:absolute focus:left-2 focus:top-2 focus:z-[300] focus:rounded-md focus:bg-card focus:px-3 focus:py-2 focus:text-sm focus:text-neutral-900 focus:shadow-lg"
             >
               Skip to content
             </a>
             {showNewsStandChrome ? <NewsStandChrome /> : null}
+            {newsHost && initialMycardPublicNav ? (
+              <MycardPublicNavbar
+                initialRegisterType={initialMycardRegisterType}
+                initialProfileSlug={initialMycardProfileSlug}
+                belowNewsHeader
+              />
+            ) : null}
             {!hideSiteChrome ? (
               <>
                 <Navbar
@@ -191,7 +217,13 @@ export default async function RootLayout({
               )}
             >
               {children}
+              {showSiteFooter ? (
+                <div className={initialMycardPublicNav ? "max-lg:hidden" : undefined}>
+                  <SiteFooter newsHost={newsHost} />
+                </div>
+              ) : null}
             </div>
+          </NewsMarketSiteProvider>
           </NewsHostProvider>
         </Providers>
       </body>

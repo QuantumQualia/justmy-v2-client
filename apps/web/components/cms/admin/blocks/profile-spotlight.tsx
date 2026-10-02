@@ -366,7 +366,7 @@ export function ProfileSpotlightBlockEditor({
                         type="button"
                         variant="ghost"
                         size="sm"
-                        className="h-7 w-7 p-0 text-red-400 hover:text-red-200"
+                        className="h-7 w-7 p-0 text-destructive hover:text-red-200"
                         onClick={() => handleRemoveFeedProfile(feedProfileSlugs[index]!)}
                         title="Remove from feed"
                       >

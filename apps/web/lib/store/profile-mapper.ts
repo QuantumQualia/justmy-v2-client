@@ -4,7 +4,7 @@
  * Also provides reverse mapping from ProfileData to API DTOs
  */
 
-import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market } from "./profile-store";
+import type { ProfileData, SocialLink, Hotlink, Phone, Address, Market, ProfileVideo, ProfileAskSkyAgent, ProfileRelatedCategory } from "./profile-store";
 import type { ProfileKind } from "@/lib/os-types";
 import { normalizeProfileKindInput } from "@/lib/os-types";
 import type { UpdateProfileDto, SocialLinkDto, HotlinkDto, PhoneDto, LocationDto } from "../services/profiles";
@@ -63,6 +63,20 @@ export interface ApiProfileResponse {
   referralCode?: string | null;
   allowsSubProfiles?: boolean;
   isVerified?: boolean;
+  videos?: Array<{
+    id: string;
+    type?: string;
+    title?: string;
+    description?: string;
+    videoUrl?: string;
+  }>;
+  ad?: { image?: string | null; href?: string | null; alt?: string | null } | null;
+  agents?: Array<{
+    id: string;
+    name?: string;
+    agentToken?: string;
+    greetingMessage?: string | null;
+  }>;
 }
 
 // Map social name to type
@@ -155,6 +169,45 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
   // Map markets
   const markets: Market[] = apiProfile.markets || [];
 
+  const videos: ProfileVideo[] = (apiProfile.videos || [])
+    .filter((video) => Boolean(video.videoUrl?.trim()))
+    .map((video) => ({
+      id: String(video.id),
+      type: String(video.type || ""),
+      title: video.title,
+      description: video.description,
+      videoUrl: video.videoUrl!.trim(),
+    }));
+
+  const agents: ProfileAskSkyAgent[] = (apiProfile.agents || [])
+    .filter((agent) => Boolean(agent.agentToken?.trim()))
+    .map((agent) => ({
+      id: String(agent.id),
+      name: agent.name || "AskSKY",
+      agentToken: agent.agentToken!.trim(),
+      greetingMessage: agent.greetingMessage ?? null,
+    }));
+
+  const adImage = apiProfile.ad?.image?.trim();
+
+  const relatedRaw = (apiProfile as { relatedCategories?: unknown; categories?: unknown }).relatedCategories;
+  const categoryNames = (apiProfile as { categories?: unknown }).categories;
+  const relatedSource: Array<{ name?: string; slug?: string | null; legacyId?: number | null }> = Array.isArray(relatedRaw)
+    ? relatedRaw.flatMap((item) => {
+        if (!item || typeof item !== "object") return [];
+        return [item as { name?: string; slug?: string | null; legacyId?: number | null }];
+      })
+    : Array.isArray(categoryNames)
+      ? categoryNames.map((name) => ({ name: String(name ?? ""), slug: null, legacyId: null }))
+      : [];
+  const relatedCategories: ProfileRelatedCategory[] = relatedSource
+    .map((category) => ({
+      name: String(category.name || "").trim(),
+      slug: category.slug?.trim() || null,
+      legacyId: category.legacyId ?? null,
+    }))
+    .filter((category) => category.name);
+
   // Convert id from string to number if needed
   let profileId: number | undefined;
   if (apiProfile.id) {
@@ -199,6 +252,13 @@ export function mapApiProfileToProfileData(apiProfile: ApiProfileResponse): Prof
     googleStarRating: (apiProfile as any).googleStarRating ?? null,
     googleRatingCount: (apiProfile as any).googleRatingCount ?? null,
     googlePlaceId: (apiProfile as any).googlePlaceId ?? null,
+    googleReviewLink: (apiProfile as any).googleReviewLink ?? null,
+    videos,
+    ad: adImage
+      ? { image: adImage, href: apiProfile.ad?.href ?? null, alt: apiProfile.ad?.alt ?? null }
+      : null,
+    agents,
+    relatedCategories,
   };
 }
 

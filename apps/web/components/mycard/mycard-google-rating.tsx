@@ -1,22 +1,45 @@
 import { Star } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 
-export function googleWriteReviewUrl(placeId?: string | null): string | null {
-  const id = placeId?.trim();
-  if (!id) return null;
-  return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(id)}`;
+function placeIdFromLink(reviewLink?: string | null): string | null {
+  const link = reviewLink?.trim();
+  if (!link) return null;
+  try {
+    const id = new URL(link).searchParams.get("placeid") || new URL(link).searchParams.get("placeId");
+    return id?.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+function resolvedPlaceId(placeId?: string | null, reviewLink?: string | null): string | null {
+  return placeId?.trim() || placeIdFromLink(reviewLink);
+}
+
+export function googleWriteReviewUrl(placeId?: string | null, reviewLink?: string | null): string | null {
+  const id = resolvedPlaceId(placeId, reviewLink);
+  if (id) return `https://search.google.com/local/writereview?placeid=${encodeURIComponent(id)}`;
+  return reviewLink?.trim() || null;
+}
+
+export function googleReviewsPageUrl(placeId?: string | null, reviewLink?: string | null): string | null {
+  const id = resolvedPlaceId(placeId, reviewLink);
+  if (id) return `https://search.google.com/local/reviews?placeid=${encodeURIComponent(id)}`;
+  return reviewLink?.trim() || null;
 }
 
 export function MycardGoogleRating({
   rating,
   count,
   placeId,
+  reviewLink,
   variant = "dark",
   className,
 }: {
   rating?: string | number | null;
   count?: number | null;
   placeId?: string | null;
+  reviewLink?: string | null;
   variant?: "dark" | "light";
   className?: string;
 }) {
@@ -24,18 +47,17 @@ export function MycardGoogleRating({
   if (!Number.isFinite(value) || value <= 0) return null;
   const filled = Math.round(Math.min(5, Math.max(0, value)));
   const reviews = count && count > 0 ? count : null;
-  const href = googleWriteReviewUrl(placeId);
+  const reviewsHref = googleReviewsPageUrl(placeId, reviewLink);
+  const writeHref = googleWriteReviewUrl(placeId, reviewLink);
   const isLight = variant === "light";
+  const label = `Google rating ${value.toFixed(1)}${reviews ? ` from ${reviews} reviews` : ""}`;
 
-  return (
-    <div
-      className={cn("flex flex-wrap items-center justify-center gap-x-2 gap-y-1", className)}
-      aria-label={`Google rating ${value.toFixed(1)}${reviews ? ` from ${reviews} reviews` : ""}`}
-    >
+  const score = (
+    <>
       <span
         className={cn(
           "text-xs font-semibold",
-          isLight ? "text-foreground" : "text-amber-200",
+          isLight ? "text-primary" : "text-amber-200",
         )}
       >
         {value.toFixed(1)}
@@ -50,43 +72,46 @@ export function MycardGoogleRating({
                 ? "fill-amber-400 text-amber-400"
                 : isLight
                   ? "text-border"
-                  : "text-slate-600",
+                  : "text-muted-foreground",
             )}
           />
         ))}
       </div>
       {reviews != null ? (
-        <span
+        <span className="text-[11px] text-muted-foreground">({reviews.toLocaleString()})</span>
+      ) : null}
+    </>
+  );
+
+  return (
+    <div className={cn("flex flex-wrap items-center justify-center gap-x-2 gap-y-1", className)}>
+      {reviewsHref ? (
+        <a
+          href={reviewsHref}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={label}
+          className="inline-flex items-center gap-x-2"
+        >
+          {score}
+        </a>
+      ) : (
+        <div className="inline-flex items-center gap-x-2" aria-label={label}>
+          {score}
+        </div>
+      )}
+      {writeHref ? (
+        <a
+          href={writeHref}
+          target="_blank"
+          rel="noopener noreferrer"
           className={cn(
-            "text-[11px]",
-            isLight ? "text-muted-foreground" : "text-slate-400",
+            "text-sm font-medium underline-offset-4 hover:underline",
+            isLight ? "text-primary" : "text-primary-foreground",
           )}
         >
-          ({reviews.toLocaleString()})
-        </span>
-      ) : null}
-      {href ? (
-        <>
-          <span
-            className={cn("text-[11px]", isLight ? "text-muted-foreground" : "text-slate-500")}
-            aria-hidden
-          >
-            ·
-          </span>
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              "inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium transition-colors",
-              isLight
-                ? "border border-border bg-[var(--hotlink-bg)] text-foreground hover:border-primary/40"
-                : "border border-white/70 bg-white text-slate-900 hover:bg-white/90",
-            )}
-          >
-            Write a review
-          </a>
-        </>
+          Write a review
+        </a>
       ) : null}
     </div>
   );

@@ -20,7 +20,7 @@ export function AskSkyUserAvatar({
   return (
     <span
       className={cn(
-        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-violet-600 to-cyan-400 font-bold text-white",
+        "relative flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-linear-to-br from-primary to-accent font-bold text-white",
         className,
       )}
       style={{ width: size, height: size, fontSize: Math.max(10, Math.round(size * 0.34)) }}

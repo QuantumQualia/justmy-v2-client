@@ -58,9 +58,6 @@ export function CityOsEventsBlockEditor({ block, onUpdate }: CityOsEventsBlockEd
     <div className="space-y-4">
       <Card className="border-border bg-muted text-foreground">
         <CardContent className="space-y-4 p-4 pt-4">
-          <p className="text-sm text-muted-foreground">
-            Tag cloud of Ticketmaster on-sale events for a market, resolved by the market&apos;s site domain.
-          </p>
           <div className="space-y-2">
             <Label className="text-muted-foreground">Market site domain (this app / CMS page only)</Label>
             <Input

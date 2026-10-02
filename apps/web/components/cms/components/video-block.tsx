@@ -13,7 +13,7 @@ export function VideoBlock({ videoUrl, title, description }: VideoBlockProps) {
 
   return (
     <section className="w-full">
-      <div className="mx-auto w-full max-w-4xl space-y-3">
+      <div className="mx-auto w-full space-y-3">
         {title && (
           <h2 className="text-lg font-semibold text-foreground text-center">
             {title}
@@ -24,13 +24,13 @@ export function VideoBlock({ videoUrl, title, description }: VideoBlockProps) {
             {description}
           </p>
         )}
-        <div className="relative mt-2 w-full overflow-hidden rounded-lg rounded-br-none border border-border bg-muted">
-          <div className="relative w-full pb-[56.25%]">
+        <div className="relative mt-2 w-full overflow-hidden rounded-lg rounded-br-none border border-border bg-black">
+          <div className="relative w-full bg-black pb-[56.25%]">
             {embedUrl ? (
               <iframe
                 src={embedUrl}
                 title={title || "Embedded video"}
-                className="absolute inset-0 h-full w-full"
+                className="absolute inset-0 h-full w-full border-0 bg-black"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                 allowFullScreen
               />

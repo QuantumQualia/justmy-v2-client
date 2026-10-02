@@ -476,7 +476,7 @@ export function PageBlockText({
               // Mark that we should skip the next initialization to prevent feedback loop
               skipNextInit.current = true;
               onChange(html);
-            });
+            }, { editor });
           }}
         />
       </div>

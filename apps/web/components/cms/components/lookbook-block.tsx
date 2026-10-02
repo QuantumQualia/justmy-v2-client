@@ -139,7 +139,7 @@ export function LookBookBlock({ items, title, description }: LookBookBlockProps)
                       >
                         <Badge
                           variant="secondary"
-                          className="h-7 w-7 rounded-full bg-black/60 p-0 text-slate-100 backdrop-blur-sm hover:bg-black/80"
+                          className="h-7 w-7 rounded-full bg-black/60 p-0 text-foreground backdrop-blur-sm hover:bg-black/80"
                         >
                           <Link2 className="h-3.5 w-3.5" />
                         </Badge>
@@ -148,12 +148,12 @@ export function LookBookBlock({ items, title, description }: LookBookBlockProps)
                     {(item.title || item.description) && (
                       <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/40 to-transparent px-2 pb-2 pt-6 text-left">
                         {item.title && (
-                          <div className="line-clamp-1 text-xs font-medium text-slate-50">
+                          <div className="line-clamp-1 text-xs font-medium text-foreground">
                             {item.title}
                           </div>
                         )}
                         {item.description && (
-                          <div className="line-clamp-1 text-[11px] text-slate-200/80">
+                          <div className="line-clamp-1 text-[11px] text-foreground/80">
                             {item.description}
                           </div>
                         )}
@@ -191,7 +191,7 @@ export function LookBookBlock({ items, title, description }: LookBookBlockProps)
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8 rounded-full text-slate-200 hover:bg-white/20 hover:text-white"
+                  className="h-8 w-8 rounded-full text-foreground hover:bg-card/20 hover:text-white"
                   onClick={closeLightbox}
                 >
                   <X className="h-4 w-4" />

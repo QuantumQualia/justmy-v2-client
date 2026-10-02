@@ -165,12 +165,26 @@ export interface UpdatePageDto extends Partial<CreatePageDto> {
 /**
  * Payload Post (matches backend response)
  */
+export interface PostAuthorProfile {
+  id: string;
+  name: string;
+  slug: string;
+  tagline?: string | null;
+  photo?: string | null;
+  banner?: string | null;
+  website?: string | null;
+  ad?: { image: string; href?: string | null; alt?: string | null } | null;
+  socialLinks?: { id: string; name: string; link: string }[];
+  hotlinks?: { id: string; label: string; link: string }[];
+}
+
 export interface PayloadPost {
   id: string;
   title: string;
   slug: string;
   // Post type discriminator from backend.
   type: "ARTICLE" | "SHARED";
+  videoUrl?: string | null;
   // Only present for "shared-from-url" posts created from external sources.
   externalUrl?: string | null;
   excerpt?: string | null;
@@ -183,8 +197,14 @@ export interface PayloadPost {
     keywords?: string;
     ogImage?: string | { url: string };
   } | null;
-  status: "draft" | "publish" | "archive";
-  author?: string | { id: string; email: string };
+  status: "draft" | "publish" | "archive" | "trash";
+  newsstandStatus?: "none" | "pending" | "published";
+  authorId?: number | null;
+  userId?: number | null;
+  author?: PostAuthorProfile | null;
+  contentType?: { slug: string; name: string } | null;
+  details?: Record<string, string> | null;
+  channelLabel?: string | null;
   publishedAt?: string | null;
   createdAt: string;
   updatedAt: string;
@@ -223,7 +243,12 @@ export interface CreatePostDto {
     keywords?: string;
     ogImage?: string;
   };
-  status?: "draft" | "publish" | "archive";
+  status?: "draft" | "publish" | "archive" | "trash";
+  videoUrl?: string;
+  contentTypeId?: number | null;
+  details?: Record<string, unknown>;
+  marketIds?: number[];
+  channelIds?: number[];
 }
 
 /**
@@ -234,7 +259,7 @@ export interface CreateSharedPostDto {
   title?: string;
   excerpt?: string;
   tags?: string[];
-  status?: "draft" | "publish" | "archive";
+  status?: "draft" | "publish" | "archive" | "trash";
   seo?: {
     title?: string;
     description?: string;
@@ -515,12 +540,26 @@ export const cmsService = {
     page?: number;
     limit?: number;
     search?: string;
+    status?: string;
+    newsstand?: string;
+    type?: string;
+    application?: string;
+    contentTypeId?: number;
+    marketId?: number;
+    profileId?: number;
   }): Promise<PaginatedPostsResponse> {
     try {
       const queryParams: Record<string, string> = {};
       if (params?.page) queryParams.page = params.page.toString();
       if (params?.limit) queryParams.limit = params.limit.toString();
       if (params?.search) queryParams.search = params.search;
+      if (params?.status) queryParams.status = params.status;
+      if (params?.newsstand) queryParams.newsstand = params.newsstand;
+      if (params?.type) queryParams.type = params.type;
+      if (params?.application) queryParams.application = params.application;
+      if (params?.contentTypeId) queryParams.contentTypeId = String(params.contentTypeId);
+      if (params?.marketId) queryParams.marketId = String(params.marketId);
+      if (params?.profileId) queryParams.profileId = String(params.profileId);
 
       return await apiRequest<PaginatedPostsResponse>("cms/posts", {
         method: "GET",
@@ -610,6 +649,27 @@ export const cmsService = {
   /**
    * Update a post
    */
+  async setNewsstand(
+    id: string,
+    action: "request" | "cancel" | "remove" | "accept" | "decline",
+  ): Promise<{ newsstandStatus: "none" | "pending" | "published" }> {
+    try {
+      if (typeof window !== "undefined") {
+        return await this.proxyMutationRequest(`/api/cms/posts/${id}/newsstand`, {
+          method: "PATCH",
+          body: JSON.stringify({ action }),
+        });
+      }
+      return await apiRequest(`cms/posts/${id}/newsstand`, {
+        method: "PATCH",
+        body: JSON.stringify({ action }),
+      });
+    } catch (error) {
+      if (error instanceof ApiClientError) throw error;
+      throw new ApiClientError("Failed to update newsstand status.");
+    }
+  },
+
   async updatePost(id: string, data: Partial<CreatePostDto>): Promise<PayloadPost> {
     try {
       if (typeof window !== "undefined") {

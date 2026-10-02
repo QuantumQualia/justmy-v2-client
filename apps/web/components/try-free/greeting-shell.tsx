@@ -83,7 +83,7 @@ export function SkyBubble({ children }: { children: ReactNode }) {
 export function UserBubble({ children }: { children: ReactNode }) {
   return (
     <div className="asksky-msg-in flex w-full items-start justify-end gap-3.5">
-      <div className="min-w-0 max-w-[min(85%,calc(100%-3.75rem))] rounded-[18px_4px_18px_18px] border-[1.5px] border-[#e6e4f0] bg-white px-5 py-3.5 text-[15px] font-medium leading-relaxed text-[#1f1f29]">
+      <div className="min-w-0 max-w-[min(85%,calc(100%-3.75rem))] rounded-[18px_4px_18px_18px] border-[1.5px] border-[#e6e4f0] bg-card px-5 py-3.5 text-[15px] font-medium leading-relaxed text-[#1f1f29]">
         {children}
       </div>
       <AskSkyUserAvatar size={42} />
@@ -95,9 +95,9 @@ export function SkyTyping() {
   return (
     <SkyBubble>
       <span className="inline-flex items-center gap-1.5" role="status" aria-label="Sky is typing">
-        <span className="size-1.5 rounded-full bg-white/90 animate-bounce" style={{ animationDelay: "0ms" }} />
-        <span className="size-1.5 rounded-full bg-white/90 animate-bounce" style={{ animationDelay: "160ms" }} />
-        <span className="size-1.5 rounded-full bg-white/90 animate-bounce" style={{ animationDelay: "320ms" }} />
+        <span className="size-1.5 rounded-full bg-card/90 animate-bounce" style={{ animationDelay: "0ms" }} />
+        <span className="size-1.5 rounded-full bg-card/90 animate-bounce" style={{ animationDelay: "160ms" }} />
+        <span className="size-1.5 rounded-full bg-card/90 animate-bounce" style={{ animationDelay: "320ms" }} />
       </span>
     </SkyBubble>
   );
@@ -128,7 +128,7 @@ export function TryFreeInputBar({
         onSubmit();
       }}
     >
-      <div className="flex items-end gap-3 rounded-[1.375rem] border-[1.5px] border-[#e6e4f0] bg-white py-2 pr-2 pl-[22px] shadow-[0_2px_10px_rgba(31,31,41,0.04)]">
+      <div className="flex items-end gap-3 rounded-[1.375rem] border-[1.5px] border-[#e6e4f0] bg-card py-2 pr-2 pl-[22px] shadow-[0_2px_10px_rgba(31,31,41,0.04)]">
         <AskSkyGrowTextarea
           chrome={false}
           ref={inputRef}
@@ -197,7 +197,7 @@ export function CategoryPills({
           disabled={disabled}
           onClick={() => onSelect(pill.id)}
           onMouseDown={(e) => e.preventDefault()}
-          className="cursor-pointer whitespace-nowrap rounded-full border-[1.5px] border-[#e6e4f0] bg-white px-4 py-2 text-sm font-semibold text-[#3a3947] hover:border-[#b9aef7] disabled:cursor-not-allowed disabled:opacity-60"
+          className="cursor-pointer whitespace-nowrap rounded-full border-[1.5px] border-[#e6e4f0] bg-card px-4 py-2 text-sm font-semibold text-[#3a3947] hover:border-[#b9aef7] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {pill.label}
         </button>

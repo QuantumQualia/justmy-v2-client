@@ -23,6 +23,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const lockViewport =
     pathname === "/biz-os/onboard" || /^\/biz-os\/battle-plans\/\d+/.test(pathname || "");
+  const hideDock = lockViewport || pathname === "/biz-os/content";
   const { isError } = useBizOsProfile();
   const [market, setMarket] = useState<NewsMarketContext | null>(null);
 
@@ -31,17 +32,6 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
   const hasHydrated = useNewsZipStore((s) => s.hasHydrated);
   const persistMarket = useNewsZipStore((s) => s.setMarket);
   const profileZip = useProfileStore((s) => s.data.zipCode);
-
-  useEffect(() => {
-    const html = document.documentElement;
-    const body = document.body;
-    html.classList.add("news-light-html");
-    body.classList.add("news-light-body");
-    return () => {
-      html.classList.remove("news-light-html");
-      body.classList.remove("news-light-body");
-    };
-  }, []);
 
   useEffect(() => {
     const markReady = () => {
@@ -120,7 +110,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-1 flex-col bg-[#f3f0f8] text-slate-900",
+        "flex min-h-0 flex-1 flex-col bg-background text-foreground",
         lockViewport &&
           (newsHost
             ? "h-[calc(100dvh-var(--news-header-h,3.5rem)-var(--impersonation-banner-h,0px))] max-h-[calc(100dvh-var(--news-header-h,3.5rem)-var(--impersonation-banner-h,0px))] overflow-hidden"
@@ -140,7 +130,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
               onNewChat={() => router.push("/news")}
             />
           ) : (
-            <header className="h-14 border-b border-slate-200/80 bg-white/90" />
+            <header className="h-14 border-b border-border bg-card/90" />
           )}
           <BizOsSubnav />
         </div>
@@ -154,7 +144,7 @@ export function BizOsShell({ children }: { children: React.ReactNode }) {
       >
         {children}
       </div>
-      {!lockViewport ? <AskSkyConciergeDock /> : null}
+      {!hideDock ? <AskSkyConciergeDock /> : null}
     </div>
   );
 }

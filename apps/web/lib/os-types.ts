@@ -130,6 +130,23 @@ export function canonicalizeOsName(raw?: string | null): string {
   return original.toUpperCase();
 }
 
+export type MycardLayout = "personal" | "biz" | "default";
+
+/** Public myCARD layout. Biz+ OS profiles share the business card. */
+export function resolveMycardLayout(osName?: string | null): MycardLayout {
+  const raw = String(osName || "").trim().toUpperCase();
+  const canonical = canonicalizeOsName(osName);
+  if (canonical === OS_NAME.PERSONAL) return "personal";
+  if (
+    isBusinessOs(canonical) ||
+    raw === "FOUNDER" ||
+    raw === "GROWTH"
+  ) {
+    return "biz";
+  }
+  return "default";
+}
+
 export function isBusinessOs(raw?: string | null): boolean {
   const u = String(raw || "").trim().toUpperCase();
   if (!u) return false;

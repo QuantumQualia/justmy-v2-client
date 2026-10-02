@@ -8,7 +8,7 @@ import { NewsHomeLink } from "@/components/news/news-home-link";
 import { NewsMarketPageClient } from "@/components/news/news-market-page-client";
 import { NewsZipForm } from "@/components/news/news-zip-form";
 import { useIsGuestSession } from "@/hooks/use-is-guest-session";
-import { useNewsHost } from "@/lib/news/news-host-context";
+import { useNewsHost, useNewsMarketSite } from "@/lib/news/news-host-context";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { useProfileStore } from "@/lib/store/profile-store";
 
@@ -34,6 +34,7 @@ const HIGHLIGHTS = [
  * `/news` gate: zip entry when no saved zip, market detail when zip is set.
  */
 export function NewsPageClient() {
+  const marketSite = useNewsMarketSite();
   const zipcode = useNewsZipStore((s) => s.zipcode);
   const hasHydrated = useNewsZipStore((s) => s.hasHydrated);
   const profileId = useProfileStore((s) => s.data.id);
@@ -63,6 +64,10 @@ export function NewsPageClient() {
     );
   }
 
+  if (marketSite) {
+    return <NewsMarketPageClient zipcode={effectiveZip} domain={marketSite} />;
+  }
+
   if (effectiveZip) {
     return <NewsMarketPageClient zipcode={effectiveZip} />;
   }
@@ -89,7 +94,7 @@ function NewsLanding() {
         <header className="relative z-10 border-b border-border backdrop-blur-sm">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-4">
             <NewsHomeLink className="flex items-center gap-2 text-sm font-semibold tracking-wide text-foreground transition hover:opacity-80">
-              <span className="inline-block h-2 w-2 rounded-full bg-linear-to-r from-emerald-400 to-cyan-500" />
+              <span className="inline-block h-2 w-2 rounded-full bg-linear-to-r from-emerald-400 to-accent" />
               JustMy News
             </NewsHomeLink>
             {guest === true ? (
@@ -114,7 +119,7 @@ function NewsLanding() {
 
           <h1 className="mt-5 text-3xl font-bold tracking-tight sm:text-5xl">
             Find your{" "}
-            <span className="bg-linear-to-r from-emerald-400 to-cyan-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-emerald-400 to-accent bg-clip-text text-transparent">
               local market
             </span>
           </h1>

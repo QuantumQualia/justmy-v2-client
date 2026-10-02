@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { Dialog, DialogContent, DialogTitle } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
 import { ConfirmDeletionModal } from "@/components/common/confirm-deletion-modal";
-import { PostEditorDialog } from "@/components/content/post-editor-dialog";
+import { PostEditorDialog, preventDialogDismiss } from "@/components/content/post-editor-dialog";
 import { cmsService, type PayloadPost } from "@/lib/services/cms";
 import {
   contentService,
@@ -224,6 +224,9 @@ export function ContentHubLiteView() {
       >
         <DialogContent
           showCloseButton={false}
+          onPointerDownOutside={preventDialogDismiss}
+          onInteractOutside={preventDialogDismiss}
+          onEscapeKeyDown={preventDialogDismiss}
           className="w-full max-w-md rounded-2xl border border-border bg-card p-0"
         >
           <div className="border-b border-border px-5 py-4">
@@ -324,7 +327,7 @@ export function ContentHubLiteView() {
                   const isActive = postStatusFilter === status;
                   const activeClass =
                     status === "publish"
-                      ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/30"
+                      ? "bg-success/15 text-success border border-emerald-400/30"
                       : status === "draft"
                         ? "bg-amber-500/15 text-amber-300 border border-amber-400/30"
                         : "bg-slate-400/15 text-foreground border border-slate-400/30";

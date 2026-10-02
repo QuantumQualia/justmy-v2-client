@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { isNewsHost } from "@/lib/hosts";
+import { isNewsHost, isProductHost, normalizeHostname } from "@/lib/hosts";
+import { getApiBaseUrl } from "@/lib/config";
 import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
 import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
 import { isBusinessOs } from "@/lib/os-types";
@@ -19,6 +20,8 @@ const publicRoutes = [
   "/stripe-callback",
   "/try-free",
   "/p",
+  "/blog",
+  "/category",
 ];
 
 /**
@@ -127,21 +130,49 @@ function redirectToVerifyEmail(request: NextRequest, explicitRedirect?: string |
 }
 
 /** Pass pathname into Server Components via `headers().get("x-pathname")`. */
-function nextWithPathname(request: NextRequest, pathname = request.nextUrl.pathname) {
+function nextWithPathname(
+  request: NextRequest,
+  pathname = request.nextUrl.pathname,
+  marketSite?: string | null,
+) {
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", pathname);
+  if (marketSite) requestHeaders.set("x-market-site", marketSite);
   const next = NextResponse.next({ request: { headers: requestHeaders } });
   next.headers.set("Cross-Origin-Opener-Policy", "same-origin-allow-popups");
   return next;
 }
 
-function rewriteWithPathname(request: NextRequest, internalPath: string) {
+function rewriteWithPathname(
+  request: NextRequest,
+  internalPath: string,
+  marketSite?: string | null,
+) {
   const url = request.nextUrl.clone();
   url.pathname = internalPath;
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-pathname", internalPath);
   requestHeaders.set("x-news-host", "1");
+  if (marketSite) requestHeaders.set("x-market-site", marketSite);
   return NextResponse.rewrite(url, { request: { headers: requestHeaders } });
+}
+
+async function resolveMarketSite(hostHeader: string | null): Promise<string | null> {
+  if (!hostHeader || isNewsHost(hostHeader) || isProductHost(hostHeader)) return null;
+  const hostname = normalizeHostname(hostHeader);
+  if (!hostname.includes(".")) return null;
+  try {
+    const base = getApiBaseUrl().replace(/\/$/, "");
+    const res = await fetch(`${base}/markets/by-site/${encodeURIComponent(hostname)}`, {
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const market = (await res.json()) as { site?: string | null };
+    return market.site?.trim() || hostname;
+  } catch {
+    return null;
+  }
 }
 
 /**
@@ -172,6 +203,8 @@ function isNewsHostAppPassthrough(pathname: string): boolean {
     "/daily-drop",
     "/p",
     "/embed",
+    "/blog",
+    "/category",
   ];
   return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
@@ -181,15 +214,15 @@ function isNewsHostAppPassthrough(pathname: string): boolean {
  * Legacy `/{slug}` and `/news/{slug}` redirect to `/`.
  * Returns null so the main proxy can auth-check app routes on this host.
  */
-function handleNewsHost(request: NextRequest): NextResponse | null {
+function handleNewsHost(request: NextRequest, marketSite?: string | null): NextResponse | null {
   const { pathname } = request.nextUrl;
 
   if (pathname === "/" || pathname === "") {
-    return rewriteWithPathname(request, "/news");
+    return rewriteWithPathname(request, "/news", marketSite);
   }
 
   if (pathname === "/news" || pathname === "/news/") {
-    return nextWithPathname(request, "/news");
+    return nextWithPathname(request, "/news", marketSite);
   }
 
   // Legacy slug paths → home (zip preference lives in storage, not the URL)
@@ -214,11 +247,12 @@ function handleNewsHost(request: NextRequest): NextResponse | null {
  * Authentication proxy for the whole platform (City OS, Biz OS, admin).
  * News host only rewrites `/` → `/news`; app routes still use this gate.
  */
-export function proxy(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const host = request.headers.get("host");
+  const marketSite = await resolveMarketSite(host);
 
-  if (isNewsHost(host)) {
-    const newsResponse = handleNewsHost(request);
+  if (isNewsHost(host) || marketSite) {
+    const newsResponse = handleNewsHost(request, marketSite);
     if (newsResponse) return newsResponse;
   }
 
@@ -245,7 +279,7 @@ export function proxy(request: NextRequest) {
       }
       return NextResponse.redirect(new URL("/personal-os", request.url));
     }
-    return nextWithPathname(request);
+    return nextWithPathname(request, pathname, marketSite);
   }
 
   if (!token) {
@@ -254,7 +288,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return nextWithPathname(request);
+  return nextWithPathname(request, pathname, marketSite);
 }
 
 /**

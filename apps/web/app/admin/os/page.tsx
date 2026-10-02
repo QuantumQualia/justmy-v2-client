@@ -156,7 +156,7 @@ export default function OSPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(os.id)}
-                          className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
                           title="Delete OS"
                         >
                           <Trash2 className="h-4 w-4" />

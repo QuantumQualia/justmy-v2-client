@@ -75,7 +75,7 @@ export function ImpersonationBanner() {
           variant="secondary"
           onClick={handleStop}
           disabled={stopping}
-          className="h-7 shrink-0 bg-white text-amber-950 hover:bg-amber-100"
+          className="h-7 shrink-0 bg-card text-amber-950 hover:bg-amber-100"
         >
           {stopping ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : "Stop impersonating"}
         </Button>

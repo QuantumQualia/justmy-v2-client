@@ -37,9 +37,9 @@ function ShareChannelIcon({ channel, className }: { channel: SkyShareTrayChannel
 
 const channelAccent: Record<SkyShareTrayChannel, string> = {
   sms: "bg-sky-500/20 text-sky-200 ring-sky-400/35 hover:bg-sky-500/30",
-  whatsapp: "bg-emerald-500/20 text-emerald-200 ring-emerald-400/35 hover:bg-emerald-500/30",
+  whatsapp: "bg-success/20 text-success ring-success/35 hover:bg-success/30",
   facebook: "bg-blue-500/20 text-blue-200 ring-blue-400/35 hover:bg-blue-500/30",
-  x: "bg-slate-100/10 text-slate-100 ring-white/25 hover:bg-slate-100/20",
+  x: "bg-muted/10 text-foreground ring-white/25 hover:bg-muted/20",
 };
 
 export function AskSkyShareTrayPanel({

@@ -22,6 +22,8 @@ export function PostBlockSelector({
       className={className}
       size={size}
       blockTypes={POST_BLOCK_TYPES}
+      appearance="light"
+      closeOnOutsideClick={false}
     />
   );
 }

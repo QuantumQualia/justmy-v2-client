@@ -123,7 +123,7 @@ export default function AdminLayout({
                     <span
                       className={cn(
                         "block text-[10px] font-semibold tracking-wide",
-                        isActive ? "text-emerald-300" : "text-emerald-700/80",
+                        isActive ? "text-success" : "text-success/80",
                       )}
                     >
                       {item.badge}

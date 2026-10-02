@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { Card, CardContent, CardDescription } from "@workspace/ui/components/card";
 import type { PageBlock } from "@/lib/services/cms";
 
 interface LocalDealsBlockEditorProps {
@@ -10,20 +9,6 @@ interface LocalDealsBlockEditorProps {
 }
 
 export function LocalDealsBlockEditor({}: LocalDealsBlockEditorProps) {
-  return (
-    <div className="space-y-4">
-      <Card>
-        <CardContent className="p-4 pt-4 space-y-2">
-          <p className="text-sm text-muted-foreground">
-            Renders the Daily Drop Local Deals grid (The Hook) for the current user&apos;s city.
-          </p>
-          <CardDescription className="text-xs text-muted-foreground">
-            No configuration needed. Data comes from the ai/daily-drop/deals API. When unavailable,
-            a simple &quot;Coming Soon&quot; placeholder will be shown.
-          </CardDescription>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return null;
 }
 
