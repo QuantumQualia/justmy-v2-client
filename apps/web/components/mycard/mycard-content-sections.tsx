@@ -244,16 +244,18 @@ function TabSection({
         )
       ) : null}
       {open && postsQuery.hasNextPage ? (
-        <Button
-          type="button"
-          variant="ghost"
-          className="mx-auto flex w-fit rounded-full"
-          disabled={postsQuery.isFetchingNextPage}
-          onClick={() => void postsQuery.fetchNextPage()}
-        >
-          {postsQuery.isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          Show more
-        </Button>
+        <div className="flex justify-center">
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto px-0"
+            disabled={postsQuery.isFetchingNextPage}
+            onClick={() => void postsQuery.fetchNextPage()}
+          >
+            {postsQuery.isFetchingNextPage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+            Show more
+          </Button>
+        </div>
       ) : null}
     </section>
   );

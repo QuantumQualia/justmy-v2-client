@@ -408,7 +408,7 @@ function SpotlightView({ profile }: { profile: PublicProfile }) {
       </div>
 
       <div className={adImage ? "mt-4 flex flex-col items-center gap-4 md:flex-row md:items-center" : "mt-4 flex items-center justify-end gap-4"}>
-        <div className={adImage ? "flex w-full max-w-md shrink-0 items-start gap-4 mb-5" : "flex shrink-0 items-center gap-4"}>
+        <div className={adImage ? "flex w-full max-w-md shrink-0 items-center gap-4 mb-5" : "flex shrink-0 items-center gap-4"}>
         <a
           href={profileHref}
           className={adImage ? "block h-20 w-20 shrink-0 overflow-hidden rounded-full border border-border bg-card" : "order-last block h-14 w-14 shrink-0 overflow-hidden rounded-full border border-border bg-card"}

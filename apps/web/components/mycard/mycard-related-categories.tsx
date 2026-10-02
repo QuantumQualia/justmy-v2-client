@@ -17,7 +17,7 @@ export function MycardRelatedCategories({
 
   return (
     <section className="space-y-3">
-      <h2 className="border-b border-border pb-3 text-xl font-bold text-foreground">Related Categories</h2>
+      <h2 className="text-xl font-bold text-foreground">Related Categories</h2>
       <ul className="space-y-2">
         {items.map((category) => {
           const href = categoryHref(category);

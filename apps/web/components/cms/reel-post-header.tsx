@@ -15,6 +15,14 @@ const ICON_BTN =
 const CTA =
   "block w-full justmy-corners border-[1.5px] border-border bg-[var(--hotlink-bg)] px-4 py-3 text-center text-sm font-medium text-foreground transition-all duration-200 hover:shadow-md active:scale-95";
 
+function detailText(details: PayloadPost["details"], ...keys: string[]) {
+  for (const key of keys) {
+    const value = details?.[key]?.trim();
+    if (value) return value;
+  }
+  return "";
+}
+
 function socialIcon(name: string) {
   const key = name.toLowerCase();
   if (key.includes("facebook")) return <SiFacebook className="h-4 w-4" />;
@@ -36,8 +44,8 @@ export function ReelPostHeader({
 }) {
   const author = post.author?.slug ? post.author : null;
   const video = post.videoUrl?.trim() || "";
-  const moreLabel = post.details?.moreInfoLabel?.trim() || "More info";
-  const moreLink = post.details?.moreInfoLink?.trim() || "";
+  const moreLabel = detailText(post.details, "moreInfoLabel", "more_info_label") || "More info";
+  const moreLink = detailText(post.details, "moreInfoLink", "more_info_link");
   const cardUrl = author ? publicMycardUrl(author.slug) || `/${author.slug}` : "";
   const socials = (author?.socialLinks ?? []).filter((link) => link.link);
   const hotlinks = (author?.hotlinks ?? []).filter((link) => link.label && link.link);
@@ -55,7 +63,7 @@ export function ReelPostHeader({
 
   return (
     <div className="grid grid-cols-1 items-stretch overflow-hidden justmy-corners-xl border border-border bg-card shadow-card lg:grid-cols-3">
-      <aside className="flex min-w-0 flex-col gap-4 border-border bg-card p-5 lg:border-r">
+      <aside className="hidden min-w-0 flex-col gap-4 border-border bg-card p-5 lg:flex lg:border-r">
         {author ? (
           <>
             <div className="flex justify-center">
@@ -118,10 +126,12 @@ export function ReelPostHeader({
         )}
       </aside>
 
-      <section className="relative min-h-0 border-border bg-black lg:border-r">
+      <section className="relative border-border bg-black lg:border-r">
         {video ? (
-          <div className="aspect-video w-full lg:absolute lg:inset-0 lg:aspect-auto">
-            <MycardVideo url={video} title={post.title} fill dark bare />
+          <div className="relative aspect-[9/16] w-full">
+            <div className="absolute inset-0">
+              <MycardVideo url={video} title={post.title} fill dark bare />
+            </div>
           </div>
         ) : null}
       </section>
