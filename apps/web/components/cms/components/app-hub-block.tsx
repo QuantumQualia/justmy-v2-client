@@ -2,7 +2,7 @@
 
 import React from "react";
 import type { PageBlock } from "@/lib/services/cms";
-import { AppHub } from "@/components/os/app-hub";
+import { AppHub } from "@/components/lab/app-hub";
 
 interface AppHubBlockProps {
   block: PageBlock;
