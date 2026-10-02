@@ -292,8 +292,10 @@ export function MycardContentSections({
     });
   }, [collapsible, tabs]);
   React.useEffect(() => {
-    if (!collapsible || tabs.length === 0) return;
-    setOpenedIds((current) => (current.length > 0 ? current : [tabs[0].id]));
+    if (!collapsible) return;
+    const firstId = tabs[0]?.id;
+    if (firstId == null) return;
+    setOpenedIds((current) => (current.length > 0 ? current : [firstId]));
   }, [collapsible, tabs]);
   const readyCount = tabs.filter((tab) => visibleIds[tab.id] === true).length;
   const stillLoading = tabs.some((tab) => visibleIds[tab.id] == null);

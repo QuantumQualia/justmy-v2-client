@@ -107,7 +107,6 @@ export function MyCardDesktopBizView({
               {askOpen && agent ? (
                 <div className="mycard-header-asksky flex h-full min-h-0 flex-1 flex-col overflow-hidden bg-card">
                   <AskSkyWidget
-                    profileSlug={data.slug}
                     agentToken={agent.agentToken}
                     variant="inline"
                     embedFill

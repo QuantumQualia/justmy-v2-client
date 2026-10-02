@@ -85,7 +85,6 @@ function AskSkySection({ data }: { data: ProfileData }) {
       <h1 className="mb-3 pr-16 text-xl font-bold text-foreground">AskSKY!</h1>
       <div className="flex min-h-0 flex-1 flex-col">
         <AskSkyWidget
-          profileSlug={data.slug}
           agentToken={agent.agentToken}
           variant="inline"
           embedFill
