@@ -93,11 +93,14 @@ export function NewsMarketPageClient({
   }, []);
 
   useEffect(() => {
-    if (domainKey && loadedDomainRef.current === domainKey && marketMatchesDomain) {
+    // Sponsor/stand only fire when marketId is set. Never skip resolve if it's missing
+    // (e.g. an older localStorage market shape), or those sections never call the API.
+    const hasMarketId = typeof market?.marketId === "number" && market.marketId > 0;
+    if (domainKey && loadedDomainRef.current === domainKey && marketMatchesDomain && hasMarketId) {
       setLoadState("ready");
       return;
     }
-    if (!domain && marketMatchesZip) {
+    if (!domain && marketMatchesZip && hasMarketId) {
       setLoadState("ready");
       return;
     }
@@ -146,7 +149,16 @@ export function NewsMarketPageClient({
     return () => {
       cancelled = true;
     };
-  }, [zipcode, domain, domainKey, marketMatchesDomain, marketMatchesZip, setMarket, clearZipcode]);
+  }, [
+    zipcode,
+    domain,
+    domainKey,
+    marketMatchesDomain,
+    marketMatchesZip,
+    market?.marketId,
+    setMarket,
+    clearZipcode,
+  ]);
 
   async function handleAsk(nextQuery: string) {
     const trimmed = nextQuery.trim();
