@@ -18,6 +18,7 @@ const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365; // 1 year
 const EMPTY_BRIEFING = {
   briefingSponsor: null as SkyAudioSponsor | null,
   suggestedQuestions: [] as string[],
+  briefingParagraph: null as string | null,
 };
 
 function writeZipCookie(zipcode: string | null) {
@@ -69,6 +70,8 @@ interface NewsZipStore {
   briefingSponsor: SkyAudioSponsor | null;
   /** AskSKY intro chips from the active slot's briefing (session only). */
   suggestedQuestions: string[];
+  /** Written market briefing from the Sky FM slot cache (session only). */
+  briefingParagraph: string | null;
   /** Save zip + resolved market together (preferred entry point). */
   setMarket: (market: NewsMarketContext) => void;
   /** Zip-only update — clears market so callers re-resolve if needed. */
@@ -79,6 +82,7 @@ interface NewsZipStore {
   setBriefingExtras: (extras: {
     sponsor?: SkyAudioSponsor | null;
     suggestedQuestions?: string[] | null;
+    briefingParagraph?: string | null;
   }) => void;
   clearBriefingExtras: () => void;
 }
@@ -110,10 +114,11 @@ export const useNewsZipStore = create<NewsZipStore>()(
 
       setHasHydrated: (value) => set({ hasHydrated: value }),
 
-      setBriefingExtras: ({ sponsor, suggestedQuestions }) =>
+      setBriefingExtras: ({ sponsor, suggestedQuestions, briefingParagraph }) =>
         set({
           briefingSponsor: sponsor ?? null,
           suggestedQuestions: normalizeSuggestedQuestions(suggestedQuestions),
+          briefingParagraph: briefingParagraph?.trim() || null,
         }),
 
       clearBriefingExtras: () => set(EMPTY_BRIEFING),

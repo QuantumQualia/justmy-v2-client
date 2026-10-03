@@ -137,8 +137,8 @@ export default function OSAppManagerPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+      <div className="flex min-h-full items-center justify-center bg-background px-6 py-8 text-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -148,7 +148,7 @@ export default function OSAppManagerPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
@@ -163,14 +163,14 @@ export default function OSAppManagerPage() {
                 Back
               </Button>
             </div>
-            <h1 className="text-3xl font-bold text-foreground">OS-App Manager</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">OS-App Manager</h1>
             <p className="text-muted-foreground mt-2">
               Manage apps for: <span className="text-foreground font-semibold">{osName}</span>
             </p>
           </div>
         </div>
 
-        <div className="border border-border rounded-xl bg-muted p-6 space-y-6">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-6">
           {/* Current Apps */}
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-4">Connected Apps</h2>
@@ -189,13 +189,13 @@ export default function OSAppManagerPage() {
                       <div className="flex items-center gap-2">
                         <h3 className="font-semibold text-foreground">{config.appName}</h3>
                         {config.isWelcome && (
-                          <span className="flex items-center gap-1 text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
-                            <Star className="h-3 w-3 fill-yellow-400" />
+                          <span className="flex items-center gap-1 text-xs px-2 py-1 bg-accent text-accent-foreground rounded">
+                            <Star className="h-3 w-3 fill-primary text-primary" />
                             Welcome App
                           </span>
                         )}
                         {config.isStandard && (
-                          <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
+                          <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
                             Standard
                           </span>
                         )}
@@ -232,7 +232,7 @@ export default function OSAppManagerPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleRemoveApp(config.appId)}
-                        className="text-destructive hover:text-red-300 hover:bg-destructive/10"
+                        className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                       >
                         Remove
                       </Button>
@@ -278,7 +278,7 @@ export default function OSAppManagerPage() {
             <Button
               onClick={handleSave}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700"
+             
             >
               {loading ? (
                 <>

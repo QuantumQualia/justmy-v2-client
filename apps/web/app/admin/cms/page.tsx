@@ -43,41 +43,41 @@ export default function CmsDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div>
-          <h1 className="text-3xl font-bold text-foreground">CMS Dashboard</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">CMS Dashboard</h1>
           <p className="text-muted-foreground mt-2">Manage your content management system</p>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-card rounded-lg border border-border p-6">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Pages</p>
                 <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
-              <FileText className="h-8 w-8 text-blue-400" />
+              <FileText className="h-8 w-8 text-primary" />
             </div>
           </div>
-          <div className="bg-card rounded-lg border border-border p-6">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Published</p>
                 <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
-              <FileText className="h-8 w-8 text-green-400" />
+              <FileText className="h-8 w-8 text-success" />
             </div>
           </div>
-          <div className="bg-card rounded-lg border border-border p-6">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Drafts</p>
                 <p className="text-2xl font-bold text-foreground mt-1">-</p>
               </div>
-              <FileText className="h-8 w-8 text-yellow-400" />
+              <FileText className="h-8 w-8 text-accent-foreground" />
             </div>
           </div>
         </div>
@@ -87,8 +87,8 @@ export default function CmsDashboardPage() {
           {cmsSections.map((section) => {
             const Icon = section.icon;
             const colorClasses = {
-              blue: "border-blue-500/20 bg-blue-500/10 hover:bg-blue-500/20",
-              green: "border-green-500/20 bg-green-500/10 hover:bg-green-500/20",
+              blue: "border-border bg-card shadow-card hover:border-primary/30 hover:bg-secondary",
+              green: "border-border bg-card shadow-card hover:border-primary/30 hover:bg-secondary",
             };
 
             return (
@@ -122,12 +122,12 @@ export default function CmsDashboardPage() {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-card rounded-lg border border-border p-6">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
           <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
           <div className="flex flex-wrap gap-3">
             <Button
               onClick={() => router.push("/admin/cms/pages/create")}
-              className="bg-blue-600 hover:bg-blue-700"
+             
             >
               <Plus className="h-4 w-4 mr-2" />
               Create New Page

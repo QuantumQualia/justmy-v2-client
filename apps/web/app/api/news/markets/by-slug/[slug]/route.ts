@@ -25,7 +25,7 @@ export async function GET(
   const backendUrl = buildApiUrl(
     `markets/slug/${encodeURIComponent(slug.toLowerCase())}`,
   );
-  const url = `${backendUrl}?includeZipcodes=true`;
+  const url = `${backendUrl}?includeZipcodes=true&includeSocials=true`;
 
   try {
     const res = await fetch(url, {

@@ -16,7 +16,7 @@ export interface AdBannerProps {
   imageAlt?: string;
   /** Optional: custom element instead of Next Image (e.g. for external URLs) */
   imageElement?: React.ReactNode;
-  /** Optional: when set, clicking the banner image opens this URL (same tab). Use full URL for external. */
+  /** Optional: clicking the banner image opens this URL. Pair with openInNewTab for external sites. */
   bannerLink?: string;
   /** Profile slug (e.g. @handle or profile identifier) shown under the image */
   profileSlug: string;
@@ -25,6 +25,8 @@ export interface AdBannerProps {
   className?: string;
   /** Keep the smaller shared corner. The default grows to the large corner on desktop. */
   compact?: boolean;
+  /** Banner image and hotlinks open in a new tab. */
+  openInNewTab?: boolean;
 }
 
 /**
@@ -39,7 +41,11 @@ export function AdBanner({
   hotlinks,
   className,
   compact = false,
+  openInNewTab = false,
 }: AdBannerProps) {
+  const external = openInNewTab
+    ? { target: "_blank" as const, rel: "noopener noreferrer" }
+    : {};
   const corner = compact ? "justmy-corners-sm" : "justmy-corners-sm lg:justmy-corners-xl";
   const imageArea = (
     <div className={cn(corner, "relative aspect-[6/1] w-full overflow-hidden")}>
@@ -59,6 +65,7 @@ export function AdBanner({
       href={bannerLink}
       className={cn(corner, "block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background")}
       aria-label={imageAlt || "Open banner link"}
+      {...external}
     >
       {imageArea}
     </Link>
@@ -83,6 +90,7 @@ export function AdBanner({
               <Link
                 href={link.href}
                 className="text-primary underline underline-offset-2 hover:text-primary/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                {...external}
               >
                 {link.label}
               </Link>

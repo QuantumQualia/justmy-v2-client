@@ -1,13 +1,24 @@
 import { ApiClientError } from "@/lib/api-client";
 import type { MarketResponseDto } from "@/lib/services/markets";
 
+const inFlight = new Map<string, Promise<MarketResponseDto>>();
+
 /**
  * Client-side market-by-slug lookup via Next BFF (no JWT required).
+ * Concurrent calls for the same slug share one request.
  */
-export async function fetchMarketBySlug(
-  slug: string,
-): Promise<MarketResponseDto> {
+export function fetchMarketBySlug(slug: string): Promise<MarketResponseDto> {
   const cleaned = slug.trim().toLowerCase();
+  const existing = inFlight.get(cleaned);
+  if (existing) return existing;
+  const request = loadMarketBySlug(cleaned).finally(() => {
+    inFlight.delete(cleaned);
+  });
+  inFlight.set(cleaned, request);
+  return request;
+}
+
+async function loadMarketBySlug(cleaned: string): Promise<MarketResponseDto> {
   const res = await fetch(
     `/api/news/markets/by-slug/${encodeURIComponent(cleaned)}`,
     {

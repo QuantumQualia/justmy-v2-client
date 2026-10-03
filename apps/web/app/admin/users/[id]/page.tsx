@@ -147,13 +147,13 @@ export default function EditUserPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background p-10 text-foreground">
+      <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
         <div className="max-w-5xl mx-auto space-y-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Edit User</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Edit User</h1>
             <p className="text-muted-foreground">User ID: {userId}</p>
           </div>
-          <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card md:p-8">
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -167,20 +167,20 @@ export default function EditUserPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-5xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Edit User</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Edit User</h1>
           <p className="text-muted-foreground">User ID: {userId}</p>
         </div>
 
         {error && (
-          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-destructive">
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
             {error}
           </div>
         )}
 
-        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card md:p-8">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <Link href="/admin/users">
@@ -194,7 +194,7 @@ export default function EditUserPage() {
                   variant="outline"
                   onClick={handleLoginAs}
                   disabled={saving || impersonating || !formData}
-                  className="border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
+                  className="border-success/40 text-success hover:bg-success/10 disabled:opacity-50"
                 >
                   {impersonating ? (
                     <>

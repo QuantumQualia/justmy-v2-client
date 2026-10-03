@@ -35,8 +35,8 @@ function statusLabel(status?: string | null) {
 function statusBadgeClass(status?: string | null) {
   const value = String(status || "open");
   if (value === "resolved") return "border-success/30 bg-success/10 text-success";
-  if (value === "in_progress") return "border-sky-500/30 bg-sky-500/10 text-sky-700";
-  return "border-amber-500/30 bg-amber-500/10 text-amber-800";
+  if (value === "in_progress") return "border-primary/30 bg-primary/10 text-primary";
+  return "border-border bg-accent text-accent-foreground";
 }
 
 export default function BizOsAdminQueuePage() {
@@ -228,7 +228,7 @@ export default function BizOsAdminQueuePage() {
                         className={cn(
                           "cursor-pointer border-t border-border/80 transition-colors duration-150",
                           active
-                            ? "bg-sidebar-accent shadow-[inset_3px_0_0_0_var(--foreground)]"
+                            ? "bg-secondary"
                             : "hover:bg-muted/80",
                         )}
                         onClick={() => setSelectedId(r.id)}

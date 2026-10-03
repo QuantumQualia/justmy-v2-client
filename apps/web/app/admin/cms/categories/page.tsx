@@ -50,13 +50,13 @@ export default function CmsCategoriesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Categories</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Categories</h1>
           <p className="mt-2 text-muted-foreground">Names and descriptions used when filing posts.</p>
         </div>
-        <div className="space-y-3 rounded-xl border border-border bg-muted p-6">
+        <div className="space-y-3 rounded-3xl border border-border bg-card p-6 shadow-card">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Category name" />
           <Input value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" />
           <Button onClick={create} disabled={saving || !name.trim()}>

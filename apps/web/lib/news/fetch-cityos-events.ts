@@ -88,6 +88,50 @@ function asEvent(value: unknown): CityOsEvent | null {
   };
 }
 
+export type CityOsEventsPage = {
+  events: CityOsEvent[];
+  totalCount: number;
+  page: number;
+  totalPages: number;
+};
+
+export async function fetchNewsCityOsEventsPage(
+  domain: string,
+  options: { page: number; pageSize: number; q?: string; from?: string; to?: string },
+  signal?: AbortSignal,
+): Promise<CityOsEventsPage> {
+  const search = new URLSearchParams({
+    domain: domain.trim(),
+    page: String(options.page),
+    pageSize: String(options.pageSize),
+  });
+  if (options.q?.trim()) search.set("q", options.q.trim());
+  if (options.from) search.set("from", options.from);
+  if (options.to) search.set("to", options.to);
+
+  const res = await fetch(`/api/news/cityos-events/page?${search.toString()}`, {
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+    signal,
+  });
+  const data = (await res.json().catch(() => ({}))) as Record<string, unknown> & { message?: string };
+  if (!res.ok) {
+    throw new ApiClientError(
+      typeof data.message === "string" ? data.message : `Events failed (${res.status})`,
+      res.status,
+    );
+  }
+  const events = (Array.isArray(data.events) ? data.events : [])
+    .map(asEvent)
+    .filter((e): e is CityOsEvent => e != null);
+  return {
+    events,
+    totalCount: typeof data.totalCount === "number" ? data.totalCount : events.length,
+    page: typeof data.page === "number" ? data.page : options.page,
+    totalPages: typeof data.totalPages === "number" ? data.totalPages : 1,
+  };
+}
+
 /** In-flight + session cache so remounts (e.g. Strict Mode) share one request. */
 const inFlight = new Map<string, Promise<CityOsEventsPayload>>();
 const cache = new Map<string, CityOsEventsPayload>();

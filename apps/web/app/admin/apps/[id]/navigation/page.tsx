@@ -424,18 +424,18 @@ export default function NavigationManagerPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+      <div className="flex min-h-full items-center justify-center bg-background px-6 py-8 text-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
               Navigation Manager - {app?.name}
             </h1>
             <p className="text-muted-foreground mt-2">Manage app navigation order and homepages</p>
@@ -449,7 +449,7 @@ export default function NavigationManagerPage() {
           </Button>
         </div>
 
-        <div className="border border-border rounded-xl bg-muted p-6 space-y-4">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-4">
           <div className="mt-6 space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold text-foreground">
@@ -528,7 +528,7 @@ export default function NavigationManagerPage() {
             <Button
               onClick={handleSave}
               disabled={loading}
-              className="bg-blue-600 hover:bg-blue-700"
+             
             >
               {loading ? (
                 <>
@@ -720,7 +720,7 @@ function MenuTreeNodeRow({
           type="button"
           onClick={() => onSetHome(node.id as number)}
           className={`p-2 rounded-full border ${data?.isHome
-            ? "bg-blue-600 border-blue-500 text-white"
+            ? "border-primary bg-primary text-primary-foreground"
             : "border-border text-muted-foreground hover:bg-accent"
             }`}
           title="Set as home"
@@ -731,7 +731,7 @@ function MenuTreeNodeRow({
         <button
           type="button"
           onClick={() => onRemove(node.id as number)}
-          className="p-2 rounded-full border border-red-500/40 text-destructive hover:bg-destructive/10 hover:border-red-500/80"
+          className="rounded-full border border-destructive/40 text-destructive hover:border-destructive/60 hover:bg-destructive/10"
           title="Remove menu item"
         >
           <Trash2 className="h-4 w-4" />

@@ -3,6 +3,8 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
+import { AdminNotice, AdminPage, AdminPanel } from "@/components/admin/admin-page"
 import { MarketIdentityForm } from "@/components/admin/markets/market-identity-form"
 import { MarketSocialsForm } from "@/components/admin/markets/market-socials-form"
 import { MarketZipManager } from "@/components/admin/markets/market-zip-manager"
@@ -92,86 +94,60 @@ export default function CreateMarketPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Create Market</h1>
-          <p className="text-muted-foreground">Add a new market to the system</p>
-        </div>
-
-        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
-          <div className="space-y-6">
-            {error && (
-              <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-destructive">
-                {error}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between">
+    <AdminPage
+      title="Create market"
+      description="Add a market, then assign sponsor profiles from the market’s Sponsors tab."
+      width="5xl"
+      actions={
+        <Button onClick={handleSave} disabled={saving || !identityData}>
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {saving ? "Creating..." : "Create market"}
+        </Button>
+      }
+    >
+      {error ? <AdminNotice>{error}</AdminNotice> : null}
+      <AdminPanel>
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Button variant="ghost" size="sm" asChild>
               <Link href="/admin/markets">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground hover:bg-accent">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
+                <ArrowLeft className="h-4 w-4" />
+                Markets
               </Link>
-              <Button
-                onClick={handleSave}
-                disabled={saving || !identityData}
-                className="disabled:opacity-50"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Create Market
-                  </>
-                )}
-              </Button>
-            </div>
-
-            <div className="border-b border-border">
-              <nav className="flex gap-4">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2 border-b-2 transition-colors cursor-pointer ${
-                      activeTab === tab.id
-                        ? "border-success text-emerald-500 font-medium"
-                        : "border-transparent text-muted-foreground hover:text-accent-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            <div>
-              {activeTab === "general" && (
-                <MarketIdentityForm
-                  onChange={(data) => setIdentityData(data)}
-                />
-              )}
-              {activeTab === "socials" && (
-                <MarketSocialsForm
-                  onChange={(data) => setSocialsData(data)}
-                />
-              )}
-              {activeTab === "territory" && (
-                <MarketZipManager
-                  onChange={(zips) => setZipData(zips)}
-                />
-              )}
+            </Button>
+            <div className="inline-flex flex-wrap rounded-full bg-muted p-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                    activeTab === tab.id
+                      ? "bg-foreground text-background shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
+
+          <div>
+            {activeTab === "general" && (
+              <MarketIdentityForm onChange={(data) => setIdentityData(data)} />
+            )}
+            {activeTab === "socials" && (
+              <MarketSocialsForm onChange={(data) => setSocialsData(data)} />
+            )}
+            {activeTab === "territory" && (
+              <MarketZipManager onChange={(zips) => setZipData(zips)} />
+            )}
+          </div>
         </div>
-      </div>
-    </div>
+      </AdminPanel>
+    </AdminPage>
   )
 }
 

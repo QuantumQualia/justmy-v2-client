@@ -67,7 +67,7 @@ export function ImageBlockEditor({ block, onUpdate }: ImageBlockEditorProps) {
           <button
             type="button"
             onClick={() => setInsertOpen(true)}
-            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card"
+            className="group relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-card text-left transition-colors hover:border-primary/30 hover:bg-secondary"
           >
             {src ? (
               <>
@@ -153,7 +153,7 @@ export function ImageBlockEditor({ block, onUpdate }: ImageBlockEditorProps) {
       {uploading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>

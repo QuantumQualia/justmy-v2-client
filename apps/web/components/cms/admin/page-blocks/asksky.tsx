@@ -395,14 +395,14 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
       <Card className="border-border bg-muted text-foreground">
         <CardContent className="space-y-4 p-4 pt-4">
           {profilesLoadFailed && !loadingProfiles && profileMenuOpen ? (
-            <div className="rounded-lg border border-red-500/35 bg-destructive/10 px-3 py-2 text-sm text-red-100">
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
               Could not load profiles from <span className="font-medium text-foreground">GET /profiles/admin</span>. Confirm
               you are signed in with permission to use the admin profile list.
             </div>
           ) : null}
 
           {missingRequired ? (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+            <div className="rounded-2xl border border-border bg-accent px-3 py-2 text-sm text-accent-foreground">
               Select both required fields below. The widget will not load until they are set.
             </div>
           ) : null}
@@ -439,7 +439,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
               <SelectTrigger
                 id="asksky-profile-select"
                 aria-required="true"
-                className={`border-border bg-card text-foreground ${!profileSlug ? "border-amber-600/60" : ""}`}
+                className={`border-border bg-card text-foreground ${!profileSlug ? "border-primary/40" : ""}`}
               >
                 <SelectValue placeholder="Choose profile">
                   {profileSlug.trim() ? selectedProfileLabel : null}
@@ -514,7 +514,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
               <SelectTrigger
                 id="asksky-agent-select"
                 aria-required="true"
-                className={`border-border bg-card text-foreground ${!agentToken ? "border-amber-600/60" : ""}`}
+                className={`border-border bg-card text-foreground ${!agentToken ? "border-primary/40" : ""}`}
               >
                 <SelectValue
                   placeholder={
@@ -556,7 +556,7 @@ export function AskSkyBlockEditor({ block, onUpdate }: AskSkyBlockEditorProps) {
               </SelectContent>
             </Select>
             {selectedAgentIsInactive ? (
-              <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+              <div className="rounded-2xl border border-border bg-accent px-3 py-2 text-sm text-accent-foreground">
                 This agent is inactive. AskSKY! will not work for visitors until you activate the agent in Agent
                 management.
               </div>

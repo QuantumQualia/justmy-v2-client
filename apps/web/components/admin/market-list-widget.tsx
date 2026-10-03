@@ -35,7 +35,7 @@ export function MarketListWidget() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background p-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input 
@@ -44,7 +44,7 @@ export function MarketListWidget() {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button className="">
+        <Button>
           <Plus className="mr-2 h-4 w-4" /> Add Market
         </Button>
       </div>
@@ -67,7 +67,7 @@ export function MarketListWidget() {
                 <TableCell className="font-mono text-xs text-muted-foreground">#{market.id}</TableCell>
                 <TableCell className="font-medium text-lg">
                     {market.name}
-                    {market.status === 'Pending' && <Badge variant="outline" className="ml-2 text-yellow-500 border-yellow-500 text-[10px]">Pending</Badge>}
+                    {market.status === 'Pending' && <Badge variant="outline" className="ml-2 border-border text-accent-foreground text-[10px]">Pending</Badge>}
                 </TableCell>
                 <TableCell className="text-muted-foreground">{market.state}</TableCell>
                 <TableCell className="text-muted-foreground text-sm">
@@ -78,7 +78,7 @@ export function MarketListWidget() {
                 </TableCell>
                 <TableCell className="text-right">
                   <Link href={`/admin/markets/${market.id}`}>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-blue-400 hover:text-accent-foreground hover:bg-blue-600">
+                    <Button variant="ghost" size="sm" className="size-8 text-muted-foreground hover:bg-secondary hover:text-foreground">
                         <Edit className="h-4 w-4" />
                     </Button>
                   </Link>

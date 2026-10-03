@@ -101,23 +101,23 @@ export default function CmsPostsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Posts</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Posts</h1>
             <p className="text-muted-foreground mt-2">Manage blog posts and articles</p>
           </div>
           <Button
             onClick={() => router.push("/admin/cms/posts/create")}
-            className="bg-blue-600 hover:bg-blue-700"
+           
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Post
           </Button>
         </div>
 
-        <div className="border border-border rounded-xl bg-muted p-6">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
           <div className="mb-4 space-y-3">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -171,7 +171,7 @@ export default function CmsPostsPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <>
@@ -184,7 +184,7 @@ export default function CmsPostsPage() {
                   filteredPosts.map((post) => (
                     <div
                       key={post.id}
-                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
+                      className="flex items-center justify-between rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-secondary"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -227,7 +227,7 @@ export default function CmsPostsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(post.id)}
-                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:border-destructive/30 hover:bg-destructive/10"
                           title="Delete post"
                         >
                           <Trash2 className="h-4 w-4" />

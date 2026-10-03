@@ -331,7 +331,7 @@ export function PageBlockEditor({
         isDragOverHere &&
           (surface === "light"
             ? "translate-y-0.5 border-ring bg-accent"
-            : "border-blue-500/70 shadow-[0_0_0_1px_rgba(59,130,246,0.6)] bg-muted translate-y-0.5")
+            : "translate-y-0.5 border-primary bg-secondary")
       )}
       onDragOver={handleDragOver}
       onDrop={handleDrop}
@@ -493,7 +493,7 @@ export function PageBlockEditor({
                       onClick={() => setActiveBreakpoint(bp.key)}
                       className={`p-1.5 rounded text-xs transition-colors ${
                         activeBreakpoint === bp.key
-                          ? "bg-blue-600 text-white"
+                          ? "bg-primary text-primary-foreground"
                           : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                       }`}
                       title={bp.label}

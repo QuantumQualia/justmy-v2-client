@@ -83,7 +83,7 @@ const editorTheme = {
     code: "bg-muted px-1 py-0.5 rounded text-sm font-mono",
   },
   heading: {
-    h1: "text-3xl font-bold mb-4 mt-6",
+    h1: "text-3xl font-semibold tracking-tight mb-4 mt-6",
     h2: "text-2xl font-bold mb-3 mt-5",
     h3: "text-xl font-semibold mb-2 mt-4",
   },
@@ -96,7 +96,7 @@ const editorTheme = {
     ol: "list-decimal ml-6 mb-2",
     listitem: "mb-1",
   },
-  link: "text-blue-400 hover:text-blue-300 underline",
+  link: "text-primary hover:text-primary underline",
 };
 
 function ToolbarButton({
@@ -118,7 +118,7 @@ function ToolbarButton({
       onClick={onClick}
       title={title}
       className={`h-8 w-8 p-0 rounded border ${isActive
-          ? "border-blue-500 bg-blue-500/20 text-blue-300"
+          ? "border-primary bg-primary/15 text-primary"
           : "border-border text-muted-foreground hover:text-accent-foreground hover:bg-accent"
         }`}
     >

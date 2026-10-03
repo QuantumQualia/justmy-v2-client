@@ -61,23 +61,23 @@ export default function AppsPage() {
   const filteredApps = appsList;
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Apps</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Apps</h1>
             <p className="text-muted-foreground mt-2">Manage applications</p>
           </div>
           <Button
             onClick={() => router.push("/admin/apps/create")}
-            className="bg-blue-600 hover:bg-blue-700"
+           
           >
             <Plus className="h-4 w-4 mr-2" />
             Create App
           </Button>
         </div>
 
-        <div className="border border-border rounded-xl bg-muted p-6">
+        <div className="rounded-3xl border border-border bg-card p-6 shadow-card">
           <div className="mb-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -92,7 +92,7 @@ export default function AppsPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <>
@@ -105,7 +105,7 @@ export default function AppsPage() {
                   filteredApps.map((app) => (
                     <div
                       key={app.id}
-                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
+                      className="flex items-center justify-between rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-secondary"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -113,17 +113,17 @@ export default function AppsPage() {
                             {app.name}
                           </h3>
                           {!app.isActive && (
-                            <span className="text-xs px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded">
+                            <span className="text-xs px-2 py-1 bg-accent text-accent-foreground rounded">
                               Inactive
                             </span>
                           )}
                           {app.isActive && (
-                            <span className="text-xs px-2 py-1 bg-green-500/20 text-green-400 rounded">
+                            <span className="text-xs px-2 py-1 bg-success/15 text-success rounded">
                               Active
                             </span>
                           )}
                           {app.osApps && app.osApps.length > 0 && (
-                            <span className="text-xs px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
+                            <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded">
                               {app.osApps.length} OS
                             </span>
                           )}
@@ -140,7 +140,7 @@ export default function AppsPage() {
                           size="sm"
                           onClick={() => router.push(`/admin/apps/${app.id}/navigation`)}
                           title="Manage Menu"
-                          className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 border border-transparent hover:border-blue-500/30"
+                          className="text-primary hover:border-primary/30 hover:bg-secondary hover:text-foreground"
                         >
                           <Menu className="h-4 w-4" />
                         </Button>
@@ -157,7 +157,7 @@ export default function AppsPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(app.id)}
-                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:border-destructive/30 hover:bg-destructive/10"
                           title="Delete App"
                         >
                           <Trash2 className="h-4 w-4" />

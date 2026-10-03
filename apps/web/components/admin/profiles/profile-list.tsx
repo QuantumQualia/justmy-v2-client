@@ -136,7 +136,7 @@ export function ProfileList() {
               <span className="text-foreground text-sm">{memberName}</span>
               <span className="text-xs text-muted-foreground">{primaryMember.email}</span>
               {primaryMember.isDefault && (
-                <Badge variant="outline" className="mt-1 w-fit text-xs border-emerald-700 text-success">
+                <Badge variant="outline" className="mt-1 w-fit text-xs border-success/40 text-success">
                   Default
                 </Badge>
               )}
@@ -175,7 +175,7 @@ export function ProfileList() {
                 variant={subscription.status === "ACTIVE" ? "default" : "outline"}
                 className={
                   subscription.status === "ACTIVE"
-                    ? "bg-success/15 text-success border-emerald-600/50 w-fit"
+                    ? "border-success/40 bg-success/15 text-success w-fit"
                     : "border-border text-muted-foreground w-fit"
                 }
               >
@@ -216,7 +216,7 @@ export function ProfileList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background p-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

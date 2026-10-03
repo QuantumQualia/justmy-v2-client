@@ -106,7 +106,7 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
             updatedColumns[colIndex] = { ...column, name: e.target.value };
             onUpdateLayout({ ...block.layout, columns: updatedColumns });
           }}
-          className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="flex-1 bg-muted border border-border rounded px-2 py-1 text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
         <Button
           variant="ghost"
@@ -133,7 +133,7 @@ function LayoutColumnEditor({ column, colIndex, block, onUpdateLayout }: LayoutC
               },
             });
           }}
-          className="h-6 w-6 p-0 ml-2 text-destructive hover:text-red-300 hover:bg-red-900/20"
+          className="h-6 w-6 p-0 ml-2 text-destructive hover:bg-destructive/10 hover:text-destructive"
           title="Delete Column"
         >
           <Trash2 className="h-3 w-3" />
@@ -238,7 +238,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
               type: e.target.value as "container" | "full-width" | "boxed",
             });
           }}
-          className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="container">Container</option>
           <option value="full-width">Full Width</option>
@@ -257,7 +257,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
                 onClick={() => setActiveBreakpoint(bp.key)}
                 className={`p-1.5 rounded text-xs transition-colors ${
                   activeBreakpoint === bp.key
-                    ? "bg-blue-600 text-white"
+                    ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
                 }`}
                 title={bp.label}
@@ -312,7 +312,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
                   columns: newColumns,
                 });
               }}
-              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
@@ -322,7 +322,7 @@ export function PageBlockLayout({ block, onUpdate }: PageBlockLayoutProps) {
               value={getGridValue("gap", activeBreakpoint).toString()}
               onChange={(e) => updateGridLayout("gap", e.target.value, activeBreakpoint)}
               placeholder="16px"
-              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 rounded border border-input bg-background px-2 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>

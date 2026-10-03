@@ -7,7 +7,11 @@ import { toast } from "sonner";
 import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
 import { DotClaimModal } from "@/components/news/asksky/dot-claim-modal";
 import { AskSkyEventsCarousel } from "@/components/news/asksky/asksky-events-carousel";
-import { AskSkyTryFreeCta } from "@/components/news/asksky/asksky-try-free-cta";
+import { CommunityReel } from "@/components/news/home/community-reel";
+import { NewsstandTools } from "@/components/news/home/newsstand-tools";
+import { SponsorSpotlight } from "@/components/news/home/sponsor-spotlight";
+import { WhatsOnTheStand } from "@/components/news/home/whats-on-the-stand";
+import { WinWithSky } from "@/components/news/home/win-with-sky";
 import { mapSkySearchToAnswer, turnsFromSkyMessages } from "@/components/news/asksky/map-sky-search";
 import { marketDtoToContext } from "@/components/news/asksky/market-context";
 import { NewsMarketNav } from "@/components/news/asksky/news-market-nav";
@@ -58,12 +62,18 @@ export function NewsMarketPageClient({
   const setMarket = useNewsZipStore((s) => s.setMarket);
   const clearZipcode = useNewsZipStore((s) => s.clearZipcode);
 
+  const domainKey = domain ? marketSiteToDomain(domain) ?? "" : "";
+  const marketMatchesDomain =
+    Boolean(domainKey) &&
+    market != null &&
+    marketSiteToDomain(market.site) === domainKey;
   const marketMatchesZip =
     market != null &&
     market.zipcode.trim().slice(0, 5) === zipcode.trim().slice(0, 5);
+  const marketReady = domain ? marketMatchesDomain : marketMatchesZip;
 
   const [loadState, setLoadState] = useState<LoadState>(() =>
-    marketMatchesZip ? "ready" : "loading",
+    marketReady ? "ready" : "loading",
   );
   const [turns, setTurns] = useState<AskSkyTurn[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -83,8 +93,7 @@ export function NewsMarketPageClient({
   }, []);
 
   useEffect(() => {
-    const domainKey = domain ? marketSiteToDomain(domain) : "";
-    if (domainKey && loadedDomainRef.current === domainKey) {
+    if (domainKey && loadedDomainRef.current === domainKey && marketMatchesDomain) {
       setLoadState("ready");
       return;
     }
@@ -112,12 +121,13 @@ export function NewsMarketPageClient({
         if (!primary) {
           toast.error("No market found");
           clearZipcode();
+          setLoadState("error");
           return;
         }
         setMarket(
           marketDtoToContext(
             primary,
-            zipcode || primary.zipcodes?.[0]?.zipcode,
+            domain ? primary.zipcodes?.[0]?.zipcode : zipcode || primary.zipcodes?.[0]?.zipcode,
           ),
         );
         if (domainKey) loadedDomainRef.current = domainKey;
@@ -136,14 +146,14 @@ export function NewsMarketPageClient({
     return () => {
       cancelled = true;
     };
-  }, [zipcode, domain, marketMatchesZip, setMarket, clearZipcode]);
+  }, [zipcode, domain, domainKey, marketMatchesDomain, marketMatchesZip, setMarket, clearZipcode]);
 
   async function handleAsk(nextQuery: string) {
     const trimmed = nextQuery.trim();
     if (!trimmed || askInFlightRef.current) return;
 
-    const activeMarket = marketMatchesZip ? market : null;
-    if (!activeMarket) return;
+    const activeMarket = marketReady ? market : null;
+    if (!activeMarket?.marketId) return;
 
     const turnId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
     askInFlightRef.current = true;
@@ -263,7 +273,7 @@ export function NewsMarketPageClient({
     };
   }, [newsHost, activeConversationId]);
 
-  const activeMarket = marketMatchesZip ? market : null;
+  const activeMarket = marketReady ? market : null;
 
   return (
     <div
@@ -273,19 +283,6 @@ export function NewsMarketPageClient({
         "[&_.font-serif]:font-[family-name:var(--font-asksky-serif),ui-serif,Georgia,serif]",
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-24 top-0 h-80 w-80 rounded-full bg-primary/15 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-20 top-32 h-96 w-96 rounded-full bg-sky-300/25 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-indigo-200/20 blur-3xl"
-      />
-
       <div className="relative z-10 min-w-0 max-w-full overflow-x-hidden">
         {loadState === "loading" ? (
           <MarketStatusMessage title="Loading market…" />
@@ -314,9 +311,22 @@ export function NewsMarketPageClient({
               onNewChat={handleNewChat}
               disabled={isSearching}
             />
-
+            <SponsorSpotlight
+              market={activeMarket}
+              placement="newsstand"
+              eyebrow="Your NewsSTAND is brought to you by"
+            />
+            <WhatsOnTheStand market={activeMarket} />
             <AskSkyEventsCarousel market={activeMarket} />
-            <AskSkyTryFreeCta />
+            <WinWithSky market={activeMarket} />
+            <SponsorSpotlight
+              market={activeMarket}
+              placement="prize"
+              eyebrow="Win with Sky! is brought to you by"
+              showPrizeProgress
+            />
+            <NewsstandTools />
+            <CommunityReel market={activeMarket} />
             <AskSkyClaimCta market={activeMarket} onClaim={() => setClaimOpen(true)} />
             <DotClaimModal
               open={claimOpen}

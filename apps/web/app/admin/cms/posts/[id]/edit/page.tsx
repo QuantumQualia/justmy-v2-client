@@ -313,7 +313,7 @@ export default function EditPostPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
@@ -327,12 +327,12 @@ export default function EditPostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-10 relative text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Edit Post</h1>
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">Edit Post</h1>
               <p className="text-muted-foreground">{post.title}</p>
             </div>
           </div>
@@ -351,7 +351,7 @@ export default function EditPostPage() {
                 saving ||
                 (isSharedPost ? !formData.externalUrl.trim() : false)
               }
-              className="bg-blue-600 hover:bg-blue-700"
+             
             >
               {saving ? (
                 <>
@@ -655,7 +655,7 @@ export default function EditPostPage() {
                     <button
                       type="button"
                       onClick={() => setOgInsertOpen(true)}
-                      className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card"
+                      className="group relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-card text-left transition-colors hover:border-primary/30 hover:bg-secondary"
                     >
                       {formData.seo.ogImage ? (
                         <>
@@ -714,7 +714,7 @@ export default function EditPostPage() {
       {uploadingOgImage && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-card border border-border shadow-xl">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>

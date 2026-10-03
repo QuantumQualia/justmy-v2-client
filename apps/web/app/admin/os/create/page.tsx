@@ -44,15 +44,15 @@ export default function CreateOSPage() {
   }, 750);
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Create OS</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-foreground">Create OS</h1>
           <p className="text-muted-foreground mt-2">Create a new operating system</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border border-border rounded-xl bg-muted p-6 space-y-4">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-foreground">
                 Name *
@@ -111,7 +111,7 @@ export default function CreateOSPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1"
             >
               {loading ? (
                 <>

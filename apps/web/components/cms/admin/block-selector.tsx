@@ -122,7 +122,7 @@ export function BlockSelector({
           "flex max-h-[90vh] w-full max-w-4xl animate-in flex-col overflow-hidden border p-6 shadow-2xl zoom-in-95",
           light
             ? "rounded-3xl border-border bg-background text-foreground"
-            : "rounded-2xl border-border bg-gradient-to-br from-slate-800 to-muted",
+            : "rounded-3xl border-border bg-card text-foreground",
         )}
         onClick={(e) => e.stopPropagation()}
       >
@@ -132,7 +132,7 @@ export function BlockSelector({
             <div
               className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-full",
-                light ? "bg-primary" : "bg-gradient-to-br from-blue-600 to-purple-600",
+                light ? "bg-primary" : "bg-primary",
               )}
             >
               <Plus className={cn("h-5 w-5", light ? "text-primary-foreground" : "text-foreground")} />

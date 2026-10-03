@@ -172,8 +172,8 @@ export function MarketList() {
               variant={displayStatus === "Active" ? "default" : "outline"}
               className={
                 displayStatus === "Active"
-                  ? "bg-success/15 text-success border-emerald-600/50"
-                  : "text-muted-foreground border-border"
+                  ? "border-success/40 bg-success/15 text-success"
+                  : "border-border text-muted-foreground"
               }
             >
               {displayStatus}
@@ -188,20 +188,17 @@ export function MarketList() {
           const market = row.original
           return (
             <div className="flex items-center justify-end gap-2">
-              <Link href={`/admin/markets/${market.id}`}>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 text-blue-400 hover:text-accent-foreground hover:bg-blue-600"
-                >
+              <Button variant="ghost" size="icon" asChild>
+                <Link href={`/admin/markets/${market.id}`} aria-label={`Edit ${market.name}`}>
                   <Edit className="h-4 w-4" />
-                </Button>
-              </Link>
+                </Link>
+              </Button>
               <Button
-                variant="destructive"
-                size="sm"
+                variant="ghost"
+                size="icon"
                 onClick={() => handleDelete(market.id)}
-                className="h-8 w-8 p-0"
+                className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+                aria-label={`Delete ${market.name}`}
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
@@ -215,7 +212,7 @@ export function MarketList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background p-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -226,7 +223,7 @@ export function MarketList() {
           />
         </div>
         <Link href="/admin/markets/create">
-          <Button className="">
+          <Button>
             <Plus className="mr-2 h-4 w-4" />
             Create Market
           </Button>

@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ArrowRight } from "lucide-react";
+import { Button } from "@workspace/ui/components/button";
 import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { legacyPlainText } from "@/lib/legacy-html";
 import dynamic from "next/dynamic";
@@ -194,41 +195,38 @@ export function AskSkyConversation({
       </div>
 
       <form
-        className="shrink-0 min-w-0 border-t border-border bg-card px-3 py-2.5 sm:px-6 sm:py-3 lg:px-8"
+        className="flex min-w-0 shrink-0 items-end gap-2 border-t border-border px-3 py-3 sm:px-6 lg:px-8"
         onSubmit={(e) => {
           e.preventDefault();
           submit(draft);
         }}
       >
         <label htmlFor="asksky-followup" className="sr-only">
-          Continue asking AskSKY
+          Continue asking AskSKY!
         </label>
-        <div className="flex min-w-0 items-end gap-1.5 rounded-[1.375rem] border border-border bg-card py-1 pl-3 pr-1 shadow-sm transition focus-within:border-primary/40 focus-within:ring-2 focus-within:ring-ring/60 sm:gap-2 sm:py-1.5 sm:pl-4 sm:pr-1.5">
-          <AskSkyGrowTextarea
-            chrome={false}
-            id="asksky-followup"
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            placeholder={disabled ? "SKY is typing…" : "Ask a follow-up…"}
-            disabled={disabled}
-            className="min-h-10 bg-transparent px-0 py-2 text-base text-foreground placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-60 md:text-sm"
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                submit(draft);
-              }
-            }}
-          />
-          <button
-            type="submit"
-            disabled={disabled}
-            className="asksky-sky-send inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full disabled:cursor-not-allowed sm:h-11 sm:w-auto sm:gap-1.5 sm:px-4"
-            aria-label="Ask SKY"
-          >
-            <span className="hidden sm:inline">Ask SKY</span>
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </button>
-        </div>
+        <AskSkyGrowTextarea
+          id="asksky-followup"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          placeholder={disabled ? "SKY is typing…" : "Ask a follow-up…"}
+          disabled={disabled}
+          className="disabled:cursor-not-allowed disabled:opacity-60"
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              submit(draft);
+            }
+          }}
+        />
+        <Button
+          type="submit"
+          size="icon"
+          className="asksky-sky-send mb-0.5 h-11 w-11 shrink-0 rounded-full"
+          disabled={disabled || !draft.trim()}
+          aria-label="Send to AskSKY!"
+        >
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </Button>
       </form>
     </div>
   );
@@ -295,7 +293,7 @@ function ConversationTurn({
   return (
     <div className="min-w-0 space-y-3.5 sm:space-y-4">
       <div className={`flex min-w-0 items-end justify-end gap-2 ${askSkyMsgInClass(animateUser) ?? ""}`.trim()}>
-        <div className="min-w-0 max-w-[min(92%,calc(100%-2.5rem))] break-words asksky-sky-bubble-user sm:max-w-[70%]">
+        <div className="asksky-sky-bubble-user min-w-0 break-words text-sm sm:max-w-[70%]">
           {turn.query}
         </div>
         <AskSkyUserAvatar size={32} className="mb-0.5" />
@@ -305,21 +303,21 @@ function ConversationTurn({
         <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(true) ?? ""}`.trim()}>
           <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
           <div
-            className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5"
+            className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5 px-4 py-3"
             role="status"
             aria-live="polite"
             aria-label="SKY is typing"
           >
             <span
-              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
               style={{ animationDelay: "0ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
               style={{ animationDelay: "160ms", animationDuration: "1.2s" }}
             />
             <span
-              className="h-2 w-2 rounded-full bg-card/85 animate-bounce"
+              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
               style={{ animationDelay: "320ms", animationDuration: "1.2s" }}
             />
           </div>
@@ -329,8 +327,8 @@ function ConversationTurn({
       {turn.status === "error" ? (
         <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(animateSky) ?? ""}`.trim()}>
           <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
-          <div className="min-w-0 flex-1 rounded-[1.25rem] border border-rose-200 bg-rose-50/80 p-3.5 sm:p-5">
-            <p className="text-sm leading-relaxed text-rose-800 sm:text-[15px]">
+          <div className="min-w-0 flex-1 justmy-corners-lg border border-destructive/30 bg-destructive/10 p-3.5 sm:p-5">
+            <p className="text-sm leading-relaxed text-destructive sm:text-[15px]">
               <AskSkyTypedText
                 text={turn.errorMessage?.trim() || "Something went wrong. Try asking again."}
                 animate={animateSky}
@@ -344,8 +342,8 @@ function ConversationTurn({
         <>
           <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(animateSky) ?? ""}`.trim()}>
             <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
-            <div className="asksky-sky-bubble-assistant min-w-0 flex-1 sm:p-5">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed text-white sm:text-[15px]">
+            <div className="asksky-sky-bubble-assistant min-w-0 sm:px-5 sm:py-4">
+              <p className="whitespace-pre-wrap text-sm leading-relaxed sm:text-[15px]">
                 <AskSkyTypedText
                   text={displayAnswer}
                   animate={animateSky}
@@ -380,7 +378,7 @@ function ConversationTurn({
                           <span
                             className={`inline-flex min-w-5 items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
                               active
-                                ? "bg-primary text-primary-foreground"
+                                ? "bg-primary-foreground/20 text-primary-foreground"
                                 : "bg-muted text-muted-foreground"
                             }`}
                           >
@@ -425,7 +423,7 @@ function ConversationTurn({
                   type="button"
                   disabled={followUpsDisabled}
                   onClick={() => onFollowUp(followUp)}
-                  className="asksky-sky-pill sm:px-3.5 sm:py-2 sm:text-sm"
+                  className="max-w-full rounded-full border border-border bg-card px-3.5 py-2 text-left text-sm text-foreground transition hover:border-primary/30 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <span className="line-clamp-2 sm:truncate">{followUp}</span>
                 </button>
@@ -446,7 +444,7 @@ function highlightZipInAnswer(answer: string, zipcode: string) {
     <span key={i}>
       {part}
       {i < parts.length - 1 ? (
-        <span className="font-semibold text-cyan-100">{zipcode}</span>
+        <span className="font-semibold underline underline-offset-2">{zipcode}</span>
       ) : null}
     </span>
   ));
@@ -575,7 +573,7 @@ function ContactIconControl({
       {open ? (
         <div
           role="menu"
-          className="absolute left-1/2 top-full z-20 mt-1.5 w-56 -translate-x-1/2 overflow-hidden rounded-xl border border-border bg-card py-1 shadow-lg shadow-card"
+          className="absolute left-1/2 top-full z-20 mt-1.5 w-56 -translate-x-1/2 overflow-hidden justmy-corners border border-border bg-card py-1 shadow-card"
         >
           {items.map((item) => (
             <a
@@ -694,7 +692,7 @@ function BusinessCard({
   };
 
   return (
-    <article className="flex h-full flex-col rounded-3xl border border-border bg-card p-5 shadow-sm">
+    <article className="flex h-full flex-col justmy-corners-lg border border-border bg-card p-5 shadow-card">
       <div className="mx-auto flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-primary/30 bg-secondary text-sm font-bold text-primary">
         {card.photo ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -842,7 +840,7 @@ function BusinessCard({
           title="Like"
         >
           <Heart
-            className={`h-3.5 w-3.5 ${liked ? "fill-rose-500 text-rose-500" : ""}`}
+            className={`h-3.5 w-3.5 ${liked ? "fill-destructive text-destructive" : ""}`}
             aria-hidden
           />
         </button>
@@ -899,17 +897,17 @@ function PostCard({ card }: { card: AskSkyPostCard }) {
   }
 
   return (
-    <article className="flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-sm">
+    <article className="flex flex-col overflow-hidden justmy-corners-lg border border-border bg-card shadow-card">
       <div
         className={`relative flex h-36 items-start justify-between p-4 ${
           card.image
             ? "bg-muted bg-cover bg-center"
-            : "bg-linear-to-br from-slate-700 to-slate-900"
+            : "bg-foreground"
         }`}
         style={card.image ? { backgroundImage: `url(${card.image})` } : undefined}
       >
         {card.badge ? (
-          <span className="ml-auto rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-white">
+          <span className="ml-auto rounded-full bg-primary px-2.5 py-1 text-[10px] font-semibold text-primary-foreground">
             {card.badge}
           </span>
         ) : null}
@@ -1035,7 +1033,7 @@ function WebCard({ card }: { card: AskSkyWebCard }) {
   }
 
   return (
-    <article className="flex flex-col rounded-3xl border border-border bg-card p-5 shadow-sm transition hover:border-primary/40">
+    <article className="flex flex-col justmy-corners-lg border border-border bg-card p-5 shadow-card transition hover:border-primary/30">
       <div className="flex items-center gap-2 text-xs font-medium text-primary">
         <Globe className="h-3.5 w-3.5" aria-hidden />
         {hostname || "Web"}

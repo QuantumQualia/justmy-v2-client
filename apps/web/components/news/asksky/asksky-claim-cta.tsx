@@ -3,6 +3,8 @@
 import { ArrowRight, MapPin } from "lucide-react";
 import Link from "next/link";
 
+import { InsetFrame } from "@/components/news/home/inset-frame";
+import { Button } from "@workspace/ui/components/button";
 import type { NewsMarketContext } from "./types";
 
 type AskSkyClaimCtaProps = {
@@ -21,71 +23,41 @@ export function AskSkyClaimCta({
 }: AskSkyClaimCtaProps) {
   const city = market.city || market.marketName;
 
-  return (
-    <section className="mx-auto w-full max-w-5xl px-3 pb-10 sm:px-6 sm:pb-14 lg:max-w-6xl">
-      <div className="relative overflow-hidden rounded-[1.75rem] rounded-br-none bg-[#0c0c10] px-6 py-12 text-center shadow-[0_28px_60px_-28px_rgba(15,23,42,0.55)] sm:rounded-[2rem] sm:rounded-br-none sm:px-10 sm:py-16">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -left-16 bottom-0 h-56 w-56 rounded-full bg-teal-500/25 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-10 top-0 h-64 w-64 rounded-full bg-primary/30 blur-3xl"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_70%_at_50%_40%,transparent_40%,rgba(0,0,0,0.35)_100%)]"
-        />
+  const label = (
+    <>
+      <MapPin className="h-4 w-4" aria-hidden />
+      Claim Your Free Dot Hub
+      <ArrowRight className="h-4 w-4" aria-hidden />
+    </>
+  );
 
+  return (
+    <InsetFrame className="pb-14">
+      <div className="bg-foreground px-6 py-12 text-center text-background sm:px-10 sm:py-16">
         <div className="relative z-10 mx-auto flex max-w-2xl flex-col items-center">
-          <span className="inline-flex items-center rounded-full border border-white/20 bg-card/5 px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/85 sm:text-[11px]">
+          <span className="inline-flex items-center rounded-full border border-background/20 px-3.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-background/85 sm:text-[11px]">
             1,000 Free Biz OS Packages
           </span>
 
-          <h2 className="mt-6 font-serif text-[1.65rem] leading-snug tracking-tight text-white sm:text-[2.15rem] sm:leading-tight">
-            If AI doesn&apos;t know you exist, your storefront is completely
-            dark.
+          <h2 className="mt-6 font-serif text-[1.65rem] leading-snug tracking-tight sm:text-[2.15rem] sm:leading-tight">
+            If AI doesn&apos;t know you exist, your storefront is completely dark.
           </h2>
 
-          <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/55 sm:text-base">
-            Claim your Dot to enter AskSKY!&apos;s local memory — so when{" "}
-            {city} asks, your storefront is the answer.
+          <p className="mt-4 max-w-xl text-sm leading-relaxed text-background/70 sm:text-base">
+            Claim your Dot to enter AskSKY!&apos;s local memory — so when {city} asks, your storefront is the answer.
           </p>
 
           {onClaim ? (
-            <button
-              type="button"
-              onClick={onClaim}
-              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-110 sm:px-7 sm:text-base"
-            >
-              <span className="relative inline-flex h-5 w-5 items-center justify-center">
-                <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-                <span
-                  aria-hidden
-                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-card"
-                />
-              </span>
-              Claim Your Free Dot Hub
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
+            <Button type="button" onClick={onClaim} className="mt-8 bg-brand-gradient text-primary-foreground">
+              {label}
+            </Button>
           ) : (
-            <Link
-              href={href}
-              className="mt-8 inline-flex items-center gap-2.5 rounded-full bg-brand-gradient px-6 py-3.5 text-sm font-semibold text-white shadow-lg shadow-primary/30 transition hover:brightness-110 sm:px-7 sm:text-base"
-            >
-              <span className="relative inline-flex h-5 w-5 items-center justify-center">
-                <MapPin className="h-5 w-5" strokeWidth={2.25} aria-hidden />
-                <span
-                  aria-hidden
-                  className="absolute bottom-[3px] left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-card"
-                />
-              </span>
-              Claim Your Free Dot Hub
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
+            <Button asChild className="mt-8 bg-brand-gradient text-primary-foreground">
+              <Link href={href}>{label}</Link>
+            </Button>
           )}
         </div>
       </div>
-    </section>
+    </InsetFrame>
   );
 }
