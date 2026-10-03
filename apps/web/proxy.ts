@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-import { isNewsHost, isProductHost, normalizeHostname } from "@/lib/hosts";
+import { isNewsHost, normalizeHostname } from "@/lib/hosts";
 import { getApiBaseUrl } from "@/lib/config";
 import { PROTECTED_SINGLE_SEGMENT_ROUTES } from "@/lib/mycard/handle-route";
 import { isEmailVerificationExemptPath } from "@/lib/auth/email-verification";
@@ -158,9 +158,9 @@ function rewriteWithPathname(
 }
 
 async function resolveMarketSite(hostHeader: string | null): Promise<string | null> {
-  if (!hostHeader || isNewsHost(hostHeader) || isProductHost(hostHeader)) return null;
+  if (!hostHeader) return null;
   const hostname = normalizeHostname(hostHeader);
-  if (!hostname.includes(".")) return null;
+  if (!hostname) return null;
   try {
     const base = getApiBaseUrl().replace(/\/$/, "");
     const res = await fetch(`${base}/markets/by-site/${encodeURIComponent(hostname)}`, {
@@ -223,6 +223,10 @@ function handleNewsHost(request: NextRequest, marketSite?: string | null): NextR
 
   if (pathname === "/news" || pathname === "/news/") {
     return nextWithPathname(request, "/news", marketSite);
+  }
+
+  if (pathname === "/news/channels" || pathname === "/news/events") {
+    return nextWithPathname(request, pathname, marketSite);
   }
 
   // Legacy slug paths → home (zip preference lives in storage, not the URL)

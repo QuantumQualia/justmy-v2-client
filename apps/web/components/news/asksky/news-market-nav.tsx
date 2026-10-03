@@ -173,6 +173,7 @@ export function NewsMarketNav({
         setBriefingExtras({
           sponsor: next.sponsor,
           suggestedQuestions: next.suggestedQuestions,
+          briefingParagraph: next.briefingParagraph,
         });
 
         const el = new Audio(next.audioUrl);

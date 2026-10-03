@@ -71,16 +71,16 @@ export default function CmsPagesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-7xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">CMS Pages</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">CMS Pages</h1>
             <p className="text-muted-foreground">Manage dynamic pages and content</p>
           </div>
           <Button
             onClick={() => router.push("/admin/cms/pages/create")}
-            className="bg-blue-600 hover:bg-blue-700"
+           
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Page
@@ -107,7 +107,7 @@ export default function CmsPagesPage() {
 
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : (
             <>
@@ -120,7 +120,7 @@ export default function CmsPagesPage() {
                   filteredPages.map((page) => (
                     <div
                       key={page.id}
-                      className="flex items-center justify-between p-4 bg-muted rounded-lg border border-border hover:border-blue-500 transition"
+                      className="flex items-center justify-between rounded-2xl border border-border bg-background p-4 transition hover:border-primary/30 hover:bg-secondary"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-3">
@@ -132,12 +132,12 @@ export default function CmsPagesPage() {
                             {page.handle}
                           </span>
                           {!page.isPublished && (
-                            <Badge variant="secondary" className="bg-yellow-500/20 text-yellow-400 border-0 hover:bg-yellow-500/30">
+                            <Badge variant="secondary" className="border-0 bg-accent text-accent-foreground">
                               Draft
                             </Badge>
                           )}
                           {page.isPublished && (
-                            <Badge variant="secondary" className="bg-green-500/20 text-green-400 border-0 hover:bg-green-500/30">
+                            <Badge variant="secondary" className="border-0 bg-success/15 text-success">
                               Published
                             </Badge>
                           )}
@@ -180,7 +180,7 @@ export default function CmsPagesPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleDelete(page.id)}
-                          className="text-destructive hover:text-red-300 hover:bg-destructive/10 border border-transparent hover:border-red-500/30"
+                          className="text-destructive hover:border-destructive/30 hover:bg-destructive/10"
                           title="Delete page"
                         >
                           <Trash2 className="h-4 w-4" />

@@ -209,20 +209,20 @@ export function UserList() {
           const user = row.original
           if (user.deletedAt) {
             return (
-              <Badge variant="destructive" className="bg-red-900/30 text-destructive border-red-800">
+              <Badge variant="destructive" className="border-destructive/30 bg-destructive/10 text-destructive">
                 Deleted
               </Badge>
             )
           }
           if (user.isBlocked) {
             return (
-              <Badge variant="destructive" className="bg-orange-900/30 text-orange-400 border-orange-800">
+              <Badge variant="destructive" className="border-destructive/30 bg-destructive/10 text-destructive">
                 Blocked
               </Badge>
             )
           }
           return (
-            <Badge className="bg-success/15 text-success border-emerald-600/50">
+            <Badge className="border-success/40 bg-success/15 text-success">
               Active
             </Badge>
           )
@@ -238,7 +238,7 @@ export function UserList() {
               variant={count > 0 ? "default" : "outline"}
               className={
                 count > 0
-                  ? "bg-emerald-900/50 text-success border-emerald-800"
+                  ? "border-success/40 bg-success/15 text-success"
                   : "bg-muted text-muted-foreground border-border"
               }
             >
@@ -265,7 +265,7 @@ export function UserList() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-8 w-8 p-0 text-muted-foreground hover:text-blue-400 hover:bg-accent"
+                    className="size-8 text-muted-foreground hover:bg-secondary hover:text-foreground"
                     title="Edit user"
                   >
                     <Edit className="h-4 w-4" />
@@ -294,7 +294,7 @@ export function UserList() {
                   size="sm"
                   onClick={() => handleRestore(user.id)}
                   disabled={isLoading}
-                  className="h-8 w-8 p-0 border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
+                  className="size-8 border-success/40 text-success hover:bg-success/10 disabled:opacity-50"
                   title="Restore user"
                 >
                   {isLoading ? (
@@ -311,7 +311,7 @@ export function UserList() {
                       size="sm"
                       onClick={() => handleUnblock(user.id)}
                       disabled={isLoading}
-                      className="h-8 w-8 p-0 border-emerald-700 text-success hover:bg-emerald-950 disabled:opacity-50"
+                      className="size-8 border-success/40 text-success hover:bg-success/10 disabled:opacity-50"
                       title="Unblock user"
                     >
                       {isLoading ? (
@@ -326,7 +326,7 @@ export function UserList() {
                       size="sm"
                       onClick={() => handleBlock(user.id)}
                       disabled={isLoading}
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-orange-400 hover:bg-accent disabled:opacity-50"
+                      className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:opacity-50"
                       title="Block user"
                     >
                       {isLoading ? (
@@ -362,7 +362,7 @@ export function UserList() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-4 bg-card p-4 rounded-lg border border-border">
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-border bg-background p-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input

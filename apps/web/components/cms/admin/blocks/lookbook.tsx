@@ -153,7 +153,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
               setInsertOpen(true);
             }}
             disabled={items.length >= MAX_IMAGES}
-            className="group relative block w-full cursor-pointer overflow-hidden rounded-lg rounded-br-none border border-border bg-card text-left transition-colors hover:border-blue-500/70 hover:bg-card disabled:cursor-not-allowed disabled:opacity-50"
+            className="group relative block w-full cursor-pointer overflow-hidden rounded-2xl border border-border bg-card text-left transition-colors hover:border-primary/30 hover:bg-secondary disabled:cursor-not-allowed disabled:opacity-50"
           >
             <div className="flex h-32 flex-col items-center justify-center gap-2 text-muted-foreground">
               <ImageIcon className="h-7 w-7 text-muted-foreground" />
@@ -182,7 +182,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                   key={item.id || index}
                   className={`flex flex-col gap-2 rounded-lg border p-3 cursor-move ${
                     hoverIndex === index
-                      ? "border-blue-500/70 bg-card"
+                      ? "border-primary bg-secondary"
                       : "border-border bg-card"
                   }`}
                   draggable
@@ -240,7 +240,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
                     <button
                       type="button"
                       onClick={() => handleRemoveItem(index)}
-                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-red-700/60 text-destructive hover:bg-red-900/30 hover:text-red-200"
+                      className="inline-flex h-7 w-7 items-center justify-center rounded border border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       title="Remove image"
                     >
                       <Trash2 className="h-3 w-3" />
@@ -302,7 +302,7 @@ export function LookBookBlockEditor({ block, onUpdate }: LookBookBlockEditorProp
       {uploading && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3 shadow-xl">
-            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-primary" />
             <span className="text-sm text-foreground">Processing image…</span>
           </div>
         </div>

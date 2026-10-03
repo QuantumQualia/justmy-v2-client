@@ -32,7 +32,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
   const ensureHotlinks = (index: number) => hotlinks[index] || { label: "", href: "" };
 
   const inputClass =
-    "bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1.5";
+    "bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded px-2 py-1.5";
 
   const handleHotlinkChange = (index: number, key: "label" | "href", value: string) => {
     const next = [...hotlinks];
@@ -53,7 +53,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
             className={cn(
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "custom"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "custom")}
@@ -65,7 +65,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
             className={cn(
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "market-sponsor"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "market-sponsor")}
@@ -77,7 +77,7 @@ export function AdBannerBlockEditor({ block, onUpdate }: AdBannerBlockEditorProp
             className={cn(
               "px-3 py-1.5 rounded-md text-xs font-medium transition-colors",
               bannerType === "profile"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
             onClick={() => updateField("bannerType", "profile")}

@@ -31,7 +31,7 @@ export function PlaceholderPanelBlockEditor({ block, onUpdate }: PlaceholderPane
           placeholder="Coming Soon"
           value={text}
           onChange={(e) => updateField("text", e.target.value)}
-          className="bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1.5"
+          className="bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded px-2 py-1.5"
         />
       </div>
     </div>

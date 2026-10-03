@@ -29,6 +29,8 @@ export type SkyDailyAudioBriefing = {
   localDate: string;
   /** AskSKY chip questions grounded in this slot's briefing / digest. */
   suggestedQuestions?: string[];
+  /** Written market briefing, identical for every visitor. */
+  briefingParagraph?: string;
 };
 
 type FetchOpts = {

@@ -140,11 +140,11 @@ export default function CreatePostPage() {
       .replace(/(^-|-$)/g, "");
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex items-center gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Create New Post</h1>
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">Create New Post</h1>
             <p className="text-muted-foreground">Create a new blog post</p>
           </div>
         </div>
@@ -355,7 +355,7 @@ export default function CreatePostPage() {
                   ? !standardFormData.title
                   : !sharedExternalUrl.trim())
               }
-              className="bg-blue-600 hover:bg-blue-700"
+             
             >
               <Save className="h-4 w-4 mr-2" />
               {loading

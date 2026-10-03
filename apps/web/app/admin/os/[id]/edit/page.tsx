@@ -70,25 +70,25 @@ export default function EditOSPage() {
 
   if (loadingData) {
     return (
-      <div className="min-h-screen bg-background p-10 text-foreground flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+      <div className="flex min-h-full items-center justify-center bg-background px-6 py-8 text-foreground">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
+    <div className="min-h-full bg-background px-6 py-8 text-foreground md:px-10">
       <div className="max-w-2xl mx-auto space-y-8">
         <div>
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Edit OS</h1>
+              <h1 className="text-3xl font-semibold tracking-tight text-foreground">Edit OS</h1>
               <p className="text-muted-foreground mt-2">Update OS configuration</p>
             </div>
             <Button
               variant="outline"
               onClick={() => router.push(`/admin/os/${id}/apps`)}
-              className="border-blue-600 text-blue-400 hover:bg-blue-600/10"
+              className="border-primary text-primary hover:bg-primary/10"
             >
               <Layers className="h-4 w-4 mr-2" />
               Manage Apps
@@ -97,7 +97,7 @@ export default function EditOSPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="border border-border rounded-xl bg-muted p-6 space-y-4">
+          <div className="rounded-3xl border border-border bg-card p-6 shadow-card space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-foreground">
                 Name *
@@ -151,7 +151,7 @@ export default function EditOSPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="flex-1 bg-blue-600 hover:bg-blue-700"
+              className="flex-1"
             >
               {loading ? (
                 <>

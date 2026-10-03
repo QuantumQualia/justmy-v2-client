@@ -32,9 +32,9 @@ function statusBadgeClass(status?: string | null) {
     return "border-success/30 bg-success/10 text-success";
   }
   if (value === "in_progress") {
-    return "border-sky-500/30 bg-sky-500/10 text-sky-700";
+    return "border-primary/30 bg-primary/10 text-primary";
   }
-  return "border-amber-500/30 bg-amber-500/10 text-amber-800";
+  return "border-border bg-accent text-accent-foreground";
 }
 
 function hrefWithProtocol(url: string) {
@@ -244,7 +244,7 @@ export function QueueTicketPanel({
                               )}
                             >
                               {done ? (
-                                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" />
+                                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" />
                               ) : (
                                 <Circle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                               )}

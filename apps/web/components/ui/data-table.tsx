@@ -87,12 +87,12 @@ export function DataTable<TData, TValue>({
   return (
     <div className="space-y-4">
       {error && (
-        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
           {error}
         </div>
       )}
 
-      <div className="overflow-hidden rounded-md border text-foreground">
+      <div className="overflow-hidden rounded-2xl border border-border text-foreground">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

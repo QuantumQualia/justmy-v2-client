@@ -107,7 +107,7 @@ export function MarketZipManager({ initialZips = [], onChange }: MarketZipManage
             <p className="text-muted-foreground text-xs">
               Press Ctrl+Enter (or Cmd+Enter) to add zip codes
             </p>
-            <Button onClick={handleAddZips} size="sm" disabled={!zipInput.trim()} className="">
+            <Button onClick={handleAddZips} size="sm" disabled={!zipInput.trim()}>
               Add Zip Codes
             </Button>
           </div>

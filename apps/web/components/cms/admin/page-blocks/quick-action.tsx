@@ -27,7 +27,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
   const actionId = (block.actionId as string) ?? "";
 
   const inputClass =
-    "bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 py-1.5";
+    "bg-muted border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded px-2 py-1.5";
 
   return (
     <div className="space-y-4">
@@ -64,7 +64,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
             className={cn(
               "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
               actionType === "link"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
@@ -76,7 +76,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
             className={cn(
               "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
               actionType === "action"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
@@ -124,7 +124,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
             className={cn(
               "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
               variant === "panel"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >
@@ -136,7 +136,7 @@ export function QuickActionBlockEditor({ block, onUpdate }: QuickActionBlockEdit
             className={cn(
               "px-3 py-1.5 rounded-md text-sm font-medium transition-colors",
               variant === "button"
-                ? "bg-blue-600 text-white"
+                ? "bg-primary text-primary-foreground"
                 : "bg-muted text-muted-foreground hover:bg-accent hover:text-accent-foreground"
             )}
           >

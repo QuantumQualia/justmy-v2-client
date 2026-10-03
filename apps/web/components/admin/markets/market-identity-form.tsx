@@ -474,7 +474,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                       status: e.target.value as "Active" | "Inactive",
                     })
                   }
-                  className="h-4 w-4 accent-emerald-600"
+                  className="h-4 w-4 accent-primary"
                 />
                 <span>Active</span>
               </label>
@@ -489,7 +489,7 @@ export function MarketIdentityForm({ initialData, onSubmit, onChange, currentMar
                       status: e.target.value as "Active" | "Inactive",
                     })
                   }
-                  className="h-4 w-4 accent-emerald-600"
+                  className="h-4 w-4 accent-primary"
                 />
                 <span>Inactive</span>
               </label>

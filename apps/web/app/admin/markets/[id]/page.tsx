@@ -3,14 +3,17 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { Button } from "@workspace/ui/components/button"
+import { cn } from "@workspace/ui/lib/utils"
+import { AdminNotice, AdminPage, AdminPanel } from "@/components/admin/admin-page"
 import { MarketIdentityForm } from "@/components/admin/markets/market-identity-form"
 import { MarketSocialsForm } from "@/components/admin/markets/market-socials-form"
+import { MarketSponsorsPanel } from "@/components/admin/markets/market-sponsors-panel"
 import { MarketZipManager } from "@/components/admin/markets/market-zip-manager"
 import { ArrowLeft, Save, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { marketsService, ApiClientError } from "@/lib/services/markets"
 
-type TabId = "general" | "socials" | "territory"
+type TabId = "general" | "socials" | "territory" | "sponsors"
 
 export default function EditMarketPage() {
   const router = useRouter()
@@ -223,89 +226,59 @@ export default function EditMarketPage() {
     { id: "general", label: "General" },
     { id: "socials", label: "Socials" },
     { id: "territory", label: "Territory" },
+    { id: "sponsors", label: "Sponsors" },
   ]
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background p-10 text-foreground">
-        <div className="max-w-5xl mx-auto space-y-8">
-          <div>
-            <h1 className="text-3xl font-bold text-foreground">Edit Market</h1>
-            <p className="text-muted-foreground">Market ID: {marketId}</p>
-          </div>
-          <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
-            <div className="flex items-center justify-center py-12">
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Loading market data...
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
+  const saveButton = activeTab === "sponsors" ? null : (
+    <Button onClick={handleSave} disabled={saving || !identityData || loading}>
+      {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+      {saving ? "Saving..." : "Save changes"}
+    </Button>
+  )
 
   return (
-    <div className="min-h-screen bg-background p-10 text-foreground">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-foreground">Edit Market</h1>
-          <p className="text-muted-foreground">Market ID: {marketId}</p>
-        </div>
+    <AdminPage
+      title={identityData?.name || "Edit market"}
+      description={`Market #${marketId}. Sponsor profiles are managed on the Sponsors tab.`}
+      width="5xl"
+      actions={saveButton}
+    >
+      {error ? <AdminNotice>{error}</AdminNotice> : null}
 
-        {error && (
-          <div className="rounded-md border border-red-800 bg-red-900/20 p-4 text-destructive">
-            {error}
-          </div>
-        )}
-
-        <div className="border border-dashed border-border p-8 rounded-xl bg-muted">
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
+      <AdminPanel>
+        <div className="space-y-6">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <Button variant="ghost" size="sm" asChild>
               <Link href="/admin/markets">
-                <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-accent-foreground hover:bg-accent">
-                  <ArrowLeft className="h-4 w-4 mr-2" />
-                  Back
-                </Button>
+                <ArrowLeft className="h-4 w-4" />
+                Markets
               </Link>
-              <Button
-                onClick={handleSave}
-                disabled={saving || !identityData}
-                className="disabled:opacity-50"
-              >
-                {saving ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
+            </Button>
+            <div className="inline-flex flex-wrap rounded-full bg-muted p-1">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    "rounded-full px-4 py-1.5 text-sm font-medium transition-colors",
+                    activeTab === tab.id
+                      ? "bg-foreground text-background shadow-sm"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
+          </div>
 
-            <div className="border-b border-border">
-              <nav className="flex gap-4">
-                {tabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-4 py-2 border-b-2 transition-colors cursor-pointer ${
-                      activeTab === tab.id
-                        ? "border-success text-emerald-500 font-medium"
-                        : "border-transparent text-muted-foreground hover:text-accent-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </nav>
+          {loading ? (
+            <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              Loading market data...
             </div>
-
+          ) : (
             <div>
               {activeTab === "general" && (
                 <MarketIdentityForm
@@ -326,11 +299,12 @@ export default function EditMarketPage() {
                   onChange={(zips) => setZipData(zips)}
                 />
               )}
+              {activeTab === "sponsors" && <MarketSponsorsPanel marketId={marketId} />}
             </div>
-          </div>
+          )}
         </div>
-      </div>
-    </div>
+      </AdminPanel>
+    </AdminPage>
   )
 }
 
