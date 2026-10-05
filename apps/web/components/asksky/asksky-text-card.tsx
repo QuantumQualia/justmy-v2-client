@@ -10,6 +10,7 @@ import { SkyAvatar } from "@workspace/ui/components/sky-avatar";
 import { cn } from "@workspace/ui/lib/utils";
 
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import { AskSkyTextLine } from "@/components/asksky/asksky-text-line";
 
 const DEFAULT_INTRO =
   "Hey, I'm Sky - ask me anything about this business, or what's going on nearby.";
@@ -117,6 +118,7 @@ export function AskSkyTextCard({
           <ArrowRight className="h-4 w-4" aria-hidden />
         </Button>
       </form>
+      <AskSkyTextLine className="mt-3 self-center" />
     </Card>
   );
 }

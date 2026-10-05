@@ -9,13 +9,9 @@ export function isValidUsZip(zipcode: string): boolean {
  * Resolve a zip match to its primary market.
  * Child markets that matched the zip are represented by their `parent`.
  */
-function resolveToPrimary(market: MarketResponseDto): MarketResponseDto | null {
-  const isChild =
-    (market.parentId !== undefined && market.parentId !== null) ||
-    market.parent != null;
-
-  if (!isChild) return market;
-  return market.parent ?? null;
+function resolveToPrimary(market: MarketResponseDto): MarketResponseDto {
+  // Older API responses carry `parentId` without the nested parent; keep the child then.
+  return market.parent ?? market;
 }
 
 /**
