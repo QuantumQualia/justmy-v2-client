@@ -16,6 +16,7 @@ import { MycardPublicNavbar } from "@/components/common/navbar/mycard-public-nav
 import { SearchResultsPanel } from "@/components/common/search/search-results-panel"
 import { NewsStandChrome } from "@/components/news/news-stand-chrome"
 import { SiteFooter } from "@/components/common/site-footer"
+import { AskSkyLauncher } from "@/components/asksky/asksky-launcher"
 import { isNewsHost } from "@/lib/hosts"
 import { NewsHostProvider, NewsMarketSiteProvider } from "@/lib/news/news-host-context"
 
@@ -223,6 +224,7 @@ export default async function RootLayout({
                 </div>
               ) : null}
             </div>
+            {!embedPath ? <AskSkyLauncher /> : null}
           </NewsMarketSiteProvider>
           </NewsHostProvider>
         </Providers>

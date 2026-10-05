@@ -5,6 +5,7 @@ import { useState } from "react";
 
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
 import { AskSkyConversation } from "@/components/news/asksky/asksky-results";
+import { AskSkyStreakLine } from "@/components/news/asksky/asksky-streak";
 import type { AskSkyTurn, NewsMarketContext } from "@/components/news/asksky/types";
 import {
   useNewsVisitor,
@@ -93,8 +94,11 @@ export function AskSkyWidget({
       <div className={`mt-8 flex w-full min-h-0 min-w-0 flex-col ${hasConversation ? "" : "max-w-3xl"}`}>
         {hasConversation ? (
           <div className="mb-4 flex items-center justify-between gap-4">
-            <p className="asksky-sky-brand text-lg">AskSKY!</p>
-            <Button type="button" variant="outline" onClick={onNewChat}>
+            <div className="min-w-0">
+              <p className="asksky-sky-brand text-lg">AskSKY!</p>
+              <AskSkyStreakLine className="mt-0.5" />
+            </div>
+            <Button type="button" variant="outline" className="shrink-0 rounded-full" onClick={onNewChat}>
               New chat
             </Button>
           </div>

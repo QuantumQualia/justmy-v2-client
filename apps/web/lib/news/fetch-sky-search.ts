@@ -83,6 +83,13 @@ export type SkySearchData = {
   webResults: SkySearchWebResult[];
 };
 
+export type SkyStreak = {
+  streak: number;
+  askedToday: boolean;
+  reward: number;
+  awarded: number;
+};
+
 export type SkySearchResponse = {
   conversationId: number;
   visitorToken: string | null;
@@ -90,6 +97,8 @@ export type SkySearchResponse = {
   reply: string;
   followUpQuestions: string[];
   data: SkySearchData;
+  /** Signed-in visitors only. */
+  streak?: SkyStreak | null;
 };
 
 export type SkySearchRequest = {

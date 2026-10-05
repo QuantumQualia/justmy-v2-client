@@ -30,6 +30,7 @@ import { resolveMarketForZip } from "@/lib/news/resolve-market-zip";
 import type { AuthResponse } from "@/lib/services/auth";
 import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 import { useNewsRecentsStore } from "@/lib/store/news-recents-store";
+import { useSkyStreakStore } from "@/lib/store/sky-streak-store";
 import { useNewsZipStore } from "@/lib/store/news-zip-store";
 import { cn } from "@workspace/ui/lib/utils";
 
@@ -225,6 +226,16 @@ export function NewsMarketPageClient({
         title: trimmed,
       });
 
+      if (response.streak) {
+        useSkyStreakStore.getState().set(response.streak);
+        if (response.streak.awarded > 0) {
+          const days = response.streak.streak;
+          toast.success(
+            `+${response.streak.awarded} myCREDITS${days > 1 ? ` · ${days}-day streak!` : " for today's question!"}`,
+          );
+        }
+      }
+
       const answer = mapSkySearchToAnswer(response);
       setTurns((prev) =>
         prev.map((turn) =>
@@ -279,6 +290,7 @@ export function NewsMarketPageClient({
 
   async function handleAuthSuccess(_response: AuthResponse) {
     void useNewsFavoritesStore.getState().hydrate({ force: true });
+    void useSkyStreakStore.getState().hydrate({ force: true });
     const thread = threadRef.current;
     if (thread?.conversationId && thread.visitorToken) {
       try {
