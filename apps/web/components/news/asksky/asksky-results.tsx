@@ -48,8 +48,10 @@ import { useNewsFavoritesStore } from "@/lib/store/news-favorites-store";
 
 import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import { AskSkyReplyBubbles } from "@workspace/ui/components/asksky-reply-bubbles";
 import {
   AskSkyTypedText,
+  AskSkyTypingDots,
   askSkyMsgInClass,
   useAskSkyFreshMessageIds,
 } from "@workspace/ui/components/asksky-typed-text";
@@ -259,10 +261,6 @@ function ConversationTurn({
   const answer = turn.status === "ready" ? turn.answer : undefined;
   const answerText = answer?.answer ?? "";
   const displayAnswer = answerText.replace(/\b\d{5}\b/, market.zipcode);
-  const answerWithZipHighlight = highlightZipInAnswer(
-    displayAnswer,
-    market.zipcode,
-  );
 
   const visibleTabs = useMemo(() => {
     if (!answer) return TABS.filter((t) => t.id === "all");
@@ -302,24 +300,8 @@ function ConversationTurn({
       {turn.status === "loading" ? (
         <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(true) ?? ""}`.trim()}>
           <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
-          <div
-            className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5 px-4 py-3"
-            role="status"
-            aria-live="polite"
-            aria-label="SKY is typing"
-          >
-            <span
-              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
-              style={{ animationDelay: "0ms", animationDuration: "1.2s" }}
-            />
-            <span
-              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
-              style={{ animationDelay: "160ms", animationDuration: "1.2s" }}
-            />
-            <span
-              className="h-2 w-2 rounded-full bg-card/90 animate-bounce"
-              style={{ animationDelay: "320ms", animationDuration: "1.2s" }}
-            />
+          <div className="asksky-sky-bubble-assistant inline-flex items-center px-4 py-3">
+            <AskSkyTypingDots label="Sky is typing" />
           </div>
         </div>
       ) : null}
@@ -340,19 +322,14 @@ function ConversationTurn({
 
       {turn.status === "ready" && turn.answer ? (
         <>
-          <div className={`flex items-start gap-2 sm:gap-3 ${askSkyMsgInClass(animateSky) ?? ""}`.trim()}>
-            <SkyAvatar size={32} className="mt-0.5 sm:h-9 sm:w-9" />
-            <div className="asksky-sky-bubble-assistant min-w-0 sm:px-5 sm:py-4">
-              <p className="whitespace-pre-wrap text-sm leading-relaxed sm:text-[15px]">
-                <AskSkyTypedText
-                  text={displayAnswer}
-                  animate={animateSky}
-                >
-                  {answerWithZipHighlight}
-                </AskSkyTypedText>
-              </p>
-            </div>
-          </div>
+          <AskSkyReplyBubbles
+            text={displayAnswer}
+            animate={animateSky}
+            at={turn.answeredAt}
+            renderPart={(part) => highlightZipInAnswer(part, market.zipcode)}
+            avatarClassName="sm:h-9 sm:w-9"
+            bubbleClassName="sm:px-5 sm:py-3.5"
+          />
 
           {showListings ? (
             <div className="space-y-3.5 pl-0 sm:space-y-4 sm:pl-12">

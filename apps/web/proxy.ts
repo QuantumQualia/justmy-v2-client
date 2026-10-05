@@ -22,6 +22,16 @@ const publicRoutes = [
   "/p",
   "/blog",
   "/category",
+  "/terms",
+  "/privacy",
+  "/nonprofits",
+  "/promote-business",
+  "/promote-event",
+  "/write-article",
+  "/prize-closet",
+  "/r",
+  "/claim",
+  "/unsubscribe",
 ];
 
 /**
@@ -175,76 +185,30 @@ async function resolveMarketSite(hostHeader: string | null): Promise<string | nu
   }
 }
 
-/**
- * App routes that must render even when the request Host is a news host.
- * Locally NEXT_PUBLIC_APP_URL and NEXT_PUBLIC_NEWS_HOSTS can be the same
- * origin (127.0.0.1), so claim/verify/onboard would otherwise 302 to `/`.
- *
- * `/embed/*` is public widget JS + iframe pages. The news-host catch-all
- * `NextResponse.redirect` is a 307; third-party `<script src>` then loads
- * HTML (`/`) instead of `asksky.js` / `myform.js` / `cityos.js` and never mounts.
- */
-function isNewsHostAppPassthrough(pathname: string): boolean {
-  const prefixes = [
-    "/verify-email",
-    "/biz-os",
-    "/login",
-    "/register",
-    "/forgot-password",
-    "/reset-password",
-    "/stripe-callback",
-    "/dashboard",
-    "/personal-os",
-    "/admin",
-    "/account",
-    "/lab",
-    "/try-free",
-    "/my-plans",
-    "/daily-drop",
-    "/p",
-    "/embed",
-    "/blog",
-    "/category",
-  ];
-  return prefixes.some((p) => pathname === p || pathname.startsWith(`${p}/`));
-}
+const NEWS_ROUTES = new Set(["/news", "/news/channels", "/news/events"]);
 
 /**
- * news.justmy.com: `/` and `/news` serve the dual-mode news page.
- * Legacy `/{slug}` and `/news/{slug}` redirect to `/`.
- * Returns null so the main proxy can auth-check app routes on this host.
+ * news.justmy.com: `/` serves the news page. Every other path falls through
+ * to the main proxy, so app routes get the normal auth gate and unknown
+ * paths get Next's 404 instead of a silent bounce to the homepage.
  */
 function handleNewsHost(request: NextRequest, marketSite?: string | null): NextResponse | null {
-  const { pathname } = request.nextUrl;
+  const pathname = request.nextUrl.pathname.replace(/\/+$/, "") || "/";
 
-  if (pathname === "/" || pathname === "") {
+  if (pathname === "/") {
     return rewriteWithPathname(request, "/news", marketSite);
   }
 
-  if (pathname === "/news" || pathname === "/news/") {
-    return nextWithPathname(request, "/news", marketSite);
-  }
-
-  if (pathname === "/news/channels" || pathname === "/news/events") {
+  if (NEWS_ROUTES.has(pathname)) {
     return nextWithPathname(request, pathname, marketSite);
   }
 
-  // Legacy slug paths → home (zip preference lives in storage, not the URL)
+  // Old share links were `/news/{market-slug}`; the market now lives in storage, not the URL.
   if (pathname.startsWith("/news/")) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  if (isNewsHostAppPassthrough(pathname)) {
-    return null;
-  }
-
-  // Public myCARD / CMS handles (`/acme-coffee`). Legacy news slugs used this
-  // path and now live at `/`; do not 302 those handles away.
-  if (isHandleRoute(pathname)) {
-    return null;
-  }
-
-  return NextResponse.redirect(new URL("/", request.url));
+  return null;
 }
 
 /**

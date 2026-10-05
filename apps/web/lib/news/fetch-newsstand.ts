@@ -36,10 +36,14 @@ export type NewsstandChannel = {
 
 export type ReferBusinessResult = {
   status: "exists" | "created";
+  /** live = already claimed; boost = unclaimed, you joined its referrers; created = new Dot. */
+  outcome: "live" | "boost" | "already" | "created";
   name: string;
   profileUrl: string;
   claimUrl: string | null;
   invited: boolean;
+  creditsAwarded: number;
+  creditsPending: number;
 };
 
 async function readJson<T>(res: Response, fallback: string): Promise<T> {

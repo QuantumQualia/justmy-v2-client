@@ -239,6 +239,7 @@ export function turnsFromSkyMessages(messages: SkyMeMessage[]): AskSkyTurn[] {
       status: assistant ? "ready" : "error",
       answer,
       errorMessage: assistant ? undefined : "This search was not completed.",
+      answeredAt: assistant ? Date.parse(assistant.createdAt) || undefined : undefined,
     });
     if (assistant) i += 1;
   }

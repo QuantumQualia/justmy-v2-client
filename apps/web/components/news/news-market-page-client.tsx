@@ -1,7 +1,7 @@
 "use client";
 
 import { Instrument_Serif } from "next/font/google";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AskSkyClaimCta } from "@/components/news/asksky/asksky-claim-cta";
@@ -85,12 +85,34 @@ export function NewsMarketPageClient({
   const askInFlightRef = useRef(false);
   const loadedDomainRef = useRef<string | null>(null);
 
+  const pendingAskRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (new URLSearchParams(window.location.search).get("claim") === "1") {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("claim") === "1") {
       setClaimOpen(true);
     }
+    const ask = url.searchParams.get("ask")?.trim();
+    if (ask) {
+      pendingAskRef.current = ask.slice(0, 500);
+      url.searchParams.delete("ask");
+      window.history.replaceState(window.history.state, "", url.pathname + url.search + url.hash);
+    }
   }, []);
+
+  const askPendingQuestion = useEffectEvent(() => {
+    const question = pendingAskRef.current;
+    if (!question) return;
+    pendingAskRef.current = null;
+    void handleAsk(question);
+  });
+
+  useEffect(() => {
+    if (loadState === "ready" && marketReady && market?.marketId) {
+      askPendingQuestion();
+    }
+  }, [loadState, marketReady, market?.marketId]);
 
   useEffect(() => {
     // Sponsor/stand only fire when marketId is set. Never skip resolve if it's missing
@@ -207,7 +229,7 @@ export function NewsMarketPageClient({
       setTurns((prev) =>
         prev.map((turn) =>
           turn.id === turnId
-            ? { ...turn, status: "ready", answer, errorMessage: undefined }
+            ? { ...turn, status: "ready", answer, errorMessage: undefined, answeredAt: Date.now() }
             : turn,
         ),
       );

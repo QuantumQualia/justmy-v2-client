@@ -18,22 +18,30 @@ export const useShareStore = create<ShareState>((set) => ({
 }));
 
 /**
+ * Desktop Chrome/Edge expose `navigator.share`, but the Windows/macOS sheet has no
+ * social networks. Only phones and tablets get the native sheet.
+ */
+export function prefersNativeShare(): boolean {
+  if (typeof navigator === "undefined" || typeof navigator.share !== "function") return false;
+  return typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches;
+}
+
+/**
  * Imperative helper to trigger global sharing from anywhere (buttons, icons, etc.)
- * - On capable devices, tries native navigator.share first.
- * - If not available or user cancels, falls back to the desktop/modal experience.
+ * - Touch devices use the native share sheet.
+ * - Desktop, or a failed native share, opens the share dialog with social links.
  */
 export async function openShare(payload: SharePayload) {
-  if (typeof navigator !== "undefined" && (navigator as any).share) {
+  if (prefersNativeShare()) {
     try {
-      await (navigator as any).share({
+      await navigator.share({
         title: payload.title,
         text: payload.description,
         url: payload.url,
       });
       return;
     } catch (err) {
-      // If user cancels or native share fails, fall back to modal below
-      console.warn("Native share failed or was cancelled", err);
+      if (err instanceof DOMException && err.name === "AbortError") return;
     }
   }
 

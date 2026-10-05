@@ -3,11 +3,11 @@
 import { Play } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
+import { openShare } from "@/components/common/share/share-store";
 import type { NewsMarketContext } from "@/components/news/asksky/types";
 import { ReferBusinessDialog } from "@/components/news/home/refer-business-dialog";
-import { REFER_FRIEND_HREF } from "@/components/news/home/links";
+import { REFER_FRIEND_HREF, WRITE_ARTICLE_HREF } from "@/components/news/home/links";
 import { useNewsVisitor } from "@/components/news/home/use-news-visitor";
 import { apiRequest } from "@/lib/api-client";
 import { useNewsAuthUiStore } from "@/lib/store/news-auth-ui-store";
@@ -29,11 +29,19 @@ const ACTIONS = [
   },
   {
     title: "Write an Article with Sky!",
-    body: "Got a story only you know? Sky helps you write it — and publishing earns you credits too. Coming soon.",
+    body: "Got a story only you know? Sky helps you write it — and publishing earns you credits too.",
   },
 ] as const;
 
-export function WinWithSky({ market }: { market: NewsMarketContext }) {
+type WinAction = "share" | "friend" | "business" | "write";
+
+export function WinWithSky({
+  market,
+  current,
+}: {
+  market: Pick<NewsMarketContext, "marketId" | "zipcode" | "city">;
+  current?: WinAction;
+}) {
   const { signedIn } = useNewsVisitor();
   const referralCode = useProfileStore((s) => s.data.referralCode);
   const setAuthOpen = useNewsAuthUiStore((s) => s.setAuthOpen);
@@ -62,21 +70,12 @@ export function WinWithSky({ market }: { market: NewsMarketContext }) {
     const url = new URL(window.location.href);
     url.searchParams.delete("claim");
     if (referralCode?.trim()) url.searchParams.set("ref", referralCode.trim());
-    const shareUrl = url.toString();
-    try {
-      if (typeof navigator.share === "function") {
-        await navigator.share({ title: "NewsSTAND", url: shareUrl });
-        return;
-      }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
-    }
-    try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success("NewsSTAND link copied.");
-    } catch {
-      toast.error("Couldn't share the NewsSTAND link.");
-    }
+    await openShare({
+      title: "NewsSTAND",
+      description: "Local news, deals, and AskSKY! for your city — free on JustMy.",
+      url: url.toString(),
+      heading: "Share the NewsSTAND",
+    });
   }
 
   function onReferBusiness() {
@@ -109,10 +108,30 @@ export function WinWithSky({ market }: { market: NewsMarketContext }) {
         </div>
 
         <div className="flex flex-col gap-4">
-          <ActionBlock title={ACTIONS[0].title} body={ACTIONS[0].body} onClick={shareHomepage} />
-          <ActionBlock title={ACTIONS[1].title} body={ACTIONS[1].body} href={REFER_FRIEND_HREF} />
-          <ActionBlock title={ACTIONS[2].title} body={ACTIONS[2].body} onClick={onReferBusiness} />
-          <ActionBlock title={ACTIONS[3].title} body={ACTIONS[3].body} />
+          <ActionBlock
+            title={ACTIONS[0].title}
+            body={ACTIONS[0].body}
+            onClick={shareHomepage}
+            current={current === "share"}
+          />
+          <ActionBlock
+            title={ACTIONS[1].title}
+            body={ACTIONS[1].body}
+            href={REFER_FRIEND_HREF}
+            current={current === "friend"}
+          />
+          <ActionBlock
+            title={ACTIONS[2].title}
+            body={ACTIONS[2].body}
+            onClick={onReferBusiness}
+            current={current === "business"}
+          />
+          <ActionBlock
+            title={ACTIONS[3].title}
+            body={ACTIONS[3].body}
+            href={WRITE_ARTICLE_HREF}
+            current={current === "write"}
+          />
         </div>
       </div>
 
@@ -132,13 +151,25 @@ function ActionBlock({
   body,
   href,
   onClick,
+  current = false,
 }: {
   title: string;
   body: string;
   href?: string;
   onClick?: () => void;
+  current?: boolean;
 }) {
-  const button = href ? (
+  const button = current ? (
+    <div
+      aria-current="page"
+      className="relative flex h-14 w-full items-center justify-center rounded-full bg-brand-gradient text-base font-medium text-primary-foreground ring-2 ring-ring ring-offset-2 ring-offset-background"
+    >
+      {title}
+      <span className="absolute -top-2.5 right-5 rounded-full bg-background px-2.5 py-0.5 text-[10px] font-extrabold tracking-wide text-foreground shadow-card">
+        YOU&apos;RE HERE
+      </span>
+    </div>
+  ) : href ? (
     <Button asChild className="h-14 w-full bg-brand-gradient text-base text-primary-foreground">
       <Link href={href}>{title}</Link>
     </Button>

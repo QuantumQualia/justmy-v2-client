@@ -54,7 +54,7 @@ export function WhatsOnTheStand({ market }: { market: NewsMarketContext }) {
     <section className="mx-auto w-full max-w-6xl px-3 pb-12 sm:px-6">
       <div className="flex items-end justify-between gap-4">
         <h2 className="font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
-          What&apos;s on the stand.
+          What&apos;s on the NewsSTAND!
         </h2>
         <Link
           href={BROWSE_CHANNELS_HREF}

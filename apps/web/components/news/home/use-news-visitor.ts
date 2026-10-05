@@ -36,18 +36,35 @@ export function useNewsVisitor() {
   return { signedIn, firstName, ready };
 }
 
+/** Hour 0–23 in the visitor's own timezone, not the server's. */
+function localHour(date: Date): number {
+  try {
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const hour = new Intl.DateTimeFormat("en-US", { hour: "numeric", hourCycle: "h23", timeZone }).format(date);
+    const parsed = Number.parseInt(hour, 10);
+    if (Number.isFinite(parsed)) return parsed % 24;
+  } catch {
+    /* fall back to the runtime clock */
+  }
+  return date.getHours();
+}
+
 export function timeOfDayGreeting(date: Date): string {
-  const hour = date.getHours();
+  const hour = localHour(date);
   if (hour >= 5 && hour < 12) return "Good Morning";
   if (hour >= 12 && hour < 17) return "Good Afternoon";
   if (hour >= 17 && hour < 21) return "Good Evening";
   return "Good Night";
 }
 
+/** Client-only so SSR never bakes in the server's clock; re-checks each minute for long-lived tabs. */
 export function useTimeOfDayGreeting(): string | null {
   const [greeting, setGreeting] = useState<string | null>(null);
   useEffect(() => {
-    setGreeting(timeOfDayGreeting(new Date()));
+    const update = () => setGreeting(timeOfDayGreeting(new Date()));
+    update();
+    const id = window.setInterval(update, 60_000);
+    return () => window.clearInterval(id);
   }, []);
   return greeting;
 }

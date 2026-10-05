@@ -34,8 +34,9 @@ import { subscriptionService } from "@/lib/services/subscription";
 import { OS_NAME } from "@/lib/os-types";
 import { AskSkyUserAvatar } from "@/components/asksky/asksky-user-avatar";
 import { AskSkyGrowTextarea } from "@/components/asksky/asksky-grow-textarea";
+import { AskSkyReplyBubbles } from "@workspace/ui/components/asksky-reply-bubbles";
 import {
-  AskSkyTypedText,
+  AskSkyTypingDots,
   askSkyMsgInClass,
   useAskSkyFreshMessageIds,
 } from "@workspace/ui/components/asksky-typed-text";
@@ -859,17 +860,17 @@ export function AskSkyConcierge({
             key={`${turn.role}-${i}`}
             className={cn(
               askSkyMsgInClass(animate),
-              turn.role === "user"
-                ? "flex items-end justify-end gap-2 pl-8"
-                : "mr-4 flex items-end gap-2",
+              turn.role === "user" ? "flex items-end justify-end gap-2 pl-8" : "mr-4",
             )}
           >
             {turn.role === "asksky" ? (
-              <>
-                <SkyAvatar size={28} className="mb-0.5" />
-                <div className="asksky-sky-bubble-assistant min-w-0 flex-1 whitespace-pre-wrap">
-                  <AskSkyTypedText text={turn.text} animate={animate} />
-                  {turn.actions?.length ? (
+              <AskSkyReplyBubbles
+                text={turn.text}
+                animate={animate}
+                avatarSize={28}
+                className="gap-2 sm:gap-2"
+                footer={
+                  turn.actions?.length ? (
                     <div className="mt-2 flex flex-col gap-1.5">
                       {turn.actions.map((action) => (
                         <Button
@@ -889,9 +890,9 @@ export function AskSkyConcierge({
                         </Button>
                       ))}
                     </div>
-                  ) : null}
-                </div>
-              </>
+                  ) : null
+                }
+              />
             ) : (
               <>
                 <div className="asksky-sky-bubble-user min-w-0">{turn.text}</div>
@@ -904,10 +905,8 @@ export function AskSkyConcierge({
         {loading ? (
           <div className="asksky-msg-in mr-4 flex items-end gap-2" role="status" aria-label="Sky is typing">
             <SkyAvatar size={28} className="mb-0.5" />
-            <div className="asksky-sky-bubble-assistant inline-flex items-center gap-1.5 px-4 py-3">
-              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "0ms" }} />
-              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "160ms" }} />
-              <span className="size-1.5 animate-bounce rounded-full bg-card/90" style={{ animationDelay: "320ms" }} />
+            <div className="asksky-sky-bubble-assistant inline-flex items-center px-4 py-3">
+              <AskSkyTypingDots />
             </div>
           </div>
         ) : null}

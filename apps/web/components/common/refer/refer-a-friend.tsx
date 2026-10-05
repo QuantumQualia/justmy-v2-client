@@ -72,7 +72,9 @@ export function ReferAFriend() {
 
   React.useEffect(() => {
     if (typeof window === "undefined") return;
-    const url = `${window.location.origin}/register${referralCode ? `?ref=${encodeURIComponent(referralCode)}` : ""}`;
+    const url = referralCode
+      ? `${window.location.origin}/r/${encodeURIComponent(referralCode)}`
+      : `${window.location.origin}/register`;
     setShareUrl(url);
   }, [referralCode]);
 
@@ -98,7 +100,7 @@ export function ReferAFriend() {
   return (
     <div className="space-y-6">
       {/* Refer section: show code + copy / share */}
-      <Card className="rounded-2xl rounded-br-none border border-border bg-card overflow-hidden">
+      <Card className="justmy-corners-lg border border-border bg-card overflow-hidden">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
             <UserPlus className="size-5" />
@@ -152,7 +154,7 @@ export function ReferAFriend() {
       </Card>
 
       {/* Referral list: people who signed up with this profile's code */}
-      <Card className="rounded-2xl rounded-br-none border border-border bg-card overflow-hidden">
+      <Card className="justmy-corners-lg border border-border bg-card overflow-hidden">
         <CardHeader className="pb-2">
           <CardTitle className="flex items-center gap-2 text-lg font-medium text-foreground">
             <Users className="size-5" />

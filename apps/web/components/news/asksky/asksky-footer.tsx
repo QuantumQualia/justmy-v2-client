@@ -13,11 +13,11 @@ type FooterLink = {
 
 const DEFAULT_LINKS: FooterLink[] = [
   { label: "Try Free", href: "/try-free" },
-  { label: "Business", href: "/try-free?for=business" },
+  { label: "Business", href: "/promote-business" },
   { label: "Government", href: "/try-free?for=nonprofit" },
-  { label: "NonProfits", href: "/try-free?for=nonprofit" },
-  { label: "Terms", href: "#" },
-  { label: "Privacy", href: "#" },
+  { label: "NonProfits", href: "/nonprofits" },
+  { label: "Terms", href: "/terms" },
+  { label: "Privacy", href: "/privacy" },
 ];
 
 type AskSkyFooterProps = {
@@ -49,11 +49,18 @@ export function AskSkyFooter({
           className="inline-flex shrink-0 items-center gap-1.5 transition hover:opacity-80"
         >
           <Image
-            src="/images/logo.png"
+            src="/images/logo-black.png"
             alt=""
             width={20}
             height={20}
-            className="h-5 w-5 rounded-md object-contain"
+            className="h-5 w-5 object-contain dark:hidden"
+          />
+          <Image
+            src="/images/logo-white.png"
+            alt=""
+            width={20}
+            height={20}
+            className="hidden h-5 w-5 object-contain dark:block"
           />
           <span className="text-sm font-semibold tracking-tight text-foreground">
             JustMy

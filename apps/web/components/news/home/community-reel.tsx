@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { FaLinkedin } from "react-icons/fa6";
+import {
+  SiFacebook,
+  SiInstagram,
+  SiSnapchat,
+  SiTiktok,
+  SiX,
+  SiYoutube,
+} from "react-icons/si";
 
 import type { NewsMarketContext } from "@/components/news/asksky/types";
 import { InsetFrame } from "@/components/news/home/inset-frame";
 import { COMMUNITY_POSTER_SRC, COMMUNITY_VIDEO_SRC, FALLBACK_SOCIAL } from "@/components/news/home/links";
 import { fetchMarketBySlug } from "@/lib/news/fetch-market-by-slug";
+import type { MarketSocialResponseDto } from "@/lib/services/markets";
 
 type SocialAccount = {
   platform: string;
@@ -44,18 +54,19 @@ function communityVideo(src: string): { kind: "file"; src: string } | { kind: "v
   return { kind: "vimeo", id: DEFAULT_VIMEO_ID };
 }
 
-function firstSocial(socials: Record<string, string | null | undefined> | null | undefined): SocialAccount | null {
-  if (!socials) return null;
+function listSocials(socials: MarketSocialResponseDto | null | undefined): SocialAccount[] {
+  if (!socials) return [];
+  const accounts: SocialAccount[] = [];
   for (const platform of PLATFORM_ORDER) {
-    const url = socials[platform]?.trim();
-    if (!url) continue;
-    return { platform, handle: handleFromUrl(url, platform), url };
+    const url = socials[platform as keyof MarketSocialResponseDto];
+    if (typeof url !== "string" || !url.trim()) continue;
+    accounts.push({ platform, handle: handleFromUrl(url, platform), url: url.trim() });
   }
-  return null;
+  return accounts;
 }
 
 export function CommunityReel({ market }: { market: NewsMarketContext }) {
-  const [account, setAccount] = useState<SocialAccount | null>(null);
+  const [accounts, setAccounts] = useState<SocialAccount[]>([]);
   const [reduceMotion, setReduceMotion] = useState(false);
 
   useEffect(() => {
@@ -69,29 +80,33 @@ export function CommunityReel({ market }: { market: NewsMarketContext }) {
   useEffect(() => {
     const slug = market.marketSlug?.trim();
     if (!slug) {
-      setAccount(null);
+      setAccounts([]);
       return;
     }
     let cancelled = false;
     fetchMarketBySlug(slug)
       .then((data) => {
         if (cancelled) return;
-        const socials = (data.socials ?? null) as unknown as Record<string, string | null> | null;
-        setAccount(firstSocial(socials));
+        setAccounts(listSocials(data.socials));
       })
       .catch(() => {
-        if (!cancelled) setAccount(null);
+        if (!cancelled) setAccounts([]);
       });
     return () => {
       cancelled = true;
     };
   }, [market.marketSlug]);
 
-  const social = account ?? {
-    platform: FALLBACK_SOCIAL.platform,
-    handle: FALLBACK_SOCIAL.handle,
-    url: FALLBACK_SOCIAL.url,
-  };
+  const socials =
+    accounts.length > 0
+      ? accounts
+      : [
+          {
+            platform: FALLBACK_SOCIAL.platform,
+            handle: FALLBACK_SOCIAL.handle,
+            url: FALLBACK_SOCIAL.url,
+          },
+        ];
   const video = communityVideo(COMMUNITY_VIDEO_SRC);
   const showVideo = !reduceMotion;
 
@@ -131,15 +146,20 @@ export function CommunityReel({ market }: { market: NewsMarketContext }) {
             <p className="mt-3 text-sm leading-relaxed text-background/80">
               Every story on the stand is written by someone who actually lives here — #FunCrew members covering their own city, and neighbors like you telling the stories only you&apos;d know to tell.
             </p>
-            <a
-              href={social.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-4 py-2 text-sm font-medium text-background hover:bg-background/20"
-            >
-              <PlatformMark platform={social.platform} />
-              @{social.handle}
-            </a>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {socials.map((social) => (
+                <a
+                  key={`${social.platform}-${social.url}`}
+                  href={social.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-background/30 bg-background/10 px-3.5 py-2 text-sm font-medium text-background hover:bg-background/20"
+                >
+                  <PlatformMark platform={social.platform} />
+                  @{social.handle}
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -148,13 +168,32 @@ export function CommunityReel({ market }: { market: NewsMarketContext }) {
 }
 
 function PlatformMark({ platform }: { platform: string }) {
-  const letter = platform.slice(0, 1).toUpperCase();
+  const className = "h-3.5 w-3.5";
+  const key = platform.trim().toLowerCase();
+  const icon =
+    key === "facebook" ? (
+      <SiFacebook className={className} aria-hidden />
+    ) : key === "instagram" ? (
+      <SiInstagram className={className} aria-hidden />
+    ) : key === "twitter" || key === "x" ? (
+      <SiX className={className} aria-hidden />
+    ) : key === "youtube" ? (
+      <SiYoutube className={className} aria-hidden />
+    ) : key === "snapchat" ? (
+      <SiSnapchat className={className} aria-hidden />
+    ) : key === "linkedin" ? (
+      <FaLinkedin className={className} aria-hidden />
+    ) : key === "tiktok" ? (
+      <SiTiktok className={className} aria-hidden />
+    ) : (
+      <span className="text-[11px] font-semibold">{platform.slice(0, 1).toUpperCase()}</span>
+    );
   return (
     <span
       aria-hidden
-      className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-background/40 text-[11px] font-semibold"
+      className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-background/40"
     >
-      {letter}
+      {icon}
     </span>
   );
 }

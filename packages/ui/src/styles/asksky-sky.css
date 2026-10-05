@@ -137,6 +137,18 @@
   box-shadow: 0 10px 24px -16px rgba(99, 102, 241, 0.7);
 }
 
+/* Earlier bubbles in a stacked reply — only the last one carries the tail. */
+.asksky-sky-bubble-stacked {
+  border-bottom-left-radius: 1.25rem;
+}
+
+.asksky-sky-meta {
+  color: var(--asksky-muted);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1rem;
+}
+
 .asksky-sky-bubble-user {
   max-width: 88%;
   border-radius: 1.25rem 1.25rem 0.35rem 1.25rem;

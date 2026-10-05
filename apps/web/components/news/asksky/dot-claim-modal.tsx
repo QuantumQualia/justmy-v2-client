@@ -64,6 +64,7 @@ export function DotClaimModal({
   defaultBusinessName,
   defaultWebsite,
   entryCategory,
+  businessReferralToken,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -71,6 +72,8 @@ export function DotClaimModal({
   defaultBusinessName?: string;
   defaultWebsite?: string;
   entryCategory?: "business" | "nonprofit";
+  /** Token from a /claim/<token> link so the neighbors who referred this business get credit. */
+  businessReferralToken?: string;
 }) {
   const [step, setStep] = useState<Step>("form");
   const [error, setError] = useState("");
@@ -172,6 +175,7 @@ export function DotClaimModal({
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
         website: website.trim() || undefined,
+        businessReferralToken,
       });
       await persistClaimSession(response);
       onOpenChange(false);
@@ -203,6 +207,7 @@ export function DotClaimModal({
         googleRating: googleRating ?? undefined,
         googleReviewCount: googleReviewCount ?? undefined,
         website: website.trim() || undefined,
+        businessReferralToken,
       });
       await persistClaimSession(response);
       onOpenChange(false);
