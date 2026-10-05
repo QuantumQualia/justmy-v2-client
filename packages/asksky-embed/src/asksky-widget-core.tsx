@@ -4,6 +4,7 @@ import { Button } from "@workspace/ui/components/button";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { SkyAvatar, SkyPoweredBy } from "@workspace/ui/components/sky-avatar";
 import { askSkyMsgInClass, useAskSkyFreshMessageIds } from "@workspace/ui/components/asksky-typed-text";
+import { AskSkyReplyBubbles } from "@workspace/ui/components/asksky-reply-bubbles";
 import type {
   AskSkySkyTransport,
   SkyConversationMessage,
@@ -870,46 +871,43 @@ function AskSkyConversationView({
             );
           }
 
-          return (
-            <div
-              key={i}
-              className={cn(
-                "flex items-start gap-2",
-                askSkyMsgInClass(freshIds.has(`${m.at ?? "x"}:${i}:${m.role}`)),
-                m.role === "user" ? "justify-end" : "justify-start",
-              )}
-            >
-              {m.role === "assistant" ? <SkyAvatar size={32} className="mt-0.5" /> : null}
-              <div
-                className={
-                  m.role === "user" ? "asksky-sky-bubble-user" : "asksky-sky-bubble-assistant"
-                }
-              >
-                <LinkifiedMessage
-                  text={m.content}
-                  className={m.role === "user" ? undefined : "text-white"}
-                  linkClassName={m.role === "user" ? userLinkClass : assistantLinkClass}
-                />
-                {m.role === "assistant" ? (
+          if (m.role !== "user") {
+            return (
+              <AskSkyReplyBubbles
+                key={i}
+                text={m.content}
+                at={!isEmbedInline ? m.at : null}
+                renderPart={(part) => (
+                  <LinkifiedMessage text={part} className="text-white" linkClassName={assistantLinkClass} />
+                )}
+                footer={
                   <>
                     <AskSkyLiveSearchBadge model={m.model} />
                     <AskSkyMessageCitations docs={m.retrievedDocs} />
                   </>
-                ) : null}
+                }
+                className={askSkyMsgInClass(freshIds.has(`${m.at ?? "x"}:${i}:${m.role}`))}
+              />
+            );
+          }
+
+          return (
+            <div
+              key={i}
+              className={cn(
+                "flex items-start justify-end gap-2",
+                askSkyMsgInClass(freshIds.has(`${m.at ?? "x"}:${i}:${m.role}`)),
+              )}
+            >
+              <div className="asksky-sky-bubble-user">
+                <LinkifiedMessage text={m.content} linkClassName={userLinkClass} />
                 {!isEmbedInline && typeof m.at === "number" ? (
-                  <span
-                    className={cn(
-                      "mt-1 block text-[10px]",
-                      m.role === "user" ? "opacity-60" : "text-white/70",
-                    )}
-                  >
-                    {new Date(m.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  <span className="mt-1 block text-[10px] opacity-60">
+                    {new Date(m.at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}
                   </span>
                 ) : null}
               </div>
-              {m.role === "user" ? (
-                <UserAvatarThumb src={profile?.photo} alt={profile?.name || "You"} />
-              ) : null}
+              <UserAvatarThumb src={profile?.photo} alt={profile?.name || "You"} />
             </div>
           );
         })}

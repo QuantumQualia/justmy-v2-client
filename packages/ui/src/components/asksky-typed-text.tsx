@@ -3,7 +3,7 @@
 import * as React from "react"
 import { cn } from "@workspace/ui/lib/utils"
 
-function usePrefersReducedMotion() {
+export function usePrefersReducedMotion() {
   const [reduced, setReduced] = React.useState(false)
   React.useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -68,12 +68,15 @@ export function AskSkyTypedText({
   text,
   animate = true,
   onTick,
+  onDone,
   className,
   children,
 }: {
   text: string
   animate?: boolean
   onTick?: () => void
+  /** Fires once, when the text is fully shown. */
+  onDone?: () => void
   className?: string
   children?: React.ReactNode
 }) {
@@ -83,15 +86,18 @@ export function AskSkyTypedText({
   const finished = React.useRef(skip)
   const onTickRef = React.useRef(onTick)
   onTickRef.current = onTick
+  const onDoneRef = React.useRef(onDone)
+  onDoneRef.current = onDone
+  const doneFired = React.useRef(false)
 
   React.useEffect(() => {
-    if (skip) {
+    if (skip || finished.current) {
       finished.current = true
       setShown(text)
-      return
-    }
-    if (finished.current) {
-      setShown(text)
+      if (!doneFired.current) {
+        doneFired.current = true
+        onDoneRef.current?.()
+      }
       return
     }
 
@@ -104,6 +110,10 @@ export function AskSkyTypedText({
       if (index >= text.length) {
         finished.current = true
         window.clearInterval(id)
+        if (!doneFired.current) {
+          doneFired.current = true
+          onDoneRef.current?.()
+        }
       }
     }, 16)
     return () => window.clearInterval(id)

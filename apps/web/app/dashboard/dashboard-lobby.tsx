@@ -78,7 +78,7 @@ export default function DashboardLobby() {
     { label: "myCITY", icon: UserIcon, variant: "panel", type: "link", href: "/mycity" },
     { label: "App Hub", icon: AppWindow, variant: "panel", type: "link", href: "/lab/app-hub" },
     { label: "Weather", icon: Sun, variant: "panel", type: "link", href: "/lab/weather" },
-    { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "link", href: "/lab/refer" },
+    { label: "Refer a Friend", icon: UserPlus, variant: "panel", type: "link", href: "/refer" },
     { label: "Directory", icon: FolderSearch, variant: "panel", type: "link", href: "/directory" },
     { label: "Need Help? Ask!", icon: HelpCircle, variant: "button", type: "action", onClick: openChatbot },
   ];

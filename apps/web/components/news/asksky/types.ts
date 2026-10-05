@@ -111,4 +111,6 @@ export type AskSkyTurn = {
   status: "loading" | "ready" | "error";
   answer?: AskSkyAnswer;
   errorMessage?: string;
+  /** When Sky replied (epoch ms). */
+  answeredAt?: number;
 };

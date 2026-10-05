@@ -13,6 +13,16 @@ export const PROTECTED_SINGLE_SEGMENT_ROUTES = [
   "/my-plans",
   "/daily-drop",
   "/p",
+  "/refer",
+  "/refer-business",
+  "/terms",
+  "/privacy",
+  "/nonprofits",
+  "/promote-business",
+  "/promote-event",
+  "/write-article",
+  "/prize-closet",
+  "/unsubscribe",
 ] as const;
 
 /**

@@ -84,7 +84,7 @@ export function NewsStandChrome() {
       <header
         data-site-chrome
         className={cn(
-          "sticky top-[var(--impersonation-banner-h,0px)] z-40 h-14 border-b border-border bg-card/90",
+          "sticky top-[var(--impersonation-banner-h,0px)] z-40 h-14 bg-news-nav",
           hideOnMobile && "max-lg:hidden",
         )}
       />

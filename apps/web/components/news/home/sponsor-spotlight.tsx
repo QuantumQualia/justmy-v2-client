@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { AdBanner } from "@/components/common/ad-banner";
 import type { NewsMarketContext } from "@/components/news/asksky/types";
+import { StandStoryCard } from "@/components/news/home/whats-on-the-stand";
 import { personalizePitch, useNewsVisitor } from "@/components/news/home/use-news-visitor";
 import {
   fetchNewsstandSponsor,
@@ -127,45 +128,19 @@ export function SponsorSpotlight({
       ) : null}
 
       {sponsor.articles.length >= 3 ? (
-        <div className="mt-8 justmy-corners-lg border border-border bg-card p-4 shadow-card sm:p-6">
-          <h2 className="text-sm font-semibold text-foreground">In the News</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-3">
-            {sponsor.articles.map((article) => (
-              <article key={article.id} className="min-w-0">
-                <p className="text-xs text-muted-foreground">
-                  NewsSTAND Partner
-                  {sponsor.profileUrl ? (
-                    <>
-                      {" · "}
-                      <Link href={sponsor.profileUrl} className="text-primary hover:underline">
-                        {sponsor.name}
-                      </Link>
-                    </>
-                  ) : null}
-                </p>
-                {article.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={article.imageUrl}
-                    alt=""
-                    className="mt-2 aspect-[16/10] w-full justmy-corners object-cover"
-                  />
-                ) : (
-                  <div className="mt-2 aspect-[16/10] w-full justmy-corners bg-muted" />
-                )}
-                <h3 className="mt-3 text-sm font-semibold leading-snug text-foreground">
-                  {article.url ? (
-                    <Link href={article.url} className="hover:text-primary">
-                      {article.title}
-                    </Link>
-                  ) : (
-                    article.title
-                  )}
-                </h3>
-                {article.excerpt ? (
-                  <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{article.excerpt}</p>
-                ) : null}
-              </article>
+        <div className="mt-8">
+          <h2 className="font-serif text-3xl tracking-tight text-foreground sm:text-4xl">
+            In the News
+          </h2>
+          <div className="mt-6 grid gap-4 md:grid-cols-3">
+            {sponsor.articles.slice(0, 3).map((article) => (
+              <StandStoryCard
+                key={article.id}
+                post={{
+                  ...article,
+                  channel: sponsor.name,
+                }}
+              />
             ))}
           </div>
         </div>

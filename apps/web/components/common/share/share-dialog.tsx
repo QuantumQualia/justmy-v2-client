@@ -37,6 +37,8 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
   onClose,
   payload,
 }) => {
+  const [copied, setCopied] = React.useState(false);
+
   if (!isOpen) return null;
 
   const { title, description, url, imageUrl, entityLabel, heading } = payload;
@@ -50,11 +52,13 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
   const xUrl = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`;
   const pinterestUrl = `https://pinterest.com/pin/create/button/?url=${encodedUrl}&description=${encodedTitle}`;
   const redditUrl = `https://www.reddit.com/submit?url=${encodedUrl}&title=${encodedTitle}`;
-  const emailUrl = `mailto:?subject=${encodedTitle}&body=${encodedDesc || encodedUrl}`;
+  const emailUrl = `mailto:?subject=${encodedTitle}&body=${encodedDesc ? `${encodedDesc}%0A%0A${encodedUrl}` : encodedUrl}`;
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (e) {
       // swallow – we don't want to crash share just because copy failed
       console.error("Failed to copy share url", e);
@@ -72,13 +76,10 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-muted">
           <h2 className="text-lg font-semibold text-foreground">{heading || "Share myCARD"}</h2>
-          <button
-            onClick={onClose}
-            className="h-8 w-8 inline-flex items-center justify-center rounded-full hover:bg-accent text-muted-foreground cursor-pointer"
-          >
+          <Button type="button" variant="ghost" size="icon" onClick={onClose} className="rounded-full">
             <span className="sr-only">Close</span>
             <CloseIcon className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Body */}
@@ -169,13 +170,8 @@ export const ShareDialog: React.FC<ShareDialogProps> = ({
                 {url}
               </div>
             </div>
-            <Button
-              size="sm"
-              className="cursor-pointer rounded-full bg-success/90 hover:bg-success text-foreground text-xs font-semibold px-5 shadow-md shadow-success/30 transition-colors"
-              onClick={handleCopy}
-              type="button"
-            >
-              Copy link
+            <Button size="sm" className="rounded-full px-5 text-xs" onClick={handleCopy} type="button">
+              {copied ? "Copied" : "Copy link"}
             </Button>
           </div>
         </div>
